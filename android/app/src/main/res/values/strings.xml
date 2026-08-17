@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Schoolix</string>
+    <string name="title_activity_main">Schoolix</string>
+    <string name="package_name">com.schoolix.app</string>
+    <string name="custom_url_scheme">com.schoolix.app</string>
+    <string name="update_json_url">https://schoolix-48107.web.app/update.json</string>
+    <string name="notification_channel_id">schoolix_alerts_v2</string>
+    <string name="notification_channel_name">Schoolix alerts</string>
+    <string name="notification_channel_description">Important announcements from your school</string>
+</resources>

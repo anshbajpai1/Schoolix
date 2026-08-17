@@ -1,0 +1,12 @@
+{
+  "appId": "com.schoolix.app",
+  "appName": "Schoolix",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true
+  }
+}

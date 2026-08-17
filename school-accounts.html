@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schoolix - School Accounts</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+<link rel="stylesheet" href="schoolix-polish.css">
+<style>
+:root{--bg:#f4f7fc;--panel:#fff;--line:#dce5f3;--ink:#13203a;--muted:#64748b;--blue:#2563eb;--blue-dark:#1d4ed8;--green:#067647;--green-bg:#ecfdf3;--red:#b42318;--red-bg:#fef3f2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",sans-serif}.accounts-page{width:min(1240px,calc(100% - 32px));margin:0 auto;padding:28px 0 48px}.workspace-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}.workspace-head h1{margin:0 0 7px;font-size:28px;letter-spacing:0}.workspace-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.head-actions,.toolbar-actions,.row-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.btn{min-height:40px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:9px 13px;font:700 13px/1 Inter,sans-serif;cursor:pointer}.btn:hover{border-color:#bcd2ff;background:#f8fbff}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue-dark)}.btn.danger{color:var(--red);border-color:#fecaca}.btn.icon{width:38px;padding:0;display:grid;place-items:center}.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}.summary-item{min-height:112px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:17px}.summary-item small{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}.summary-item strong{display:block;margin-top:10px;font-size:24px;letter-spacing:0}.summary-item.credit strong{color:var(--green)}.summary-item.debit strong{color:var(--red)}.summary-item.balance{border-color:#bfdbfe;background:#eff6ff}.accounts-layout{display:grid;grid-template-columns:370px minmax(0,1fr);gap:18px;align-items:start}.entry-panel,.ledger-panel{border:1px solid var(--line);border-radius:8px;background:var(--panel)}.entry-panel{padding:20px;position:sticky;top:calc(var(--sx-admin-header-offset,0px) + 12px)}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.panel-title h2{margin:0;font-size:17px;letter-spacing:0}.edit-badge{display:none;padding:5px 8px;border-radius:6px;background:#fff7ed;color:#b45309;font-size:11px;font-weight:800}.editing .edit-badge{display:block}.type-control{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}.type-control input{position:absolute;opacity:0;pointer-events:none}.type-control label{min-height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--muted);font-size:13px;font-weight:800;cursor:pointer}.type-control input:checked+label[for="typeCredit"]{border-color:#86efac;background:var(--green-bg);color:var(--green)}.type-control input:checked+label[for="typeDebit"]{border-color:#fca5a5;background:var(--red-bg);color:var(--red)}.field{display:grid;gap:6px;margin-bottom:13px}.field label{font-size:12px;font-weight:800}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:11px 12px;font:500 13px Inter,sans-serif;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}.field textarea{min-height:76px;resize:vertical;line-height:1.45}.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-actions{display:flex;gap:8px;margin-top:17px}.form-actions .btn.primary{flex:1}.ledger-toolbar{display:grid;grid-template-columns:minmax(170px,1fr) 145px 150px auto;gap:9px;padding:16px;border-bottom:1px solid var(--line)}.ledger-toolbar input,.ledger-toolbar select{min-width:0;border:1px solid var(--line);border-radius:7px;background:#fff;padding:10px 11px;font:500 12px Inter,sans-serif;outline:none}.table-wrap{overflow:auto;max-height:680px}.ledger-table{width:100%;border-collapse:collapse;min-width:850px}.ledger-table th{position:sticky;top:0;z-index:2;background:#f8fafc;color:var(--muted);padding:11px 12px;border-bottom:1px solid var(--line);font-size:10px;text-align:left;text-transform:uppercase}.ledger-table td{padding:13px 12px;border-bottom:1px solid #edf1f7;font-size:12px;vertical-align:top}.ledger-table tr:hover td{background:#fbfdff}.entry-main strong,.entry-main small{display:block}.entry-main strong{font-size:13px}.entry-main small{margin-top:4px;color:var(--muted);line-height:1.4}.money{font-weight:800;white-space:nowrap}.money.credit{color:var(--green)}.money.debit{color:var(--red)}.type-badge{display:inline-flex;padding:5px 7px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase}.type-badge.credit{color:var(--green);background:var(--green-bg)}.type-badge.debit{color:var(--red);background:var(--red-bg)}.empty{padding:48px 20px;color:var(--muted);text-align:center;font-size:13px}.status{min-height:20px;margin-top:10px;color:var(--muted);font-size:11px}.toast{position:fixed;right:20px;top:calc(var(--sx-admin-header-offset,92px) + 10px);z-index:2147482020;max-width:min(360px,calc(100vw - 32px));padding:12px 15px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);box-shadow:0 18px 42px rgba(15,23,42,.16);font-size:12px;font-weight:800}.toast.error{color:var(--red)}
+@media(max-width:980px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.accounts-layout{grid-template-columns:1fr}.entry-panel{position:static}.ledger-toolbar{grid-template-columns:1fr 1fr}.toolbar-actions{grid-column:1/-1}}
+@media(max-width:620px){.accounts-page{width:min(100% - 20px,1240px);padding-top:18px}.workspace-head{flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.summary-grid{grid-template-columns:1fr 1fr;gap:8px}.summary-item{min-height:95px;padding:13px}.summary-item strong{font-size:19px}.two-fields,.ledger-toolbar{grid-template-columns:1fr}.toolbar-actions{grid-column:auto}.form-actions{flex-direction:column}.table-wrap{max-height:none}}
+.entry-panel,.ledger-panel{min-width:0}
+.print-report-head,.print-report-footer{display:none}.pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.pagination-actions{display:flex;align-items:center;gap:8px}.pagination-actions .btn{min-height:34px;padding:7px 10px}.pagination-actions .btn:disabled{opacity:.45;cursor:not-allowed}.print-modal{position:fixed;inset:0;z-index:2147482500;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.42);padding:20px}.print-modal.open{display:flex}.print-modal-card{width:min(520px,100%);border:1px solid var(--line);border-radius:10px;background:#fff;padding:20px;box-shadow:0 24px 70px rgba(15,23,42,.24)}.print-modal-card h3{margin:0 0 6px;font-size:19px}.print-modal-card p{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.5}.print-options{display:grid;gap:10px;margin-bottom:14px}.print-option{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:11px;cursor:pointer}.print-option input{margin-top:2px}.print-option strong,.print-option small{display:block}.print-option small{margin-top:3px;color:var(--muted);font-size:11px}.print-session-row{display:none;margin-bottom:15px}.print-session-row select{width:100%;border:1px solid var(--line);border-radius:7px;padding:10px 11px;font:500 12px Inter,sans-serif}.print-modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:620px){.head-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.head-actions .btn{min-width:0;padding-inline:7px}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-item{min-width:0}.two-fields,.ledger-toolbar{grid-template-columns:minmax(0,1fr)}}
+@media print{@page{size:A4 landscape;margin:10mm}html,body{width:297mm;min-height:210mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.sx-admin-sidebar,.sx-admin-header,.sx-admin-menu-btn,.sx-admin-overlay,.workspace-head,.entry-panel,.ledger-toolbar,.pagination-bar,.print-modal{display:none!important}body,body.sx-admin-shell-enabled{margin:0!important;padding:0!important;background:#fff!important;color:#111827;overflow:visible!important}.accounts-page{width:277mm!important;max-width:277mm!important;margin:0 auto!important;padding:0!important}.print-report-head,.print-report-footer{display:block}.print-report-head{padding-bottom:10px;margin-bottom:10px;border-bottom:2px solid #1d4ed8}.print-report-head h1{margin:0;color:#123a8c;font-size:21px}.print-report-head h2{margin:4px 0 0;font-size:13px}.print-report-meta{display:flex;justify-content:space-between;gap:14px;margin-top:8px;color:#475569;font-size:9px}.summary-grid{grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.summary-item{min-height:54px;padding:8px;border-color:#cbd5e1}.summary-item small{font-size:8px}.summary-item strong{font-size:14px;margin-top:4px}.accounts-layout{display:block}.ledger-panel{border:0;width:100%}.table-wrap{width:100%;max-height:none;overflow:visible}.ledger-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed;border-collapse:collapse}.ledger-table thead{display:table-header-group}.ledger-table th{position:static;background:#eaf1ff!important;color:#123a8c;padding:6px 5px;font-size:7.5px;white-space:normal}.ledger-table td{padding:6px 5px;font-size:8px;line-height:1.25;overflow-wrap:anywhere;word-break:break-word;white-space:normal}.ledger-table th:nth-child(1),.ledger-table td:nth-child(1){width:10%}.ledger-table th:nth-child(2),.ledger-table td:nth-child(2){width:33%}.ledger-table th:nth-child(3),.ledger-table td:nth-child(3),.ledger-table th:nth-child(4),.ledger-table td:nth-child(4){width:11%}.ledger-table th:nth-child(5),.ledger-table td:nth-child(5){width:22%}.ledger-table th:nth-child(6),.ledger-table td:nth-child(6){width:13%}.ledger-table tr{break-inside:avoid;page-break-inside:avoid}.entry-main strong{font-size:8px}.entry-main small{font-size:7.3px}.money{white-space:normal}.print-report-footer{margin-top:10px;padding-top:7px;border-top:1px solid #cbd5e1;color:#64748b;font-size:8px;text-align:center}}
+</style>
+</head>
+<body data-sx-title="School Accounts">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+<main class="accounts-page">
+  <header class="workspace-head">
+    <div><h1>School Accounts</h1><p>Maintain the school's income, expenses, references and accountable running balance.</p></div>
+    <div class="head-actions">
+      <button class="btn" id="portalBtn"><i class="fas fa-arrow-left"></i> Portal</button>
+      <button class="btn" id="printBtn"><i class="fas fa-file-pdf"></i> Print / Save PDF</button>
+      <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export CSV</button>
+    </div>
+  </header>
+
+  <section class="print-report-head">
+    <h1 id="printSchoolName">Schoolix</h1>
+    <h2>School Accounts Ledger</h2>
+    <div class="print-report-meta"><span id="printReportPeriod">All transactions</span><span id="printGeneratedAt"></span></div>
+  </section>
+
+  <section class="summary-grid" aria-label="Accounts summary">
+    <div class="summary-item credit"><small>Total credit</small><strong id="totalCredit">Rs 0</strong></div>
+    <div class="summary-item debit"><small>Total debit</small><strong id="totalDebit">Rs 0</strong></div>
+    <div class="summary-item balance"><small>Current balance</small><strong id="currentBalance">Rs 0</strong></div>
+    <div class="summary-item"><small>This month net</small><strong id="monthNet">Rs 0</strong></div>
+  </section>
+
+  <div class="accounts-layout">
+    <section class="entry-panel" id="entryPanel">
+      <div class="panel-title"><h2 id="formTitle">Add ledger entry</h2><span class="edit-badge">Editing</span></div>
+      <form id="entryForm">
+        <div class="type-control">
+          <input type="radio" name="entryType" id="typeCredit" value="credit" checked><label for="typeCredit"><i class="fas fa-arrow-down"></i> Credit</label>
+          <input type="radio" name="entryType" id="typeDebit" value="debit"><label for="typeDebit"><i class="fas fa-arrow-up"></i> Debit</label>
+        </div>
+        <div class="two-fields">
+          <div class="field"><label for="entryAmount">Amount (Rs)</label><input id="entryAmount" type="number" min="0.01" max="1000000000" step="0.01" required placeholder="0.00"></div>
+          <div class="field"><label for="entryDate">Transaction date</label><input id="entryDate" type="date" required></div>
+        </div>
+        <div class="field"><label for="entryReason">Reason</label><input id="entryReason" maxlength="140" required placeholder="Why was this amount credited or debited?"></div>
+        <div class="two-fields">
+          <div class="field"><label for="entryCategory">Category</label><select id="entryCategory"><option>Fees</option><option>Admission</option><option>Donation</option><option>Transport</option><option>Salary</option><option>Utilities</option><option>Purchase</option><option>Maintenance</option><option>Refund</option><option selected>Other</option></select></div>
+          <div class="field"><label for="entryMode">Payment mode</label><select id="entryMode"><option>Cash</option><option>Bank Transfer</option><option>UPI</option><option>Cheque</option><option>Card</option><option selected>Other</option></select></div>
+        </div>
+        <div class="field"><label for="entryReference">Reference / receipt number</label><input id="entryReference" maxlength="80" placeholder="Optional transaction reference"></div>
+        <div class="field"><label for="entryNotes">Notes</label><textarea id="entryNotes" maxlength="300" placeholder="Optional additional details"></textarea></div>
+        <div class="form-actions"><button class="btn" type="button" id="cancelEditBtn" hidden>Cancel edit</button><button class="btn primary" type="submit" id="saveBtn"><i class="fas fa-save"></i> Save entry</button></div>
+        <div class="status" id="formStatus">Every entry records the signed-in user's identity.</div>
+      </form>
+    </section>
+
+    <section class="ledger-panel">
+      <div class="ledger-toolbar">
+        <input id="searchInput" type="search" placeholder="Search reason, category or reference">
+        <select id="typeFilter"><option value="all">All entries</option><option value="credit">Credits only</option><option value="debit">Debits only</option></select>
+        <input id="monthFilter" type="month" aria-label="Filter by month">
+        <div class="toolbar-actions"><select id="pageSizeSelect" aria-label="Rows per page"><option value="25">25 entries</option><option value="50">50 entries</option><option value="1000">1000 entries</option><option value="all">All</option></select><button class="btn" id="clearFiltersBtn">Clear filters</button></div>
+      </div>
+      <div class="table-wrap">
+        <table class="ledger-table">
+          <thead><tr><th>Date</th><th>Particulars</th><th>Credit</th><th>Debit</th><th>Mode / reference</th><th>Running balance</th></tr></thead>
+          <tbody id="ledgerBody"><tr><td colspan="6" class="empty">Loading school accounts...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar"><span id="paginationInfo">0 entries</span><div class="pagination-actions"><button class="btn" id="prevPageBtn" type="button">Previous</button><span id="pageInfo">Page 1 of 1</span><button class="btn" id="nextPageBtn" type="button">Next</button></div></div>
+    </section>
+  </div>
+  <footer class="print-report-footer">System generated Schoolix accounts report</footer>
+</main>
+<div class="print-modal" id="printOptionsModal" role="dialog" aria-modal="true" aria-labelledby="printOptionsTitle">
+  <div class="print-modal-card">
+    <h3 id="printOptionsTitle">Print / Save PDF</h3>
+    <p>Select which ledger entries should be included in the A4 PDF.</p>
+    <div class="print-options">
+      <label class="print-option"><input type="radio" name="printScope" value="month" checked><span><strong>This month</strong><small>Only entries from the current calendar month.</small></span></label>
+      <label class="print-option"><input type="radio" name="printScope" value="all"><span><strong>Full ledger</strong><small>All entries saved till now.</small></span></label>
+      <label class="print-option"><input type="radio" name="printScope" value="session"><span><strong>Particular session</strong><small>Only entries linked to the selected academic session.</small></span></label>
+    </div>
+    <div class="print-session-row" id="printSessionRow"><select id="printSessionSelect"><option value="">Loading sessions...</option></select></div>
+    <div class="print-modal-actions"><button class="btn" id="cancelPrintBtn" type="button">Cancel</button><button class="btn primary" id="confirmPrintBtn" type="button"><i class="fas fa-file-pdf"></i> Create PDF</button></div>
+  </div>
+</div>
+
+<script src="school-branding.js"></script>
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "./firebase-compat.js";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from "./firebase-compat.js";
+import { backfillAutomaticAccounts } from "./accounts-ledger.js";
+
+const $=id=>document.getElementById(id);let user=null,profile={},role="",schoolId="",entries=[],editingId="",currentPage=1,pageSize=25,printRowsOverride=null,printScopeLabel="",sessions=[],activeSessionId="",activeSessionLabel="";
+const money=value=>`Rs ${Number(value||0).toLocaleString("en-IN",{maximumFractionDigits:2})}`;
+const esc=value=>String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+const timestamp=value=>value?.toMillis?.()||new Date(value||0).getTime()||0;
+function toast(message,type="success"){document.querySelector(".toast")?.remove();const el=document.createElement("div");el.className=`toast ${type==="error"?"error":""}`;el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),4200)}
+function today(){return new Date().toISOString().slice(0,10)}
+function loadAdminShell(){document.body.classList.remove("sx-accountant-shell-enabled","library-dashboard-app");document.querySelectorAll("#librarySidebar,#librarySidebarOverlay,#libraryMenuButton").forEach(element=>element.remove());if(document.querySelector('script[data-accounts-shell]'))return;const script=document.createElement("script");script.src="admin-shell.js?v=navbar-20260721";script.defer=true;script.dataset.accountsShell="true";document.body.appendChild(script)}
+function loadAccountantShell(){document.body.dataset.accountantPage="accounts";document.body.classList.remove("sx-admin-shell-enabled","sx-admin-shell-open","sx-admin-shell-collapsed","sx-admin-shell-header-only");document.querySelectorAll(".sx-admin-sidebar,.sx-admin-menu-btn,.sx-admin-overlay,.sx-admin-header").forEach(element=>element.remove());const activate=()=>window.enableAccountantShell?.();if(window.enableAccountantShell){activate();return}if(document.querySelector('script[data-accountant-shell]'))return;const script=document.createElement("script");script.src="accountant-portal.js?v=accountant-portal-20260806-4";script.defer=true;script.dataset.accountantShell="true";script.addEventListener("load",activate);document.body.appendChild(script)}
+function entryTime(entry){return new Date(`${entry.transactionDate||"1970-01-01"}T12:00:00`).getTime()+timestamp(entry.createdAt)/100000}
+function calculateRunningBalances(){let balance=0;const map=new Map();[...entries].sort((a,b)=>entryTime(a)-entryTime(b)).forEach(entry=>{balance+=entry.type==="credit"?Number(entry.amount||0):-Number(entry.amount||0);map.set(entry.id,balance)});return map}
+function entryBelongsToActiveSession(entry){if(!activeSessionId&&!activeSessionLabel)return true;if(!entry.sessionId&&!entry.session&&!entry.currentYear&&!entry.academicSession)return true;return entry.sessionId===activeSessionId||entry.session===activeSessionLabel||entry.currentYear===activeSessionLabel||entry.academicSession===activeSessionLabel}
+function sessionScopedEntries(){return entries.filter(entryBelongsToActiveSession)}
+function filteredEntries(){const term=$("searchInput").value.trim().toLowerCase(),type=$("typeFilter").value,month=$("monthFilter").value;return sessionScopedEntries().filter(entry=>(type==="all"||entry.type===type)&&(!month||String(entry.transactionDate||"").startsWith(month))&&(!term||[entry.reason,entry.category,entry.reference,entry.notes,entry.createdByName,entry.studentId,entry.studentName,entry.teacherId,entry.teacherName,entry.staffId,entry.staffName,entry.staffRole].some(value=>String(value||"").toLowerCase().includes(term)))).sort((a,b)=>entryTime(b)-entryTime(a))}
+function sessionMatches(entry,session){if(!session)return false;return entry.sessionId===session.id||entry.session===session.label||entry.currentYear===session.label||entry.academicSession===session.label}
+function applyPrintType(rows){const type=$("typeFilter").value;return rows.filter(entry=>type==="all"||entry.type===type)}
+function printScopedEntries(){const scope=document.querySelector('input[name="printScope"]:checked')?.value||"month";if(scope==="all"){printScopeLabel="Full ledger";return applyPrintType([...entries]).sort((a,b)=>entryTime(b)-entryTime(a))}if(scope==="session"){const value=$("printSessionSelect").value,session=sessions.find(item=>item.id===value||item.label===value);if(!session){toast("Select a session first.","error");return null}printScopeLabel=`Session: ${session.label}`;return applyPrintType(entries.filter(entry=>sessionMatches(entry,session))).sort((a,b)=>entryTime(b)-entryTime(a))}const month=today().slice(0,7);printScopeLabel=new Date(`${month}-01T12:00:00`).toLocaleDateString("en-IN",{month:"long",year:"numeric"});return applyPrintType(entries.filter(entry=>String(entry.transactionDate||"").startsWith(month))).sort((a,b)=>entryTime(b)-entryTime(a))}
+function updateSummary(){const scoped=sessionScopedEntries(),credit=scoped.filter(e=>e.type==="credit").reduce((s,e)=>s+Number(e.amount||0),0),debit=scoped.filter(e=>e.type==="debit").reduce((s,e)=>s+Number(e.amount||0),0),month=today().slice(0,7),monthEntries=scoped.filter(e=>String(e.transactionDate||"").startsWith(month)),monthValue=monthEntries.reduce((s,e)=>s+(e.type==="credit"?Number(e.amount||0):-Number(e.amount||0)),0);$("totalCredit").textContent=money(credit);$("totalDebit").textContent=money(debit);$("currentBalance").textContent=money(credit-debit);$("monthNet").textContent=money(monthValue)}
+function renderRows(rows){const balances=calculateRunningBalances();if(!rows.length){$("ledgerBody").innerHTML='<tr><td colspan="6" class="empty">No account entries match this view.</td></tr>';return}$("ledgerBody").innerHTML=rows.map(entry=>{const source=entry.sourceType==="student_fee"?`Student ID: ${entry.studentId||"-"}${entry.studentClass?` | Class ${entry.studentClass}${entry.studentSection?`-${entry.studentSection}`:""}`:""}`:entry.sourceType==="teacher_salary"?`Teacher ID: ${entry.teacherId||"-"}`:entry.sourceType==="staff_salary"?`Staff ID: ${entry.staffId||entry.teacherId||"-"}${entry.staffRole?` | Role: ${entry.staffRole}`:""}`:"";const credit=entry.type==="credit"?money(entry.amount):"-",debit=entry.type==="debit"?money(entry.amount):"-";return `<tr><td>${esc(entry.transactionDate||"-")}</td><td class="entry-main"><strong>${esc(entry.reason)}</strong><small>${esc(entry.category||"Other")} / ${entry.automatic?"automatic entry":`by ${esc(entry.createdByName||entry.createdByRole||"User")}`}${source?`<br>${esc(source)}`:""}${entry.notes?`<br>${esc(entry.notes)}`:""}</small></td><td class="money credit">${esc(credit)}</td><td class="money debit">${esc(debit)}</td><td>${esc(entry.paymentMode||"-")}<br><small>${esc(entry.reference||"No reference")}</small></td><td class="money">${esc(money(balances.get(entry.id)||0))}</td></tr>`}).join("")}
+function updatePagination(total){const all=pageSize==="all",pages=all?1:Math.max(1,Math.ceil(total/pageSize));if(currentPage>pages)currentPage=pages;const start=total?all?1:(currentPage-1)*pageSize+1:0,end=all?total:Math.min(total,currentPage*pageSize);$("paginationInfo").textContent=total?`Showing ${start}-${end} of ${total} entries`:"0 entries";$("pageInfo").textContent=`Page ${currentPage} of ${pages}`;$("prevPageBtn").disabled=all||currentPage<=1;$("nextPageBtn").disabled=all||currentPage>=pages}
+function render(){updateSummary();const rows=printRowsOverride||filteredEntries();if(printRowsOverride){renderRows(rows);return}updatePagination(rows.length);const visible=pageSize==="all"?rows:rows.slice((currentPage-1)*pageSize,currentPage*pageSize);renderRows(visible)}
+async function loadEntries(){const snapshot=await getDocs(collection(db,"schools",schoolId,"accounts"));entries=snapshot.docs.map(item=>({id:item.id,...item.data()}));render()}
+function resetForm(){editingId="";$("entryForm").reset();$("typeCredit").checked=true;$("entryDate").value=today();$("entryPanel").classList.remove("editing");$("formTitle").textContent="Add ledger entry";$("cancelEditBtn").hidden=true;$("saveBtn").innerHTML='<i class="fas fa-save"></i> Save entry'}
+function startEdit(id){const entry=entries.find(item=>item.id===id);if(!entry)return;editingId=id;$(entry.type==="debit"?"typeDebit":"typeCredit").checked=true;$("entryAmount").value=entry.amount||"";$("entryDate").value=entry.transactionDate||today();$("entryReason").value=entry.reason||"";$("entryCategory").value=entry.category||"Other";$("entryMode").value=entry.paymentMode||"Other";$("entryReference").value=entry.reference||"";$("entryNotes").value=entry.notes||"";$("entryPanel").classList.add("editing");$("formTitle").textContent="Edit ledger entry";$("cancelEditBtn").hidden=false;$("saveBtn").innerHTML='<i class="fas fa-save"></i> Update entry';$("entryPanel").scrollIntoView({behavior:"smooth",block:"start"})}
+async function removeEntry(id){const entry=entries.find(item=>item.id===id);if(!entry||!confirm(`Delete ${entry.type} entry of ${money(entry.amount)}?\n\n${entry.reason}`))return;try{await deleteDoc(doc(db,"schools",schoolId,"accounts",id));toast("Account entry deleted.");await loadEntries()}catch(error){console.error(error);toast("Unable to delete this account entry.","error")}}
+$("entryForm").addEventListener("submit",async event=>{event.preventDefault();const amount=Number($("entryAmount").value),reason=$("entryReason").value.trim();if(!Number.isFinite(amount)||amount<=0)return toast("Enter a valid amount.","error");if(reason.length<2)return toast("Enter a clear reason.","error");const button=$("saveBtn"),buttonHtml=button.innerHTML;let saved=false;button.disabled=true;button.dataset.loading="true";button.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';const base={schoolId,type:document.querySelector('input[name="entryType"]:checked').value,amount,reason,transactionDate:$("entryDate").value,category:$("entryCategory").value,paymentMode:$("entryMode").value,reference:$("entryReference").value.trim(),notes:$("entryNotes").value.trim(),sessionId:activeSessionId,session:activeSessionLabel,updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByName:profile.name||user.email||role};try{if(editingId){const original=entries.find(item=>item.id===editingId);await updateDoc(doc(db,"schools",schoolId,"accounts",editingId),{...base,createdBy:original.createdBy,createdByName:original.createdByName,createdByRole:original.createdByRole,createdAt:original.createdAt});toast("Account entry updated.")}else{await addDoc(collection(db,"schools",schoolId,"accounts"),{...base,createdBy:user.uid,createdByName:profile.name||user.email||role,createdByRole:role,createdAt:serverTimestamp()});toast("Account entry saved.")}resetForm();saved=true;await loadEntries()}catch(error){console.error(error);toast(error.code==="permission-denied"?"You do not have permission to save this entry.":"Unable to save account entry.","error")}finally{button.disabled=false;if(button.dataset.loading==="true"){if(!saved)button.innerHTML=buttonHtml;delete button.dataset.loading}}});
+function csvCell(value){return `"${String(value??"").replace(/"/g,'""')}"`}
+$("exportBtn").onclick=()=>{const balances=calculateRunningBalances(),rows=filteredEntries(),csv=[["Date","Particulars","Credit","Debit","Payment Mode","Reference","Notes","Entered By","Running Balance"],...rows.map(e=>[e.transactionDate,e.reason,e.type==="credit"?e.amount:"",e.type==="debit"?e.amount:"",e.paymentMode,e.reference,e.notes,e.createdByName||e.createdByRole,balances.get(e.id)||0])].map(row=>row.map(csvCell).join(",")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const link=document.createElement("a");link.href=url;link.download=`school-accounts-${today()}.csv`;link.click();URL.revokeObjectURL(url)};
+function preparePrintReport(rows){const credit=rows.filter(e=>e.type==="credit").reduce((sum,e)=>sum+Number(e.amount||0),0),debit=rows.filter(e=>e.type==="debit").reduce((sum,e)=>sum+Number(e.amount||0),0),type=$("typeFilter").value;$("printSchoolName").textContent=profile.schoolName||window.SchoolBranding?.getSchoolName?.()||"Schoolix";$("printReportPeriod").textContent=`${printScopeLabel||"Selected entries"}${type!=="all"?` | ${type==="credit"?"Credits only":"Debits only"}`:""} | ${rows.length} entries`;$("printGeneratedAt").textContent=`Generated ${new Date().toLocaleString("en-IN")}`;$("totalCredit").textContent=money(credit);$("totalDebit").textContent=money(debit);$("currentBalance").textContent=money(credit-debit);$("monthNet").textContent=money(credit-debit)}
+async function loadSessions(){try{const snapshot=await getDocs(collection(db,"schools",schoolId,"sessions"));sessions=snapshot.docs.map(item=>{const data=item.data();return{id:item.id,label:data.session||data.name||item.id,locked:data.locked===true}});try{let viewSessionId="";try{viewSessionId=localStorage.getItem("schoolix.viewSessionId")||""}catch(_){}const activeSnap=await getDoc(doc(db,"schools",schoolId,"settings","activeSession"));activeSessionId=viewSessionId||(activeSnap.exists()?activeSnap.data().sessionId||"":"");if(activeSessionId&&!sessions.some(item=>item.id===activeSessionId)){try{if(viewSessionId)localStorage.removeItem("schoolix.viewSessionId")}catch(_){}activeSessionId=activeSnap.exists()?activeSnap.data().sessionId||"":""}activeSessionLabel=sessions.find(item=>item.id===activeSessionId)?.label||""}catch(_){}$("printSessionSelect").innerHTML=sessions.length?sessions.map(item=>`<option value="${esc(item.id)}" ${item.id===activeSessionId?"selected":""}>${esc(item.label)}</option>`).join(""):'<option value="">No sessions found</option>'}catch(error){console.warn(error);$("printSessionSelect").innerHTML='<option value="">Unable to load sessions</option>'}}
+function openPrintOptions(){if(!sessions.length)loadSessions();$("printOptionsModal").classList.add("open")}
+function closePrintOptions(){$("printOptionsModal").classList.remove("open")}
+$("printBtn").onclick=openPrintOptions;$("cancelPrintBtn").onclick=closePrintOptions;$("confirmPrintBtn").onclick=()=>{const rows=printScopedEntries();if(!rows)return;if(!rows.length)return toast("No entries found for this print option.","error");closePrintOptions();printRowsOverride=rows;preparePrintReport(rows);render();setTimeout(()=>window.print(),80)};document.querySelectorAll('input[name="printScope"]').forEach(input=>input.addEventListener("change",()=>{$("printSessionRow").style.display=input.value==="session"&&input.checked?"block":"none"}));window.addEventListener("afterprint",()=>{printRowsOverride=null;printScopeLabel="";render()});$("cancelEditBtn").onclick=resetForm;$("clearFiltersBtn").onclick=()=>{$("searchInput").value="";$("typeFilter").value="all";$("monthFilter").value="";currentPage=1;render()};$("pageSizeSelect").onchange=()=>{pageSize=$("pageSizeSelect").value==="all"?"all":Number($("pageSizeSelect").value);currentPage=1;render()};$("prevPageBtn").onclick=()=>{if(currentPage>1){currentPage--;render()}};$("nextPageBtn").onclick=()=>{currentPage++;render()};["searchInput","typeFilter","monthFilter"].forEach(id=>$(id).addEventListener(id==="searchInput"?"input":"change",()=>{currentPage=1;render()}));
+async function resolveAccountsProfile(current){const direct=await getDoc(doc(db,"users",current.uid));if(direct.exists())return{id:direct.id,...direct.data()};const uid=String(current.uid||"").trim(),rawEmail=String(current.email||"").trim(),email=rawEmail.toLowerCase(),lookups=[];if(uid)lookups.push(["authUid",uid],["uid",uid],["legacyUid",uid],["firebaseUid",uid]);if(email)lookups.push(["email",email],["authEmail",email]);if(rawEmail&&rawEmail!==email)lookups.push(["email",rawEmail],["authEmail",rawEmail]);for(const[field,value]of lookups){try{const snap=await getDocs(query(collection(db,"users"),where(field,"==",value),limit(1)));if(!snap.empty)return{id:snap.docs[0].id,...snap.docs[0].data()}}catch(error){if(error?.code!=="permission-denied")console.warn(`Accounts profile ${field} lookup failed:`,error)}}return null}
+onAuthStateChanged(auth,async current=>{if(!current){location.href="index.html";return}try{profile=await resolveAccountsProfile(current);if(!profile)throw new Error("Profile missing");role=String(profile.role||"").toLowerCase();if(!["admin","accountant","superadmin"].includes(role)&&profile.superAdmin!==true){location.href="index.html";return}user=current;schoolId=String(role==="admin"||profile.superAdmin===true?profile.id||current.uid:profile.schoolId||profile.adminId||profile.schoolID||profile.adminUID||profile.adminUid||profile.schoolUID||profile.schoolUid||profile.schoolDocId||profile.schoolDocID||"");if(!schoolId)throw new Error("School not linked with this accountant.");$("portalBtn").innerHTML=role==="accountant"?'<i class="fas fa-arrow-left"></i> Accountant portal':'<i class="fas fa-arrow-left"></i> Admin dashboard';$("portalBtn").onclick=()=>location.href=role==="accountant"?"accountant-dashboard.html":"admin-dashboard.html";if(role==="accountant")loadAccountantShell();else loadAdminShell();await loadSessions();resetForm();$("formStatus").textContent="Loading saved account entries...";await loadEntries();$("formStatus").textContent="Syncing fees and salary payments in background...";backfillAutomaticAccounts({db,schoolId,actor:{uid:current.uid,name:profile.name,email:current.email,role}}).then(()=>loadEntries()).finally(()=>{$("formStatus").textContent="Every manual entry records the signed-in user's identity."}).catch(error=>console.warn("Accounts background sync failed",error))}catch(error){console.error(error);toast(error.message||"Unable to open school accounts.","error")}});
+</script>
+<script type="module" src="access-control.js?v=accountant-guard-20260806-3"></script>
+<script src="schoolix-polish.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Additional Settings — Sessions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --line: #e4e9f2;
+  --primary: #1f5eff;
+  --primary-dark: #1746c7;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --text: #172033;
+  --muted: #667085;
+  --radius: 16px;
+  --soft: #f8fafc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 80px;
+}
+.shell { width: 100%; max-width: 980px; display: grid; gap: 20px; }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: 0 16px 42px rgba(16,24,40,0.08);
+}
+.page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.page-title span { color: var(--primary); }
+.badge-pill {
+  background: #eef4ff;
+  color: var(--primary-dark);
+  border: 1px solid #d8e5ff;
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+h3 { font-size: 15px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row.three { grid-template-columns: repeat(3, 1fr); }
+.field.full { grid-column: 1 / -1; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+input[type=number], input[type=text], select {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type=number]:focus, input[type=text]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31,94,255,0.12); }
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; box-shadow: 0 8px 22px rgba(31,94,255,0.22); width: 100%; margin-top: 14px; }
+.btn-inline { width: auto; margin-top: 0; }
+.btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+.btn-success { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; }
+.btn-danger { background: linear-gradient(135deg, var(--danger), #dc2626); color: #fff; }
+.btn-warning { background: linear-gradient(135deg, var(--warning), #d97706); color: #1a1a1a; }
+.btn-ghost { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+.status-msg { font-size: 13px; margin-top: 10px; min-height: 20px; font-weight: 600; color: var(--success); }
+.session-list { display: grid; gap: 10px; margin-top: 4px; }
+.session-item {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+.session-item.active {
+  border-color: var(--success);
+  background: #f0fdf4;
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.34);
+}
+.session-item.locked-item {
+  border-color: var(--danger);
+  background: #fef2f2;
+}
+.session-meta { display: flex; flex-direction: column; gap: 3px; }
+.session-year { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.session-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tag-active { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.tag-locked { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.tag-open { background: #eef4ff; color: var(--primary-dark); border: 1px solid #d8e5ff; }
+.session-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.term-toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.term-toolbar .field { min-width: 220px; }
+.hint-text { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 8px; }
+.term-list { display: grid; gap: 10px; margin-top: 14px; }
+.term-item {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.term-name { font-size: 16px; font-weight: 800; }
+.term-meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.term-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: var(--muted);
+  font-size: 14px;
+  border: 1px dashed rgba(148,163,184,0.25);
+  border-radius: 12px;
+  background: var(--soft);
+}
+body.sx-admin-shell-enabled.sx-settings-app {
+  display: block;
+  align-items: initial;
+  justify-content: initial;
+}
+body.sx-admin-shell-enabled.sx-settings-app .shell {
+  padding-top: 12px;
+}
+@media (max-width: 480px) {
+  .form-row, .form-row.three { grid-template-columns: 1fr; }
+  .session-item, .term-item { flex-direction: column; align-items: flex-start; }
+}
+</style>
+<link rel="stylesheet" href="schoolix-erp.css">
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body class="sx-settings-app">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+<div class="shell">
+  <!-- Header -->
+  <div class="card page-header">
+    <div>
+      <div class="page-title">Academic <span>Settings</span></div>
+      <div style="color:var(--muted);font-size:13px;margin-top:4px;">Manage sessions, class locks, active academic year, and report-card test terms from one admin workspace.</div>
+    </div>
+    <span class="badge-pill">Settings</span>
+  </div>
+
+  <!-- Add Session -->
+  <div class="card">
+    <h3>New Session</h3>
+    <div class="form-row">
+      <div class="field">
+        <label>Start Year</label>
+        <input type="number" id="startYear" placeholder="2024" min="2000" max="2099">
+      </div>
+      <div class="field">
+        <label>End Year</label>
+        <input type="number" id="endYear" placeholder="2025" min="2000" max="2099">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    <div class="status-msg" id="status"></div>
+  </div>
+
+  <!-- Sessions List -->
+  <div class="card">
+    <h3>All Sessions</h3>
+    <div class="session-list" id="sessionList">
+      <div class="empty-state">Loading sessions…</div>
+    </div>
+  </div>
+  <!-- Test Terms -->
+  <div class="card">
+    <div class="term-toolbar">
+      <div>
+        <h3 style="margin-bottom:6px;">Class Wise Test Terms</h3>
+        <div class="hint-text">Create terms for tests from the admin panel. Terms are tied to the selected session and reset when the session changes.</div>
+      </div>
+      <div class="field">
+        <label for="termSessionSelect">Session</label>
+        <select id="termSessionSelect" onchange="loadTerms()">
+          <option value="">Loading sessions...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row three">
+      <div class="field">
+        <label for="termClassSelect">Class</label>
+        <select id="termClassSelect">
+          <option value="">Select class</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="termSectionSelect">Section</label>
+        <select id="termSectionSelect">
+          <option value="">All sections</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="termNameInput">Term Name</label>
+        <input type="text" id="termNameInput" placeholder="Term 1 / Mid Term / Final">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveTerm()">Save Term</button>
+    <div class="status-msg" id="termStatus"></div>
+    <div class="term-list" id="termList">
+      <div class="empty-state">Select a session to load terms.</div>
+    </div>
+  </div>
+</div>
+
+<script src="school-branding.js"></script>
+<script type="module">
+import { initializeApp } from "./firebase-compat.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, updateDoc, serverTimestamp
+} from "./firebase-compat.js";
+import { getAuth, onAuthStateChanged } from "./firebase-compat.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  authDomain: "schoolix-48107.firebaseapp.com",
+  projectId: "schoolix-48107",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let activeSessionId = null;
+let currentAdminProfile = {};
+let allSessions = [];
+
+const CLASS_LIST = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+const ALL_SECTIONS = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getSessionLabel(session) {
+  return session?.session || session?.name || "";
+}
+
+function normalizeReportTerm(term) {
+  return String(term || "").trim();
+}
+
+function getReportTermKey(term) {
+  return normalizeReportTerm(term).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function getClassKey(cls) {
+  return String(cls || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "class";
+}
+
+function getSectionKey(section) {
+  return String(section || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "all";
+}
+
+function getTermDocId(sessionId, cls, section, termKey) {
+  return `${sessionId || "no-session"}__${getClassKey(cls)}__${getSectionKey(section)}__${termKey}`;
+}
+
+function getSelectedTermSession() {
+  const sessionId = document.getElementById("termSessionSelect")?.value || activeSessionId || "";
+  return allSessions.find((session) => session.id === sessionId) || null;
+}
+
+function termBelongsToSelectedTermSession(term) {
+  const session = getSelectedTermSession();
+  if (!session) return false;
+  const label = getSessionLabel(session);
+  return term.sessionId === session.id ||
+    term.session === label ||
+    term.currentYear === label ||
+    String(term.id || "").startsWith(`${session.id}__`);
+}
+
+function formatClassSection(cls, section) {
+  if (!cls && !section) return "All classes";
+  return section ? `Class ${cls}-${section}` : `Class ${cls} - All sections`;
+}
+
+function setStatus(id, message, ok = true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.color = ok ? "#86efac" : "#fca5a5";
+  el.textContent = message;
+}
+
+function makeSessionPlacement(student, session, locks = {}) {
+  const existing = student.sessionPlacements?.[session.id] || {};
+  const alreadyFrozen = existing.locked === true || existing.classLocked === true;
+  const source = alreadyFrozen ? existing : student;
+  const now = Date.now();
+  const placement = {
+    ...existing,
+    sessionId: session.id,
+    session: getSessionLabel(session),
+    currentYear: getSessionLabel(session),
+    class: source.class || "",
+    section: source.section || "",
+    roll: source.roll || source.rollNo || "",
+    updatedAt: now
+  };
+
+  if (locks.locked !== undefined) placement.locked = Boolean(locks.locked);
+  if (locks.classLocked !== undefined) placement.classLocked = Boolean(locks.classLocked);
+  if ((locks.locked || locks.classLocked) && !placement.lockedAt) placement.lockedAt = now;
+  if (!placement.createdAt) placement.createdAt = now;
+  return placement;
+}
+
+async function writeSessionPlacements(session, locks = {}) {
+  const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+  const writes = snap.docs.map((studentDoc) => {
+    const student = { id: studentDoc.id, ...studentDoc.data() };
+    const placement = makeSessionPlacement(student, session, locks);
+    return updateDoc(doc(db, "schools", currentUser.uid, "students", studentDoc.id), {
+      [`sessionPlacements.${session.id}`]: placement
+    });
+  });
+  await Promise.all(writes);
+  return writes.length;
+}
+
+function populateTermClassControls() {
+  const classSelect = document.getElementById("termClassSelect");
+  const sectionSelect = document.getElementById("termSectionSelect");
+  if (!classSelect || !sectionSelect) return;
+  classSelect.innerHTML = `<option value="">Select class</option>${CLASS_LIST.map((cls) => `<option value="${cls}">${cls}</option>`).join("")}`;
+  sectionSelect.innerHTML = `<option value="">All sections</option>${ALL_SECTIONS.map((section) => `<option value="${section}">${section}</option>`).join("")}`;
+}
+
+function populateTermSessionSelect() {
+  const select = document.getElementById("termSessionSelect");
+  if (!select) return;
+  if (!allSessions.length) {
+    select.innerHTML = `<option value="">Create a session first</option>`;
+    document.getElementById("termList").innerHTML = `<div class="empty-state">Create a session before adding terms.</div>`;
+    return;
+  }
+  const sorted = [...allSessions].sort((a, b) => (b.startYear || 0) - (a.startYear || 0));
+  const preferredSessionId = activeSessionId || select.value || sorted[0]?.id || "";
+  select.innerHTML = sorted.map((session) => {
+    const selected = session.id === preferredSessionId ? "selected" : "";
+    const locked = session.locked ? " (Locked)" : "";
+    return `<option value="${session.id}" ${selected}>${escapeHtml(getSessionLabel(session) || "Unnamed")}${locked}</option>`;
+  }).join("");
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    if (!userSnap.exists() || userSnap.data().role !== "admin") {
+      alert("Access denied. Only admin can manage sessions and terms.");
+      window.location.href = "index.html";
+      return;
+    }
+    currentUser = user;
+    currentAdminProfile = userSnap.data();
+    populateTermClassControls();
+    await loadActiveSession();
+    await loadSessions();
+    await loadTerms();
+  } else {
+    alert("Login required.");
+    window.location.href = "index.html";
+  }
+});
+
+window.saveSession = async function() {
+  const startYear = document.getElementById("startYear").value;
+  const endYear = document.getElementById("endYear").value;
+  const status = document.getElementById("status");
+  if (!startYear || !endYear) { status.style.color="#fca5a5"; status.textContent="Fill both year fields."; return; }
+  if (Number(endYear) <= Number(startYear)) { status.style.color="#fca5a5"; status.textContent="End year must be after start year."; return; }
+  status.textContent = "Saving…";
+  try {
+    const sessionRef = await addDoc(collection(db, "schools", currentUser.uid, "sessions"), {
+      startYear: Number(startYear), endYear: Number(endYear),
+      session: `${startYear}-${endYear}`, createdAt: Date.now(), locked: false, classesLocked: false
+    });
+    const session = {
+      id: sessionRef.id,
+      startYear: Number(startYear),
+      endYear: Number(endYear),
+      session: `${startYear}-${endYear}`,
+      locked: false,
+      classesLocked: false
+    };
+    const copied = await writeSessionPlacements(session, { locked: false, classLocked: false });
+    status.style.color = "#86efac";
+    status.textContent = `Session ${startYear}-${endYear} saved. ${copied} student class snapshots copied.`;
+    document.getElementById("startYear").value = "";
+    document.getElementById("endYear").value = "";
+    await loadSessions();
+    await loadTerms();
+  } catch(e) {
+    status.style.color="#fca5a5"; status.textContent="Failed to save session.";
+  }
+};
+
+async function loadSessions() {
+  const list = document.getElementById("sessionList");
+  list.innerHTML = '<div class="empty-state">Loading…</div>';
+  const snapshot = await getDocs(collection(db, "schools", currentUser.uid, "sessions"));
+  list.innerHTML = "";
+  if (snapshot.empty) {
+    allSessions = [];
+    populateTermSessionSelect();
+    list.innerHTML = '<div class="empty-state">No sessions yet. Create one above.</div>';
+    return;
+  }
+  allSessions = [];
+  snapshot.forEach(d => allSessions.push({ id: d.id, ...d.data() }));
+  allSessions.sort((a, b) => (b.startYear || 0) - (a.startYear || 0));
+  populateTermSessionSelect();
+  allSessions.forEach(data => {
+    const id = data.id;
+    const isActive = id === activeSessionId;
+    const isLocked = data.locked;
+    const div = document.createElement("div");
+    div.className = "session-item" + (isActive ? " active" : "") + (isLocked ? " locked-item" : "");
+    div.innerHTML = `
+      <div class="session-meta">
+        <div class="session-year">${data.session}</div>
+        <div class="session-tags">
+          ${isActive ? '<span class="tag tag-active">Active</span>' : ""}
+          ${isLocked ? '<span class="tag tag-locked">Locked</span>' : '<span class="tag tag-open">Open</span>'}
+          ${data.classesLocked ? '<span class="tag tag-locked">Classes Locked</span>' : ""}
+        </div>
+      </div>
+      <div class="session-actions">
+        ${!isActive ? `<button class="btn btn-sm btn-success" onclick="setActive('${id}')">Set Active</button>` : ""}
+        <button class="btn btn-sm btn-warning" onclick="toggleLock('${id}', ${isLocked})">${isLocked ? "Unlock" : "Lock"}</button>
+        <button class="btn btn-sm btn-ghost" onclick="toggleClassLock('${id}', ${data.classesLocked || false})">${data.classesLocked ? "Unlock Classes" : "Lock Classes"}</button>
+        ${!isLocked ? `<button class="btn btn-sm btn-danger" onclick="deleteSession('${id}', ${isLocked})">Delete</button>` : ""}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+window.setActive = async function(id) {
+  await setDoc(doc(db, "schools", currentUser.uid, "settings", "activeSession"), { sessionId: id });
+  activeSessionId = id;
+  await loadSessions();
+  await loadTerms();
+};
+
+window.toggleLock = async function(id, currentStatus) {
+  const action = currentStatus ? "unlock" : "lock";
+  if (!confirm(`Are you sure you want to ${action} this session?
+${currentStatus ? "Unlocking will allow edits by teachers." : "Locking will make teacher dashboards VIEW ONLY for this session."}`)) return;
+  const snap = await getDoc(doc(db, "schools", currentUser.uid, "sessions", id));
+  if (snap.exists()) {
+    await writeSessionPlacements({ id, ...snap.data(), locked: !currentStatus }, { locked: !currentStatus });
+  }
+  await setDoc(doc(db, "schools", currentUser.uid, "sessions", id), { locked: !currentStatus }, { merge: true });
+  loadSessions();
+};
+
+window.toggleClassLock = async function(id, currentStatus) {
+  const action = currentStatus ? "unlock classes for" : "lock classes for";
+  if (!confirm(`Are you sure you want to ${action} this session?
+${currentStatus ? "Unlocking classes will allow class changes for students in this session." : "Locking classes will prevent any class changes for students in this session."}`)) return;
+  const snap = await getDoc(doc(db, "schools", currentUser.uid, "sessions", id));
+  if (snap.exists()) {
+    await writeSessionPlacements({ id, ...snap.data(), classesLocked: !currentStatus }, { classLocked: !currentStatus });
+  }
+  await setDoc(doc(db, "schools", currentUser.uid, "sessions", id), { classesLocked: !currentStatus }, { merge: true });
+  loadSessions();
+};
+
+window.saveTerm = async function() {
+  const session = getSelectedTermSession();
+  const cls = document.getElementById("termClassSelect").value;
+  const section = document.getElementById("termSectionSelect").value;
+  const label = normalizeReportTerm(document.getElementById("termNameInput").value);
+  const termKey = getReportTermKey(label);
+
+  if (!session) return setStatus("termStatus", "Select a session first.", false);
+  if (session.locked) return setStatus("termStatus", "This session is locked. Unlock it before adding terms.", false);
+  if (!cls) return setStatus("termStatus", "Select class for this term.", false);
+  if (!label || !termKey) return setStatus("termStatus", "Enter a valid term name.", false);
+
+  const termDocId = getTermDocId(session.id, cls, section, termKey);
+  const termRef = doc(db, "schools", currentUser.uid, "terms", termDocId);
+  const existing = await getDoc(termRef);
+  if (existing.exists()) {
+    return setStatus("termStatus", "This term already exists for the selected class/session.", false);
+  }
+
+  await setDoc(termRef, {
+    label,
+    termKey,
+    class: cls,
+    section,
+    sessionId: session.id,
+    session: getSessionLabel(session),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    createdBy: currentAdminProfile.name || currentUser.email || currentUser.uid,
+    createdByRole: "admin"
+  });
+
+  document.getElementById("termNameInput").value = "";
+  setStatus("termStatus", `Term "${label}" saved for ${formatClassSection(cls, section)}.`);
+  await loadTerms();
+};
+
+window.loadTerms = async function() {
+  const list = document.getElementById("termList");
+  if (!list) return;
+  const session = getSelectedTermSession();
+  if (!session) {
+    list.innerHTML = `<div class="empty-state">Create a session before adding terms.</div>`;
+    return;
+  }
+  list.innerHTML = `<div class="empty-state">Loading terms...</div>`;
+  try {
+    const snapshot = await getDocs(collection(db, "schools", currentUser.uid, "terms"));
+    const terms = snapshot.docs
+      .map((termDoc) => ({ id: termDoc.id, ...termDoc.data() }))
+      .filter(termBelongsToSelectedTermSession)
+      .sort((a, b) => {
+        const left = `${a.class || ""}${a.section || ""}${a.label || a.term || ""}`;
+        const right = `${b.class || ""}${b.section || ""}${b.label || b.term || ""}`;
+        return left.localeCompare(right);
+      });
+
+    if (!terms.length) {
+      list.innerHTML = `<div class="empty-state">No terms created for this session yet.</div>`;
+      return;
+    }
+
+    list.innerHTML = terms.map((term) => {
+      const label = escapeHtml(term.label || term.term || term.termKey || "Untitled Term");
+      const sessionLabel = escapeHtml(term.session || getSessionLabel(session) || "Session");
+      const classLabel = escapeHtml(formatClassSection(term.class || "", term.section || ""));
+      return `
+        <div class="term-item">
+          <div>
+            <div class="term-name">${label}</div>
+            <div class="term-meta">${classLabel} | ${sessionLabel}</div>
+          </div>
+          <div class="term-actions">
+            <button class="btn btn-sm btn-danger" onclick="deleteTerm('${term.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (error) {
+    console.error(error);
+    list.innerHTML = `<div class="empty-state">Unable to load terms.</div>`;
+  }
+};
+
+window.deleteTerm = async function(id) {
+  if (!confirm("Delete this term? Existing marks and report cards will not be deleted.")) return;
+  await deleteDoc(doc(db, "schools", currentUser.uid, "terms", id));
+  setStatus("termStatus", "Term deleted.");
+  await loadTerms();
+};
+
+async function loadActiveSession() {
+  const snap = await getDoc(doc(db, "schools", currentUser.uid, "settings", "activeSession"));
+  if (snap.exists()) activeSessionId = snap.data().sessionId;
+}
+
+window.deleteSession = async function(id, locked) {
+  if (locked) { alert("Cannot delete a locked session. Unlock it first."); return; }
+  if (!confirm("Delete this session? This cannot be undone.")) return;
+  await deleteDoc(doc(db, "schools", currentUser.uid, "sessions", id));
+  if (activeSessionId === id) {
+    await deleteDoc(doc(db, "schools", currentUser.uid, "settings", "activeSession"));
+    activeSessionId = null;
+  }
+  await loadSessions();
+  await loadTerms();
+};
+</script>
+<script type="module" src="access-control.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>
+
+

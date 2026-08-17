@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "133937954491",
+    "project_id": "schoolix-48107",
+    "storage_bucket": "schoolix-48107.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133937954491:android:8a3d896aec9095b1c4339e",
+        "android_client_info": {
+          "package_name": "com.schoolix.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "133937954491-9us77e3m1sifekp51tafsr2got4imboa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5EiPM1tOlVARuFctj7cSbr8-k3BT3xZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "133937954491-9us77e3m1sifekp51tafsr2got4imboa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

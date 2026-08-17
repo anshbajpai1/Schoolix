@@ -1,0 +1,35 @@
+{
+  "name": "Schoolix",
+  "short_name": "Schoolix",
+  "description": "Student and teacher school management app.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#080d14",
+  "theme_color": "#080d14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/schoolix-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Student Dashboard",
+      "short_name": "Student",
+      "url": "/student-dashboard.html",
+      "icons": [{ "src": "/schoolix-app-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Teacher Dashboard",
+      "short_name": "Teacher",
+      "url": "/teacher-dashboard.html",
+      "icons": [{ "src": "/schoolix-app-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

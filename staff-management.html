@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading, html.sx-page-loading body { min-height: 100%; background: #ffffff !important; }
+html.sx-page-loading body::before, html.sx-page-loading body::after { visibility: hidden !important; }
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) { visibility: hidden !important; }
+.sx-page-loader { position: fixed; inset: 0; z-index: 2147482500; display: flex; align-items: center; justify-content: center; background: #ffffff; transition: opacity 0.26s ease, visibility 0.26s ease; }
+.sx-page-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.sx-page-loader .dots-container { display: flex; align-items: center; justify-content: center; width: min(180px, 54vw); height: 72px; }
+.sx-page-loader .dot { height: clamp(12px, 4vw, 20px); width: clamp(12px, 4vw, 20px); margin-right: clamp(7px, 2.3vw, 10px); border-radius: 999px; background-color: #b3d4fc; animation: pulse 1.5s infinite ease-in-out; }
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse { 0% { transform: scale(0.8); background-color: #b3d4fc; box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7); } 50% { transform: scale(1.2); background-color: #6793fb; box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0); } 100% { transform: scale(0.8); background-color: #b3d4fc; box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7); } }
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schoolix - Staff Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="schoolix-theme.css">
+<style>
+:root {
+  --page-bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #059669;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: #f3f6fb; color: var(--text); font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif; font-size: 14px; line-height: 1.45; }
+.staff-page { width: min(1220px, calc(100% - 40px)); margin: 0 auto; padding: 26px 0 46px; }
+.hero { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 18px; padding: 22px; border: 1px solid #dbe4ef; border-radius: 8px; background: linear-gradient(135deg, #ffffff 0%, #f8fbff 64%, #eef7f4 100%); box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08); }
+.hero h1 { margin: 0; font: 800 clamp(26px, 3vw, 36px)/1.08 "Sora", "DM Sans", sans-serif; letter-spacing: 0; }
+.hero p { margin: 9px 0 0; color: #526173; max-width: 720px; font-size: 14px; }
+.hero-actions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end; min-width: min(390px, 100%); }
+.panel { background: rgba(255,255,255,.98); border: 1px solid #dfe7f1; border-radius: 8px; box-shadow: 0 14px 36px rgba(15, 23, 42, 0.07); padding: 18px; margin-bottom: 18px; }
+.panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #edf2f7; }
+.panel-head h2 { margin: 0; font: 800 19px/1.2 "Sora", "DM Sans", sans-serif; letter-spacing: 0; }
+.muted { color: var(--muted); }
+.grid { display: grid; gap: 12px; }
+.form-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.teacher-fields { display: none; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 12px; }
+.teacher-fields.show { display: grid; }
+.filters { display: grid; grid-template-columns: minmax(240px, 1.5fr) minmax(150px, 180px) minmax(150px, 170px) minmax(112px, 130px); gap: 12px; align-items: center; }
+.other-fields { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+.other-fields.show { display: grid; }
+.login-field.is-hidden { display: none; }
+label { display: block; font-size: 11px; font-weight: 900; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0; }
+input, select { width: 100%; min-height: 42px; border: 1px solid #d7e0eb; border-radius: 8px; padding: 10px 12px; font: 700 13px/1.2 "DM Sans", "Inter", sans-serif; color: var(--text); background: #fff; transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+input:focus, select:focus { outline: 2px solid rgba(37, 99, 235, 0.18); border-color: var(--primary); }
+.btn { min-height: 40px; border: 1px solid transparent; border-radius: 8px; padding: 10px 13px; font: 900 13px/1 "DM Sans", "Inter", sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap; transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 10px 20px rgba(37,99,235,.2); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-light { background: #f8fafc; color: #1e293b; border-color: #d8e1ed; }
+.btn-light:hover { background: #eef6ff; border-color: #bcd2ff; }
+.btn-danger { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+.btn-success { background: #ecfdf5; color: #047857; border-color: #bbf7d0; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat { background: #fff; border: 1px solid #dfe7f1; border-radius: 8px; padding: 16px; box-shadow: 0 10px 24px rgba(15,23,42,.055); position: relative; overflow: hidden; }
+.stat::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: #2563eb; }
+.stat:nth-child(2)::before { background: #7c3aed; }
+.stat:nth-child(3)::before { background: #0891b2; }
+.stat:nth-child(4)::before { background: #059669; }
+.stat span { display: block; color: #64748b; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0; }
+.stat strong { display: block; margin-top: 7px; font: 800 27px/1 "Sora", "DM Sans", sans-serif; }
+.staff-list { display: grid; gap: 10px; }
+.staff-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.staff-pagination-info { color: var(--muted); font-size: 13px; font-weight: 800; }
+.staff-pagination-actions { display: inline-flex; align-items: center; gap: 8px; }
+.staff-page-size { width: 100%; min-width: 112px; }
+.salary-layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.salary-form { display: grid; gap: 12px; padding: 14px; border: 1px solid #edf2f7; border-radius: 8px; background: #fbfdff; }
+.salary-records { display: grid; gap: 10px; }
+.salary-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px; background: #fbfdff; border: 1px solid #dfe7f1; border-radius: 8px; }
+.salary-breakdown-card { border: 1px solid #dfe7f1; border-radius: 8px; background: #ffffff; box-shadow: 0 12px 30px rgba(15,23,42,.06); padding: 15px; }
+.salary-breakdown-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid #edf2f7; }
+.salary-breakdown-head strong { display: block; font: 800 16px/1.25 "Sora", "DM Sans", sans-serif; overflow-wrap: anywhere; }
+.salary-breakdown-head span { display: block; margin-top: 4px; color: #64748b; font-size: 12px; font-weight: 800; }
+.salary-status-pill { display: inline-flex; align-items: center; min-height: 26px; padding: 5px 9px; border-radius: 999px; background: #f1f5f9; color: #334155; font-size: 11px; font-weight: 900; white-space: nowrap; }
+.salary-status-pill.paid { background: #dcfce7; color: #166534; }
+.salary-status-pill.partial { background: #fef3c7; color: #92400e; }
+.salary-status-pill.unpaid { background: #fee2e2; color: #991b1b; }
+.salary-breakdown-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 13px; }
+.salary-breakdown-box { min-width: 0; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; padding: 11px; }
+.salary-breakdown-box span { display: block; color: #64748b; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0; }
+.salary-breakdown-box strong { display: block; margin-top: 6px; font: 900 18px/1.1 "Sora", "DM Sans", sans-serif; overflow-wrap: anywhere; }
+.salary-breakdown-box.base strong { color: #1d4ed8; }
+.salary-breakdown-box.paid strong { color: #047857; }
+.salary-breakdown-box.due strong { color: #b45309; }
+.salary-payment-history { display: grid; gap: 8px; margin-top: 13px; }
+.salary-payment-history h4 { margin: 0; font: 900 12px/1.2 "DM Sans", sans-serif; color: #334155; text-transform: uppercase; letter-spacing: 0; }
+.salary-payment-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; border: 1px solid #edf2f7; border-radius: 8px; background: #fbfdff; padding: 10px; }
+.salary-payment-item strong { display: block; font-weight: 900; }
+.salary-payment-item small { display: block; color: #64748b; margin-top: 3px; }
+.salary-breakdown-note { margin-top: 12px; color: #64748b; font-size: 12px; font-weight: 800; }
+.staff-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 15px; background: #fbfdff; border: 1px solid #dfe7f1; border-radius: 8px; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.staff-row:hover, .salary-row:hover { border-color: #bfd0e4; box-shadow: 0 12px 28px rgba(15,23,42,.07); }
+.identity { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.avatar { width: 44px; height: 44px; border-radius: 8px; background: #e0f2fe; color: #075985; display: grid; place-items: center; font: 900 14px/1 "Sora", "DM Sans", sans-serif; flex: 0 0 auto; }
+.staff-main { min-width: 0; }
+.staff-main strong { display: block; font: 800 15px/1.2 "Sora", "DM Sans", sans-serif; overflow-wrap: anywhere; }
+.staff-main small { display: block; color: #64748b; margin-top: 5px; font-size: 12px; overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 8px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 900; letter-spacing: 0; }
+.chip.teacher { background: #ede9fe; color: #5b21b6; }
+.chip.librarian { background: #dbeafe; color: #1d4ed8; }
+.chip.accountant { background: #dcfce7; color: #166534; }
+.chip.removed { background: #fee2e2; color: #991b1b; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.empty { padding: 24px; text-align: center; color: #64748b; background: #fbfdff; border: 1px dashed #cbd5e1; border-radius: 8px; font-weight: 800; }
+.staff-loader { display: grid; gap: 10px; }
+.staff-skeleton { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); padding: 14px; }
+.staff-skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.72), transparent); animation: staffShimmer 1.15s infinite; }
+.staff-skeleton-line { height: 12px; border-radius: 999px; background: #dbe4ef; margin: 8px 0; }
+.staff-skeleton-line.title { width: 42%; height: 16px; }
+.staff-skeleton-line.meta { width: 68%; }
+.staff-skeleton-line.short { width: 24%; }
+.staff-row.is-loading, .salary-row.is-loading, .panel.is-loading { opacity: .72; pointer-events: none; }
+.staff-inline-loader { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 800; }
+.staff-inline-loader i { color: var(--primary); }
+@keyframes staffShimmer { 100% { transform: translateX(100%); } }
+.dialog-backdrop { position: fixed; inset: 0; z-index: 4000; background: rgba(15, 23, 42, 0.55); display: none; align-items: center; justify-content: center; padding: 18px; }
+.dialog-backdrop.show { display: flex; }
+.dialog { width: min(720px, 100%); max-height: 92vh; overflow: auto; background: #fff; border-radius: 8px; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.32); padding: 18px; }
+.dialog-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
+.dialog-title h2 { margin: 0; font: 800 22px/1.2 "Sora", sans-serif; }
+.edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .hero { flex-direction: column; }
+  .hero-actions { justify-content: flex-start; }
+  .stats, .form-grid, .teacher-fields, .other-fields, .filters, .edit-grid, .salary-layout { grid-template-columns: 1fr; }
+  .staff-row { grid-template-columns: 1fr; }
+  .row-actions { justify-content: flex-start; }
+}
+@media (max-width: 640px) {
+  .staff-page { width: min(100% - 24px, 1220px); padding-top: 18px; }
+  .hero, .panel { padding: 16px; }
+  .hero h1 { font-size: 25px; }
+  .hero-actions, .hero-actions .btn, .row-actions, .row-actions .btn, .panel-head .btn { width: 100%; }
+  .panel-head { flex-direction: column; }
+  .salary-row, .salary-payment-item { grid-template-columns: 1fr; }
+  .salary-breakdown-head { flex-direction: column; }
+  .salary-breakdown-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .salary-breakdown-grid { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+<style id="staffProfessionalOverrides">
+body.sx-admin-app {
+  background: #f3f6fb;
+  color: #0f172a;
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+}
+body.sx-admin-app .staff-page,
+body.sx-admin-app .staff-page input,
+body.sx-admin-app .staff-page select,
+body.sx-admin-app .staff-page button {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+}
+body.sx-admin-app .staff-page h1,
+body.sx-admin-app .staff-page h2,
+body.sx-admin-app .staff-page .stat strong,
+body.sx-admin-app .staff-page .staff-main strong {
+  font-family: "Sora", "DM Sans", "Inter", sans-serif;
+}
+body.sx-admin-app .staff-page {
+  width: min(1220px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 26px 0 46px;
+}
+body.sx-admin-app .hero,
+body.sx-admin-app .panel,
+body.sx-admin-app .stat,
+body.sx-admin-app .staff-row,
+body.sx-admin-app .salary-row {
+  border-radius: 8px;
+  letter-spacing: 0;
+}
+</style>
+</head>
+<body class="sx-admin-app" data-sx-title="Staff management">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </section>
+</div>
+<main class="staff-page">
+  <section class="hero">
+    <div>
+      <h1>Staff Management</h1>
+      <p>Teachers, librarians, accountants, and other staff accounts in one place.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-light" href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Teacher Desk</a>
+      <a class="btn btn-light" href="library-management.html"><i class="fas fa-book-open"></i> Library Staff</a>
+      <a class="btn btn-light" href="accountant-management.html"><i class="fas fa-user-tie"></i> Accountants</a>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><span>Total Staff</span><strong id="statTotal">0</strong></div>
+    <div class="stat"><span>Teachers</span><strong id="statTeachers">0</strong></div>
+    <div class="stat"><span>Librarians</span><strong id="statLibrarians">0</strong></div>
+    <div class="stat"><span>Accountants</span><strong id="statAccountants">0</strong></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Add Staff</h2>
+        <div class="muted">Teachers, librarians, and accountants get portal login. Other Staff is saved for records and salary only.</div>
+      </div>
+    </div>
+    <form id="staffForm">
+      <div class="grid form-grid">
+        <div>
+          <label for="staffRole">Role</label>
+          <select id="staffRole" required>
+            <option value="teacher">Teacher</option>
+            <option value="librarian">Librarian</option>
+            <option value="accountant">Accountant</option>
+            <option value="staff">Other Staff</option>
+          </select>
+        </div>
+        <div>
+          <label for="staffName">Name</label>
+          <input id="staffName" type="text" placeholder="Full name" required>
+        </div>
+        <div id="staffEmailField" class="login-field">
+          <label for="staffEmail">Email</label>
+          <input id="staffEmail" type="email" placeholder="staff@school.com" required>
+        </div>
+        <div id="staffPasswordField" class="login-field">
+          <label for="staffPassword">Password</label>
+          <input id="staffPassword" type="password" placeholder="Minimum 6 characters" minlength="6" required>
+        </div>
+        <div>
+          <label for="staffSalary">Monthly Salary</label>
+          <input id="staffSalary" type="number" min="0" placeholder="0">
+        </div>
+      </div>
+      <div id="otherFields" class="grid other-fields">
+        <div>
+          <label for="staffDesignation">Who is this staff?</label>
+          <input id="staffDesignation" type="text" placeholder="Receptionist, Guard, Driver, Clerk">
+        </div>
+        <div>
+          <label for="staffDepartment">Department / Work</label>
+          <input id="staffDepartment" type="text" placeholder="Office, Transport, Security">
+        </div>
+      </div>
+      <div id="teacherFields" class="grid teacher-fields show">
+        <div>
+          <label for="teacherClass">Class</label>
+          <input id="teacherClass" type="text" placeholder="10">
+        </div>
+        <div>
+          <label for="teacherSection">Section</label>
+          <input id="teacherSection" type="text" placeholder="A">
+        </div>
+        <div>
+          <label for="teacherSubject">Subject</label>
+          <input id="teacherSubject" type="text" placeholder="Mathematics">
+        </div>
+      </div>
+      <div style="margin-top: 14px;">
+        <button id="createStaffBtn" class="btn btn-primary" type="submit"><i class="fas fa-user-plus"></i> Create Staff Account</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Staff Salary</h2>
+        <div class="muted">Generate monthly salary records and record payments. Paid salary is posted as debit in School Accounts ledger.</div>
+      </div>
+      <a class="btn btn-light" href="school-accounts.html"><i class="fas fa-book"></i> Open Ledger</a>
+    </div>
+    <div class="salary-layout">
+      <form id="salaryForm" class="salary-form">
+        <div>
+          <label for="salaryStaffSelect">Staff</label>
+          <select id="salaryStaffSelect" required><option value="">Loading staff...</option></select>
+        </div>
+        <div>
+          <label for="salaryMonth">Salary Month</label>
+          <input id="salaryMonth" type="month" required>
+        </div>
+        <button class="btn btn-primary" type="button" id="generateSalaryBtn"><i class="fas fa-file-invoice"></i> Generate / Select Salary</button>
+        <div>
+          <label for="paymentAmount">Payment Amount</label>
+          <input id="paymentAmount" type="number" min="0.01" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label for="paymentDate">Payment Date</label>
+          <input id="paymentDate" type="date">
+        </div>
+        <div>
+          <label for="paymentMode">Payment Mode</label>
+          <select id="paymentMode">
+            <option>Cash</option>
+            <option>Bank Transfer</option>
+            <option>UPI</option>
+            <option>Cheque</option>
+            <option>Card</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="paymentNote">Note</label>
+          <input id="paymentNote" type="text" maxlength="160" placeholder="Optional note">
+        </div>
+        <button class="btn btn-success" type="submit" id="recordSalaryBtn" disabled><i class="fas fa-indian-rupee-sign"></i> Record Payment</button>
+      </form>
+      <div>
+        <div id="activeSalaryHint" class="empty">Select staff and month to generate salary.</div>
+        <div id="salaryRecordsList" class="salary-records" style="display: none;" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>All Staff</h2>
+        <div class="muted">Search, edit, activate, or remove staff accounts without touching old role-specific pages.</div>
+      </div>
+    </div>
+    <div class="filters">
+      <input id="staffSearch" type="search" placeholder="Search name, email, ID, class, subject">
+      <select id="roleFilter">
+        <option value="all">All roles</option>
+        <option value="teacher">Teachers</option>
+        <option value="librarian">Librarians</option>
+        <option value="accountant">Accountants</option>
+        <option value="staff">Other Staff</option>
+      </select>
+      <select id="statusFilter">
+        <option value="active">Active</option>
+        <option value="all">All status</option>
+        <option value="removed">Removed</option>
+      </select>
+      <select id="staffPageSize" class="staff-page-size" aria-label="Rows per page">
+        <option value="10">10 / page</option>
+        <option value="25">25 / page</option>
+        <option value="50">50 / page</option>
+      </select>
+    </div>
+    <div id="staffList" class="staff-list" style="margin-top: 14px;"></div>
+    <div id="staffPagination" class="staff-pagination" hidden>
+      <div id="staffPaginationInfo" class="staff-pagination-info"></div>
+      <div class="staff-pagination-actions">
+        <button class="btn btn-light" type="button" id="staffPrevPage"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-light" type="button" id="staffNextPage">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="editDialog" class="dialog-backdrop" aria-hidden="true">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editDialogTitle">
+    <div class="dialog-title">
+      <h2 id="editDialogTitle">Edit Staff</h2>
+      <button class="btn btn-light" type="button" id="closeEditBtn" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="editForm">
+      <input id="editUid" type="hidden">
+      <div class="edit-grid">
+        <div>
+          <label for="editName">Name</label>
+          <input id="editName" type="text" required>
+        </div>
+        <div>
+          <label for="editEmail">Email</label>
+          <input id="editEmail" type="email" required>
+        </div>
+        <div>
+          <label for="editRole">Role</label>
+          <select id="editRole" required>
+            <option value="teacher">Teacher</option>
+            <option value="librarian">Librarian</option>
+            <option value="accountant">Accountant</option>
+            <option value="staff">Other Staff</option>
+          </select>
+        </div>
+        <div>
+          <label for="editStaffId">Staff/Teacher ID</label>
+          <input id="editStaffId" type="text">
+        </div>
+        <div>
+          <label for="editClass">Class</label>
+          <input id="editClass" type="text">
+        </div>
+        <div>
+          <label for="editSection">Section</label>
+          <input id="editSection" type="text">
+        </div>
+        <div>
+          <label for="editSubject">Subject</label>
+          <input id="editSubject" type="text">
+        </div>
+        <div>
+          <label for="editSalary">Monthly Salary</label>
+          <input id="editSalary" type="number" min="0">
+        </div>
+        <div>
+          <label for="editDesignation">Designation</label>
+          <input id="editDesignation" type="text">
+        </div>
+        <div>
+          <label for="editDepartment">Department / Work</label>
+          <input id="editDepartment" type="text">
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-light" type="button" id="cancelEditBtn">Cancel</button>
+        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="school-branding.js"></script>
+<script>
+(function () {
+  function escapeLoaderText(value) {
+    return String(value || "").replace(/[&<>"']/g, function (char) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char];
+    });
+  }
+  function skeletonRows(count) {
+    var rows = "";
+    for (var i = 0; i < count; i += 1) {
+      rows += '<div class="staff-skeleton"><div class="staff-skeleton-line title"></div><div class="staff-skeleton-line meta"></div><div class="staff-skeleton-line short"></div></div>';
+    }
+    return '<div class="staff-loader" aria-hidden="true">' + rows + "</div>";
+  }
+  function setLoader(id, message, count) {
+    var list = document.getElementById(id);
+    if (!list) return;
+    if (list.hidden || list.style.display === "none") return;
+    list.setAttribute("aria-busy", "true");
+    list.innerHTML = '<div class="staff-inline-loader"><i class="fas fa-spinner fa-spin"></i>' + escapeLoaderText(message) + "</div>" + skeletonRows(count);
+  }
+  function setFallback(id, message) {
+    var list = document.getElementById(id);
+    if (!list || list.getAttribute("aria-busy") !== "true") return;
+    if (list.hidden || list.style.display === "none") return;
+    list.removeAttribute("aria-busy");
+    list.innerHTML = '<div class="empty">' + escapeLoaderText(message) + "</div>";
+  }
+  window.SchoolixStaffManagementLoading = {
+    staff: function (message) { setLoader("staffList", message || "Loading staff management...", 5); },
+    salary: function (message) { setLoader("salaryRecordsList", message || "Loading salary desk...", 3); },
+    fallback: function () {
+      setFallback("staffList", "Staff data could not be loaded. Please refresh or sign in again.");
+      setFallback("salaryRecordsList", "Salary desk could not be loaded.");
+    }
+  };
+  window.SchoolixStaffManagementLoading.staff();
+  window.SchoolixStaffManagementLoading.salary();
+  window.setTimeout(function () {
+    if (!window.SchoolixStaffManagementModuleLoaded) window.SchoolixStaffManagementLoading.fallback();
+  }, 18000);
+}());
+</script>
+<script type="module">
+import { initializeApp } from "./firebase-compat.js?v=staff-loaders-20260806";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "./firebase-compat.js?v=staff-loaders-20260806";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  collection,
+  serverTimestamp,
+  query,
+  where
+} from "./firebase-compat.js?v=staff-loaders-20260806";
+import { newLedgerTransactionId, syncStaffSalaryDebit } from "./accounts-ledger.js?v=staff-loaders-20260806";
+
+window.SchoolixStaffManagementModuleLoaded = true;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  authDomain: "schoolix-48107.firebaseapp.com",
+  projectId: "schoolix-48107",
+  storageBucket: "schoolix-48107.firebasestorage.app",
+  messagingSenderId: "133937954491",
+  appId: "1:133937954491:web:69d8064422617eb8c4339e"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const staffCreatorApp = initializeApp(firebaseConfig, "staffManagementCreatorApp");
+const staffCreatorAuth = getAuth(staffCreatorApp);
+const staffRoles = ["teacher", "librarian", "accountant", "staff"];
+let adminUID = "";
+let staffRecords = [];
+let salaryRecords = [];
+let activeSalaryRecordId = "";
+let activeSalaryRecord = null;
+let staffPage = 1;
+
+const $ = (id) => document.getElementById(id);
+const clean = (value) => String(value || "").replace(/\s+/g, " ").trim();
+const lower = (value) => clean(value).toLowerCase();
+const money = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+const roleLabel = (role) => ({ teacher: "Teacher", librarian: "Librarian", accountant: "Accountant", staff: "Other Staff" }[role] || clean(role) || "Staff");
+const isRemoved = (staff) => staff.removedFromPanel === true || staff.panelStatus === "removed" || staff.active === false;
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const currentMonth = () => todayISO().slice(0, 7);
+const monthLabel = (value) => value ? new Date(`${value}-01T12:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Salary";
+const salaryStatus = (net, paid) => paid <= 0 ? "Unpaid" : paid >= net ? "Paid" : "Partially Paid";
+const moneyLabel = (value) => `Rs ${money(value).toLocaleString("en-IN")}`;
+
+function staffSkeletonRows(count = 4) {
+  return `<div class="staff-loader" aria-hidden="true">${Array.from({ length: count }).map(() => `
+    <div class="staff-skeleton">
+      <div class="staff-skeleton-line title"></div>
+      <div class="staff-skeleton-line meta"></div>
+      <div class="staff-skeleton-line short"></div>
+    </div>
+  `).join("")}</div>`;
+}
+
+function setStaffBusy(element, busy, busyHtml = "") {
+  if (!element) return;
+  if (busy) {
+    element.dataset.originalHtml = element.dataset.originalHtml || element.innerHTML;
+    element.disabled = true;
+    element.setAttribute("aria-busy", "true");
+    if (busyHtml) element.innerHTML = busyHtml;
+    return;
+  }
+  element.disabled = false;
+  element.removeAttribute("aria-busy");
+  if (element.dataset.originalHtml) {
+    element.innerHTML = element.dataset.originalHtml;
+    delete element.dataset.originalHtml;
+  }
+}
+
+function showStaffListLoader(message = "Loading staff records...") {
+  const list = $("staffList");
+  if (!list) return;
+  list.setAttribute("aria-busy", "true");
+  list.innerHTML = `<div class="staff-inline-loader"><i class="fas fa-spinner fa-spin"></i>${escapeHtml(message)}</div>${staffSkeletonRows(5)}`;
+  $("staffPagination").hidden = true;
+}
+
+function showSalaryLoader(message = "Loading salary records...") {
+  const list = $("salaryRecordsList");
+  if (!list) return;
+  if (list.hidden || list.style.display === "none") return;
+  list.setAttribute("aria-busy", "true");
+  list.innerHTML = `<div class="staff-inline-loader"><i class="fas fa-spinner fa-spin"></i>${escapeHtml(message)}</div>${staffSkeletonRows(3)}`;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function initials(name, fallback = "S") {
+  const words = clean(name).split(" ").filter(Boolean);
+  return (words.length ? words.slice(0, 2).map((word) => word[0]).join("") : fallback).toUpperCase();
+}
+
+function staffKey(staff = {}) {
+  return clean(staff.teacherId || staff.staffId || staff.employeeId || staff.uid || "");
+}
+
+function staffDesignation(staff = {}) {
+  const role = lower(staff.role);
+  if (role === "teacher") return staff.subject || "Teacher";
+  if (role === "librarian") return "Librarian";
+  if (role === "accountant") return "Accountant";
+  return staff.designation || staff.department || "Other Staff";
+}
+
+function salaryCollectionForRole(role = "") {
+  return lower(role) === "teacher" ? "teacher_salary_records" : "staff_salary_records";
+}
+
+function salaryCollectionForRecord(record = {}) {
+  return record.salaryCollection || (lower(record.staffRole || record.role) === "teacher" || record.sourceType === "teacher_salary"
+    ? "teacher_salary_records"
+    : "staff_salary_records");
+}
+
+async function generateStaffId(role) {
+  const prefix = role === "teacher" ? "TCH" : role === "librarian" ? "LIB" : role === "accountant" ? "ACC" : "STF";
+  const existing = new Set(staffRecords.map((staff) => staffKey(staff)).filter(Boolean).map((id) => id.toUpperCase()));
+  const nextNumber = staffRecords.reduce((max, staff) => {
+    const id = staffKey(staff).toUpperCase();
+    const match = id.match(new RegExp(`^${prefix}-?(\\d+)$`));
+    return match ? Math.max(max, Number(match[1]) || 0) : max;
+  }, 0) + 1;
+  let number = nextNumber;
+  let id = "";
+  do {
+    id = `${prefix}-${String(number).padStart(3, "0")}`;
+    number += 1;
+  } while (existing.has(id));
+  return id;
+}
+
+function setStats() {
+  const activeStaff = staffRecords.filter((staff) => !isRemoved(staff));
+  $("statTotal").textContent = activeStaff.length.toLocaleString("en-IN");
+  $("statTeachers").textContent = activeStaff.filter((staff) => lower(staff.role) === "teacher").length.toLocaleString("en-IN");
+  $("statLibrarians").textContent = activeStaff.filter((staff) => lower(staff.role) === "librarian").length.toLocaleString("en-IN");
+  $("statAccountants").textContent = activeStaff.filter((staff) => lower(staff.role) === "accountant").length.toLocaleString("en-IN");
+}
+
+function matchesSearch(staff, search) {
+  if (!search) return true;
+  return [
+    staff.name,
+    staff.email,
+    staff.role,
+    staff.teacherId,
+    staff.staffId,
+      staff.employeeId,
+      staff.class,
+      staff.section,
+      staff.subject,
+      staff.designation,
+      staff.department
+  ].some((value) => lower(value).includes(search));
+}
+
+function resetStaffPage() {
+  staffPage = 1;
+}
+
+function renderStaff() {
+  $("staffList").removeAttribute("aria-busy");
+  setStats();
+  const search = lower($("staffSearch").value);
+  const roleFilter = $("roleFilter").value;
+  const statusFilter = $("statusFilter").value;
+  const pageSize = Math.max(1, Number($("staffPageSize")?.value || 10));
+  const rows = staffRecords
+    .filter((staff) => staffRoles.includes(lower(staff.role)))
+    .filter((staff) => roleFilter === "all" || lower(staff.role) === roleFilter)
+    .filter((staff) => statusFilter === "all" || (statusFilter === "removed" ? isRemoved(staff) : !isRemoved(staff)))
+    .filter((staff) => matchesSearch(staff, search))
+    .sort((a, b) => `${lower(a.role)}-${lower(a.name)}`.localeCompare(`${lower(b.role)}-${lower(b.name)}`));
+
+  if (!rows.length) {
+    $("staffList").innerHTML = `<div class="empty">No staff matched the current filters.</div>`;
+    $("staffPagination").hidden = true;
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  staffPage = Math.min(Math.max(1, staffPage), totalPages);
+  const start = (staffPage - 1) * pageSize;
+  const visibleRows = rows.slice(start, start + pageSize);
+
+  $("staffList").innerHTML = visibleRows.map((staff) => {
+    const role = lower(staff.role);
+    const removed = isRemoved(staff);
+    const meta = [
+      staff.email || "No email",
+      staffKey(staff) ? `ID: ${staffKey(staff)}` : "",
+      staff.class ? `Class ${staff.class}${staff.section ? "-" + staff.section : ""}` : "",
+      staff.subject ? `Subject: ${staff.subject}` : "",
+      lower(staff.role) === "staff" ? `Designation: ${staffDesignation(staff)}` : "",
+      staff.monthlySalary ? `Salary: Rs ${money(staff.monthlySalary).toLocaleString("en-IN")}` : ""
+    ].filter(Boolean).join(" | ");
+    return `
+      <article class="staff-row">
+        <div class="identity">
+          <div class="avatar">${escapeHtml(initials(staff.name || staff.email, role[0] || "S"))}</div>
+          <div class="staff-main">
+            <strong>${escapeHtml(staff.name || "Unnamed Staff")}</strong>
+            <small>${escapeHtml(meta)}</small>
+            <div class="chips">
+              <span class="chip ${escapeHtml(role)}">${escapeHtml(roleLabel(role))}</span>
+              ${removed ? `<span class="chip removed">Removed</span>` : `<span class="chip">Active</span>`}
+            </div>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-light" type="button" onclick="window.location.href='teacher-profile.html?id=${escapeHtml(staff.uid)}'"><i class="fas fa-id-card"></i> View Profile</button>
+          <button class="btn btn-light" type="button" onclick="openEditStaff('${escapeHtml(staff.uid)}')"><i class="fas fa-pen"></i> Edit</button>
+          ${removed
+            ? `<button class="btn btn-success" type="button" onclick="setStaffRemoved('${escapeHtml(staff.uid)}', false)"><i class="fas fa-user-check"></i> Activate</button>`
+            : `<button class="btn btn-danger" type="button" onclick="setStaffRemoved('${escapeHtml(staff.uid)}', true)"><i class="fas fa-user-slash"></i> Remove</button>`}
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  $("staffPagination").hidden = rows.length <= pageSize;
+  $("staffPaginationInfo").textContent = `Showing ${start + 1}-${Math.min(start + pageSize, rows.length)} of ${rows.length} staff`;
+  $("staffPrevPage").disabled = staffPage <= 1;
+  $("staffNextPage").disabled = staffPage >= totalPages;
+}
+
+function renderSalaryStaffOptions() {
+  const activeStaff = staffRecords.filter((staff) => !isRemoved(staff));
+  $("salaryStaffSelect").innerHTML = activeStaff.length
+    ? `<option value="">Select staff</option>${activeStaff.map((staff) => `<option value="${escapeHtml(staff.uid)}">${escapeHtml(staff.name || staff.email)} - ${escapeHtml(roleLabel(lower(staff.role)))}${staff.monthlySalary ? ` (Rs ${money(staff.monthlySalary).toLocaleString("en-IN")})` : ""}</option>`).join("")}`
+    : `<option value="">No active staff found</option>`;
+}
+
+function salaryStatusClass(status, net, paid) {
+  const value = lower(status || salaryStatus(net, paid));
+  if (value.includes("paid") && !value.includes("partial")) return "paid";
+  if (value.includes("partial")) return "partial";
+  return "unpaid";
+}
+
+function renderSalaryPlaceholder() {
+  $("activeSalaryHint").className = "salary-breakdown-card";
+  $("activeSalaryHint").innerHTML = `
+    <div class="salary-breakdown-head">
+      <div>
+        <strong>Salary Breakdown</strong>
+        <span>Select a teacher or staff member to preview monthly salary details.</span>
+      </div>
+      <span class="salary-status-pill">Ready</span>
+    </div>
+    <div class="salary-breakdown-grid">
+      <div class="salary-breakdown-box base"><span>Base Salary</span><strong>Rs 0</strong></div>
+      <div class="salary-breakdown-box"><span>Net Salary</span><strong>Rs 0</strong></div>
+      <div class="salary-breakdown-box paid"><span>Paid</span><strong>Rs 0</strong></div>
+      <div class="salary-breakdown-box due"><span>Pending</span><strong>Rs 0</strong></div>
+    </div>
+    <div class="salary-breakdown-note">Select a staff member to view salary, status, and payment history here.</div>
+  `;
+}
+
+function renderSalaryBreakdown(record = null, staff = null) {
+  const selectedStaff = staff || staffRecords.find((item) => item.uid === (record?.staffUid || record?.teacherUid || $("salaryStaffSelect")?.value));
+  if (!record && !selectedStaff) {
+    renderSalaryPlaceholder();
+    return;
+  }
+  const base = money(record?.baseSalary ?? selectedStaff?.monthlySalary);
+  const net = money(record?.netSalary ?? base);
+  const paid = money(record?.paidAmount);
+  const due = money(record?.remainingAmount ?? Math.max(net - paid, 0));
+  const status = record?.status || salaryStatus(net, paid);
+  const staffName = record?.staffName || record?.teacherName || selectedStaff?.name || selectedStaff?.email || "Selected Staff";
+  const staffRole = record?.staffRole || selectedStaff?.role || "staff";
+  const staffId = record?.staffId || record?.teacherId || staffKey(selectedStaff) || "-";
+  const month = record?.monthLabel || monthLabel(record?.monthKey || $("salaryMonth")?.value || currentMonth());
+  const session = record?.session || "Current session";
+  const payments = Array.isArray(record?.payments) ? record.payments.slice().reverse() : [];
+  $("activeSalaryHint").className = "salary-breakdown-card";
+  $("activeSalaryHint").innerHTML = `
+    <div class="salary-breakdown-head">
+      <div>
+        <strong>${escapeHtml(staffName)}</strong>
+        <span>${escapeHtml(roleLabel(staffRole))} | ID: ${escapeHtml(staffId)} | ${escapeHtml(month)} | ${escapeHtml(session)}</span>
+      </div>
+      <span class="salary-status-pill ${salaryStatusClass(status, net, paid)}">${escapeHtml(status)}</span>
+    </div>
+    <div class="salary-breakdown-grid">
+      <div class="salary-breakdown-box base"><span>Base Salary</span><strong>${moneyLabel(base)}</strong></div>
+      <div class="salary-breakdown-box"><span>Net Salary</span><strong>${moneyLabel(net)}</strong></div>
+      <div class="salary-breakdown-box paid"><span>Paid</span><strong>${moneyLabel(paid)}</strong></div>
+      <div class="salary-breakdown-box due"><span>Pending</span><strong>${moneyLabel(due)}</strong></div>
+    </div>
+    <div class="salary-payment-history">
+      <h4>Payment History</h4>
+      ${payments.length ? payments.map((payment) => `
+        <div class="salary-payment-item">
+          <div><strong>${moneyLabel(payment.amount)}</strong><small>${escapeHtml(payment.note || payment.paymentMode || "Salary payment")}</small></div>
+          <span>${escapeHtml(payment.paymentDate ? new Date(`${payment.paymentDate}T00:00:00`).toLocaleDateString("en-IN") : "Date not set")}</span>
+        </div>
+      `).join("") : `<div class="salary-breakdown-note">No payment history has been recorded for this salary yet.</div>`}
+    </div>
+    ${record ? "" : `<div class="salary-breakdown-note">After the salary record is generated, paid and pending amounts will update here.</div>`}
+  `;
+}
+
+function renderSalaryRecords() {
+  $("salaryRecordsList").removeAttribute("aria-busy");
+  if ($("salaryRecordsList").hidden || $("salaryRecordsList").style.display === "none") return;
+  if (!salaryRecords.length) {
+    $("salaryRecordsList").innerHTML = `<div class="empty">No staff salary records yet.</div>`;
+    return;
+  }
+  $("salaryRecordsList").innerHTML = salaryRecords
+    .slice()
+    .sort((a, b) => `${b.monthKey || ""}-${lower(b.staffName || b.teacherName)}`.localeCompare(`${a.monthKey || ""}-${lower(a.staffName || a.teacherName)}`))
+    .map((record) => {
+      const paid = money(record.paidAmount);
+      const net = money(record.netSalary);
+      const due = money(record.remainingAmount);
+      return `
+        <article class="salary-row">
+          <div>
+            <strong>${escapeHtml(record.staffName || record.teacherName || "Staff")} - ${escapeHtml(record.monthLabel || monthLabel(record.monthKey))}</strong>
+            <small class="muted">${escapeHtml(roleLabel(record.staffRole || record.role))} | Net Rs ${net.toLocaleString("en-IN")} | Paid Rs ${paid.toLocaleString("en-IN")} | Due Rs ${due.toLocaleString("en-IN")} | ${escapeHtml(record.status || "Unpaid")}</small>
+          </div>
+          <button class="btn btn-light" type="button" onclick="selectSalaryRecord('${escapeHtml(record.id)}')"><i class="fas fa-arrow-pointer"></i> Select</button>
+        </article>
+      `;
+    }).join("");
+}
+
+async function loadSalaryRecords() {
+  if (!adminUID) return;
+  showSalaryLoader();
+  try {
+    const [teacherSnapshot, staffSnapshot] = await Promise.all([
+      getDocs(collection(db, "schools", adminUID, "teacher_salary_records")).catch(() => ({ docs: [] })),
+      getDocs(collection(db, "schools", adminUID, "staff_salary_records")).catch(() => ({ docs: [] }))
+    ]);
+    const recordsById = new Map();
+    teacherSnapshot.docs.forEach((item) => {
+      const data = item.data();
+      recordsById.set(`teacher:${item.id}`, {
+        id: item.id,
+        ...data,
+        staffUid: data.staffUid || data.teacherUid || "",
+        staffId: data.staffId || data.teacherId || "",
+        staffName: data.staffName || data.teacherName || "Teacher",
+        staffEmail: data.staffEmail || data.teacherEmail || "",
+        staffRole: "teacher",
+        sourceType: "teacher_salary",
+        salaryCollection: "teacher_salary_records"
+      });
+    });
+    staffSnapshot.docs.forEach((item) => {
+      const data = item.data();
+      const role = lower(data.staffRole || data.role);
+      const key = role === "teacher" ? `teacher:${item.id}` : `staff:${item.id}`;
+      if (recordsById.has(key)) return;
+      recordsById.set(key, {
+        id: item.id,
+        ...data,
+        staffRole: role || "staff",
+        sourceType: role === "teacher" ? "teacher_salary" : "staff_salary",
+        salaryCollection: role === "teacher" ? "teacher_salary_records" : "staff_salary_records"
+      });
+    });
+    salaryRecords = Array.from(recordsById.values());
+    renderSalaryRecords();
+    if ($("salaryStaffSelect")?.value) previewSelectedStaffSalary();
+  } catch (error) {
+    console.warn("Unable to load staff salary records", error);
+    $("salaryRecordsList").removeAttribute("aria-busy");
+    $("salaryRecordsList").innerHTML = `<div class="empty">Unable to load staff salary records.</div>`;
+  }
+}
+
+function setActiveSalaryRecord(record) {
+  activeSalaryRecord = record || null;
+  activeSalaryRecordId = record?.id || "";
+  $("recordSalaryBtn").disabled = !record;
+  renderSalaryBreakdown(record);
+  $("paymentAmount").value = record && record.remainingAmount > 0 ? record.remainingAmount : "";
+}
+
+function previewSelectedStaffSalary() {
+  const staff = staffRecords.find((item) => item.uid === $("salaryStaffSelect").value);
+  const monthKey = $("salaryMonth").value || currentMonth();
+  const existing = salaryRecords.find((record) => {
+    const uid = record.staffUid || record.teacherUid;
+    return uid === staff?.uid && (!record.monthKey || record.monthKey === monthKey);
+  });
+  if (existing) {
+    setActiveSalaryRecord(existing);
+    return;
+  }
+  activeSalaryRecord = null;
+  activeSalaryRecordId = "";
+  $("recordSalaryBtn").disabled = true;
+  renderSalaryBreakdown(null, staff || null);
+}
+
+async function ensureStaffSalaryRecord() {
+  const button = $("generateSalaryBtn");
+  const staffUid = $("salaryStaffSelect").value;
+  const monthKey = $("salaryMonth").value;
+  const staff = staffRecords.find((item) => item.uid === staffUid);
+  if (!staff) return alert("Select staff first.");
+  if (!monthKey) return alert("Select salary month first.");
+  const role = lower(staff.role);
+  const salaryCollection = salaryCollectionForRole(role);
+  const baseSalary = money(staff.monthlySalary);
+  if (baseSalary <= 0 && !confirm("Monthly salary is 0. Generate salary record anyway?")) return null;
+  setStaffBusy(button, true, `<i class="fas fa-spinner fa-spin"></i> Generating...`);
+  $("activeSalaryHint").innerHTML = `<div class="staff-inline-loader"><i class="fas fa-spinner fa-spin"></i> Preparing salary record...</div>`;
+  try {
+    const recordId = `${staffUid}_${monthKey}`;
+    const recordRef = doc(db, "schools", adminUID, salaryCollection, recordId);
+    const existingSnap = await getDoc(recordRef);
+    const existing = existingSnap.exists() ? existingSnap.data() : {};
+    let salarySessionId = existing.sessionId || "";
+    let salarySessionLabel = existing.session || "";
+    if (!salarySessionId) {
+      try {
+        let viewSessionId = "";
+        try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
+        const activeSnap = await getDoc(doc(db, "schools", adminUID, "settings", "activeSession"));
+        salarySessionId = viewSessionId || (activeSnap.exists() ? activeSnap.data().sessionId || "" : "");
+        if (salarySessionId) {
+          const sessionSnap = await getDoc(doc(db, "schools", adminUID, "sessions", salarySessionId));
+          if (sessionSnap.exists()) {
+            const sessionData = sessionSnap.data();
+            salarySessionLabel = sessionData.session || sessionData.name || salarySessionId;
+          }
+        }
+      } catch (error) {
+        console.warn("Unable to attach session to salary record", error);
+      }
+    }
+    const payments = Array.isArray(existing.payments) ? existing.payments : [];
+    const paidAmount = money(payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0));
+    const netSalary = money(existing.netSalary ?? baseSalary);
+    const remainingAmount = money(Math.max(netSalary - paidAmount, 0));
+    const payload = {
+      staffUid,
+      staffId: staffKey(staff),
+      staffName: staff.name || staff.email || "Staff",
+      staffEmail: staff.email || "",
+      staffRole: role,
+      designation: staffDesignation(staff),
+      department: staff.department || "",
+      monthKey,
+      monthLabel: monthLabel(monthKey),
+      sessionId: salarySessionId,
+      session: salarySessionLabel,
+      baseSalary,
+      netSalary,
+      paidAmount,
+      remainingAmount,
+      status: salaryStatus(netSalary, paidAmount),
+      payments,
+      sourceType: role === "teacher" ? "teacher_salary" : "staff_salary",
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || "admin"
+    };
+    if (role === "teacher") {
+      payload.teacherUid = staffUid;
+      payload.teacherId = staff.teacherId || staffKey(staff);
+      payload.teacherName = staff.name || staff.email || "Teacher";
+      payload.teacherEmail = staff.email || "";
+    }
+    if (!existingSnap.exists()) payload.generatedAt = serverTimestamp();
+    await setDoc(recordRef, payload, { merge: true });
+    const record = { id: recordId, ...payload, salaryCollection };
+    activeSalaryRecordId = recordId;
+    activeSalaryRecord = record;
+    await loadSalaryRecords();
+    setActiveSalaryRecord(salaryRecords.find((item) => item.id === recordId) || record);
+    return activeSalaryRecord;
+  } finally {
+    setStaffBusy(button, false);
+  }
+}
+
+async function recordStaffSalaryPayment(event) {
+  event.preventDefault();
+  const button = $("recordSalaryBtn");
+  if (!activeSalaryRecordId || !activeSalaryRecord) return alert("Generate or select salary record first.");
+  const amount = money($("paymentAmount").value);
+  if (amount <= 0 || !$("paymentDate").value) return alert("Enter payment amount and payment date.");
+  setStaffBusy(button, true, `<i class="fas fa-spinner fa-spin"></i> Recording...`);
+  try {
+    const salaryCollection = salaryCollectionForRecord(activeSalaryRecord);
+    const recordRef = doc(db, "schools", adminUID, salaryCollection, activeSalaryRecordId);
+    const snap = await getDoc(recordRef);
+    if (!snap.exists()) return alert("Salary record no longer exists.");
+    const record = {
+      id: snap.id,
+      ...snap.data(),
+      sourceType: salaryCollection === "teacher_salary_records" ? "teacher_salary" : "staff_salary",
+      salaryCollection
+    };
+    const payments = Array.isArray(record.payments) ? [...record.payments] : [];
+    const payment = {
+      amount,
+      paymentDate: $("paymentDate").value,
+      paymentMode: $("paymentMode").value,
+      note: clean($("paymentNote").value),
+      recordedBy: auth.currentUser?.email || "admin",
+      recordedAt: new Date().toISOString(),
+      ledgerTransactionId: newLedgerTransactionId("SAL")
+    };
+    payments.push(payment);
+    const paidAmount = money(payments.reduce((sum, item) => sum + Number(item.amount || 0), 0));
+    const remainingAmount = money(Math.max(Number(record.netSalary || 0) - paidAmount, 0));
+    await setDoc(recordRef, {
+      payments,
+      paidAmount,
+      remainingAmount,
+      status: salaryStatus(Number(record.netSalary || 0), paidAmount),
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || "admin"
+    }, { merge: true });
+    await syncStaffSalaryDebit({
+      db,
+      schoolId: adminUID,
+      actor: { uid: auth.currentUser.uid, email: auth.currentUser.email, role: "admin" },
+      recordId: activeSalaryRecordId,
+      record,
+      payment,
+      paymentIndex: payments.length - 1
+    });
+    $("paymentAmount").value = "";
+    $("paymentNote").value = "";
+    await loadSalaryRecords();
+    setActiveSalaryRecord(salaryRecords.find((item) => item.id === activeSalaryRecordId) || null);
+    alert("Salary payment recorded and debited in School Accounts.");
+  } finally {
+    setStaffBusy(button, false);
+  }
+}
+
+async function loadStaff() {
+  if (!adminUID) return;
+  showStaffListLoader();
+  showSalaryLoader("Waiting for staff records...");
+  $("salaryStaffSelect").innerHTML = `<option value="">Loading staff...</option>`;
+  try {
+    const [adminSnap, schoolSnap] = await Promise.all([
+      getDocs(query(collection(db, "users"), where("adminId", "==", adminUID))),
+      getDocs(query(collection(db, "users"), where("schoolId", "==", adminUID)))
+    ]);
+    const seen = new Set();
+    staffRecords = [];
+    [...adminSnap.docs, ...schoolSnap.docs].forEach((docSnap) => {
+      if (seen.has(docSnap.id)) return;
+      seen.add(docSnap.id);
+      const data = docSnap.data();
+      if (!staffRoles.includes(lower(data.role))) return;
+      staffRecords.push({ uid: docSnap.id, ...data });
+    });
+    renderSalaryStaffOptions();
+    renderStaff();
+    await loadSalaryRecords();
+  } catch (error) {
+    console.error("Staff load failed:", error);
+    $("staffList").removeAttribute("aria-busy");
+    $("salaryRecordsList").removeAttribute("aria-busy");
+    $("staffList").innerHTML = `<div class="empty">Unable to load staff: ${escapeHtml(error.message)}</div>`;
+    $("salaryStaffSelect").innerHTML = `<option value="">Unable to load staff</option>`;
+  }
+}
+
+async function createStaff(event) {
+  event.preventDefault();
+  const role = $("staffRole").value;
+  const name = clean($("staffName").value);
+  const email = lower($("staffEmail").value);
+  const password = $("staffPassword").value;
+  const needsLogin = role !== "staff";
+  const button = $("createStaffBtn");
+  const original = button.innerHTML;
+  if (!role || !name) {
+    alert("Please fill role and name.");
+    return;
+  }
+  if (needsLogin && (!email || password.length < 6)) {
+    alert("Please fill email and minimum 6 character password for portal login.");
+    return;
+  }
+  if (role === "teacher" && (!clean($("teacherClass").value) || !clean($("teacherSection").value))) {
+    alert("Please enter class and section for teacher accounts.");
+    return;
+  }
+  if (role === "staff" && !clean($("staffDesignation").value)) {
+    alert("Please tell who this Other Staff is, for example Receptionist, Guard, Driver, Clerk.");
+    return;
+  }
+
+  try {
+    button.disabled = true;
+    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Creating...`;
+    const userRef = needsLogin ? null : doc(collection(db, "users"));
+    const userCred = needsLogin ? await createUserWithEmailAndPassword(staffCreatorAuth, email, password) : null;
+    const uid = needsLogin ? userCred.user.uid : userRef.id;
+    const generatedId = await generateStaffId(role);
+    const base = {
+      name,
+      email,
+      role,
+      adminId: adminUID,
+      schoolId: adminUID,
+      loginEnabled: needsLogin,
+      portalAccess: needsLogin,
+      staffLocalOnly: !needsLogin,
+      active: true,
+      panelStatus: "active",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    const roleFields = role === "teacher"
+      ? {
+          teacherId: generatedId,
+          class: clean($("teacherClass").value),
+          section: clean($("teacherSection").value),
+          subject: clean($("teacherSubject").value),
+          monthlySalary: money($("staffSalary").value)
+        }
+      : {
+          staffId: generatedId,
+          designation: role === "staff" ? clean($("staffDesignation").value) : roleLabel(role),
+          department: clean($("staffDepartment").value),
+          monthlySalary: money($("staffSalary").value)
+        };
+
+    await setDoc(needsLogin ? doc(db, "users", uid) : userRef, { ...base, ...roleFields });
+    if (role === "teacher") {
+      await setDoc(doc(db, "schools", adminUID, "teacher_salaries", uid), {
+        teacherUid: uid,
+        teacherId: generatedId,
+        teacherName: name,
+        teacherEmail: email,
+        monthlySalary: money($("staffSalary").value),
+        adminId: adminUID,
+        schoolId: adminUID,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+    $("staffForm").reset();
+    $("staffRole").value = "teacher";
+    toggleTeacherFields();
+    alert(needsLogin ? `${roleLabel(role)} account created successfully.` : `${roleLabel(role)} details saved without login access.`);
+    await loadStaff();
+  } catch (error) {
+    alert(error.message || "Unable to create staff account.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
+  }
+}
+
+function toggleTeacherFields() {
+  const role = $("staffRole").value;
+  const isOtherStaff = role === "staff";
+  $("teacherFields").classList.toggle("show", role === "teacher");
+  $("otherFields").classList.toggle("show", isOtherStaff);
+  $("staffEmailField").classList.toggle("is-hidden", isOtherStaff);
+  $("staffPasswordField").classList.toggle("is-hidden", isOtherStaff);
+  $("staffEmail").required = !isOtherStaff;
+  $("staffPassword").required = !isOtherStaff;
+  $("staffDesignation").required = isOtherStaff;
+  if (isOtherStaff) {
+    $("staffEmail").value = "";
+    $("staffPassword").value = "";
+    $("createStaffBtn").innerHTML = `<i class="fas fa-user-plus"></i> Save Staff Details`;
+  } else {
+    $("createStaffBtn").innerHTML = `<i class="fas fa-user-plus"></i> Create Staff Account`;
+  }
+}
+
+function openEditStaff(uid) {
+  const staff = staffRecords.find((item) => item.uid === uid);
+  if (!staff) return alert("Staff record not found.");
+  $("editUid").value = uid;
+  $("editName").value = staff.name || "";
+  $("editEmail").value = staff.email || "";
+  $("editRole").value = lower(staff.role) || "staff";
+  $("editStaffId").value = staffKey(staff);
+  $("editClass").value = staff.class || "";
+  $("editSection").value = staff.section || "";
+  $("editSubject").value = staff.subject || "";
+  $("editSalary").value = staff.monthlySalary || "";
+  $("editDesignation").value = staff.designation || "";
+  $("editDepartment").value = staff.department || "";
+  $("editDialog").classList.add("show");
+  $("editDialog").setAttribute("aria-hidden", "false");
+}
+
+function closeEditDialog() {
+  $("editDialog").classList.remove("show");
+  $("editDialog").setAttribute("aria-hidden", "true");
+}
+
+async function saveStaff(event) {
+  event.preventDefault();
+  const button = event.submitter || $("editForm").querySelector('button[type="submit"]');
+  const uid = $("editUid").value;
+  const role = $("editRole").value;
+  const staffId = clean($("editStaffId").value);
+  if (!uid) return;
+  const payload = {
+    name: clean($("editName").value),
+    email: lower($("editEmail").value),
+    role,
+    class: clean($("editClass").value),
+    section: clean($("editSection").value),
+    subject: clean($("editSubject").value),
+    designation: clean($("editDesignation").value),
+    department: clean($("editDepartment").value),
+    monthlySalary: money($("editSalary").value),
+    updatedAt: serverTimestamp()
+  };
+  if (role === "teacher") payload.teacherId = staffId;
+  else payload.staffId = staffId;
+  setStaffBusy(button, true, `<i class="fas fa-spinner fa-spin"></i> Saving...`);
+  try {
+    await setDoc(doc(db, "users", uid), payload, { merge: true });
+    if (role === "teacher") {
+      await setDoc(doc(db, "schools", adminUID, "teacher_salaries", uid), {
+        teacherUid: uid,
+        teacherId: staffId,
+        teacherName: payload.name,
+        teacherEmail: payload.email,
+        monthlySalary: payload.monthlySalary,
+        adminId: adminUID,
+        schoolId: adminUID,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+    closeEditDialog();
+    await loadStaff();
+    alert("Staff details updated.");
+  } finally {
+    setStaffBusy(button, false);
+  }
+}
+
+function selectSalaryRecord(recordId) {
+  const record = salaryRecords.find((item) => item.id === recordId);
+  if (!record) return alert("Salary record not found.");
+  $("salaryStaffSelect").value = record.staffUid || record.teacherUid || "";
+  $("salaryMonth").value = record.monthKey || currentMonth();
+  setActiveSalaryRecord(record);
+}
+
+async function setStaffRemoved(uid, removed) {
+  const staff = staffRecords.find((item) => item.uid === uid);
+  if (!staff) return alert("Staff record not found.");
+  const action = removed ? "remove from active staff" : "activate";
+  if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} ${staff.name || staff.email}?`)) return;
+  const button = document.activeElement?.tagName === "BUTTON" ? document.activeElement : null;
+  setStaffBusy(button, true, `<i class="fas fa-spinner fa-spin"></i> ${removed ? "Removing..." : "Activating..."}`);
+  try {
+    await setDoc(doc(db, "users", uid), {
+      active: !removed,
+      removedFromPanel: removed,
+      panelStatus: removed ? "removed" : "active",
+      removedAt: removed ? serverTimestamp() : null,
+      removedBy: removed ? (auth.currentUser?.email || "admin") : "",
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    if (lower(staff.role) === "teacher") {
+      await setDoc(doc(db, "schools", adminUID, "teacher_salaries", uid), {
+        removedFromPanel: removed,
+        panelStatus: removed ? "removed" : "active",
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+    await loadStaff();
+  } finally {
+    setStaffBusy(button, false);
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  showStaffListLoader("Checking admin access...");
+  showSalaryLoader("Preparing salary desk...");
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    const role = lower(userDoc.exists() ? userDoc.data().role : "");
+    if (!userDoc.exists() || role !== "admin") {
+      alert("Access denied. Only admin can manage staff.");
+      window.location.href = "index.html";
+      return;
+    }
+    adminUID = user.uid;
+    await loadStaff();
+  } catch (error) {
+    console.error("Staff management auth failed:", error);
+    $("staffList").removeAttribute("aria-busy");
+    $("salaryRecordsList").removeAttribute("aria-busy");
+    $("staffList").innerHTML = `<div class="empty">Unable to open staff management.</div>`;
+    $("salaryRecordsList").innerHTML = `<div class="empty">Salary desk unavailable.</div>`;
+  }
+});
+
+$("staffForm").addEventListener("submit", createStaff);
+$("staffRole").addEventListener("change", toggleTeacherFields);
+$("staffSearch").addEventListener("input", () => { resetStaffPage(); renderStaff(); });
+$("roleFilter").addEventListener("change", () => { resetStaffPage(); renderStaff(); });
+$("statusFilter").addEventListener("change", () => { resetStaffPage(); renderStaff(); });
+$("staffPageSize").addEventListener("change", () => { resetStaffPage(); renderStaff(); });
+$("staffPrevPage").addEventListener("click", () => { staffPage = Math.max(1, staffPage - 1); renderStaff(); });
+$("staffNextPage").addEventListener("click", () => { staffPage += 1; renderStaff(); });
+$("salaryStaffSelect").addEventListener("change", previewSelectedStaffSalary);
+$("salaryMonth").addEventListener("change", previewSelectedStaffSalary);
+$("editForm").addEventListener("submit", saveStaff);
+$("generateSalaryBtn").addEventListener("click", () => ensureStaffSalaryRecord().catch((error) => alert(error.message || "Unable to generate salary record.")));
+$("salaryForm").addEventListener("submit", (event) => recordStaffSalaryPayment(event).catch((error) => alert(error.message || "Unable to record salary payment.")));
+$("closeEditBtn").addEventListener("click", closeEditDialog);
+$("cancelEditBtn").addEventListener("click", closeEditDialog);
+$("editDialog").addEventListener("click", (event) => {
+  if (event.target === $("editDialog")) closeEditDialog();
+});
+window.openEditStaff = openEditStaff;
+window.setStaffRemoved = setStaffRemoved;
+window.selectSalaryRecord = selectSalaryRecord;
+$("salaryMonth").value = currentMonth();
+$("paymentDate").value = todayISO();
+toggleTeacherFields();
+renderSalaryPlaceholder();
+showStaffListLoader("Loading staff management...");
+showSalaryLoader("Loading salary desk...");
+</script>
+<script type="module" src="access-control.js?v=accountant-guard-20260806-3"></script>
+<script src="schoolix-polish.js" defer></script>
+<script src="admin-shell.js?v=staff-loaders-20260806" defer></script>
+</body>
+</html>

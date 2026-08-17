@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accountant Notices - Schoolix</title>
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="accountant-portal.css">
+<link rel="stylesheet" href="notice-board.css">
+<style>
+body.accountant-notice-app .notice-shell {
+  width: 100%;
+  margin: 0;
+  padding: 0 0 36px;
+}
+body.accountant-notice-app .notice-hero {
+  margin: 0;
+}
+body.accountant-notice-app .notice-toolbar {
+  margin: 18px 0 14px;
+}
+body.accountant-notice-app .notice-topbar-refresh {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid #dbe3ef;
+  background: #fff;
+  color: #1746c7;
+  padding: 10px 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+body.accountant-notice-app .notice-topbar-refresh:hover {
+  border-color: #cddcff;
+  background: #eef4ff;
+  color: #1746c7;
+}
+body.accountant-notice-app .notice-refresh {
+  min-height: 40px;
+  border: 1px solid #1f5eff;
+  border-radius: 8px;
+  background: #1f5eff;
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(31, 94, 255, 0.18);
+}
+</style>
+</head>
+<body class="library-dashboard-app sx-accountant-shell-enabled notice-board-app accountant-notice-app" data-accountant-page="notices" data-notice-role="accountant">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </section>
+</div>
+<div class="library-app-layout">
+  <div class="library-sidebar-overlay" id="librarySidebarOverlay" aria-hidden="true"></div>
+  <aside class="library-sidebar" id="librarySidebar"></aside>
+  <main class="library-main">
+    <header class="library-page-topbar">
+      <div>
+        <h1 class="library-page-title">Notices</h1>
+        <div class="library-page-meta" id="noticeSummary">Accounts notice board</div>
+      </div>
+      <div class="notice-topbar-actions">
+        <button class="notice-topbar-refresh" id="refreshNotices" type="button">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+          <span>Refresh</span>
+        </button>
+        <span class="notice-role" id="roleLabel">Accountant</span>
+        <button class="library-menu-button" id="libraryMenuButton" type="button" aria-label="Open accounts navigation" aria-expanded="false">
+          <span class="library-toggle-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="notice-shell">
+      <section class="notice-hero">
+        <div class="notice-hero-copy">
+          <div class="notice-eyebrow"><span class="notice-live-dot"></span>Accounts Portal</div>
+          <h1>Latest Notices</h1>
+          <p class="notice-subtitle">Latest school notices shared with accounts staff, including attachments and updates.</p>
+        </div>
+        <div class="notice-hero-stat">
+          <strong id="noticeCount">--</strong>
+          <span>Notices Available</span>
+        </div>
+      </section>
+
+      <section class="notice-toolbar">
+        <div>
+          <h2>Notice Board</h2>
+          <p>Messages published by school administration.</p>
+        </div>
+      </section>
+
+      <section class="notice-list" id="noticeList">
+        <div class="notice-empty">Loading notices...</div>
+      </section>
+    </main>
+  </main>
+</div>
+<script src="accountant-portal.js"></script>
+<script type="module" src="notice-board.js"></script>
+<script type="module" src="access-control.js"></script>
+<script src="schoolix-polish.js" defer></script>
+</body>
+</html>

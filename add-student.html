@@ -1,0 +1,3617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admissions and Fees | Schoolix</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --line: #d8e2f0;
+      --line-strong: #bfcee4;
+      --text: #142033;
+      --text-soft: #5e6c80;
+      --primary: #0f6cbd;
+      --primary-deep: #0b4f8a;
+      --accent: #0d9488;
+      --accent-soft: #d9f4f1;
+      --success: #12805c;
+      --success-soft: #e7f6ef;
+      --warning: #b56c00;
+      --warning-soft: #fff2db;
+      --danger: #b42318;
+      --danger-soft: #feeceb;
+      --shadow: 0 22px 44px rgba(18, 35, 59, .08);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --transition: 180ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: "Aptos", "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(15, 108, 189, .16), transparent 28%),
+        radial-gradient(circle at top right, rgba(13, 148, 136, .14), transparent 26%),
+        linear-gradient(180deg, #f7f9fd 0%, var(--bg) 100%);
+      min-height: 100vh;
+      padding: 28px 20px 56px;
+    }
+
+    .page-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      gap: 24px
+    }
+
+    .hero,
+    .card,
+    .modal-card {
+      background: var(--panel);
+      border: 1px solid rgba(191, 206, 228, .72);
+      box-shadow: var(--shadow)
+    }
+
+    .hero {
+      border-radius: var(--radius-xl);
+      padding: 28px 30px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -90px -90px auto;
+      width: 240px;
+      height: 240px;
+      background: linear-gradient(135deg, rgba(15, 108, 189, .12), rgba(13, 148, 136, .06));
+      border-radius: 50%
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eaf3fb;
+      color: var(--primary-deep);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 14px
+    }
+
+    .hero h1 {
+      font-size: 34px;
+      line-height: 1.08;
+      margin-bottom: 10px;
+      letter-spacing: -.02em
+    }
+
+    .hero p {
+      max-width: 680px;
+      color: var(--text-soft);
+      line-height: 1.65;
+      font-size: 15px
+    }
+
+    .hero-actions,
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap
+    }
+
+    .section-heading h2 {
+      font-size: 24px;
+      letter-spacing: -.02em;
+      margin-bottom: 6px
+    }
+
+    .section-heading p,
+    .info-panel p,
+    .modal-header p {
+      color: var(--text-soft);
+      line-height: 1.6;
+      font-size: 14px
+    }
+
+    .card {
+      border-radius: var(--radius-xl);
+      padding: 28px
+    }
+
+    .subnote {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #edf5ff, #f4fbff);
+      border: 1px solid #cfe2fb;
+      color: var(--primary-deep);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 18px
+    }
+
+    .config-grid,
+    .fee-summary-grid,
+    .stats-grid,
+    .money-grid,
+    .preview-details {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+    }
+
+    .config-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .config-pill,
+    .stat-tile,
+    .money-box,
+    .preview-metric {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px
+    }
+
+    .config-pill {
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      border-color: #cfe0f3;
+      box-shadow: 0 10px 22px rgba(18, 35, 59, .05);
+    }
+
+    .config-pill strong,
+    .stat-tile strong {
+      font-size: 13px;
+      color: var(--text-soft);
+      font-weight: 700
+    }
+
+    .config-pill strong {
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      line-height: 1.2;
+    }
+
+    .config-pill span,
+    .stat-tile span {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--text)
+    }
+
+    .config-pill span {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--primary-deep);
+      white-space: nowrap;
+    }
+
+    .layout-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, .9fr);
+      gap: 24px
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .field {
+      display: grid;
+      gap: 8px
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #344155;
+      letter-spacing: .01em
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      font-size: 14px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      font-family: inherit
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+      line-height: 1.5
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #78a9dc;
+      box-shadow: 0 0 0 4px rgba(15, 108, 189, .1)
+    }
+
+    input[readonly] {
+      background: #f5f8fc;
+      color: #49576a
+    }
+
+    .inline-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .01em;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 46px;
+      text-decoration: none
+    }
+
+    .btn:hover {
+      transform: translateY(-1px)
+    }
+
+    .btn:disabled {
+      opacity: .58;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #1575c8);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(15, 108, 189, .18)
+    }
+
+    .btn-secondary {
+      background: #eef4fb;
+      color: #18324f
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #15956b);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(18, 128, 92, .18)
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #d97706, #b85b00);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(181, 108, 0, .18)
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #d64c3c, var(--danger));
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(180, 35, 24, .18)
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), #0b7a72);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(13, 148, 136, .18)
+    }
+
+    .aside-panel {
+      display: grid;
+      gap: 16px;
+      align-content: start
+    }
+
+    .info-panel {
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)
+    }
+
+    .info-panel h3 {
+      font-size: 18px;
+      margin-bottom: 8px
+    }
+
+    .auto-fee-banner,
+    .preview-banner,
+    .recent-student,
+    .summary-banner {
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      border: 1px solid transparent
+    }
+
+    .auto-fee-banner {
+      display: none;
+      background: var(--success-soft);
+      border-color: #b9e3d1;
+      color: #0f5f45;
+      margin-top: 4px
+    }
+
+    .preview-banner {
+      display: none;
+      background: #f7f9fc;
+      border-color: var(--line);
+      margin-top: 12px
+    }
+
+    .preview-banner.warning {
+      background: var(--warning-soft);
+      border-color: #f3cf91;
+      color: #7c4b00
+    }
+
+    .preview-banner strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px
+    }
+
+    .preview-metric span,
+    .money-box span,
+    .stat-tile small {
+      display: block;
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px
+    }
+
+    .preview-metric strong,
+    .money-box strong {
+      margin: 0;
+      font-size: 20px;
+      color: var(--text)
+    }
+
+    .recent-student {
+      display: none;
+      background: linear-gradient(135deg, #f0f8ff, #ffffff);
+      border-color: #cfe2fb
+    }
+
+    .recent-student h3 {
+      margin-bottom: 8px;
+      font-size: 20px
+    }
+
+    .recent-student p {
+      color: var(--text-soft);
+      line-height: 1.65;
+      font-size: 14px;
+      margin-bottom: 14px
+    }
+
+    .student-photo-field {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fbff;
+    }
+
+    .student-photo-preview {
+      width: 86px;
+      height: 86px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #e8f0ff, #eefdf8);
+      border: 1px solid #d7e3f4;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .student-photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .sr-number-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .sr-number-tools .btn {
+      min-height: 44px;
+      padding: 10px 12px;
+      white-space: nowrap;
+    }
+
+    .bulk-import-panel {
+      margin-bottom: 22px;
+      padding: 18px;
+      border: 1px solid #cfe2fb;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #f0f8ff, #ffffff);
+      display: grid;
+      gap: 14px;
+    }
+
+    .bulk-import-actions {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .bulk-import-results {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+      padding: 14px;
+      max-height: 260px;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .bulk-import-results.show {
+      display: block;
+    }
+
+    .bulk-import-results .ok {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .bulk-import-results .fail {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .search-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .summary-banner {
+      display: none;
+      background: linear-gradient(180deg, #ffffff 0%, #f6fafc 100%);
+      border-color: var(--line);
+      margin-bottom: 18px
+    }
+
+    .stat-tile.paid span {
+      color: var(--success)
+    }
+
+    .stat-tile.extra span {
+      color: var(--accent)
+    }
+
+    .stat-tile.due span {
+      color: var(--danger)
+    }
+
+    .stat-tile.total span {
+      color: var(--primary)
+    }
+
+    /* Extra Adjust Banner */
+    .extra-adjust-banner {
+      display: none;
+      background: linear-gradient(135deg, #f0fdf9, #e6f7f5);
+      border: 1px solid #a7e3da;
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-top: 12px;
+      color: #0b5f56
+    }
+
+    .extra-adjust-banner h4 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #0b5f56
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 16, 29, .56);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      padding: 24px;
+      justify-content: center;
+      align-items: center
+    }
+
+    .modal-card {
+      width: min(1100px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      border-radius: var(--radius-xl)
+    }
+
+    .modal-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, .97);
+      backdrop-filter: blur(6px);
+      z-index: 2
+    }
+
+    .modal-header h3 {
+      font-size: 24px;
+      margin-bottom: 6px;
+      letter-spacing: -.02em
+    }
+
+    .modal-body {
+      padding: 24px 28px 28px
+    }
+
+    #feeConfigModal {
+      align-items: flex-start;
+      padding-top: clamp(18px, 4vh, 42px);
+    }
+
+    #feeConfigModal .modal-card {
+      width: min(980px, 100%);
+      max-height: min(86vh, 760px);
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    #feeConfigModal .modal-header {
+      padding: 22px 26px;
+      align-items: center;
+    }
+
+    .fee-config-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fee-config-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #eaf3fb;
+      color: var(--primary-deep);
+      font-weight: 900;
+      font-size: 20px;
+      flex: 0 0 auto;
+    }
+
+    .fee-config-body {
+      padding: 24px 26px 0;
+      overflow: auto;
+      max-height: calc(min(86vh, 760px) - 150px);
+    }
+
+    .fee-config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .fee-config-grid .field {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .fee-config-grid .field label {
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: 11px;
+    }
+
+    .fee-config-grid input {
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      padding: 11px 12px;
+    }
+
+    .fee-config-actions {
+      position: sticky;
+      bottom: 0;
+      margin: 0 -26px;
+      padding: 16px 26px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .96);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px
+    }
+
+    .fee-card {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--line-strong);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      background: #fff;
+      display: grid;
+      gap: 14px
+    }
+
+    .fee-card.paid {
+      border-left-color: var(--success)
+    }
+
+    .fee-card.partial {
+      border-left-color: var(--accent)
+    }
+
+    .fee-card.imposed {
+      border-left-color: var(--primary)
+    }
+
+    .fee-card.unpaid {
+      border-left-color: var(--danger)
+    }
+
+    .fee-card.pending {
+      border-left-color: var(--warning)
+    }
+
+    .fee-card-top,
+    .payment-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .fee-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .fee-meta {
+      color: var(--text-soft);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 4px
+    }
+
+    .fee-remarks {
+      background: #fffbf0;
+      border: 1px solid #f3e0a8;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #6b4c00;
+      line-height: 1.6
+    }
+
+    .fee-remarks strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: #edf3fb;
+      color: #23486f
+    }
+
+    .status-chip.paid {
+      background: var(--success-soft);
+      color: #0d6247
+    }
+
+    .status-chip.partial {
+      background: var(--accent-soft);
+      color: #0b685f
+    }
+
+    .status-chip.imposed {
+      background: #eaf3fb;
+      color: var(--primary-deep)
+    }
+
+    .status-chip.unpaid {
+      background: var(--danger-soft);
+      color: #84231c
+    }
+
+    .status-chip.pending {
+      background: var(--warning-soft);
+      color: #7c4b00
+    }
+
+    .progress-track {
+      height: 10px;
+      background: #e8eef7;
+      border-radius: 999px;
+      overflow: hidden
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #18a999);
+      border-radius: 999px
+    }
+
+    .payment-history {
+      background: #f7fbfd;
+      border: 1px solid #d8ebf0;
+      border-radius: 14px;
+      padding: 14px
+    }
+
+    .payment-history h4 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #18576d
+    }
+
+    .payment-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #e3edf0;
+      font-size: 13px
+    }
+
+    .payment-item:last-child {
+      border-bottom: none
+    }
+
+    .payment-item strong {
+      font-size: 14px
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 42px 18px;
+      color: var(--text-soft);
+      background: var(--panel-soft);
+      border: 1px dashed var(--line-strong);
+      border-radius: 18px;
+      line-height: 1.7
+    }
+
+    .toast {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      min-width: 260px;
+      max-width: 380px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 700;
+      z-index: 2000;
+      box-shadow: 0 18px 34px rgba(9, 16, 29, .22);
+      animation: slideIn .18s ease
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-10px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    /* Receipt Modal */
+    #receiptModal .modal-card {
+      max-width: 860px
+    }
+
+    .receipt-surface {
+      padding: 0
+    }
+
+    /* Adjust Extra Modal */
+    #adjustExtraModal .modal-card {
+      max-width: 560px
+    }
+
+    .print-surface {
+      display: none
+    }
+
+    @media (max-width:1080px) {
+      .layout-two {
+        grid-template-columns: 1fr
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .bulk-import-actions {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media (max-width:768px) {
+      body {
+        padding: 18px 14px 40px
+      }
+
+      .hero,
+      .card,
+      .modal-body,
+      .modal-header {
+        padding: 20px
+      }
+
+      .hero h1 {
+        font-size: 28px
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+
+      .config-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-bar {
+        grid-template-columns: 1fr
+      }
+
+      .modal {
+        padding: 14px
+      }
+
+      #feeConfigModal .modal-header,
+      .fee-config-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .fee-config-actions {
+        margin-left: -18px;
+        margin-right: -18px;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .fee-config-actions .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width:460px) {
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden
+      }
+
+      .print-surface,
+      .print-surface * {
+        visibility: visible
+      }
+
+      .print-surface {
+        display: block;
+        position: absolute;
+        inset: 0;
+        background: #fff
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+
+<body>
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <span class="eyebrow">Schoolix Administration</span>
+        <h1>Admissions and Fees</h1>
+        <p>Manage student admissions, automatic section allocation, fee imposition and payment tracking with clear
+          visibility into paid, pending and extra collections.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-secondary" id="printRecentBtn" style="display:none" onclick="printRecentStudent()">Print
+          Latest Registration</button>
+        <button class="btn btn-primary" onclick="goToStudents()">View Students</button>
+      </div>
+    </header>
+
+    <section class="recent-student" id="recentStudentCard">
+      <h3>Recently Added Student</h3>
+      <p id="recentStudentInfo"></p>
+      <div class="button-row">
+        <button class="btn btn-primary" onclick="printRecentStudent()">Print Registration Form</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <h2>Fee Configuration</h2>
+          <p>Set the standard fee for each class. New admissions automatically receive an imposed fee entry for the
+            current month using this configuration.</p>
+        </div>
+        <button class="btn btn-warning" onclick="openFeeConfigModal()">Edit Class Fees</button>
+      </div>
+      <div class="config-grid">
+        <div class="config-pill"><strong>PG</strong><span id="pgAmount">₹2,500</span></div>
+        <div class="config-pill"><strong>LKG</strong><span id="lkgAmount">₹2,800</span></div>
+        <div class="config-pill"><strong>UKG</strong><span id="ukgAmount">₹3,000</span></div>
+        <div class="config-pill"><strong>Class 1</strong><span id="class1Amount">₹3,500</span></div>
+        <div class="config-pill"><strong>Class 2</strong><span id="class2Amount">₹3,500</span></div>
+        <div class="config-pill"><strong>Class 3</strong><span id="class3Amount">₹3,500</span></div>
+        <div class="config-pill"><strong>Class 4</strong><span id="class4Amount">₹3,500</span></div>
+        <div class="config-pill"><strong>Class 5</strong><span id="class5Amount">₹3,500</span></div>
+        <div class="config-pill"><strong>Class 6</strong><span id="class6Amount">₹4,000</span></div>
+        <div class="config-pill"><strong>Class 7</strong><span id="class7Amount">₹4,000</span></div>
+        <div class="config-pill"><strong>Class 8</strong><span id="class8Amount">₹4,000</span></div>
+        <div class="config-pill"><strong>Class 9</strong><span id="class9Amount">₹4,500</span></div>
+        <div class="config-pill"><strong>Class 10</strong><span id="class10Amount">₹4,500</span></div>
+        <div class="config-pill"><strong>Class 11</strong><span id="class11Amount">₹5,000</span></div>
+        <div class="config-pill"><strong>Class 12</strong><span id="class12Amount">₹5,000</span></div>
+      </div>
+    </section>
+
+    <!-- Add New Student -->
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <h2>Add New Student</h2>
+          <p>Student profile, section allocation and first fee imposition are handled together so the admission record
+            is complete from day one.</p>
+        </div>
+      </div>
+
+      <div class="bulk-import-panel">
+        <div>
+          <h3>Bulk Student Import</h3>
+          <p class="subnote" style="margin:8px 0 0">Upload an Excel or CSV sheet with student details. Student ID and section can be left blank; they will be assigned automatically.</p>
+        </div>
+        <div class="bulk-import-actions">
+          <div class="field">
+            <label for="bulkStudentFile">Excel / CSV file</label>
+            <input id="bulkStudentFile" type="file" accept=".xlsx,.xls,.csv">
+          </div>
+          <button class="btn btn-secondary" type="button" onclick="downloadBulkStudentTemplate()">Download Template</button>
+          <button class="btn btn-success" type="button" id="bulkImportBtn" onclick="importBulkStudents()">Import Students</button>
+        </div>
+        <div id="bulkImportResults" class="bulk-import-results"></div>
+      </div>
+
+      <div class="layout-two">
+        <div>
+          <div class="subnote">Section allocation is automatic. Enter the maximum number of students per section and the
+            system will place the student in the lightest available section.</div>
+          <div class="form-grid">
+            <div class="field"><label for="name">Student name</label><input id="name" placeholder="Enter full name">
+            </div>
+            <div class="field">
+              <label for="class">Class</label>
+              <select id="class" onchange="showAutoFees()">
+                <option value="">Select class</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="maxPerSection">Max students per section</label>
+              <input id="maxPerSection" type="number" min="1" placeholder="Example: 40">
+
+              <!-- NEW BUTTON -->
+              <button class="btn btn-primary" onclick="saveMaxSectionLimit()">
+                Save for now
+              </button>
+            </div>
+            <div class="field"><label for="dateOfAdmission">Date of admission</label><input id="dateOfAdmission"
+                type="date"></div>
+            <div class="field"><label for="yearOfAdmission">Year of admission</label><input id="yearOfAdmission"
+                type="number" min="2000" placeholder="Example: 2026"></div>
+            <div class="field">
+              <label for="currentYear">Current Academic session</label>
+              <select id="currentYear">
+                <option value="">Loading sessions…</option>
+              </select>
+            </div>
+            <div class="field"><label for="studentId">Student ID</label><input id="studentId"
+                placeholder="26XXXX format (auto-generated)"></div>
+            <div class="field">
+              <label for="srNumber">SR Number</label>
+              <div class="sr-number-tools">
+                <input id="srNumber" placeholder="Unique school SR number">
+                <button class="btn btn-secondary" type="button" onclick="generateSrNumber()">Generate SR</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="gender">Gender</label>
+              <select id="gender">
+                <option value="">Select gender</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="category">Category</label>
+              <select id="category">
+                <option value="">Select category</option>
+                <option>General</option>
+                <option>OBC</option>
+                <option>SC</option>
+                <option>ST</option>
+              </select>
+            </div>
+            <div class="field"><label for="aadharNumber">Aadhaar number</label><input id="aadharNumber" type="text"
+                maxlength="12" placeholder="Optional"></div>
+            <div class="field">
+              <label for="bloodGroup">Blood group</label>
+              <select id="bloodGroup">
+                <option value="">Select blood group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
+              </select>
+            </div>
+            <div class="field"><label for="religion">Religion</label><input id="religion"
+                placeholder="Optional"></div>
+            <div class="field"><label for="previousSchool">Previous school</label><input id="previousSchool"
+                placeholder="Optional"></div>
+            <div class="field">
+              <label for="studentStatus">Status</label>
+              <select id="studentStatus">
+                <option>Active</option>
+                <option>Passed Out</option>
+                <option>TC Issued</option>
+              </select>
+            </div>
+            <div class="field"><label for="studentEmail">Registered email address</label><input id="studentEmail" type="email"
+                placeholder="student@example.com (required for login/reset)"></div>
+            <div class="field"><label for="parentEmail">Parent email address</label><input id="parentEmail" type="email"
+                placeholder="parent@example.com (absence alerts)"></div>
+            <div class="field"><label for="studentPassword">Login password</label><input id="studentPassword" type="password"
+                placeholder="Optional; auto-generated if blank"></div>
+            <div class="field"><label for="father">Father name</label><input id="father"
+                placeholder="Enter father name"></div>
+            <div class="field"><label for="fatherPhone">Father phone number</label><input id="fatherPhone"
+                placeholder="Enter father contact number"></div>
+            <div class="field"><label for="mother">Mother name</label><input id="mother"
+                placeholder="Enter mother name"></div>
+            <div class="field"><label for="motherPhone">Mother phone number</label><input id="motherPhone"
+                placeholder="Enter mother contact number"></div>
+            <div class="field"><label for="phone">Primary contact number</label><input id="phone"
+                placeholder="Optional; defaults to father's number"></div>
+            <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date"></div>
+            <div class="student-photo-field">
+              <div class="student-photo-preview" id="studentPhotoPreview">No photo</div>
+              <div class="field">
+                <label for="studentPhoto">Student photo</label>
+                <input id="studentPhoto" type="file" accept="image/*">
+                <small>Optional. Uploaded to Cloudinary when the admission is saved.</small>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1/-1"><label for="address">Address</label><input id="address"
+                placeholder="Optional"></div>
+            <div class="field" style="grid-column:1/-1"><label for="documentList">Document list</label><textarea id="documentList"
+                placeholder="Birth Certificate, TC, Aadhaar copy, marksheet"></textarea></div>
+          </div>
+
+          <div class="auto-fee-banner" id="autoFeeInfo">
+            <strong id="autoFeeTitle">Auto imposed fee</strong>
+            <div id="autoFeeAmount"></div>
+          </div>
+
+          <div class="button-row" style="margin-top:20px">
+            <button class="btn btn-secondary" onclick="generateStudentId()">Generate Student ID</button>
+            <button class="btn btn-success" onclick="addStudent()">Add Student and Impose Fee</button>
+          </div>
+        </div>
+
+        <aside class="aside-panel">
+          <div class="info-panel">
+            <h3>Admission workflow</h3>
+            <p>The student is added to the school collection, section is assigned automatically, roll numbers are
+              refreshed and the monthly fee for the current month is created as an imposed entry.</p>
+          </div>
+          <div class="info-panel">
+            <h3>Payment handling</h3>
+            <p>Partial payments stay attached to the same fee entry. If an amount higher than the due balance is
+              received, the extra amount is recorded separately and can be adjusted to any future month.</p>
+          </div>
+          <div class="info-panel">
+            <h3>Extra adjustment</h3>
+            <p>Extra collected amounts can be moved and applied to any billing month — current, past, or future —
+              directly from the fee history section.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Fee Management -->
+    <section class="card" id="addStudentFeeManagementSection" style="display:contents">
+      <div class="section-heading" style="display:none">
+        <div>
+          <h2>Fee Management</h2>
+          <p>Fetch a student, update or impose a monthly fee, review fee history and print receipts whenever needed.</p>
+        </div>
+      </div>
+
+      <div class="search-bar" style="display:none">
+        <input id="searchId" placeholder="Enter student ID">
+        <button class="btn btn-primary" onclick="fetchStudent()">Fetch Student</button>
+      </div>
+
+      <!-- Fees Modal -->
+      <div class="modal" id="feesModal" style="display:none">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <h3>Student Fees</h3>
+              <p>Review student details, save a payment or update the current fee state without losing visibility into
+                partial and extra collections.</p>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-accent" id="printReceiptBtn" style="display:none" onclick="openReceiptModal()">View / Print Fee Statement</button>
+              <button class="btn btn-secondary" id="downloadStatementBtn" style="display:none" onclick="downloadFullStatement()">Download Full Statement</button>
+              <button class="btn btn-secondary" id="printBtn" style="display:none"
+                onclick="printRegistrationForm()">Print Registration Form</button>
+              <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div class="form-grid" style="grid-template-columns:repeat(3, minmax(0, 1fr));margin-bottom:18px">
+              <div class="field"><label for="studentName">Student name</label><input id="studentName" readonly></div>
+              <div class="field"><label for="studentClass">Class and section</label><input id="studentClass" readonly>
+              </div>
+              <div class="field"><label for="studentFather">Father name</label><input id="studentFather" readonly></div>
+              <div class="field"><label for="studentFatherPhone">Father phone</label><input id="studentFatherPhone" readonly></div>
+              <div class="field"><label for="studentMother">Mother name</label><input id="studentMother" readonly></div>
+              <div class="field"><label for="studentMotherPhone">Mother phone</label><input id="studentMotherPhone" readonly></div>
+            </div>
+
+            <div class="summary-banner" id="studentFeeSummary"></div>
+
+            <!-- Extra balance notice -->
+            <div class="extra-adjust-banner" id="extraBalanceBanner">
+              <h4>Extra Balance Available</h4>
+              <div id="extraBalanceText"></div>
+              <div style="margin-top:12px">
+                <button class="btn btn-accent" style="min-height:38px;padding:10px 16px"
+                  onclick="openAdjustExtraModal()">Adjust Extra to Another Month</button>
+              </div>
+            </div>
+
+            <div class="inline-grid" style="margin-top:14px">
+              <div class="field">
+                <label for="amount">Amount</label>
+                <input id="amount" type="number" min="0" placeholder="Enter amount">
+              </div>
+              <div class="field">
+                <label for="month">Billing month</label>
+                <select id="month">
+                  <option value="">Select month</option>
+                  <option>January</option>
+                  <option>February</option>
+                  <option>March</option>
+                  <option>April</option>
+                  <option>May</option>
+                  <option>June</option>
+                  <option>July</option>
+                  <option>August</option>
+                  <option>September</option>
+                  <option>October</option>
+                  <option>November</option>
+                  <option>December</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="status">Status</label>
+                <select id="status">
+                  <option value="">Select status</option>
+                  <option value="Paid">Record payment</option>
+                  <option value="Imposed">Imposed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Unpaid">Unpaid</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Remarks field -->
+            <div class="field" style="margin-top:14px">
+              <label for="feeRemarks">Remarks <span
+                  style="font-weight:400;color:var(--text-soft)">(optional)</span></label>
+              <textarea id="feeRemarks"
+                placeholder="Add any notes, reason for late payment, concession details, etc."></textarea>
+            </div>
+
+            <div class="preview-banner" id="autoUpdateAlert">
+              <strong id="autoUpdateMsg">Existing fee detected</strong>
+              <div class="preview-details" id="autoUpdateMetrics"></div>
+              <div id="previewHint" style="margin-top:12px;color:var(--text-soft);font-size:13px;line-height:1.6"></div>
+            </div>
+
+            <div class="button-row" style="margin-top:18px">
+              <button class="btn btn-success" id="saveBtn" onclick="saveFees()">Save Fee Entry</button>
+              <button class="btn btn-secondary" onclick="resetFeeForm()">Reset Form</button>
+              <button class="btn btn-primary" onclick="viewHistory()">Refresh History</button>
+            </div>
+
+            <div id="historySection"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fee Config Modal -->
+      <div class="modal" id="feeConfigModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="fee-config-title">
+              <div class="fee-config-icon">₹</div>
+              <div>
+                <h3>Configure Class Fees</h3>
+                <p>Update standard admission fees used for newly imposed monthly fee entries.</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="closeFeeConfigModal()">Close</button>
+          </div>
+          <div class="fee-config-body">
+            <div class="fee-config-grid">
+              <div class="field"><label for="pgFeeInput">PG</label><input id="pgFeeInput" type="number" min="0"></div>
+              <div class="field"><label for="lkgFeeInput">LKG</label><input id="lkgFeeInput" type="number" min="0">
+              </div>
+              <div class="field"><label for="ukgFeeInput">UKG</label><input id="ukgFeeInput" type="number" min="0">
+              </div>
+              <div class="field"><label for="class1FeeInput">Class 1</label><input id="class1FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class2FeeInput">Class 2</label><input id="class2FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class3FeeInput">Class 3</label><input id="class3FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class4FeeInput">Class 4</label><input id="class4FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class5FeeInput">Class 5</label><input id="class5FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class6FeeInput">Class 6</label><input id="class6FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class7FeeInput">Class 7</label><input id="class7FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class8FeeInput">Class 8</label><input id="class8FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class9FeeInput">Class 9</label><input id="class9FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class10FeeInput">Class 10</label><input id="class10FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class11FeeInput">Class 11</label><input id="class11FeeInput" type="number"
+                  min="0"></div>
+              <div class="field"><label for="class12FeeInput">Class 12</label><input id="class12FeeInput" type="number"
+                  min="0"></div>
+            </div>
+            <div class="fee-config-actions">
+              <button class="btn btn-success" onclick="saveFeeConfig()">Save Fee Configuration</button>
+              <button class="btn btn-secondary" onclick="closeFeeConfigModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receipt Modal -->
+      <div class="modal" id="receiptModal">
+        <div class="modal-card" style="max-width:860px">
+          <div class="modal-header">
+            <div>
+              <h3>Fee Receipt</h3>
+              <p>Select a specific fee entry or print the full fee summary receipt for this student.</p>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-primary" onclick="downloadReceiptPDF()">Download PDF</button>
+              <button class="btn btn-secondary" onclick="printReceipt()">Print Receipt</button>
+              <button class="btn btn-secondary" onclick="closeReceiptModal()">Close</button>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div style="margin-bottom:16px">
+              <label style="font-size:13px;font-weight:700;color:#344155;display:block;margin-bottom:8px">Receipt
+                Type</label>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+                  <input type="radio" name="receiptType" value="full" checked onchange="renderReceiptPreview()"> Full
+                  Fee Summary
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+                  <input type="radio" name="receiptType" value="single" onchange="renderReceiptPreview()"> Single Month
+                  Entry
+                </label>
+              </div>
+            </div>
+            <div id="singleMonthSelector" style="display:none;margin-bottom:16px">
+              <label style="font-size:13px;font-weight:700;color:#344155;display:block;margin-bottom:8px">Select Month
+                Entry</label>
+              <select id="receiptFeeSelect" onchange="renderReceiptPreview()" style="max-width:320px"></select>
+            </div>
+            <div id="receiptPreview"
+              style="border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adjust Extra Modal -->
+      <div class="modal" id="adjustExtraModal">
+        <div class="modal-card" style="max-width:560px">
+          <div class="modal-header">
+            <div>
+              <h3>Adjust Extra Amount</h3>
+              <p>Apply the extra collected balance towards any billing month fee.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="closeAdjustExtraModal()">Close</button>
+          </div>
+          <div class="modal-body">
+            <div id="adjustExtraInfo"
+              style="margin-bottom:18px;padding:14px 16px;border-radius:var(--radius-md);background:var(--accent-soft);color:#0b5f56;font-size:14px;line-height:1.6">
+            </div>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr">
+              <div class="field">
+                <label for="adjustTargetMonth">Apply to month</label>
+                <select id="adjustTargetMonth">
+                  <option value="">Select month</option>
+                  <option>January</option>
+                  <option>February</option>
+                  <option>March</option>
+                  <option>April</option>
+                  <option>May</option>
+                  <option>June</option>
+                  <option>July</option>
+                  <option>August</option>
+                  <option>September</option>
+                  <option>October</option>
+                  <option>November</option>
+                  <option>December</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adjustAmount">Amount to adjust</label>
+                <input id="adjustAmount" type="number" min="1" placeholder="Enter amount">
+              </div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label for="adjustRemarks">Remarks</label>
+              <textarea id="adjustRemarks" placeholder="Reason for adjustment (optional)"></textarea>
+            </div>
+            <div class="button-row" style="margin-top:18px">
+              <button class="btn btn-success" onclick="applyExtraAdjustment()">Apply Adjustment</button>
+              <button class="btn btn-secondary" onclick="closeAdjustExtraModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="print-surface" id="printContent"></div>
+
+      <script src="school-branding.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+      <script type="module">
+        import { initializeApp } from "./firebase-compat.js";
+        import {
+          addDoc, collection, deleteDoc, doc, getDoc, getDocs,
+          getFirestore, query, setDoc, updateDoc, where
+        } from "./firebase-compat.js";
+        import {
+          createUserWithEmailAndPassword,
+          getAuth,
+          onAuthStateChanged,
+          signOut
+        } from "./firebase-compat.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+          authDomain: "schoolix-48107.firebaseapp.com",
+          projectId: "schoolix-48107",
+          storageBucket: "schoolix-48107.firebasestorage.app",
+          messagingSenderId: "133937954491",
+          appId: "1:133937954491:web:69d8064422617eb8c4339e",
+          measurementId: "G-EG23XE5Q0Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const studentCreatorApp = initializeApp(firebaseConfig, "studentCreatorApp");
+        const studentCreatorAuth = getAuth(studentCreatorApp);
+        const $ = (id) => document.getElementById(id);
+        const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+        const REGISTRATION_EMAIL_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-registration-email`;
+
+        const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const DEFAULT_FEE_CONFIG = {
+          PG: 2500, LKG: 2800, UKG: 3000,
+          "1": 3500, "2": 3500, "3": 3500, "4": 3500, "5": 3500,
+          "6": 4000, "7": 4000, "8": 4000,
+          "9": 4500, "10": 4500, "11": 5000, "12": 5000
+        };
+
+        const toastColors = {
+          success: "linear-gradient(135deg,#12805c,#15956b)",
+          error: "linear-gradient(135deg,#d64c3c,#b42318)",
+          info: "linear-gradient(135deg,#0f6cbd,#1575c8)"
+        };
+
+        let currentUser = null;
+        let currentStudent = null;
+        let recentStudent = null;
+        let savedMaxPerSection = "";
+        let feeHistory = [];
+        let feeConfig = { ...DEFAULT_FEE_CONFIG };
+        let existingFeeId = null;
+        let existingFeeData = null;
+        let editingFeeId = null;
+        let editingFeeData = null;
+        let activeSessionId = "";
+        let activeSessionLabel = "";
+        let activeSessionLocked = false;
+
+        function escapeHtml(value) {
+          return String(value ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[m]));
+        }
+
+        const CLOUDINARY_CLOUD_NAME = "fthnumnk";
+        const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";
+
+        function getCloudinaryConfig() {
+          return {
+            cloudName: CLOUDINARY_CLOUD_NAME,
+            uploadPreset: CLOUDINARY_UPLOAD_PRESET
+          };
+        };
+
+        async function uploadStudentPhoto(file, studentId) {
+          if (!file) return { photoUrl: "", photoPublicId: "" };
+          if (!file.type.startsWith("image/")) throw new Error("Please select an image file for student photo.");
+          if (file.size > 5 * 1024 * 1024) throw new Error("Student photo must be under 5 MB.");
+          const config = getCloudinaryConfig();
+          if (!config.cloudName || !config.uploadPreset) {
+            throw new Error("Cloudinary photo upload is not configured.");
+          }
+          const form = new FormData();
+          form.append("file", file);
+          form.append("upload_preset", config.uploadPreset);
+          form.append("folder", `schoolix/students/${currentUser.uid}`);
+          form.append("public_id", `${String(studentId || "student").replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}`);
+          const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(config.cloudName)}/image/upload`, {
+            method: "POST",
+            body: form
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error?.message || "Cloudinary photo upload failed.");
+          return { photoUrl: data.secure_url || data.url || "", photoPublicId: data.public_id || "" };
+        }
+
+        function updateStudentPhotoPreview() {
+          const preview = $("studentPhotoPreview");
+          const file = $("studentPhoto")?.files?.[0];
+          if (!preview) return;
+          if (!file) {
+            preview.textContent = "No photo";
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => { preview.innerHTML = `<img src="${reader.result}" alt="Student photo preview">`; };
+          reader.readAsDataURL(file);
+        }
+
+        function formatCurrency(value) {
+          return `₹${Number(value || 0).toLocaleString("en-IN")}`;
+        }
+
+        function toDate(value) {
+          if (!value) return null;
+          if (value?.toDate) return value.toDate();
+          const p = new Date(value);
+          return isNaN(p.getTime()) ? null : p;
+        }
+
+        function normalizeClassValue(value) {
+          const cleaned = String(value || "").trim().toUpperCase().replace(/^CLASS\s+/i, "");
+          if (!cleaned) return "";
+          const roman = { I: "1", II: "2", III: "3", IV: "4", V: "5", VI: "6", VII: "7", VIII: "8", IX: "9", X: "10", XI: "11", XII: "12" };
+          return roman[cleaned] || (/^\d+$/.test(cleaned) ? String(Number(cleaned)) : cleaned);
+        }
+
+        function normalizeSectionValue(value) {
+          return String(value || "").trim().toUpperCase().replace(/^SECTION\s+/i, "");
+        }
+
+        function sameClassSection(student, studentClass, section) {
+          return normalizeClassValue(student.class) === normalizeClassValue(studentClass) &&
+            normalizeSectionValue(student.section || "A") === normalizeSectionValue(section || "A");
+        }
+
+        function getSelectedSessionMeta() {
+          const sel = $("currentYear");
+          const opt = sel?.options?.[sel.selectedIndex];
+          return {
+            sessionId: opt?.dataset?.id || activeSessionId || "",
+            session: sel?.value || activeSessionLabel || "",
+            locked: opt?.dataset?.locked === "1" || activeSessionLocked,
+            classesLocked: opt?.dataset?.classesLocked === "1"
+          };
+        }
+
+        function makeSessionPlacement(student, meta, overrides = {}) {
+          const now = Date.now();
+          return {
+            ...(student.sessionPlacements?.[meta.sessionId] || {}),
+            sessionId: meta.sessionId || "",
+            session: meta.session || student.currentYear || "",
+            currentYear: meta.session || student.currentYear || "",
+            class: student.class || "",
+            section: student.section || "",
+            roll: student.roll || student.rollNo || "",
+            locked: Boolean(meta.locked),
+            classLocked: Boolean(meta.classesLocked),
+            createdAt: student.createdAt || now,
+            updatedAt: now,
+            ...overrides
+          };
+        }
+
+        function sessionFeeFields() {
+          const meta = getSelectedSessionMeta();
+          return { sessionId: meta.sessionId || "", session: meta.session || "" };
+        }
+
+        function ensureSessionEditable(action = "Fee changes") {
+          if (!getSelectedSessionMeta().locked) return true;
+          showToast(`${action} are blocked because this session is locked.`, "error");
+          return false;
+        }
+
+        function feeBelongsToSelectedSession(fee) {
+          const meta = getSelectedSessionMeta();
+          if (!meta.sessionId && !meta.session) return true;
+          if (!fee.sessionId && !fee.session && !fee.currentYear && !fee.academicSession) return false;
+          return fee.sessionId === meta.sessionId ||
+            fee.session === meta.session ||
+            fee.currentYear === meta.session ||
+            fee.academicSession === meta.session;
+        }
+
+        function formatDate(value) {
+          const d = toDate(value);
+          return d ? d.toLocaleDateString("en-IN") : "N/A";
+        }
+
+        function currentMonthName() { return MONTHS[new Date().getMonth()]; }
+
+        function academicYearFromToday() {
+          const t = new Date();
+          const s = t.getMonth() >= 3 ? t.getFullYear() : t.getFullYear() - 1;
+          return `${s}-${String((s + 1) % 100).padStart(2, "0")}`;
+        }
+
+        function showToast(message, type = "success") {
+          const t = document.createElement("div");
+          t.className = "toast";
+          t.textContent = message;
+          t.style.background = toastColors[type] || toastColors.success;
+          document.body.appendChild(t);
+          setTimeout(() => t.remove(), 3600);
+        }
+
+        function getFeeAmounts(fee) {
+          const total = Number(fee?.originalAmount ?? fee?.amount ?? 0);
+          const applied = Number(fee?.totalPaidAmount ?? fee?.paidAmount ?? 0);
+          const explicitExtra = Number(fee?.totalExtraPaidAmount);
+          const derivedCollected = Number(fee?.totalCollectedAmount ?? applied + (isFinite(explicitExtra) ? explicitExtra : 0));
+          const extra = isFinite(explicitExtra) ? explicitExtra : Math.max(0, derivedCollected - applied);
+          const collected = Number(fee?.totalCollectedAmount ?? applied + extra);
+          const due = isFinite(Number(fee?.remainingAmount)) ? Number(fee.remainingAmount) : Math.max(0, total - applied);
+          return {
+            total: Math.max(0, total),
+            applied: Math.max(0, applied),
+            extra: Math.max(0, extra),
+            collected: Math.max(0, collected),
+            due: Math.max(0, due)
+          };
+        }
+
+        function getFeeStatusMeta(fee) {
+          const { total, applied, extra, due } = getFeeAmounts(fee);
+          if (due === 0 && total > 0 && extra > 0) return { tone: "paid", label: "Paid with extra" };
+          if (due === 0 && total > 0) return { tone: "paid", label: "Paid" };
+          if (applied > 0) return { tone: "partial", label: "Partial payment" };
+          if (fee?.status === "Imposed") return { tone: "imposed", label: "Imposed" };
+          if (fee?.status === "Unpaid") return { tone: "unpaid", label: "Unpaid" };
+          return { tone: "pending", label: fee?.status || "Pending" };
+        }
+
+        function calculateStudentFeeSummary(fees) {
+          return fees.reduce((t, fee) => {
+            const a = getFeeAmounts(fee);
+            t.total += a.total; t.applied += a.applied;
+            t.extra += a.extra; t.collected += a.collected; t.due += a.due;
+            return t;
+          }, { total: 0, applied: 0, extra: 0, collected: 0, due: 0 });
+        }
+
+        // Calculate total extra balance across ALL fee entries
+        function getTotalExtraBalance() {
+          return feeHistory.reduce((sum, fee) => sum + getFeeAmounts(fee).extra, 0);
+        }
+
+        function updateExtraBalanceBanner() {
+          const totalExtra = getTotalExtraBalance();
+          if (totalExtra > 0 && currentStudent) {
+            $("extraBalanceBanner").style.display = "block";
+            $("extraBalanceText").innerHTML = `Total extra balance: <strong>${formatCurrency(totalExtra)}</strong>. You can apply this towards any month's fee.`;
+          } else {
+            $("extraBalanceBanner").style.display = "none";
+          }
+        }
+
+        function renderSummaryBanner(fees) {
+          const s = calculateStudentFeeSummary(fees);
+          $("studentFeeSummary").innerHTML = `
+            <strong style="display:block;font-size:16px;margin-bottom:6px">Fee snapshot</strong>
+            <div style="color:var(--text-soft);font-size:14px;line-height:1.6">Assigned, applied, collected and extra amounts are shown separately so balances stay accurate.</div>
+            <div class="stats-grid" style="margin-top:14px">
+              <div class="stat-tile total"><small>Assigned</small><span>${formatCurrency(s.total)}</span><strong>Total fee raised</strong></div>
+              <div class="stat-tile paid"><small>Applied</small><span>${formatCurrency(s.applied)}</span><strong>Applied against dues</strong></div>
+              <div class="stat-tile extra"><small>Extra</small><span>${formatCurrency(s.extra)}</span><strong>Collected above due</strong></div>
+              <div class="stat-tile due"><small>Due</small><span>${formatCurrency(s.due)}</span><strong>Remaining balance</strong></div>
+            </div>`;
+          $("studentFeeSummary").style.display = "block";
+        }
+
+        function initializeClasses() {
+          const classList = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+          $("class").innerHTML = `<option value="">Select class</option>${classList.map(v => `<option value="${v}">${v}</option>`).join("")}`;
+        }
+
+        function setDefaults() {
+          if (!$("maxPerSection").value && savedMaxPerSection) $("maxPerSection").value = savedMaxPerSection;
+          if (!$("yearOfAdmission").value) $("yearOfAdmission").value = String(new Date().getFullYear());
+          if (!$("currentYear").value) $("currentYear").value = academicYearFromToday();
+          if (!$("month").value) $("month").value = currentMonthName();
+        }
+
+        async function loadFeeConfig() {
+          try {
+            const directDoc = await getDoc(doc(db, "schools", currentUser.uid, "config", "fees_config"));
+            if (directDoc.exists()) {
+              feeConfig = { ...feeConfig, ...(directDoc.data().fees || {}) };
+            } else {
+              const fallback = await getDocs(query(collection(db, "schools", currentUser.uid, "config"), where("type", "==", "fees")));
+              if (!fallback.empty) feeConfig = { ...feeConfig, ...(fallback.docs[0].data().fees || {}) };
+            }
+          } catch (e) { console.error("Fee config load failed:", e); }
+          updateFeeDisplay();
+          showAutoFees();
+        }
+
+        function updateFeeDisplay() {
+          const map = {
+            pgAmount: "PG", lkgAmount: "LKG", ukgAmount: "UKG",
+            class1Amount: "1", class2Amount: "2", class3Amount: "3", class4Amount: "4", class5Amount: "5",
+            class6Amount: "6", class7Amount: "7", class8Amount: "8", class9Amount: "9", class10Amount: "10",
+            class11Amount: "11", class12Amount: "12"
+          };
+          Object.entries(map).forEach(([id, key]) => { $(id).textContent = formatCurrency(feeConfig[key] || 0); });
+        }
+
+        window.showAutoFees = () => {
+          const sel = $("class").value;
+          if (sel && feeConfig[sel]) {
+            $("autoFeeTitle").textContent = "Auto imposed fee";
+            $("autoFeeAmount").textContent = `${formatCurrency(feeConfig[sel])} will be created for ${currentMonthName()} as an imposed entry.`;
+            $("autoFeeInfo").style.display = "block";
+          } else {
+            $("autoFeeInfo").style.display = "none";
+          }
+        };
+
+        async function getExistingStudentIds() {
+          const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+          return snap.docs.map(d => String(d.data().studentId || "").trim()).filter(Boolean);
+        }
+
+        async function getExistingSrNumbers() {
+          const [studentSnap, passedOutSnap] = await Promise.all([
+            getDocs(collection(db, "schools", currentUser.uid, "students")),
+            getDocs(collection(db, "schools", currentUser.uid, "passedOutStudents"))
+          ]);
+          return [...studentSnap.docs, ...passedOutSnap.docs]
+            .map(d => String(d.data().srNumber || "").trim())
+            .filter(Boolean);
+        }
+
+        function splitSrNumber(value) {
+          const text = String(value || "").trim();
+          const match = text.match(/^(.*?)(\d+)(\D*)$/);
+          if (!match) return { prefix: "", number: 0, suffix: "", width: 0 };
+          return {
+            prefix: match[1] || "",
+            number: Number(match[2] || 0),
+            suffix: match[3] || "",
+            width: match[2].length
+          };
+        }
+
+        function formatSrNumber(pattern, number) {
+          const width = Math.max(Number(pattern.width || 0), String(Math.max(0, number)).length);
+          return `${pattern.prefix || ""}${String(number).padStart(width, "0")}${pattern.suffix || ""}`;
+        }
+
+        function getNextSrPattern(existingSrNumbers, seed = "") {
+          const cleanSeed = String(seed || "").trim();
+          const seedPattern = splitSrNumber(cleanSeed);
+          const parsedExisting = existingSrNumbers
+            .map(splitSrNumber)
+            .filter((item) => Number.isFinite(item.number) && item.number > 0);
+
+          if (cleanSeed && seedPattern.number > 0) {
+            return seedPattern;
+          }
+
+          const highest = parsedExisting.reduce((best, item) => item.number > best.number ? item : best, { prefix: "", number: 0, suffix: "", width: 0 });
+          return {
+            prefix: highest.prefix || "",
+            number: highest.number + 1,
+            suffix: highest.suffix || "",
+            width: Math.max(highest.width || 0, 1)
+          };
+        }
+
+        async function generateUniqueSrNumbers(count = 1, seed = "", extraTaken = []) {
+          const existing = await getExistingSrNumbers();
+          const taken = new Set([...existing, ...extraTaken].map((value) => String(value || "").trim().toLowerCase()).filter(Boolean));
+          const pattern = getNextSrPattern(existing, seed);
+          let nextNumber = Math.max(1, Number(pattern.number || 1));
+          const generated = [];
+
+          while (generated.length < count) {
+            const candidate = formatSrNumber(pattern, nextNumber);
+            nextNumber += 1;
+            const key = candidate.toLowerCase();
+            if (taken.has(key)) continue;
+            taken.add(key);
+            generated.push(candidate);
+          }
+
+          return generated;
+        }
+
+        window.generateSrNumber = async () => {
+          try {
+            const input = $("srNumber");
+            const seed = input?.value || "";
+            const [srNumber] = await generateUniqueSrNumbers(1, seed, seed ? [seed] : []);
+            if (input) input.value = srNumber;
+            showToast("SR Number generated.", "info");
+          } catch (e) {
+            console.error("SR number generation failed:", e);
+            showToast("Unable to generate SR number.", "error");
+          }
+        };
+
+        async function findExistingStudentRecord(studentId = "", email = "", srNumber = "") {
+          const [studentSnap, passedOutSnap] = await Promise.all([
+            getDocs(collection(db, "schools", currentUser.uid, "students")),
+            getDocs(collection(db, "schools", currentUser.uid, "passedOutStudents"))
+          ]);
+          const normalizedStudentId = String(studentId || "").trim();
+          const normalizedEmail = String(email || "").trim().toLowerCase();
+          const normalizedSrNumber = String(srNumber || "").trim().toLowerCase();
+          const activeMatch = studentSnap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .find((student) => {
+              const existingStudentId = String(student.studentId || "").trim();
+              const existingEmail = String(student.email || "").trim().toLowerCase();
+              const existingSrNumber = String(student.srNumber || "").trim().toLowerCase();
+              return (normalizedStudentId && existingStudentId === normalizedStudentId)
+                || (normalizedEmail && existingEmail === normalizedEmail)
+                || (normalizedSrNumber && existingSrNumber === normalizedSrNumber);
+            });
+          if (activeMatch) return activeMatch;
+          if (!normalizedSrNumber) return null;
+          return passedOutSnap.docs
+            .map(d => ({ id: d.id, ...d.data(), archived: true }))
+            .find((student) => String(student.srNumber || "").trim().toLowerCase() === normalizedSrNumber) || null;
+        }
+
+        async function generateUniqueStudentId(existing = null) {
+          const ids = existing || await getExistingStudentIds();
+          const currentYear = new Date().getFullYear();
+          const yearPrefix = String(currentYear).slice(-2); // Last 2 digits of current year (e.g., "26" for 2026)
+
+          let gen = "";
+          let attempts = 0;
+          do {
+            // Generate 4 random digits
+            const randomDigits = String(Math.floor(1000 + Math.random() * 9000));
+            gen = yearPrefix + randomDigits; // Combine year prefix with 4 random digits
+            attempts++;
+            if (attempts > 10000) { // Prevent infinite loop
+              throw new Error("Unable to generate unique student ID after maximum attempts");
+            }
+          } while (ids.includes(gen));
+
+          return gen;
+        }
+
+        window.generateStudentId = async () => {
+          try { $("studentId").value = await generateUniqueStudentId(); showToast("Student ID generated.", "info"); }
+          catch (e) { showToast("Unable to generate student ID.", "error"); }
+        };
+
+        async function assignAutoSection(studentClass, maxPerSection) {
+          try {
+            const snap = await getDocs(query(
+              collection(db, "schools", currentUser.uid, "students"),
+              where("class", "==", studentClass)
+            ));
+
+            const counts = {};
+            snap.forEach(d => {
+              const s = d.data().section || "A";
+              counts[s] = (counts[s] || 0) + 1;
+            });
+
+            // 👉 FIX: sequential fill (A → B → C)
+            for (let c = 65; c <= 90; c++) {
+              const section = String.fromCharCode(c);
+              const count = counts[section] || 0;
+
+              if (count < maxPerSection) {
+                return section; // first available section
+              }
+            }
+
+            // fallback
+            return "A";
+
+          } catch (e) {
+            return "A";
+          }
+        }
+        async function updateRolls(studentClass, section) {
+          const assignedRolls = new Map();
+          try {
+            const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+            const students = snap.docs
+              .map(d => ({ id: d.id, ...d.data() }))
+              .filter(student => sameClassSection(student, studentClass, section));
+            students.sort((a, b) =>
+              String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "en", { sensitivity: "base", numeric: true }) ||
+              String(a.studentId || a.id || "").localeCompare(String(b.studentId || b.id || ""), "en", { numeric: true })
+            );
+            for (let i = 0; i < students.length; i++) {
+              const roll = String(i + 1).padStart(2, "0");
+              const student = students[i];
+              const sessionMeta = getSelectedSessionMeta();
+              const updatePayload = { roll, rollNo: roll, updatedAt: new Date() };
+              if (sessionMeta.sessionId) {
+                updatePayload[`sessionPlacements.${sessionMeta.sessionId}`] = makeSessionPlacement(
+                  { ...student, roll, rollNo: roll },
+                  sessionMeta,
+                  { roll }
+                );
+              }
+              assignedRolls.set(student.id, roll);
+              await updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), updatePayload);
+              const mirrorIds = [student.studentId, student.authUid].map(value => String(value || "").trim()).filter(Boolean);
+              const mirrorResults = await Promise.allSettled([...new Set(mirrorIds)].map((id) => setDoc(doc(db, "users", id), { rollNo: roll, roll, updatedAt: Date.now() }, { merge: true })));
+              mirrorResults
+                .filter(result => result.status === "rejected")
+                .forEach(result => console.warn("Roll mirror update failed:", result.reason));
+            }
+          } catch (e) { console.error("Roll update failed:", e); }
+          return assignedRolls;
+        }
+
+        async function findExistingFeeRecord(studentId, monthName) {
+          const snap = await getDocs(query(collection(db, "schools", currentUser.uid, "fees"), where("studentId", "==", studentId)));
+          return snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(f => feeBelongsToSelectedSession(f) && String(f.month || "").toLowerCase() === String(monthName || "").toLowerCase())
+            .sort((a, b) => (toDate(b.updatedAt) || toDate(b.date) || 0) - (toDate(a.updatedAt) || toDate(a.date) || 0))[0] || null;
+        }
+
+        function feeDocIdPart(value, fallback) {
+          return String(value || fallback || "")
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 70) || fallback;
+        }
+
+        function deterministicMonthlyFeeDocId(studentId, month, feeType = "monthly") {
+          const meta = getSelectedSessionMeta();
+          const sessionKey = meta.sessionId || meta.session || "current";
+          return [
+            "monthly-fee",
+            feeDocIdPart(sessionKey, "current"),
+            feeDocIdPart(studentId, "student"),
+            feeDocIdPart(month, "month"),
+            feeDocIdPart(feeType, "monthly")
+          ].join("_");
+        }
+
+        async function createMonthlyFeeIfMissing(studentId, month, payload, feeType = "monthly") {
+          const existing = await findExistingFeeRecord(studentId, month);
+          if (existing) return { created: false, fee: existing };
+
+          const feeRef = doc(db, "schools", currentUser.uid, "fees", deterministicMonthlyFeeDocId(studentId, month, feeType));
+          const feeSnap = await getDoc(feeRef);
+          if (feeSnap.exists()) return { created: false, fee: { id: feeRef.id, ...feeSnap.data() } };
+
+          // Monthly fee records used random addDoc() IDs, so repeated saves could create
+          // duplicates. This deterministic ID makes student + session + month + fee type
+          // idempotent while keeping the stored fee payload backward-compatible.
+          await setDoc(feeRef, payload, { merge: false });
+          return { created: true, id: feeRef.id, fee: { id: feeRef.id, ...payload } };
+        }
+
+        function showRecentStudent(student) {
+          recentStudent = student;
+          $("recentStudentCard").style.display = "block";
+          $("printRecentBtn").style.display = "inline-flex";
+          $("recentStudentInfo").innerHTML = `
+            ${student.photoUrl ? `<img src="${escapeHtml(student.photoUrl)}" alt="${escapeHtml(student.name || "Student")} photo" style="width:74px;height:74px;border-radius:14px;object-fit:cover;border:1px solid #d7e3f4;margin:0 0 10px;display:block">` : ""}
+            <strong>${escapeHtml(student.name || "")}</strong><br>
+            ${escapeHtml(student.class || "")}-${escapeHtml(student.section || "")} | ID: ${escapeHtml(student.studentId || "")}<br>
+            Father: ${escapeHtml(student.father || "")} (${escapeHtml(student.fatherPhone || student.phone || "")})<br>
+            Mother: ${escapeHtml(student.mother || "")} (${escapeHtml(student.motherPhone || student.phone || "")})`;
+        }
+
+        function resetStudentForm() {
+          ["name", "yearOfAdmission", "studentId", "srNumber", "gender", "category", "aadharNumber", "bloodGroup", "religion", "previousSchool", "studentEmail", "parentEmail", "studentPassword", "father", "fatherPhone", "mother", "motherPhone", "phone", "address", "documentList", "dob", "dateOfAdmission"].forEach(id => { const el=$(id); if(el) el.value=""; }); const cls=$("class"); if(cls) cls.value="";
+          const status = $("studentStatus");
+          if (status) status.value = "Active";
+          const photoInput = $("studentPhoto");
+          if (photoInput) photoInput.value = "";
+          updateStudentPhotoPreview();
+          setDefaults();
+          $("autoFeeInfo").style.display = "none";
+        }
+
+        function normalizeAdmissionDate(value) {
+          if (!value) return "";
+          if (value instanceof Date && !isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+          const text = String(value || "").trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+          const parsed = new Date(text);
+          return isNaN(parsed.getTime()) ? text : parsed.toISOString().slice(0, 10);
+        }
+
+        function getStudentPayloadFromForm() {
+          return {
+            name: $("name").value.trim(),
+            studentClass: $("class").value,
+            maxPerSection: parseInt($("maxPerSection").value, 10) || 0,
+            yearOfAdmission: $("yearOfAdmission").value.trim(),
+            currentYear: $("currentYear").value.trim(),
+            studentId: $("studentId").value.trim(),
+            srNumber: $("srNumber").value.trim(),
+            gender: $("gender").value.trim(),
+            category: $("category").value.trim(),
+            aadharNumber: $("aadharNumber").value.trim(),
+            bloodGroup: $("bloodGroup").value.trim(),
+            religion: $("religion").value.trim(),
+            previousSchool: $("previousSchool").value.trim(),
+            status: $("studentStatus").value.trim(),
+            studentEmail: $("studentEmail").value.trim(),
+            parentEmail: $("parentEmail").value.trim(),
+            studentPassword: $("studentPassword").value.trim(),
+            father: $("father").value.trim(),
+            fatherPhone: $("fatherPhone").value.trim(),
+            mother: $("mother").value.trim(),
+            motherPhone: $("motherPhone").value.trim(),
+            phone: $("phone").value.trim(),
+            address: $("address").value.trim(),
+            documentList: $("documentList").value.trim(),
+            dob: $("dob").value,
+            dateOfAdmission: $("dateOfAdmission").value,
+            photoFile: $("studentPhoto")?.files?.[0] || null
+          };
+        }
+
+        function validateStudentPayload(payload, label = "Student") {
+          if (!payload.name || !payload.studentClass || (!payload.section && !payload.maxPerSection) || !payload.yearOfAdmission || !payload.currentYear || !payload.father || !payload.fatherPhone || !payload.mother || !payload.motherPhone || !payload.dateOfAdmission) {
+            throw new Error(`${label}: required fields missing.`);
+          }
+          if (payload.aadharNumber && !/^\d{12}$/.test(payload.aadharNumber)) {
+            throw new Error(`${label}: Aadhaar number must contain 12 digits.`);
+          }
+          if (!payload.studentEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.studentEmail)) {
+            throw new Error(`${label}: valid registered email is required.`);
+          }
+          if (payload.parentEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.parentEmail)) {
+            throw new Error(`${label}: parent email is invalid.`);
+          }
+          if (payload.studentPassword && payload.studentPassword.length < 6) {
+            throw new Error(`${label}: password must be at least 6 characters when entered.`);
+          }
+        }
+
+        function generateLoginPassword(studentId = "", srNumber = "") {
+          const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+          const random = new Uint32Array(6);
+          crypto.getRandomValues(random);
+          const token = Array.from(random, (value) => alphabet[value % alphabet.length]).join("");
+          return `Sx${token}`;
+        }
+
+        async function sendStudentRegistrationEmail(student, temporaryPassword, feeAmount = 0, feeMonth = "") {
+          if (!student?.email) return { success: false, skipped: true };
+          const payload = {
+            recipients: [student.email],
+            schoolName: student.schoolName || window.SchoolBranding?.getSchoolName?.() || "Schoolix",
+            studentName: student.name,
+            studentId: student.studentId,
+            srNumber: student.srNumber,
+            className: student.class,
+            section: student.section,
+            roll: student.roll || student.rollNo || "",
+            father: student.father,
+            fatherPhone: student.fatherPhone,
+            mother: student.mother,
+            motherPhone: student.motherPhone,
+            phone: student.phone,
+            gender: student.gender,
+            category: student.category,
+            bloodGroup: student.bloodGroup,
+            religion: student.religion,
+            previousSchool: student.previousSchool,
+            aadharNumber: student.aadharNumber,
+            dob: student.dob,
+            dateOfAdmission: student.dateOfAdmission || student.admissionDate,
+            yearOfAdmission: student.yearOfAdmission,
+            academicSession: student.academicSession || student.session || student.currentYear,
+            loginEmail: student.email,
+            parentEmail: student.parentEmail,
+            address: student.address,
+            documentList: student.documentList || student.documents,
+            status: student.status,
+            feeAmount,
+            feeMonth,
+            temporaryPassword
+          };
+
+          const response = await fetch(REGISTRATION_EMAIL_FUNCTION_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || data.details || "Registration email failed");
+          return data;
+        }
+
+        async function createStudentAdmission(rawPayload, options = {}) {
+          const payload = {
+            ...rawPayload,
+            name: String(rawPayload.name || "").trim(),
+            studentClass: normalizeClassValue(rawPayload.studentClass || rawPayload.class),
+            section: normalizeSectionValue(rawPayload.section),
+            maxPerSection: parseInt(rawPayload.maxPerSection, 10) || 0,
+            yearOfAdmission: String(rawPayload.yearOfAdmission || "").trim(),
+            currentYear: String(rawPayload.currentYear || "").trim(),
+            studentId: String(rawPayload.studentId || "").trim(),
+            srNumber: String(rawPayload.srNumber || "").trim(),
+            gender: String(rawPayload.gender || "").trim(),
+            category: String(rawPayload.category || "").trim(),
+            aadharNumber: String(rawPayload.aadharNumber || "").trim(),
+            bloodGroup: String(rawPayload.bloodGroup || "").trim(),
+            religion: String(rawPayload.religion || "").trim(),
+            previousSchool: String(rawPayload.previousSchool || "").trim(),
+            status: String(rawPayload.status || "Active").trim() || "Active",
+            studentEmail: String(rawPayload.studentEmail || "").trim().toLowerCase(),
+            parentEmail: String(rawPayload.parentEmail || "").trim().toLowerCase(),
+            studentPassword: String(rawPayload.studentPassword || "").trim(),
+            father: String(rawPayload.father || "").trim(),
+            fatherPhone: String(rawPayload.fatherPhone || "").trim(),
+            mother: String(rawPayload.mother || "").trim(),
+            motherPhone: String(rawPayload.motherPhone || "").trim(),
+            phone: String(rawPayload.phone || rawPayload.fatherPhone || rawPayload.motherPhone || "").trim(),
+            address: String(rawPayload.address || "").trim(),
+            documentList: String(rawPayload.documentList || rawPayload.documents || "").trim(),
+            dob: normalizeAdmissionDate(rawPayload.dob),
+            dateOfAdmission: normalizeAdmissionDate(rawPayload.dateOfAdmission)
+          };
+          validateStudentPayload(payload, options.label || payload.name || "Student");
+
+          const sessionMeta = getSelectedSessionMeta();
+          let studentId = payload.studentId;
+          if (!payload.srNumber) {
+            [payload.srNumber] = await generateUniqueSrNumbers(1, options.srSeed || "");
+          }
+          const existingStudent = await findExistingStudentRecord(studentId, payload.studentEmail, payload.srNumber);
+          if (existingStudent) throw new Error("A student with this ID, email, or SR number already exists in this school.");
+
+          const existingIds = await getExistingStudentIds();
+          if (!studentId) studentId = await generateUniqueStudentId(existingIds);
+          else if (existingIds.includes(studentId)) throw new Error("This student ID is already in use.");
+          if (!payload.studentPassword) {
+            payload.studentPassword = generateLoginPassword(studentId, payload.srNumber);
+          }
+
+          const photoUpload = await uploadStudentPhoto(payload.photoFile, studentId);
+          const section = payload.section || await assignAutoSection(payload.studentClass, payload.maxPerSection);
+          const studentAuthCred = await createUserWithEmailAndPassword(studentCreatorAuth, payload.studentEmail, payload.studentPassword);
+          const studentAuthUid = studentAuthCred.user.uid;
+          const currentSchoolName = window.SchoolBranding?.getSchoolName?.() || "";
+          const studentData = {
+            studentId, name: payload.name, class: payload.studentClass, section,
+            srNumber: payload.srNumber,
+            father: payload.father, fatherPhone: payload.fatherPhone,
+            mother: payload.mother, motherPhone: payload.motherPhone,
+            phone: payload.phone || payload.fatherPhone || payload.motherPhone,
+            address: payload.address, dob: payload.dob,
+            gender: payload.gender,
+            category: payload.category,
+            bloodGroup: payload.bloodGroup,
+            religion: payload.religion,
+            previousSchool: payload.previousSchool,
+            documentList: payload.documentList,
+            documents: payload.documentList,
+            status: payload.status,
+            tcIssued: payload.status === "TC Issued",
+            dateOfAdmission: payload.dateOfAdmission,
+            yearOfAdmission: payload.yearOfAdmission,
+            currentYear: payload.currentYear,
+            sessionId: sessionMeta.sessionId || "",
+            session: sessionMeta.session || payload.currentYear,
+            academicSession: sessionMeta.session || payload.currentYear,
+            aadharNumber: payload.aadharNumber || "",
+            email: payload.studentEmail,
+            parentEmail: payload.parentEmail || payload.studentEmail,
+            photoUrl: photoUpload.photoUrl,
+            photoPublicId: photoUpload.photoPublicId,
+            authUid: studentAuthUid,
+            schoolName: currentSchoolName,
+            createdAt: new Date()
+          };
+
+          const studentRef = await addDoc(collection(db, "schools", currentUser.uid, "students"), studentData);
+          const userMirror = {
+            authUid: studentAuthUid, studentDocId: studentRef.id, name: payload.name,
+            email: payload.studentEmail,
+            parentEmail: payload.parentEmail || payload.studentEmail,
+            role: "student", class: payload.studentClass, section,
+            rollNo: "", dob: payload.dob || "", studentId,
+            srNumber: payload.srNumber,
+            schoolId: currentUser.uid, schoolName: currentSchoolName,
+            yearOfAdmission: payload.yearOfAdmission,
+            currentYear: payload.currentYear,
+            father: payload.father, fatherPhone: payload.fatherPhone,
+            mother: payload.mother, motherPhone: payload.motherPhone,
+            phone: payload.phone || payload.fatherPhone || payload.motherPhone,
+            address: payload.address,
+            gender: payload.gender,
+            category: payload.category,
+            bloodGroup: payload.bloodGroup,
+            religion: payload.religion,
+            previousSchool: payload.previousSchool,
+            documentList: payload.documentList,
+            documents: payload.documentList,
+            status: payload.status,
+            tcIssued: payload.status === "TC Issued",
+            sessionId: sessionMeta.sessionId || "",
+            session: sessionMeta.session || payload.currentYear,
+            dateOfAdmission: payload.dateOfAdmission,
+            aadharNumber: payload.aadharNumber || "",
+            photoUrl: photoUpload.photoUrl,
+            photoPublicId: photoUpload.photoPublicId,
+            authProvider: "firebase",
+            authEmail: payload.studentEmail,
+            createdAt: new Date()
+          };
+
+          await setDoc(doc(db, "users", studentId), { uid: studentId, ...userMirror });
+          await setDoc(doc(db, "users", studentAuthUid), { uid: studentAuthUid, ...userMirror });
+
+          const assignedRolls = await updateRolls(payload.studentClass, section);
+          const assignedRoll = assignedRolls.get(studentRef.id) || "";
+          const feeAmount = Number(feeConfig[payload.studentClass] || 0);
+          const currentMonth = currentMonthName();
+          const existingFee = await findExistingFeeRecord(studentId, currentMonth);
+          if (feeAmount > 0 && !existingFee) {
+            await createMonthlyFeeIfMissing(studentId, currentMonth, {
+              studentId, studentDocId: studentRef.id, studentName: payload.name,
+              roll: assignedRoll, class: payload.studentClass, section,
+              amount: feeAmount, originalAmount: feeAmount,
+              paidAmount: 0, totalPaidAmount: 0,
+              totalExtraPaidAmount: 0, totalCollectedAmount: 0,
+              remainingAmount: feeAmount,
+              status: "Imposed", month: currentMonth,
+              date: new Date(), autoImposed: true, imposedDate: new Date(),
+              ...sessionFeeFields(),
+              payments: [], remarks: "",
+              createdBy: currentUser.email || ""
+            });
+          }
+
+          const savedSnap = await getDoc(studentRef);
+          const savedStudent = savedSnap.exists() ? { id: studentRef.id, ...savedSnap.data() } : { id: studentRef.id, ...studentData };
+          savedStudent.roll = savedStudent.roll || assignedRoll;
+          savedStudent.rollNo = savedStudent.rollNo || assignedRoll;
+          if (sessionMeta.sessionId) {
+            const placement = makeSessionPlacement(savedStudent, sessionMeta, { roll: assignedRoll || savedStudent.roll || savedStudent.rollNo || "" });
+            await updateDoc(studentRef, {
+              [`sessionPlacements.${sessionMeta.sessionId}`]: placement,
+              roll: assignedRoll || savedStudent.roll || "",
+              rollNo: assignedRoll || savedStudent.rollNo || "",
+              currentYear: sessionMeta.session || payload.currentYear,
+              sessionId: sessionMeta.sessionId,
+              session: sessionMeta.session || payload.currentYear,
+              academicSession: sessionMeta.session || payload.currentYear
+            });
+            savedStudent.sessionPlacements = {
+              ...(savedStudent.sessionPlacements || {}),
+              [sessionMeta.sessionId]: placement
+            };
+            savedStudent.roll = assignedRoll || savedStudent.roll || "";
+            savedStudent.rollNo = assignedRoll || savedStudent.rollNo || "";
+            savedStudent.currentYear = sessionMeta.session || payload.currentYear;
+            savedStudent.session = sessionMeta.session || payload.currentYear;
+            savedStudent.academicSession = sessionMeta.session || payload.currentYear;
+          }
+
+          let registrationEmailSent = false;
+          let registrationEmailError = "";
+          try {
+            await sendStudentRegistrationEmail(savedStudent, payload.studentPassword, feeAmount, currentMonth);
+            registrationEmailSent = true;
+          } catch (emailError) {
+            registrationEmailError = emailError.message || "Registration email failed.";
+            console.error("Registration email failed:", emailError);
+          }
+
+          return { savedStudent, feeAmount, currentMonth, registrationEmailSent, registrationEmailError };
+        }
+
+        window.addStudent = async () => {
+          try {
+            if (!ensureSessionEditable("Admission and fee creation")) return;
+            const result = await createStudentAdmission(getStudentPayloadFromForm());
+            showRecentStudent(result.savedStudent);
+            resetStudentForm();
+            const emailText = result.registrationEmailSent ? " Registration email sent." : " Registration saved, but email could not be sent.";
+            showToast(`Student added successfully. ${result.feeAmount > 0 ? `${formatCurrency(result.feeAmount)} imposed for ${result.currentMonth}.` : "No class fee configured."}${emailText}`, result.registrationEmailSent ? "success" : "info");
+          } catch (e) {
+            console.error("Student add failed:", e);
+            showToast(e.message || "Unable to add student.", "error");
+          }
+        };
+
+        const BULK_STUDENT_HEADERS = [
+          "srNumber", "name", "class", "section", "studentId", "gender", "category", "aadharNumber", "bloodGroup", "religion", "previousSchool", "status", "documentList", "studentEmail", "parentEmail",
+          "studentPassword", "father", "fatherPhone", "mother", "motherPhone", "phone",
+          "dob", "dateOfAdmission", "yearOfAdmission", "currentYear", "address", "maxPerSection"
+        ];
+
+        const BULK_HEADER_ALIASES = {
+          srNumber: ["srnumber", "srno", "scholarregister", "scholarno", "serialnumber"],
+          name: ["name", "studentname", "student"],
+          studentClass: ["class", "studentclass", "classname"],
+          section: ["section", "sec"],
+          studentId: ["studentid", "admissionno", "admissionnumber", "registrationid"],
+          gender: ["gender", "sex"],
+          category: ["category", "castecategory"],
+          aadharNumber: ["aadharnumber", "aadhaar", "aadhaarnumber", "aadhar"],
+          bloodGroup: ["bloodgroup", "blood"],
+          religion: ["religion"],
+          previousSchool: ["previousschool", "lastschool", "prevschool"],
+          status: ["status", "studentstatus"],
+          documentList: ["documentlist", "documents", "docs", "submitteddocuments"],
+          studentEmail: ["studentemail", "registeredemail", "email", "loginemail"],
+          parentEmail: ["parentemail", "guardianemail"],
+          studentPassword: ["studentpassword", "password", "loginpassword"],
+          father: ["father", "fathername"],
+          fatherPhone: ["fatherphone", "fatherphonenumber", "fathermobile"],
+          mother: ["mother", "mothername"],
+          motherPhone: ["motherphone", "motherphonenumber", "mothermobile"],
+          phone: ["phone", "primaryphone", "contact", "contactnumber", "mobile"],
+          dob: ["dob", "dateofbirth", "birthdate"],
+          dateOfAdmission: ["dateofadmission", "admissiondate", "dateadmission"],
+          yearOfAdmission: ["yearofadmission", "admissionyear"],
+          currentYear: ["currentyear", "academicsession", "session", "academicyear"],
+          address: ["address"],
+          maxPerSection: ["maxpersection", "sectionlimit", "maxstudentspersection"]
+        };
+
+        function normalizeBulkHeader(value) {
+          return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        }
+
+        function canonicalBulkKey(header) {
+          const normalized = normalizeBulkHeader(header);
+          for (const [key, aliases] of Object.entries(BULK_HEADER_ALIASES)) {
+            if (aliases.includes(normalized)) return key;
+          }
+          return "";
+        }
+
+        function parseCsvText(text) {
+          const rows = [];
+          let row = [], value = "", quoted = false;
+          for (let i = 0; i < text.length; i += 1) {
+            const ch = text[i];
+            const next = text[i + 1];
+            if (ch === '"' && quoted && next === '"') {
+              value += '"';
+              i += 1;
+            } else if (ch === '"') {
+              quoted = !quoted;
+            } else if (ch === "," && !quoted) {
+              row.push(value);
+              value = "";
+            } else if ((ch === "\n" || ch === "\r") && !quoted) {
+              if (ch === "\r" && next === "\n") i += 1;
+              row.push(value);
+              if (row.some((cell) => String(cell).trim())) rows.push(row);
+              row = [];
+              value = "";
+            } else {
+              value += ch;
+            }
+          }
+          row.push(value);
+          if (row.some((cell) => String(cell).trim())) rows.push(row);
+          return rows;
+        }
+
+        function rowsToObjects(rows) {
+          const headers = rows[0] || [];
+          return rows.slice(1).map((row) => {
+            const obj = {};
+            headers.forEach((header, index) => {
+              const key = canonicalBulkKey(header);
+              if (key) obj[key] = row[index] ?? "";
+            });
+            return obj;
+          }).filter((row) => Object.values(row).some((value) => String(value || "").trim()));
+        }
+
+        async function readBulkStudentRows(file) {
+          const ext = String(file.name || "").split(".").pop().toLowerCase();
+          if (ext === "csv") {
+            return rowsToObjects(parseCsvText(await file.text()));
+          }
+          if (!window.XLSX) {
+            throw new Error("Excel parser is still loading. Please try again in a moment, or upload CSV.");
+          }
+          const workbook = window.XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rawRows = window.XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: false });
+          return rowsToObjects(rawRows);
+        }
+
+        function withBulkDefaults(row) {
+          const today = new Date().toISOString().slice(0, 10);
+          const formLimit = parseInt($("maxPerSection")?.value || savedMaxPerSection, 10) || 0;
+          return {
+            ...row,
+            studentClass: row.studentClass || row.class,
+            maxPerSection: parseInt(row.maxPerSection, 10) || formLimit,
+            dateOfAdmission: row.dateOfAdmission || $("dateOfAdmission")?.value || today,
+            yearOfAdmission: row.yearOfAdmission || $("yearOfAdmission")?.value || String(new Date().getFullYear()),
+            currentYear: row.currentYear || $("currentYear")?.value || academicYearFromToday()
+          };
+        }
+
+        async function assignBulkSrNumbers(rows) {
+          const normalizedRows = rows.map((row) => ({ ...row, srNumber: String(row.srNumber || "").trim() }));
+          const fileTaken = new Set();
+          const duplicateInFile = normalizedRows.find((row) => {
+            if (!row.srNumber) return false;
+            const key = row.srNumber.toLowerCase();
+            if (fileTaken.has(key)) return true;
+            fileTaken.add(key);
+            return false;
+          });
+          if (duplicateInFile) throw new Error(`Duplicate SR number in import file: ${duplicateInFile.srNumber}`);
+
+          const blankIndexes = normalizedRows
+            .map((row, index) => row.srNumber ? -1 : index)
+            .filter((index) => index >= 0);
+          if (!blankIndexes.length) return normalizedRows;
+
+          const seed = normalizedRows.find((row) => row.srNumber)?.srNumber || $("srNumber")?.value || "";
+          const generated = await generateUniqueSrNumbers(blankIndexes.length, seed, normalizedRows.map((row) => row.srNumber));
+          blankIndexes.forEach((rowIndex, generatedIndex) => {
+            normalizedRows[rowIndex].srNumber = generated[generatedIndex];
+          });
+          return normalizedRows;
+        }
+
+        function renderBulkResults(results) {
+          const target = $("bulkImportResults");
+          if (!target) return;
+          target.classList.add("show");
+          const ok = results.filter((item) => item.ok).length;
+          const failed = results.length - ok;
+          target.innerHTML = `
+            <strong>Import finished: ${ok} added, ${failed} failed.</strong>
+            <div style="margin-top:10px;display:grid;gap:6px">
+              ${results.map((item) => `<div><span class="${item.ok ? "ok" : "fail"}">${item.ok ? "Added" : "Failed"}</span> Row ${item.row}: ${escapeHtml(item.name || "")}${item.studentId ? ` (${escapeHtml(item.studentId)})` : ""}${item.message ? ` - ${escapeHtml(item.message)}` : ""}</div>`).join("")}
+            </div>`;
+        }
+
+        window.downloadBulkStudentTemplate = () => {
+          const sample = [
+            BULK_STUDENT_HEADERS,
+            ["", "Aarav Sharma", "5", "", "", "Male", "General", "", "B+", "", "", "Active", "", "aarav.student@example.com", "parent@example.com", "student123", "Raj Sharma", "9876543210", "Neha Sharma", "9876543211", "", "2015-04-12", new Date().toISOString().slice(0, 10), String(new Date().getFullYear()), $("currentYear")?.value || academicYearFromToday(), "Student address", $("maxPerSection")?.value || savedMaxPerSection || "40"]
+          ];
+          const csv = sample.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+          const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "schoolix-student-bulk-template.csv";
+          link.click();
+          URL.revokeObjectURL(url);
+        };
+
+        window.importBulkStudents = async () => {
+          const file = $("bulkStudentFile")?.files?.[0];
+          if (!file) return showToast("Select an Excel or CSV file first.", "error");
+          if (!ensureSessionEditable("Bulk admission import")) return;
+          const button = $("bulkImportBtn");
+          const previousLabel = button?.textContent || "Import Students";
+          const results = [];
+          try {
+            if (button) { button.disabled = true; button.textContent = "Importing..."; }
+            const rows = await assignBulkSrNumbers((await readBulkStudentRows(file)).map(withBulkDefaults));
+            if (!rows.length) throw new Error("No student rows found in the file.");
+            const seenEmails = new Set();
+            const seenIds = new Set();
+            rows.forEach((row, index) => {
+              const label = `Row ${index + 2}`;
+              validateStudentPayload({
+                ...row,
+                studentClass: normalizeClassValue(row.studentClass || row.class),
+                maxPerSection: parseInt(row.maxPerSection, 10) || 0,
+                studentEmail: String(row.studentEmail || "").trim().toLowerCase(),
+                parentEmail: String(row.parentEmail || "").trim().toLowerCase(),
+                studentPassword: String(row.studentPassword || "").trim(),
+                dateOfAdmission: normalizeAdmissionDate(row.dateOfAdmission)
+              }, label);
+              const email = String(row.studentEmail || "").trim().toLowerCase();
+              const id = String(row.studentId || "").trim();
+              if (seenEmails.has(email)) throw new Error(`${label}: duplicate email in import file.`);
+              if (id && seenIds.has(id)) throw new Error(`${label}: duplicate student ID in import file.`);
+              seenEmails.add(email);
+              if (id) seenIds.add(id);
+            });
+
+            for (let index = 0; index < rows.length; index += 1) {
+              const rowNumber = index + 2;
+              const row = rows[index];
+              try {
+                const result = await createStudentAdmission(row, { label: `Row ${rowNumber}` });
+                results.push({ ok: true, row: rowNumber, name: result.savedStudent.name, studentId: result.savedStudent.studentId });
+              } catch (error) {
+                console.error("Bulk student import row failed:", rowNumber, error);
+                results.push({ ok: false, row: rowNumber, name: row.name, studentId: row.studentId, message: error.message || "Unable to import row." });
+              }
+            }
+            renderBulkResults(results);
+            const imported = results.filter((item) => item.ok).length;
+            showToast(`${imported} student(s) imported from ${file.name}.`, imported ? "success" : "error");
+          } catch (error) {
+            console.error("Bulk import failed:", error);
+            showToast(error.message || "Unable to import students.", "error");
+            if (results.length) renderBulkResults(results);
+          } finally {
+            if (button) { button.disabled = false; button.textContent = previousLabel; }
+          }
+        };
+
+        function setFeeFormMode(isEditing) {
+          $("month").disabled = Boolean(isEditing);
+          $("saveBtn").textContent = isEditing ? "Update Fee Entry" : "Save Fee Entry";
+        }
+
+        function clearPreview() {
+          $("autoUpdateAlert").style.display = "none";
+          $("autoUpdateAlert").classList.remove("warning");
+          $("autoUpdateMsg").textContent = "";
+          $("autoUpdateMetrics").innerHTML = "";
+          $("previewHint").textContent = "";
+        }
+
+        window.resetFeeForm = () => {
+          $("amount").value = "";
+          $("status").value = "";
+          $("feeRemarks").value = "";
+          $("month").value = currentMonthName();
+          existingFeeId = null; existingFeeData = null;
+          editingFeeId = null; editingFeeData = null;
+          setFeeFormMode(false);
+          clearPreview();
+        };
+
+        async function loadFeesForStudent(studentId) {
+          const snap = await getDocs(query(collection(db, "schools", currentUser.uid, "fees"), where("studentId", "==", studentId)));
+          return snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(feeBelongsToSelectedSession)
+            .sort((a, b) => (toDate(b.updatedAt) || toDate(b.date) || 0) - (toDate(a.updatedAt) || toDate(a.date) || 0));
+        }
+
+        function renderPreview(fee, enteredAmount, status) {
+          if (!fee) { clearPreview(); return; }
+          const base = getFeeAmounts(fee);
+          if (status === "Paid") {
+            const isZeroAssignedEntry = base.total <= 0 && base.due <= 0;
+            const appliedNow = isZeroAssignedEntry ? enteredAmount : Math.min(enteredAmount, base.due);
+            const extraNow = isZeroAssignedEntry ? 0 : Math.max(0, enteredAmount - base.due);
+            const projApplied = base.applied + appliedNow;
+            const projExtra = base.extra + extraNow;
+            const projDue = Math.max(0, base.total - projApplied);
+            $("autoUpdateMsg").textContent = `${fee.month} already exists for this student. The payment will update the same entry.`;
+            $("autoUpdateMetrics").innerHTML = `
+              <div class="preview-metric"><span>Assigned</span><strong>${formatCurrency(base.total)}</strong></div>
+              <div class="preview-metric"><span>Already Applied</span><strong>${formatCurrency(base.applied)}</strong></div>
+              <div class="preview-metric"><span>Applied Now</span><strong>${formatCurrency(appliedNow)}</strong></div>
+              <div class="preview-metric"><span>Extra Now</span><strong>${formatCurrency(extraNow)}</strong></div>
+              <div class="preview-metric"><span>Projected Extra</span><strong>${formatCurrency(projExtra)}</strong></div>
+              <div class="preview-metric"><span>Projected Due</span><strong>${formatCurrency(projDue)}</strong></div>`;
+            $("previewHint").textContent = extraNow > 0
+              ? "The received amount exceeds the current due. The excess will be stored as extra collection and can be adjusted to any month."
+              : "The payment will be appended to the existing payment history.";
+            $("autoUpdateAlert").classList.remove("warning");
+          } else {
+            const projAssigned = base.total + enteredAmount;
+            const projDue = base.due + enteredAmount;
+            $("autoUpdateMsg").textContent = `${fee.month} already exists. The entered amount will be added to the same month.`;
+            $("autoUpdateMetrics").innerHTML = `
+              <div class="preview-metric"><span>Current Assigned</span><strong>${formatCurrency(base.total)}</strong></div>
+              <div class="preview-metric"><span>Applied Till Now</span><strong>${formatCurrency(base.applied)}</strong></div>
+              <div class="preview-metric"><span>Extra Till Now</span><strong>${formatCurrency(base.extra)}</strong></div>
+              <div class="preview-metric"><span>Added Now</span><strong>${formatCurrency(enteredAmount)}</strong></div>
+              <div class="preview-metric"><span>Projected Assigned</span><strong>${formatCurrency(projAssigned)}</strong></div>
+              <div class="preview-metric"><span>Projected Due</span><strong>${formatCurrency(projDue)}</strong></div>`;
+            $("previewHint").textContent = "Existing payment history and applied amounts will stay intact. Only assigned and due amounts will increase.";
+            $("autoUpdateAlert").classList.remove("warning");
+          }
+          $("autoUpdateAlert").style.display = "block";
+        }
+
+        window.checkAutoUpdate = async () => {
+          try {
+            const month = $("month").value;
+            const status = $("status").value;
+            const enteredAmount = Number($("amount").value || 0);
+            if (!currentStudent || !month || !status || enteredAmount <= 0) {
+              if (!editingFeeId) clearPreview();
+              existingFeeId = null; existingFeeData = null;
+              return;
+            }
+            if (editingFeeId && editingFeeData) { renderPreview(editingFeeData, enteredAmount, status); return; }
+            const fee = await findExistingFeeRecord(currentStudent.studentId, month);
+            existingFeeId = fee?.id || null;
+            existingFeeData = fee || null;
+            renderPreview(existingFeeData, enteredAmount, status);
+          } catch (e) { console.error("Preview update failed:", e); clearPreview(); }
+        };
+
+        async function buildPaymentUpdate(enteredAmount, fee, status, remarks) {
+          const current = getFeeAmounts(fee);
+          const payments = Array.isArray(fee.payments) ? [...fee.payments] : [];
+
+          if (status === "Paid") {
+            const isZeroAssignedEntry = current.total <= 0 && current.due <= 0;
+            const appliedNow = isZeroAssignedEntry ? enteredAmount : Math.min(enteredAmount, current.due);
+            const extraNow = isZeroAssignedEntry ? 0 : Math.max(0, enteredAmount - current.due);
+            const totalApplied = current.applied + appliedNow;
+            const totalExtra = current.extra + extraNow;
+            const remaining = Math.max(0, current.total - totalApplied);
+            const paymentStatus = extraNow > 0 ? (appliedNow > 0 ? "Applied with extra" : "Extra collection") : remaining === 0 ? "Paid" : "Partial paid";
+
+            return {
+              updateData: {
+                amount: current.total, originalAmount: current.total,
+                paidAmount: totalApplied, totalPaidAmount: totalApplied,
+                totalExtraPaidAmount: totalExtra,
+                totalCollectedAmount: totalApplied + totalExtra,
+                remainingAmount: remaining,
+                status: remaining === 0 ? "Paid" : "Partial Paid",
+                payments: [...payments, {
+                  receivedAmount: enteredAmount, appliedAmount: appliedNow,
+                  extraAmount: extraNow, amount: appliedNow,
+                  date: new Date(), status: paymentStatus,
+                  remarks: remarks || ""
+                }],
+                lastPaymentAmount: enteredAmount, lastAppliedAmount: appliedNow,
+                lastExtraAmount: extraNow, lastPaymentDate: new Date(),
+                remarks: remarks || fee.remarks || "",
+                updatedAt: new Date(), lastUpdatedBy: currentUser.email || ""
+              },
+              message: extraNow > 0
+                ? `Payment saved. ${formatCurrency(appliedNow)} applied and ${formatCurrency(extraNow)} stored as extra collection.`
+                : `Payment saved. ${formatCurrency(appliedNow)} applied to ${fee.month}.`
+            };
+          }
+
+          return {
+            updateData: {
+              amount: current.total + enteredAmount,
+              originalAmount: current.total + enteredAmount,
+              paidAmount: current.applied, totalPaidAmount: current.applied,
+              totalExtraPaidAmount: current.extra, totalCollectedAmount: current.collected,
+              remainingAmount: current.due + enteredAmount,
+              status, payments,
+              remarks: remarks || fee.remarks || "",
+              lastPaymentAmount: fee.lastPaymentAmount || 0,
+              lastAppliedAmount: fee.lastAppliedAmount || 0,
+              lastExtraAmount: fee.lastExtraAmount || 0,
+              lastPaymentDate: fee.lastPaymentDate || null,
+              updatedAt: new Date(), lastUpdatedBy: currentUser.email || ""
+            },
+            message: `${formatCurrency(enteredAmount)} added to ${fee.month}. Total assigned is now ${formatCurrency(current.total + enteredAmount)}.`
+          };
+        }
+
+        window.saveFees = async () => {
+          try {
+            if (!ensureSessionEditable("Fee changes")) return;
+            if (!currentStudent) return showToast("Fetch a student first.", "error");
+            const enteredAmount = Number($("amount").value || 0);
+            const status = $("status").value;
+            const month = $("month").value;
+            const remarks = $("feeRemarks").value.trim();
+
+            if (!month || !status || enteredAmount <= 0) {
+              return showToast("Enter amount, billing month and status.", "error");
+            }
+
+            const targetFeeId = editingFeeId || existingFeeId;
+            const targetFeeData = editingFeeData || existingFeeData;
+
+            if (targetFeeId && targetFeeData) {
+              const paymentUpdate = await buildPaymentUpdate(enteredAmount, targetFeeData, status, remarks);
+              if (!paymentUpdate) return;
+              await updateDoc(doc(db, "schools", currentUser.uid, "fees", targetFeeId), paymentUpdate.updateData);
+              showToast(paymentUpdate.message);
+            } else {
+              const isPaid = status === "Paid";
+              const assignedAmount = isPaid ? 0 : enteredAmount;
+              const newFee = {
+                studentId: currentStudent.studentId,
+                studentDocId: currentStudent.id,
+                studentName: currentStudent.name,
+                roll: currentStudent.roll || "",
+                class: currentStudent.class, section: currentStudent.section || "",
+                amount: assignedAmount, originalAmount: assignedAmount,
+                paidAmount: isPaid ? enteredAmount : 0,
+                totalPaidAmount: isPaid ? enteredAmount : 0,
+                totalExtraPaidAmount: 0,
+                totalCollectedAmount: isPaid ? enteredAmount : 0,
+                remainingAmount: isPaid ? 0 : assignedAmount,
+                status: isPaid ? "Paid" : status,
+                month, date: new Date(), manualEntry: true,
+                ...sessionFeeFields(),
+                remarks: remarks || "",
+                updatedAt: new Date(), lastUpdatedBy: currentUser.email || "",
+                payments: isPaid ? [{
+                  receivedAmount: enteredAmount, appliedAmount: enteredAmount,
+                  extraAmount: 0, amount: enteredAmount,
+                  date: new Date(), status: "Paid", remarks: remarks || ""
+                }] : []
+              };
+              const saveResult = await createMonthlyFeeIfMissing(currentStudent.studentId, month, newFee);
+              if (!saveResult.created) {
+                const paymentUpdate = await buildPaymentUpdate(enteredAmount, saveResult.fee, status, remarks);
+                if (!paymentUpdate) return;
+                await updateDoc(doc(db, "schools", currentUser.uid, "fees", saveResult.fee.id), paymentUpdate.updateData);
+              }
+              showToast(isPaid ? `New paid fee saved for ${month}.` : `New ${status.toLowerCase()} fee saved for ${month}.`);
+            }
+
+            resetFeeForm();
+            await viewHistory();
+          } catch (e) {
+            console.error("Fee save failed:", e);
+            showToast(e.message || "Unable to save fee entry.", "error");
+          }
+        };
+
+        function feeCardHtml(fee) {
+          const amounts = getFeeAmounts(fee);
+          const meta = getFeeStatusMeta(fee);
+          const payments = Array.isArray(fee.payments) ? [...fee.payments].reverse() : [];
+          const progress = amounts.total > 0 ? Math.min(100, Math.round((amounts.applied / amounts.total) * 100)) : 0;
+          const source = fee.autoImposed ? "Auto imposed" : fee.adjustmentEntry ? "Extra adjustment" : fee.manualEntry ? "Manual entry" : "Updated record";
+
+          return `
+            <article class="fee-card ${meta.tone}">
+              <div class="fee-card-top">
+                <div>
+                  <div class="fee-title">${escapeHtml(fee.month || "Fee entry")}</div>
+                  <div class="fee-meta">${formatDate(fee.updatedAt || fee.date)} | ${source}</div>
+                </div>
+                <div class="button-row" style="gap:10px">
+                  <span class="status-chip ${meta.tone}">${meta.label}</span>
+                  <button class="btn btn-accent" style="min-height:38px;padding:10px 14px;font-size:13px" onclick="openReceiptModalForFee('${fee.id}')">Receipt</button>
+                  <button class="btn btn-secondary" style="min-height:38px;padding:10px 14px" onclick="editFee('${fee.id}')">Edit</button>
+                  <button class="btn btn-danger" style="min-height:38px;padding:10px 14px" onclick="deleteFee('${fee.id}')">Delete</button>
+                </div>
+              </div>
+
+              <div class="money-grid">
+                <div class="money-box"><span>Assigned</span><strong>${formatCurrency(amounts.total)}</strong></div>
+                <div class="money-box"><span>Applied</span><strong>${formatCurrency(amounts.applied)}</strong></div>
+                <div class="money-box"><span>Collected</span><strong>${formatCurrency(amounts.collected)}</strong></div>
+                <div class="money-box"><span>Extra</span><strong>${formatCurrency(amounts.extra)}</strong></div>
+                <div class="money-box"><span>Due</span><strong>${formatCurrency(amounts.due)}</strong></div>
+              </div>
+
+              <div>
+                <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+                <div style="margin-top:8px;color:var(--text-soft);font-size:13px">${progress}% of the assigned amount has been applied.</div>
+              </div>
+
+              ${fee.remarks ? `<div class="fee-remarks"><strong>Remarks</strong>${escapeHtml(fee.remarks)}</div>` : ""}
+
+              ${payments.length ? `
+                <div class="payment-history">
+                  <h4>Payment History</h4>
+                  ${payments.map(p => `
+                    <div class="payment-item">
+                      <div>
+                        <strong>${formatDate(p.date)}</strong><br>
+                        <span style="color:var(--text-soft)">Received ${formatCurrency(p.receivedAmount ?? p.fullAmount ?? p.amount ?? 0)}</span>
+                        ${p.remarks ? `<br><span style="color:#8a6a00;font-size:12px">${escapeHtml(p.remarks)}</span>` : ""}
+                      </div>
+                      <div style="text-align:right">
+                        <div>Applied ${formatCurrency(p.appliedAmount ?? p.amount ?? 0)}</div>
+                        <div style="color:var(--accent)">Extra ${formatCurrency(p.extraAmount ?? 0)}</div>
+                        <div style="color:var(--text-soft)">${escapeHtml(p.status || "Payment recorded")}</div>
+                      </div>
+                    </div>`).join("")}
+                </div>` : ""}
+            </article>`;
+        }
+
+        window.viewHistory = async () => {
+          try {
+            if (!currentStudent) return showToast("Fetch a student first.", "error");
+            feeHistory = await loadFeesForStudent(currentStudent.studentId);
+            renderSummaryBanner(feeHistory);
+            updateExtraBalanceBanner();
+            $("historySection").innerHTML = feeHistory.length
+              ? `<div class="history-list">${feeHistory.map(fee => feeCardHtml(fee)).join("")}</div>`
+              : `<div class="empty-state">No fee entries found for this student.</div>`;
+            $("printBtn").style.display = "inline-flex";
+            $("printReceiptBtn").style.display = "inline-flex";
+            $("downloadStatementBtn").style.display = "inline-flex";
+          } catch (e) {
+            console.error("History load failed:", e);
+            showToast(e.message || "Unable to load fee history.", "error");
+          }
+        };
+
+        window.fetchStudent = async () => {
+          try {
+            const studentId = $("searchId").value.trim();
+            if (!studentId) return showToast("Enter a student ID.", "error");
+            const snap = await getDocs(query(collection(db, "schools", currentUser.uid, "students"), where("studentId", "==", studentId)));
+            if (snap.empty) return showToast("Student not found.", "error");
+            currentStudent = { id: snap.docs[0].id, ...snap.docs[0].data() };
+            $("studentName").value = currentStudent.name || "";
+            $("studentClass").value = `${currentStudent.class || ""}-${currentStudent.section || ""}`;
+            $("studentFather").value = currentStudent.father || "";
+            $("studentFatherPhone").value = currentStudent.fatherPhone || currentStudent.phone || "";
+            $("studentMother").value = currentStudent.mother || "";
+            $("studentMotherPhone").value = currentStudent.motherPhone || currentStudent.phone || "";
+            $("feesModal").style.display = "flex";
+            $("printBtn").style.display = "inline-flex";
+            resetFeeForm();
+            await viewHistory();
+            showToast("Student loaded.", "info");
+          } catch (e) {
+            console.error("Student fetch failed:", e);
+            showToast(e.message || "Unable to fetch student.", "error");
+          }
+        };
+
+        window.editFee = (feeId) => {
+          const fee = feeHistory.find(e => e.id === feeId);
+          if (!fee) return showToast("Fee entry not found.", "error");
+          editingFeeId = fee.id; editingFeeData = fee;
+          existingFeeId = fee.id; existingFeeData = fee;
+          $("amount").value = String(fee.originalAmount ?? fee.amount ?? 0);
+          $("month").value = fee.month || "";
+          $("status").value = fee.status === "Partial Paid" ? "Paid" : fee.status || "Pending";
+          $("feeRemarks").value = fee.remarks || "";
+          setFeeFormMode(true);
+          renderPreview(fee, Number($("amount").value || 0), $("status").value);
+          document.querySelector("#feesModal .modal-card").scrollTop = 0;
+          showToast("Edit mode enabled for the selected fee.", "info");
+        };
+
+        window.deleteFee = async (feeId) => {
+          if (!ensureSessionEditable("Fee deletion")) return;
+          if (!window.confirm("Delete this fee entry?")) return;
+          try {
+            await deleteDoc(doc(db, "schools", currentUser.uid, "fees", feeId));
+            if (editingFeeId === feeId) resetFeeForm();
+            await viewHistory();
+            showToast("Fee entry deleted.");
+          } catch (e) {
+            console.error("Fee delete failed:", e);
+            showToast(e.message || "Unable to delete fee entry.", "error");
+          }
+        };
+
+        // ── EXTRA ADJUSTMENT ──────────────────────────────────────────
+
+        window.openAdjustExtraModal = () => {
+          const totalExtra = getTotalExtraBalance();
+          if (totalExtra <= 0) return showToast("No extra balance to adjust.", "error");
+          $("adjustExtraInfo").innerHTML = `
+            <strong>Total extra balance available: ${formatCurrency(totalExtra)}</strong><br>
+            Select the month you want to apply this extra amount to. If a fee entry exists for that month, the amount will be applied against its due. If not, a new paid entry will be created.`;
+          $("adjustTargetMonth").value = "";
+          $("adjustAmount").value = "";
+          $("adjustRemarks").value = "";
+          $("adjustExtraModal").style.display = "flex";
+        };
+
+        window.closeAdjustExtraModal = () => {
+          $("adjustExtraModal").style.display = "none";
+        };
+
+        window.applyExtraAdjustment = async () => {
+          try {
+            if (!ensureSessionEditable("Fee adjustments")) return;
+            const targetMonth = $("adjustTargetMonth").value;
+            const adjustAmount = Number($("adjustAmount").value || 0);
+            const remarks = $("adjustRemarks").value.trim();
+
+            if (!targetMonth) return showToast("Select a target month.", "error");
+            if (adjustAmount <= 0) return showToast("Enter a valid amount.", "error");
+
+            const totalExtra = getTotalExtraBalance();
+            if (adjustAmount > totalExtra) {
+              return showToast(`Amount exceeds available extra balance of ${formatCurrency(totalExtra)}.`, "error");
+            }
+
+            // Deduct from fee entries with extra (oldest first)
+            const feesWithExtra = [...feeHistory]
+              .filter(f => getFeeAmounts(f).extra > 0)
+              .sort((a, b) => (toDate(a.updatedAt) || toDate(a.date) || 0) - (toDate(b.updatedAt) || toDate(b.date) || 0));
+
+            let remaining = adjustAmount;
+            for (const fee of feesWithExtra) {
+              if (remaining <= 0) break;
+              const amounts = getFeeAmounts(fee);
+              const deductFromThis = Math.min(remaining, amounts.extra);
+              const newExtra = amounts.extra - deductFromThis;
+              const newCollected = amounts.applied + newExtra;
+              remaining -= deductFromThis;
+              await updateDoc(doc(db, "schools", currentUser.uid, "fees", fee.id), {
+                totalExtraPaidAmount: newExtra,
+                totalCollectedAmount: newCollected,
+                updatedAt: new Date(),
+                lastUpdatedBy: currentUser.email || ""
+              });
+            }
+
+            // Apply to target month
+            const existingFee = await findExistingFeeRecord(currentStudent.studentId, targetMonth);
+            if (existingFee) {
+              const current = getFeeAmounts(existingFee);
+              const appliedNow = current.total <= 0 && current.due <= 0 ? adjustAmount : Math.min(adjustAmount, current.due);
+              const totalApplied = current.applied + appliedNow;
+              const newDue = Math.max(0, current.total - totalApplied);
+              const payments = Array.isArray(existingFee.payments) ? [...existingFee.payments] : [];
+              await updateDoc(doc(db, "schools", currentUser.uid, "fees", existingFee.id), {
+                paidAmount: totalApplied, totalPaidAmount: totalApplied,
+                totalCollectedAmount: current.collected + appliedNow,
+                remainingAmount: newDue,
+                status: newDue === 0 ? "Paid" : "Partial Paid",
+                payments: [...payments, {
+                  receivedAmount: adjustAmount, appliedAmount: appliedNow,
+                  extraAmount: 0, amount: appliedNow,
+                  date: new Date(), status: "Adjusted from extra",
+                  remarks: remarks || "Extra balance adjustment"
+                }],
+                remarks: existingFee.remarks || "",
+                updatedAt: new Date(), lastUpdatedBy: currentUser.email || ""
+              });
+              showToast(`${formatCurrency(adjustAmount)} extra adjusted to ${targetMonth}. ${formatCurrency(appliedNow)} applied against dues.`);
+            } else {
+              const newAdjustmentFee = {
+                studentId: currentStudent.studentId,
+                studentDocId: currentStudent.id,
+                studentName: currentStudent.name,
+                roll: currentStudent.roll || "",
+                class: currentStudent.class, section: currentStudent.section || "",
+                amount: 0, originalAmount: 0,
+                paidAmount: adjustAmount, totalPaidAmount: adjustAmount,
+                totalExtraPaidAmount: 0, totalCollectedAmount: adjustAmount,
+                remainingAmount: 0, status: "Paid",
+                month: targetMonth, date: new Date(),
+                adjustmentEntry: true, remarks: remarks || "Extra balance adjustment",
+                ...sessionFeeFields(),
+                updatedAt: new Date(), lastUpdatedBy: currentUser.email || "",
+                payments: [{
+                  receivedAmount: adjustAmount, appliedAmount: adjustAmount,
+                  extraAmount: 0, amount: adjustAmount,
+                  date: new Date(), status: "Adjusted from extra",
+                  remarks: remarks || "Extra balance adjustment"
+                }]
+              };
+              const saveResult = await createMonthlyFeeIfMissing(currentStudent.studentId, targetMonth, newAdjustmentFee);
+              if (!saveResult.created) {
+                const current = getFeeAmounts(saveResult.fee);
+                const appliedNow = current.total <= 0 && current.due <= 0 ? adjustAmount : Math.min(adjustAmount, current.due);
+                const totalApplied = current.applied + appliedNow;
+                const newDue = Math.max(0, current.total - totalApplied);
+                const payments = Array.isArray(saveResult.fee.payments) ? [...saveResult.fee.payments] : [];
+                await updateDoc(doc(db, "schools", currentUser.uid, "fees", saveResult.fee.id), {
+                  paidAmount: totalApplied, totalPaidAmount: totalApplied,
+                  totalCollectedAmount: current.collected + appliedNow,
+                  remainingAmount: newDue,
+                  status: newDue === 0 ? "Paid" : "Partial Paid",
+                  payments: [...payments, {
+                    receivedAmount: adjustAmount, appliedAmount: appliedNow,
+                    extraAmount: 0, amount: appliedNow,
+                    date: new Date(), status: "Adjusted from extra",
+                    remarks: remarks || "Extra balance adjustment"
+                  }],
+                  remarks: saveResult.fee.remarks || "",
+                  updatedAt: new Date(), lastUpdatedBy: currentUser.email || ""
+                });
+              }
+              showToast(`${formatCurrency(adjustAmount)} extra adjusted and new paid entry created for ${targetMonth}.`);
+            }
+
+            closeAdjustExtraModal();
+            await viewHistory();
+          } catch (e) {
+            console.error("Extra adjustment failed:", e);
+            showToast(e.message || "Adjustment failed.", "error");
+          }
+        };
+
+        // ── RECEIPT ─────────────────────────────────────────────────────
+
+        function buildReceiptHtml(student, feesToShow, isSingle = false) {
+          const schoolName = window.SchoolBranding?.getSchoolName() || "Schoolix Academy";
+          const now = new Date();
+          const receiptNo = `RCP-${student.studentId}-${now.getTime().toString().slice(-6)}`;
+
+          const rowsHtml = feesToShow.map(fee => {
+            const a = getFeeAmounts(fee);
+            const meta = getFeeStatusMeta(fee);
+            const statusColor = meta.tone === "paid" ? "#12805c" : meta.tone === "partial" ? "#0d9488" : meta.tone === "unpaid" ? "#b42318" : "#b56c00";
+            return `
+              <tr>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;font-weight:700">${escapeHtml(fee.month || "")}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right">${formatCurrency(a.total)}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right;color:#12805c">${formatCurrency(a.applied)}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right;color:#0d9488">${formatCurrency(a.extra)}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right;color:#b42318">${formatCurrency(a.due)}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:center"><span style="background:${statusColor}20;color:${statusColor};padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800">${meta.label}</span></td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;font-size:12px;color:#5e6c80">${escapeHtml(fee.remarks || "—")}</td>
+              </tr>`;
+          }).join("");
+
+          const summary = calculateStudentFeeSummary(feesToShow);
+
+          return `
+            <div style="font-family:'Aptos','Segoe UI',Tahoma,sans-serif;max-width:860px;margin:0 auto;background:#fff;color:#142033">
+              <div style="padding:28px 30px;background:linear-gradient(135deg,#0f6cbd,#0b4f8a);color:#fff;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+                <div>
+                  <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;font-weight:700">${escapeHtml(schoolName)}</div>
+                  <h1 style="margin:8px 0 4px;font-size:26px;letter-spacing:-.02em">${isSingle ? "Fee Receipt" : "Full Fee Statement"}</h1>
+                  <div style="font-size:13px;opacity:.85">Receipt No: ${receiptNo}</div>
+                </div>
+                <div style="text-align:right;font-size:13px;opacity:.85;line-height:1.7">
+                  <div>Date: ${now.toLocaleDateString("en-IN")}</div>
+                  <div>Generated: ${now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>
+                </div>
+              </div>
+
+              <div style="padding:20px 30px;background:#eef3fb;border-bottom:1px solid #d7e2f2;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+                <div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#3b4b63;font-weight:700;margin-bottom:8px">Student Details</div>
+                  <table style="font-size:13px;border-collapse:collapse;width:100%">
+                    <tr><td style="padding:3px 0;font-weight:700;width:38%">Name</td><td>${escapeHtml(student.name || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Student ID</td><td>${escapeHtml(student.studentId || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Class</td><td>${escapeHtml(student.class || "N/A")}-${escapeHtml(student.section || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Roll No.</td><td>${escapeHtml(student.roll || "TBA")}</td></tr>
+                  </table>
+                </div>
+                <div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5e6c80;font-weight:700;margin-bottom:8px">Parent Details</div>
+                  <table style="font-size:13px;border-collapse:collapse;width:100%">
+                    <tr><td style="padding:3px 0;font-weight:700;width:38%">Father</td><td>${escapeHtml(student.father || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Father Phone</td><td>${escapeHtml(student.fatherPhone || student.phone || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Mother</td><td>${escapeHtml(student.mother || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Mother Phone</td><td>${escapeHtml(student.motherPhone || student.phone || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Phone</td><td>${escapeHtml(student.phone || "N/A")}</td></tr>
+                    <tr><td style="padding:3px 0;font-weight:700">Acad. Year</td><td>${escapeHtml(student.currentYear || "N/A")}</td></tr>
+                  </table>
+                </div>
+              </div>
+
+              <div style="padding:0 30px 20px">
+                <div style="margin:20px 0 12px;font-weight:800;font-size:15px">Fee Details</div>
+                <div style="overflow-x:auto">
+                  <table style="width:100%;border-collapse:collapse;font-size:13px">
+                    <thead>
+                      <tr style="background:#e8eff8">
+                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Month</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Assigned</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Applied</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Extra</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Due</th>
+                        <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Status</th>
+                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                    <tfoot>
+                      <tr style="background:#eef5ff;font-weight:800;color:#102a43">
+                        <td style="padding:12px;border-top:2px solid #d8e2f0">TOTAL</td>
+                        <td style="padding:12px;text-align:right;border-top:2px solid #d8e2f0">${formatCurrency(summary.total)}</td>
+                        <td style="padding:12px;text-align:right;border-top:2px solid #d8e2f0;color:#12805c">${formatCurrency(summary.applied)}</td>
+                        <td style="padding:12px;text-align:right;border-top:2px solid #d8e2f0;color:#0f766e">${formatCurrency(summary.extra)}</td>
+                        <td style="padding:12px;text-align:right;border-top:2px solid #d8e2f0;color:#991b1b">${formatCurrency(summary.due)}</td>
+                        <td style="border-top:2px solid #d8e2f0"></td>
+                        <td style="border-top:2px solid #d8e2f0"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <div style="padding:16px 30px 24px;border-top:1px solid #e8eef7;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;color:#5e6c80;font-size:12px">
+                <span>This is a computer generated receipt.</span>
+                <span>${escapeHtml(schoolName)} | ${now.toLocaleDateString("en-IN")}</span>
+              </div>
+            </div>`;
+        }
+
+        window.openReceiptModal = () => {
+          if (!currentStudent || !feeHistory.length) return showToast("No fee data available.", "error");
+
+          // Populate single fee selector
+          $("receiptFeeSelect").innerHTML = feeHistory.map(f => `<option value="${f.id}">${escapeHtml(f.month || f.id)}</option>`).join("");
+          document.querySelector('input[name="receiptType"][value="full"]').checked = true;
+          $("singleMonthSelector").style.display = "none";
+          renderReceiptPreview();
+          $("receiptModal").style.display = "flex";
+        };
+
+        window.openReceiptModalForFee = (feeId) => {
+          if (!currentStudent) return;
+          $("receiptFeeSelect").innerHTML = feeHistory.map(f => `<option value="${f.id}"${f.id === feeId ? " selected" : ""}>${escapeHtml(f.month || f.id)}</option>`).join("");
+          document.querySelector('input[name="receiptType"][value="single"]').checked = true;
+          $("singleMonthSelector").style.display = "block";
+          renderReceiptPreview();
+          $("receiptModal").style.display = "flex";
+        };
+
+        window.closeReceiptModal = () => {
+          $("receiptModal").style.display = "none";
+        };
+
+        window.downloadFullStatement = () => {
+          document.querySelector('input[name="receiptType"][value="full"]').checked = true;
+          $("singleMonthSelector").style.display = "none";
+          renderReceiptPreview();
+          downloadReceiptPDF();
+        };
+
+        window.renderReceiptPreview = () => {
+          const type = document.querySelector('input[name="receiptType"]:checked')?.value || "full";
+          $("singleMonthSelector").style.display = type === "single" ? "block" : "none";
+
+          let feesToShow = feeHistory;
+          if (type === "single") {
+            const selectedId = $("receiptFeeSelect").value;
+            feesToShow = feeHistory.filter(f => f.id === selectedId);
+          }
+
+          $("receiptPreview").innerHTML = buildReceiptHtml(currentStudent, feesToShow, type === "single");
+        };
+
+        window.printReceipt = () => {
+          const html = $("receiptPreview").innerHTML;
+          $("printContent").innerHTML = html;
+          setTimeout(() => window.print(), 150);
+        };
+
+        window.downloadReceiptPDF = () => {
+          const type = document.querySelector('input[name="receiptType"]:checked')?.value || "full";
+          let feesToShow = feeHistory;
+          if (type === "single") {
+            const selectedId = $("receiptFeeSelect").value;
+            feesToShow = feeHistory.filter(f => f.id === selectedId);
+          }
+
+          const html = buildReceiptHtml(currentStudent, feesToShow, type === "single");
+          const w = window.open("", "_blank");
+          w.document.write(`<!DOCTYPE html><html><head>
+<title>Fee Receipt</title><style>body{margin:0;font-family:'Segoe UI',Tahoma,sans-serif}@media print{body{margin:0}}</style></head><body>${html}<script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>`);
+          w.document.close();
+        };
+
+        // ── REGISTRATION FORM PRINT ────────────────────────────────────
+
+        async function getStudentFeeSummary(studentId) {
+          return calculateStudentFeeSummary(await loadFeesForStudent(studentId));
+        }
+
+        async function buildPrintMarkup(student) {
+          const feeSummary = await getStudentFeeSummary(student.studentId);
+          const schoolName = window.SchoolBranding?.getSchoolName() || "Schoolix Academy";
+          return `
+            <div style="font-family:'Aptos','Segoe UI',Tahoma,sans-serif;max-width:900px;margin:0 auto;padding:28px 30px;color:#142033">
+              <div style="border:2px solid #0f6cbd;border-radius:22px;overflow:hidden">
+                <div style="padding:24px 30px;background:linear-gradient(135deg,#0f6cbd,#0b4f8a);color:#fff">
+                  <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.88">${escapeHtml(schoolName)}</div>
+                  <h1 style="margin:10px 0 6px;font-size:32px;letter-spacing:-.02em">Student Registration Form</h1>
+                  <p style="margin:0;font-size:14px;opacity:.88">Registration ID: ${escapeHtml(student.studentId || student.id || "N/A")}</p>
+                </div>
+                <div style="padding:28px 30px;background:#fff">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+                    <div>
+                      <h3 style="margin:0 0 12px;font-size:18px;color:#0b4f8a">Student Details</h3>
+                      <table style="width:100%;border-collapse:collapse;font-size:14px">
+                        <tr><td style="padding:8px 0;font-weight:700;width:42%">Name</td><td>${escapeHtml(student.name || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Student ID</td><td>${escapeHtml(student.studentId || student.id || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Aadhaar</td><td>${escapeHtml(student.aadharNumber || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Email</td><td>${escapeHtml(student.email || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Class</td><td>${escapeHtml(student.class || "N/A")}-${escapeHtml(student.section || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Roll no.</td><td>${escapeHtml(student.roll || "TBA")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Date of Admission</td><td>${escapeHtml(student.dateOfAdmission || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Year of admission</td><td>${escapeHtml(student.yearOfAdmission || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Academic year</td><td>${escapeHtml(student.currentYear || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Date of birth</td><td>${escapeHtml(student.dob || "N/A")}</td></tr>
+                      </table>
+                    </div>
+                    <div>
+                      <h3 style="margin:0 0 12px;font-size:18px;color:#0b4f8a">Parent Details</h3>
+                      <table style="width:100%;border-collapse:collapse;font-size:14px">
+                        <tr><td style="padding:8px 0;font-weight:700;width:42%">Father</td><td>${escapeHtml(student.father || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Father Phone</td><td>${escapeHtml(student.fatherPhone || student.phone || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Mother</td><td>${escapeHtml(student.mother || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Mother Phone</td><td>${escapeHtml(student.motherPhone || student.phone || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Phone</td><td>${escapeHtml(student.phone || "N/A")}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:700">Address</td><td>${escapeHtml(student.address || "N/A")}</td></tr>
+                      </table>
+                    </div>
+                  </div>
+                  <div style="border:1px solid #d8e2f0;border-radius:18px;padding:18px 20px;background:#f7fbfd">
+                    <h3 style="margin:0 0 12px;font-size:18px;color:#0b4f8a">Fee Summary</h3>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Assigned</div><div style="font-size:22px;font-weight:800;margin-top:6px">${formatCurrency(feeSummary.total)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Applied</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#12805c">${formatCurrency(feeSummary.applied)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Extra</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#0d9488">${formatCurrency(feeSummary.extra)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Due</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#b42318">${formatCurrency(feeSummary.due)}</div></div>
+                    </div>
+                  </div>
+                  <div style="margin-top:24px;padding-top:18px;border-top:1px solid #d8e2f0;color:#5e6c80;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                    <span>Generated on ${new Date().toLocaleDateString("en-IN")}</span>
+                    <span>${escapeHtml(schoolName)} digital admission record</span>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+
+        window.printRegistrationForm = async (student = currentStudent) => {
+          try {
+            if (!student) return showToast("No student selected.", "error");
+            $("printContent").innerHTML = await buildPrintMarkup(student);
+            setTimeout(() => window.print(), 150);
+          } catch (e) {
+            console.error("Print failed:", e);
+            showToast("Unable to prepare registration form.", "error");
+          }
+        };
+
+        window.printRecentStudent = async () => {
+          if (!recentStudent) return showToast("No recent student available.", "error");
+          await printRegistrationForm(recentStudent);
+        };
+
+        window.goToStudents = () => { window.location.href = "students.html"; };
+
+        window.openFeeConfigModal = () => {
+          $("pgFeeInput").value = feeConfig.PG || 0;
+          $("lkgFeeInput").value = feeConfig.LKG || 0;
+          $("ukgFeeInput").value = feeConfig.UKG || 0;
+          ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].forEach(v => { $(`class${v}FeeInput`).value = feeConfig[v] || 0; });
+          $("feeConfigModal").style.display = "flex";
+        };
+
+        window.closeFeeConfigModal = () => { $("feeConfigModal").style.display = "none"; };
+
+        window.saveFeeConfig = async () => {
+          try {
+            const newConfig = {
+              PG: Number($("pgFeeInput").value || DEFAULT_FEE_CONFIG.PG),
+              LKG: Number($("lkgFeeInput").value || DEFAULT_FEE_CONFIG.LKG),
+              UKG: Number($("ukgFeeInput").value || DEFAULT_FEE_CONFIG.UKG)
+            };
+            ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].forEach(v => { newConfig[v] = Number($(`class${v}FeeInput`).value || 0); });
+            feeConfig = newConfig;
+            await setDoc(doc(db, "schools", currentUser.uid, "config", "fees_config"), {
+              type: "fees", fees: newConfig, updatedAt: new Date(), updatedBy: currentUser.email || ""
+            });
+            updateFeeDisplay();
+            showAutoFees();
+            closeFeeConfigModal();
+            showToast("Fee configuration saved.");
+          } catch (e) {
+            console.error("Fee config save failed:", e);
+            showToast(e.message || "Unable to save fee configuration.", "error");
+          }
+        };
+
+        window.closeModal = () => {
+          $("feesModal").style.display = "none";
+          $("printBtn").style.display = "none";
+          $("printReceiptBtn").style.display = "none";
+          $("studentFeeSummary").style.display = "none";
+          $("historySection").innerHTML = "";
+          $("extraBalanceBanner").style.display = "none";
+          currentStudent = null;
+          feeHistory = [];
+          resetFeeForm();
+        };
+
+        
+        // ── SESSION DROPDOWN ────────────────────────────────────────────────
+        async function loadSessionDropdown() {
+          const sel = $("currentYear");
+          if (!sel) return;
+          sel.innerHTML = '<option value="">Loading sessions…</option>';
+          try {
+            const snap = await getDocs(collection(db, "schools", currentUser.uid, "sessions"));
+            // get active session
+            let activeId = null;
+            try {
+              const activeSnap = await getDoc(doc(db, "schools", currentUser.uid, "settings", "activeSession"));
+              if (activeSnap.exists()) activeId = activeSnap.data().sessionId;
+            } catch(e) {}
+            let viewSessionId = "";
+            try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
+            sel.innerHTML = '<option value="">— Select session —</option>';
+            let defaultVal = "";
+            snap.forEach(d => {
+              const data = d.data();
+              const isViewing = d.id === (viewSessionId || activeId);
+              const opt = document.createElement("option");
+              opt.value = data.session;
+              opt.dataset.id = d.id;
+              opt.dataset.locked = data.locked ? "1" : "0";
+              opt.dataset.classesLocked = data.classesLocked ? "1" : "0";
+              opt.textContent = data.session + (isViewing ? " (Viewing)" : "") + (d.id === activeId ? " (Active)" : "") + (data.locked ? " (Locked)" : "") + (data.classesLocked ? " (Classes Locked)" : "");
+              if (isViewing) {
+                opt.selected = true;
+                defaultVal = data.session;
+                activeSessionId = d.id;
+                activeSessionLabel = data.session || "";
+                activeSessionLocked = data.locked === true;
+              }
+              sel.appendChild(opt);
+            });
+            if (snap.empty) {
+              sel.innerHTML = '<option value="">No sessions saved — go to Additional Settings</option>';
+            }
+          } catch(e) {
+            console.error("Session load error:", e);
+            sel.innerHTML = '<option value="">Error loading sessions</option>';
+          }
+        }
+
+onAuthStateChanged(auth, async (user) => {
+          if (!user) { window.location.href = "index.html"; return; }
+          currentUser = user;
+          initializeClasses();
+          setDefaults();
+          await loadSessionDropdown();
+          await loadFeeConfig();
+          await loadMaxSectionLimit();
+        });
+
+        $("studentPhoto")?.addEventListener("change", updateStudentPhotoPreview);
+        $("searchId").addEventListener("keypress", e => { if (e.key === "Enter") fetchStudent(); });
+        $("amount").addEventListener("input", checkAutoUpdate);
+        $("month").addEventListener("change", checkAutoUpdate);
+        $("status").addEventListener("change", checkAutoUpdate);
+
+        window.addEventListener("click", e => {
+          if (e.target === $("feesModal")) closeModal();
+          if (e.target === $("feeConfigModal")) closeFeeConfigModal();
+          if (e.target === $("receiptModal")) closeReceiptModal();
+          if (e.target === $("adjustExtraModal")) closeAdjustExtraModal();
+
+        });
+        window.saveMaxSectionLimit = async () => {
+          try {
+            const value = parseInt($("maxPerSection").value, 10);
+
+            if (!value || value <= 0) {
+              return showToast("Enter valid number", "error");
+            }
+
+            await setDoc(
+              doc(db, "schools", currentUser.uid, "config", "section_config"),
+              { maxPerSection: value },
+              { merge: true }
+            );
+
+            savedMaxPerSection = String(value);
+            $("maxPerSection").value = savedMaxPerSection;
+            showToast("Saved successfully");
+          } catch (e) {
+            console.error(e);
+            showToast("Failed to save", "error");
+          }
+        };
+        async function loadMaxSectionLimit() {
+          try {
+            const snap = await getDoc(
+              doc(db, "schools", currentUser.uid, "config", "section_config")
+            );
+
+            if (snap.exists() && Number(snap.data().maxPerSection) > 0) {
+              savedMaxPerSection = String(Number(snap.data().maxPerSection));
+              $("maxPerSection").value = savedMaxPerSection;
+            }
+          } catch (e) {
+            console.error("Load failed", e);
+          }
+        }
+      </script>
+    </section>
+  </div>
+<script type="module" src="access-control.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+
+</html>
+

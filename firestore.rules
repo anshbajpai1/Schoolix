@@ -1,0 +1,364 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function currentUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && (
+          request.auth.token.email == "anshbajpai4@gmail.com"
+          || (
+            exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && (
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "superAdmin"
+              || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.superAdmin == true
+            )
+          )
+        );
+    }
+
+    function isSchoolAdminForSchool(schoolId) {
+      return signedIn()
+        && schoolId is string
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && (
+        request.auth.uid == schoolId
+        || (
+          currentUser().role == "admin"
+          && (
+            request.auth.uid == schoolId
+            || currentUser().schoolId == schoolId
+            || currentUser().adminId == schoolId
+            || currentUser().adminUID == schoolId
+            || currentUser().adminUid == schoolId
+            || currentUser().schoolUID == schoolId
+            || currentUser().schoolUid == schoolId
+          )
+        )
+      );
+    }
+
+    function isSchoolMember(schoolId) {
+      return signedIn()
+        && schoolId is string
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+        currentUser().schoolId == schoolId
+        || currentUser().adminId == schoolId
+        || currentUser().adminUID == schoolId
+        || currentUser().adminUid == schoolId
+        || currentUser().schoolUID == schoolId
+        || currentUser().schoolUid == schoolId
+        || request.auth.uid == schoolId
+      );
+    }
+
+    function isMemberOfUserSchool(userId) {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+        currentUser().adminId == userId
+        || currentUser().schoolId == userId
+        || currentUser().adminUID == userId
+        || currentUser().adminUid == userId
+        || currentUser().schoolUID == userId
+        || currentUser().schoolUid == userId
+      );
+    }
+
+    function hasSchoolRole(schoolId, role) {
+      return isSchoolMember(schoolId) && currentUser().role == role;
+    }
+
+    function isSignedInSchoolUser() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && currentUser().role in ["admin", "teacher", "student", "accountant", "librarian", "superAdmin"];
+    }
+
+    function isStudentLoginRecord() {
+      return resource.data.role == "student";
+    }
+
+    function canReadSchoolData(schoolId) {
+      return signedIn()
+        && schoolId is string
+        && (
+          isSchoolMember(schoolId)
+          || isSchoolAdminForSchool(schoolId)
+          || isSuperAdmin()
+        );
+    }
+
+    function canManageFees(schoolId) {
+      return isSchoolAdminForSchool(schoolId)
+        || hasSchoolRole(schoolId, "accountant")
+        || isSuperAdmin();
+    }
+
+    function canManageAccounts(schoolId) {
+      return isSchoolAdminForSchool(schoolId)
+        || hasSchoolRole(schoolId, "accountant")
+        || isSuperAdmin();
+    }
+
+    function validAccountEntry(schoolId) {
+      return request.resource.data.schoolId == schoolId
+        && request.resource.data.type in ["credit", "debit"]
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() >= 2
+        && request.resource.data.transactionDate is string;
+    }
+
+    function canManageLibrary(schoolId) {
+      return isSchoolAdminForSchool(schoolId)
+        || hasSchoolRole(schoolId, "librarian")
+        || isSuperAdmin();
+    }
+
+    function canManageTeacherWork(schoolId) {
+      return isSchoolAdminForSchool(schoolId)
+        || hasSchoolRole(schoolId, "teacher")
+        || isSuperAdmin();
+    }
+
+    function keepsProtectedUserFields() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(["role", "adminId", "schoolId", "superAdmin"]);
+    }
+
+    match /appUpdates/latest {
+      allow read: if true;
+      allow create, update: if isSuperAdmin()
+        && request.resource.data.versionCode is int
+        && request.resource.data.versionCode > 0
+        && request.resource.data.apkDownloadUrl is string
+        && request.resource.data.updateRequired is bool;
+      allow delete: if false;
+    }
+
+    match /appUpdates/history/items/{itemId} {
+      allow read: if isSuperAdmin();
+      allow create: if isSuperAdmin()
+        && request.resource.data.versionCode is int
+        && request.resource.data.apkDownloadUrl is string;
+      allow update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if (
+        request.auth != null && (
+          request.auth.uid == userId
+          || isSuperAdmin()
+          || isSchoolAdminForSchool(resource.data.schoolId)
+          || isSchoolAdminForSchool(resource.data.adminId)
+          || isSchoolMember(resource.data.schoolId)
+          || isSchoolMember(resource.data.adminId)
+          || isSchoolMember(resource.data.adminUID)
+          || isSchoolMember(resource.data.adminUid)
+          || isSchoolMember(resource.data.schoolUID)
+          || isSchoolMember(resource.data.schoolUid)
+          || isMemberOfUserSchool(userId)
+        )
+      ) || isStudentLoginRecord();
+      allow list: if (
+        request.auth != null && (
+          isSuperAdmin()
+          || isSignedInSchoolUser()
+        )
+      ) || (
+        request.auth == null
+        && request.query.limit <= 1
+        && isStudentLoginRecord()
+      );
+      allow create: if signedIn() && (
+        request.auth.uid == userId
+        || isSuperAdmin()
+        || isSchoolAdminForSchool(request.resource.data.schoolId)
+        || isSchoolAdminForSchool(request.resource.data.adminId)
+      )
+        && request.resource.data.role is string;
+      allow update: if signedIn() && (
+        (request.auth.uid == userId && keepsProtectedUserFields())
+        || isSuperAdmin()
+        || isSchoolAdminForSchool(resource.data.schoolId)
+        || isSchoolAdminForSchool(resource.data.adminId)
+      );
+      allow delete: if signedIn() && (
+        isSuperAdmin()
+        || isSchoolAdminForSchool(resource.data.schoolId)
+        || isSchoolAdminForSchool(resource.data.adminId)
+      );
+    }
+
+    match /schools/{schoolId}/fees/{feeId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageFees(schoolId);
+    }
+
+    match /schools/{schoolId}/accounts/{entryId} {
+      allow read: if signedIn() && canManageAccounts(schoolId);
+      allow create: if signedIn()
+        && canManageAccounts(schoolId)
+        && validAccountEntry(schoolId)
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if signedIn()
+        && canManageAccounts(schoolId)
+        && validAccountEntry(schoolId)
+        && request.resource.data.schoolId == resource.data.schoolId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if signedIn() && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+    }
+
+    match /schools/{schoolId}/{salaryCollection}/{recordId} {
+      allow read: if signedIn()
+        && salaryCollection in ["teacher_salary_records", "staff_salary_records"]
+        && canReadSchoolData(schoolId);
+      allow create, update: if signedIn()
+        && salaryCollection in ["teacher_salary_records", "staff_salary_records"]
+        && canManageAccounts(schoolId);
+      allow delete: if signedIn()
+        && salaryCollection in ["teacher_salary_records", "staff_salary_records"]
+        && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+    }
+
+    match /schools/{schoolId}/library_issues/{issueId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageLibrary(schoolId);
+    }
+
+    match /schools/{schoolId}/settings/library {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageLibrary(schoolId);
+    }
+
+    match /schools/{schoolId}/attendance/{attendanceId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId}/teacher_attendance/{attendanceId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId}/teacher_attendance_qr/{tokenId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId}/staff_attendance/{attendanceId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update: if signedIn() && (
+        isSchoolAdminForSchool(schoolId)
+        || isSuperAdmin()
+        || (isSchoolMember(schoolId) && request.resource.data.staffUid == request.auth.uid)
+      );
+      allow delete: if signedIn() && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+    }
+
+    match /schools/{schoolId}/staff_attendance_qr/{tokenId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create: if signedIn() && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+      allow update: if signedIn() && (
+        isSchoolAdminForSchool(schoolId)
+        || isSuperAdmin()
+        || (isSchoolMember(schoolId) && resource.data.staffUid == request.auth.uid)
+      );
+      allow delete: if signedIn() && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+    }
+
+    match /schools/{schoolId}/marks/{markId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId}/reportCards/{reportId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId}/subjects/{subjectId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && canManageTeacherWork(schoolId);
+    }
+
+    match /schools/{schoolId} {
+      allow read: if canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn() && (isSchoolAdminForSchool(schoolId) || isSuperAdmin());
+    }
+
+    match /schools/{schoolId}/notificationDevices/{deviceId} {
+      allow read, delete: if false;
+      allow create, update: if signedIn()
+        && isSchoolMember(schoolId)
+        && request.resource.data.schoolId == schoolId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role in ["teachers", "students", "librarians"]
+        && request.resource.data.platform == "android"
+        && request.resource.data.token is string
+        && request.resource.data.token.size() >= 40
+        && request.resource.data.token.size() <= 4096;
+    }
+
+    match /schools/{schoolId}/{collectionId}/{docId} {
+      allow read: if signedIn()
+        && !(collectionId in ["accounts", "notificationDevices"])
+        && canReadSchoolData(schoolId);
+      allow create, update, delete: if signedIn()
+        && (isSchoolAdminForSchool(schoolId) || isSuperAdmin())
+        && collectionId in [
+          "students",
+          "passedOutStudents",
+          "teachers",
+          "config",
+          "settings",
+          "sessions",
+          "terms",
+          "timetables",
+          "teacher_salaries",
+          "teacher_profiles",
+          "staff_profiles",
+          "teacher_salary_records",
+          "staff_salary_records",
+          "notices",
+          "vehicles",
+          "routes"
+        ];
+    }
+
+    match /schools/{schoolId}/notifications/{notificationId} {
+      allow read: if signedIn()
+        && (
+          request.auth.uid == schoolId
+          || (
+            exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && (
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == schoolId
+              || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.adminId == schoolId
+            )
+          )
+        );
+      allow create: if isAdmin()
+        && request.auth.uid == schoolId
+        && request.resource.data.schoolId == schoolId
+        && request.resource.data.title is string
+        && request.resource.data.message is string
+        && request.resource.data.recipientRoles is list;
+      allow update, delete: if false;
+    }
+
+  }
+}

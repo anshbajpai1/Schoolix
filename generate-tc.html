@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transfer Certificate - Schoolix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-soft: #94a3b8;
+      --primary: #1d4ed8;
+      --primary-600: #2563eb;
+      --primary-50: #eff6ff;
+      --success: #059669;
+      --success-50: #ecfdf5;
+      --danger: #dc2626;
+      --danger-50: #fef2f2;
+      --warning: #d97706;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+    /* ===== Top bar ===== */
+    .top-bar {
+      background: var(--surface);
+      padding: 20px 28px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-mark {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      display: grid; place-items: center;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(29, 78, 216, 0.28);
+    }
+    .top-bar h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .top-bar .subtitle { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: #334155;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all .15s ease;
+    }
+    .btn-back:hover { background: var(--surface-2); border-color: #94a3b8; }
+
+    /* ===== Tabs ===== */
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      padding: 6px;
+      gap: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+    .tab-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      border: none;
+      background: transparent;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 8px;
+      transition: all .15s ease;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--surface-2); }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.25);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none; } }
+
+    /* ===== Panels ===== */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .panel-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-title { display: flex; align-items: center; gap: 12px; }
+    .panel-title .icon-box {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: grid; place-items: center;
+      background: var(--primary-50);
+      color: var(--primary);
+    }
+    .panel-title h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+    .panel-title p { color: var(--text-muted); font-size: 12.5px; margin-top: 1px; }
+
+    /* ===== Forms ===== */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.01em;
+    }
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color .15s, box-shadow .15s;
+      width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-soft); }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+    textarea { resize: vertical; min-height: 72px; }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      font-family: inherit;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .btn svg { flex-shrink: 0; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #1e40af; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #047857; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28); }
+    .btn-secondary { background: var(--surface); color: #334155; border-color: var(--border-strong); }
+    .btn-secondary:hover { background: var(--surface-2); border-color: #94a3b8; }
+    .btn-danger { background: var(--surface); color: var(--danger); border-color: #fecaca; }
+    .btn-danger:hover { background: var(--danger-50); border-color: var(--danger); }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-warning:hover { background: #b45309; }
+    .btn-ghost { background: transparent; color: var(--text-muted); }
+    .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+    .btn-sm { padding: 7px 12px; font-size: 12.5px; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* ===== Search / results ===== */
+    .search-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .search-input-wrap { position: relative; }
+    .search-input-wrap svg.search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-soft); pointer-events: none;
+    }
+    .search-input-wrap input { padding-left: 36px; }
+
+    .empty-state, .error-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon-circle, .error-state .icon-circle {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--surface-2);
+      display: grid; place-items: center;
+      margin: 0 auto 14px;
+      color: var(--text-soft);
+    }
+    .error-state .icon-circle { background: var(--danger-50); color: var(--danger); }
+    .empty-state h4, .error-state h4 { color: var(--text); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .empty-state p, .error-state p { font-size: 13px; }
+
+    /* ===== Cards (student / tc) ===== */
+    .cards-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .card-item {
+      background: var(--surface);
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all .15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .card-item:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .card-item.selected {
+      border-color: var(--success);
+      background: var(--success-50);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    }
+    .card-item.tc-issued-card { cursor: not-allowed; opacity: 0.85; border-color: #fecaca; background: #fff8f8; }
+    .card-item.tc-issued-card:hover { transform: none; box-shadow: none; border-color: #fecaca; }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; color: var(--text);
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+      color: var(--primary); font-weight: 700; font-size: 13px;
+      display: grid; place-items: center;
+    }
+    .card-body-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 6px 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .card-body-grid strong { color: var(--text); font-weight: 600; margin-right: 4px; }
+
+    /* Badges / pills */
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+    .pill-danger { background: var(--danger-50); color: #991b1b; }
+    .pill-success { background: var(--success-50); color: #065f46; }
+    .pill-warning { background: #fffbeb; color: #92400e; }
+    .tc-note { color: #b91c1c; font-weight: 600; font-size: 12.5px; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+
+    /* ===== Selected student summary ===== */
+    .selected-strip {
+      background: linear-gradient(135deg, var(--primary-50), #e0e7ff);
+      border: 1px solid #c7d2fe;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .selected-strip .avatar { background: var(--primary); color: #fff; }
+    .selected-strip .label { font-size: 12px; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .selected-strip .name { font-size: 15px; font-weight: 700; color: var(--text); }
+
+    /* ===== Preview ===== */
+    .preview-header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-content {
+      min-height: 640px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 48px 56px;
+      background: #fffef9;
+      overflow-y: auto;
+      font-family: 'Crimson Pro', 'Times New Roman', Georgia, serif;
+      line-height: 1.7;
+      color: #1e293b;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.15);
+    }
+    .editable-field {
+      background: #fff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 15px;
+      display: inline-block;
+      min-width: 120px;
+    }
+    .editable-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      border-style: solid;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    }
+    .editable-field:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-soft);
+    }
+    .edit-hint {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--primary-50);
+      color: var(--primary);
+      border: 1px solid #c7d2fe;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    /* Every text node inside the certificate is editable; highlight on hover */
+    .preview-content[contenteditable="true"] :is(h2,.school-name,.school-addr,.tc-field,.sig-box strong):hover {
+      background: rgba(29, 78, 216, 0.05);
+      border-radius: 4px;
+    }
+
+    /* ===== Section divider ===== */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0 14px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ===== Toast ===== */
+    .toast-host {
+      position: fixed; top: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 10000;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      font-weight: 600; font-size: 13.5px;
+      min-width: 260px;
+      animation: slideIn .2s ease;
+    }
+    .toast.success { border-left-color: var(--success); color: #065f46; }
+    .toast.error { border-left-color: var(--danger); color: #991b1b; }
+    @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* ===== Loading skeleton ===== */
+    .loading {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 48px; color: var(--text-muted); font-size: 13.5px;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Delete modal ===== */
+    .delete-confirm {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+    .delete-confirm.open { display: flex; }
+    .delete-modal {
+      background: #fff;
+      padding: 28px;
+      border-radius: 14px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    }
+    .delete-modal .icon-danger {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--danger-50);
+      color: var(--danger);
+      display: grid; place-items: center;
+      margin: 0 auto 14px;
+    }
+    .delete-modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .delete-modal p { color: var(--text-muted); font-size: 13.5px; margin-bottom: 20px; }
+    .delete-actions { display: flex; gap: 10px; justify-content: center; }
+
+    /* ===== Preview text formatting (inside TC preview) ===== */
+    .preview-content h2 {
+      text-align: center; font-size: 28px; font-weight: 700;
+      letter-spacing: 0.04em; margin-bottom: 6px; color: #0f172a;
+    }
+    .preview-content .school-name { text-align: center; font-size: 20px; font-weight: 600; color: #1e293b; }
+    .preview-content .school-addr { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px double #cbd5e1; }
+    .preview-content .meta-row {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      font-size: 14px; margin-bottom: 20px;
+    }
+    .preview-content .tc-field { margin: 8px 0; font-size: 15px; }
+    .preview-content .tc-field strong { display: inline-block; min-width: 320px; font-weight: 600; }
+    .preview-content .sig-row {
+      display: flex; justify-content: space-between; margin-top: 60px; gap: 40px;
+    }
+    .preview-content .sig-box { text-align: center; flex: 1; }
+    .preview-content .sig-line { border-top: 1.5px solid #334155; margin-bottom: 6px; }
+
+    @media (max-width: 720px) {
+      .container { padding: 16px; }
+      .preview-content { padding: 24px 20px; }
+      .preview-content .tc-field strong { min-width: 100%; display: block; }
+      .top-bar { padding: 16px 18px; }
+      .panel { padding: 18px; }
+    }
+    @media print {
+      body * { visibility: hidden; }
+      .preview-content, .preview-content * { visibility: visible; }
+      .preview-content { position: absolute; inset: 0; border: none; box-shadow: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body>
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+  <div class="toast-host" id="toastHost"></div>
+
+  <div class="container">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        </div>
+        <div>
+          <h1>Transfer Certificate</h1>
+          <div class="subtitle">Issue official TC, print, and manage records</div>
+        </div>
+      </div>
+      <button class="btn-back" onclick="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Students
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('generate')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Generate TC
+      </button>
+      <button class="tab-btn" onclick="switchTab('issued')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+        Issued Certificates
+      </button>
+    </div>
+
+    <!-- Generate Tab -->
+    <div id="generateTab" class="tab-content active">
+      <!-- Search Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div>
+              <h3>Find Student</h3>
+              <p>Search for a student to generate TC</p>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadAllStudents()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Show All Students
+          </button>
+        </div>
+
+        <div class="search-grid">
+          <div class="field">
+            <label>Student Name</label>
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchName" placeholder="Enter name..." oninput="searchStudent()" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Student ID</label>
+            <input type="text" id="searchStudentId" placeholder="e.g. STU001" oninput="searchStudent()" />
+          </div>
+          <div class="field">
+            <label>Roll No</label>
+            <input type="text" id="searchRoll" placeholder="e.g. 12" oninput="searchStudent()" />
+          </div>
+          <div class="field">
+            <label>Class</label>
+            <select id="searchClass" onchange="searchStudent()">
+              <option value="">Select Class</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="studentResult">
+          <div class="empty-state">
+            <div class="icon-circle">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <h4>Search for a student</h4>
+            <p>Enter Student Name, ID, Roll No, or Class to find students</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TC Form -->
+      <div class="panel" id="tcFormSection" style="display:none;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <h3>TC Details</h3>
+              <p>Fill certificate information</p>
+            </div>
+          </div>
+          <button class="btn btn-success" onclick="showTCPREVIEW()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview TC
+          </button>
+        </div>
+
+        <div class="selected-strip">
+          <div class="avatar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="label">Selected Student</div>
+            <div class="name" id="selectedStudentName"></div>
+          </div>
+        </div>
+
+        <div class="divider">Certificate &amp; Reason</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Reason for Leaving</label>
+            <select id="reason">
+              <option value="">Select reason</option>
+              <option>Personal Reasons</option>
+              <option>Parent Job Transfer</option>
+              <option>Change of Residence</option>
+              <option>Better Educational Opportunity</option>
+              <option>Migration to Another School</option>
+              <option>Completed Highest Class in School</option>
+              <option>Others</option>
+            </select>
+          </div>
+          <div class="field"><label>TC / Certificate Number</label><input type="text" id="tcNumber" /></div>
+          <div class="field"><label>Book No.</label><input type="text" id="bookNo" placeholder="e.g. 01" /></div>
+          <div class="field"><label>Date of Application</label><input type="date" id="applicationDate" /></div>
+          <div class="field"><label>Date of Leaving (Struck off)</label><input type="date" id="leavingDate" /></div>
+          <div class="field"><label>Date of Issue</label><input type="date" id="issueDate" /></div>
+          <div class="field"><label>Place of Issue</label><input type="text" id="placeOfIssue" placeholder="City / Town" /></div>
+        </div>
+
+        <div class="divider">Parent / Guardian Details</div>
+        <div class="form-row">
+          <div class="field"><label>Father's Name</label><input type="text" id="fatherName" /></div>
+          <div class="field"><label>Mother's Name</label><input type="text" id="motherName" /></div>
+          <div class="field"><label>Guardian's Name</label><input type="text" id="guardianName" placeholder="If applicable" /></div>
+          <div class="field"><label>Nationality</label><input type="text" id="nationality" placeholder="Indian" /></div>
+          <div class="field"><label>Religion</label><input type="text" id="religion" placeholder="e.g. Hindu" /></div>
+          <div class="field"><label>Category (SC/ST/OBC/Gen)</label><input type="text" id="category" placeholder="General / SC / ST / OBC" /></div>
+        </div>
+
+        <div class="divider">Student &amp; Admission</div>
+        <div class="form-row">
+          <div class="field"><label>Admission / Register No.</label><input type="text" id="admissionNo" /></div>
+          <div class="field"><label>Roll No</label><input type="text" id="rollNo" /></div>
+          <div class="field"><label>Aadhaar / PAN No.</label><input type="text" id="aadhaarPen" placeholder="Optional" /></div>
+          <div class="field"><label>Date of Birth (figures)</label><input type="date" id="dob" /></div>
+          <div class="field"><label>Date of Birth (in words)</label><input type="text" id="dobWords" placeholder="e.g. Fifth March Two Thousand Ten" /></div>
+          <div class="field"><label>Date of First Admission</label><input type="date" id="admissionDate" /></div>
+          <div class="field"><label>Class in which Admitted</label><input type="text" id="admittedClass" placeholder="e.g. Nursery / I" /></div>
+          <div class="field"><label>Class Last Studied</label><input type="text" id="lastClass" /></div>
+          <div class="field"><label>Section</label><input type="text" id="section" /></div>
+          <div class="field"><label>Medium of Instruction</label><input type="text" id="medium" placeholder="English / Hindi" /></div>
+        </div>
+
+        <div class="divider">Academic Record</div>
+        <div class="form-row">
+          <div class="field"><label>Annual Exam Last Taken &amp; Result</label><input type="text" id="lastExamResult" /></div>
+          <div class="field"><label>Whether Qualified for Promotion</label><input type="text" id="qualifiedPromotion" placeholder="Yes / No" /></div>
+          <div class="field"><label>Promoted to Class</label><input type="text" id="promotedTo" /></div>
+          <div class="field"><label>Whether Failed / Repeated</label><input type="text" id="failedRepeated" placeholder="No" /></div>
+          <div class="field"><label>Subjects Studied</label><input type="text" id="subjects" placeholder="English, Hindi, Maths, Science, Social Science" /></div>
+          <div class="field"><label>Co-curricular / Games</label><input type="text" id="coCurricular" placeholder="e.g. Football, Music" /></div>
+          <div class="field"><label>NCC / Scout / Guide</label><input type="text" id="nccScout" placeholder="No" /></div>
+          <div class="field"><label>Total Working Days</label><input type="text" id="workingDays" placeholder="220" /></div>
+          <div class="field"><label>Total Days Present</label><input type="text" id="daysPresent" placeholder="210" /></div>
+          <div class="field"><label>General Conduct</label><input type="text" id="conduct" placeholder="Good" /></div>
+        </div>
+
+        <div class="divider">Fees &amp; Remarks</div>
+        <div class="form-row">
+          <div class="field"><label>School Dues Paid Upto</label><input type="text" id="feesPaidUpto" placeholder="Paid in Full" /></div>
+          <div class="field"><label>Fee Concession (if any)</label><input type="text" id="feeConcession" placeholder="Nil" /></div>
+          <div class="field"><label>Identification Mark (i)</label><input type="text" id="identMark1" /></div>
+          <div class="field"><label>Identification Mark (ii)</label><input type="text" id="identMark2" /></div>
+          <div class="field"><label>Remarks</label><input type="text" id="remarks" placeholder="Character &amp; conduct good" /></div>
+        </div>
+
+        <div class="divider">School &amp; Signatories</div>
+        <div class="form-row">
+          <div class="field"><label>School Name</label><input type="text" id="schoolName" /></div>
+          <div class="field"><label>School Address</label><input type="text" id="schoolAddress" /></div>
+          <div class="field"><label>Affiliation No.</label><input type="text" id="affiliationNo" placeholder="Optional" /></div>
+          <div class="field"><label>School Reg. / UDISE No.</label><input type="text" id="udise" placeholder="Optional" /></div>
+          <div class="field"><label>Class Teacher</label><input type="text" id="classTeacher" /></div>
+          <div class="field"><label>Head Clerk / Accountant</label><input type="text" id="clerk" placeholder="Optional" /></div>
+          <div class="field"><label>Principal Name</label><input type="text" id="principalName" /></div>
+        </div>
+
+        <p style="margin-top:16px; font-size:12.5px; color: var(--text-muted); display:flex; align-items:center; gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Tip: In the preview you can click and edit <strong>every line</strong> of the certificate directly, including titles, labels and values, before saving or printing.
+        </p>
+      </div>
+
+      <!-- TC Preview -->
+      <div class="panel" id="tcPreview" style="display:none;">
+        <div class="preview-header">
+          <div class="panel-title">
+            <div class="icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div>
+              <h3>TC Preview & Edit</h3>
+              <p>Review before printing</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn btn-secondary btn-sm" onclick="updatePreviewFromForm()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Refresh Preview
+            </button>
+            <button class="btn btn-success btn-sm" onclick="finalizeTC()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Save & Print TC
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="backToForm()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Back to Form
+            </button>
+          </div>
+        </div>
+        <div class="edit-hint">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Everything below is editable. Click any title, label or value to change it, then Save &amp; Print.
+        </div>
+        <div class="preview-content" id="previewContent"></div>
+      </div>
+    </div>
+
+    <!-- Issued Tab -->
+    <div id="issuedTab" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+            </div>
+            <div>
+              <h3>Issued Transfer Certificates</h3>
+              <p>Search, print or download previously issued TCs</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-grid">
+          <div class="field">
+            <label>Student</label>
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="tcSearchStudent" placeholder="Name or Student ID" oninput="searchIssuedTCs()" />
+            </div>
+          </div>
+          <div class="field">
+            <label>TC Number</label>
+            <input type="text" id="tcSearchNumber" placeholder="e.g. TC-..." oninput="searchIssuedTCs()" />
+          </div>
+          <div class="field">
+            <label>Class</label>
+            <select id="tcSearchClass" onchange="searchIssuedTCs()"><option value="">All Classes</option></select>
+          </div>
+          <div class="field">
+            <label>Issue Date</label>
+            <input type="date" id="tcSearchDate" onchange="searchIssuedTCs()" />
+          </div>
+        </div>
+
+        <div id="issuedTCsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="delete-confirm" id="deleteModal">
+    <div class="delete-modal">
+      <div class="icon-danger">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+      <h3>Delete TC</h3>
+      <p id="deleteMessage">Are you sure you want to delete this TC?</p>
+      <div class="delete-actions">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn" style="background: var(--danger); color: #fff;" id="confirmDelete">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================== SCRIPT (logic preserved) ================== -->
+  <script type="module">
+    import { initializeApp } from "./firebase-compat.js";
+    import { getFirestore, collection, getDocs, getDoc, doc, addDoc, setDoc, updateDoc, deleteDoc, query, where, serverTimestamp } from "./firebase-compat.js";
+    import { getAuth, onAuthStateChanged } from "./firebase-compat.js";
+
+    const firebaseConfig = {
+ apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+      authDomain: "schoolix-48107.firebaseapp.com",
+      projectId: "schoolix-48107",
+      storageBucket: "schoolix-48107.firebasestorage.app",
+      messagingSenderId: "133937954491",
+      appId: "1:133937954491:web:69d8064422617eb8c4339e",
+      measurementId: "G-EG23XE5Q0Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let allStudents = [];
+    let allTCs = [];
+    let selectedStudent = null;
+    let tcPreviewData = {};
+    let tcToDelete = null;
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[char]));
+    }
+
+    function safeDateText(value) {
+      if (!value) return "";
+      const raw = value?.toDate ? value.toDate() : value;
+      const date = raw instanceof Date ? raw : new Date(raw);
+      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString("en-IN");
+    }
+
+    function getPassoutYearFromTC(tcData = {}) {
+      const source = tcData.leavingDate || tcData.issueDate || tcData.generatedAt || new Date().toISOString();
+      const date = new Date(source);
+      if (!Number.isNaN(date.getTime())) return String(date.getFullYear());
+      const years = String(source).match(/\b(20\d{2}|19\d{2})\b/g);
+      return years?.length ? years[years.length - 1] : String(new Date().getFullYear());
+    }
+
+    async function loadStudentArchiveRecords(student = {}) {
+      const sid = student.studentId || student.id || "";
+      if (!sid) return { attendance: [], fees: [], reportCards: [] };
+      const [attendanceSnap, feesSnap, reportsSnap] = await Promise.all([
+        getDocs(query(collection(db, "schools", currentUser.uid, "attendance"), where("studentId", "==", sid))),
+        getDocs(query(collection(db, "schools", currentUser.uid, "fees"), where("studentId", "==", sid))),
+        getDocs(query(collection(db, "schools", currentUser.uid, "reportCards"), where("studentId", "==", sid)))
+      ]);
+      return {
+        attendance: attendanceSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+        fees: feesSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+        reportCards: reportsSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      };
+    }
+
+    async function archiveTCStudent(student, tcData, tcDocId) {
+      const archiveId = student.id || student.studentId;
+      const existingRecords = student.records || {};
+      const records = student._recordSource === "archive"
+        ? {
+            attendance: Array.isArray(existingRecords.attendance) ? existingRecords.attendance : [],
+            fees: Array.isArray(existingRecords.fees) ? existingRecords.fees : [],
+            reportCards: Array.isArray(existingRecords.reportCards) ? existingRecords.reportCards : []
+          }
+        : await loadStudentArchiveRecords(student);
+      await setDoc(doc(db, "schools", currentUser.uid, "passedOutStudents", archiveId), {
+        ...student,
+        _recordSource: null,
+        activeStudentDocId: student.id || "",
+        originalStudentDocId: student.id || "",
+        studentId: student.studentId || student.id || "",
+        passoutYear: student.passoutYear || getPassoutYearFromTC(tcData),
+        archiveReason: student.archiveReason || "Transfer Certificate",
+        archiveSource: "transfer-certificate",
+        status: student._recordSource === "archive" ? (student.status || "Passed Out") : "TC Issued",
+        finalClass: student.finalClass || student.class || "",
+        finalSection: student.finalSection || student.section || "",
+        tcIssued: true,
+        tcNumber: tcData.tcNumber || "",
+        tcCertificateDocId: tcDocId || "",
+        tcIssuedAt: tcData.generatedAt || new Date().toISOString(),
+        transferCertificate: { id: tcDocId || "", ...tcData },
+        records,
+        archivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      if (student._recordSource !== "archive") {
+        await deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id));
+      }
+    }
+
+    function studentDisplayName(student) {
+      return student?.name || student?.studentName || "N/A";
+    }
+    function initials(name) {
+      return String(name || '?').split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('') || '?';
+    }
+
+    function getStoredSchoolName() {
+      return window.SchoolBranding?.getSchoolName() || "Schoolix School";
+    }
+    function getDefaultSchoolAddress() {
+      return "Affiliated to State Board";
+    }
+
+    window.goBack = () => window.location.href = "students.html";
+
+    function showToast(message, type = 'success') {
+      const host = document.getElementById('toastHost');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'error'
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+      toast.innerHTML = `${icon}<span>${esc(message)}</span>`;
+      host.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function showLoading(show, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (show) container.innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading...</span></div>';
+    }
+
+    window.switchTab = (tabName) => {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    };
+
+    window.showDeleteModal = (tcId, tcNumber) => {
+      tcToDelete = tcId;
+      document.getElementById('deleteMessage').textContent = `Are you sure you want to delete TC ${tcNumber}?`;
+      document.getElementById('deleteModal').classList.add('open');
+    };
+    window.closeDeleteModal = () => {
+      document.getElementById('deleteModal').classList.remove('open');
+      tcToDelete = null;
+    };
+    window.confirmDeleteTC = async () => {
+      if (!tcToDelete) return;
+      try {
+        const tcSnap = await getDoc(doc(db, "schools", currentUser.uid, "transferCertificates", tcToDelete));
+        const tcData = tcSnap.exists() ? tcSnap.data() : null;
+        await deleteDoc(doc(db, "schools", currentUser.uid, "transferCertificates", tcToDelete));
+        if (tcData?.studentDocId) {
+          await updateDoc(doc(db, "schools", currentUser.uid, "students", tcData.studentDocId), {
+            tcIssued: false, tcNumber: "", tcIssuedAt: null, tcCertificateDocId: null, updatedAt: serverTimestamp()
+          }).catch(() => {});
+        } else if (tcData?.studentId) {
+          const stSnap = await getDocs(query(collection(db, "schools", currentUser.uid, "students"), where("studentId", "==", tcData.studentId)));
+          if (!stSnap.empty) {
+            await updateDoc(doc(db, "schools", currentUser.uid, "students", stSnap.docs[0].id), {
+              tcIssued: false, tcNumber: "", tcIssuedAt: null, tcCertificateDocId: null, updatedAt: serverTimestamp()
+            }).catch(() => {});
+          }
+        }
+        if (tcData?.archiveStudentDocId) {
+          await updateDoc(doc(db, "schools", currentUser.uid, "passedOutStudents", tcData.archiveStudentDocId), {
+            tcIssued: false,
+            tcNumber: "",
+            tcIssuedAt: null,
+            tcCertificateDocId: null,
+            transferCertificate: null,
+            status: "Passed Out",
+            updatedAt: serverTimestamp()
+          }).catch(() => {});
+        } else if (tcData?.studentId) {
+          const archivedSnap = await getDocs(query(collection(db, "schools", currentUser.uid, "passedOutStudents"), where("studentId", "==", tcData.studentId)));
+          if (!archivedSnap.empty) {
+            await updateDoc(doc(db, "schools", currentUser.uid, "passedOutStudents", archivedSnap.docs[0].id), {
+              tcIssued: false,
+              tcNumber: "",
+              tcIssuedAt: null,
+              tcCertificateDocId: null,
+              transferCertificate: null,
+              status: "Passed Out",
+              updatedAt: serverTimestamp()
+            }).catch(() => {});
+          }
+        }
+        showToast('TC deleted. Student record unlocked.', 'success');
+        closeDeleteModal();
+        await loadIssuedTCs();
+        await loadStudents();
+      } catch (error) {
+        console.error("Error deleting TC:", error);
+        showToast('Error deleting TC', 'error');
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { showToast('Please login first', 'error'); return window.location.href = "index.html"; }
+      currentUser = user;
+      try {
+        await Promise.all([loadStudents(), loadIssuedTCs()]);
+        switchTab('generate');
+      } catch (error) {
+        console.error('Error initializing:', error);
+        showToast('Error loading data: ' + error.message, 'error');
+      }
+    });
+
+    window.loadStudents = async () => {
+      if (!currentUser) { showToast('Please login first', 'error'); return; }
+      try {
+        showLoading(true, "studentResult");
+        const [studentSnap, archivedSnap] = await Promise.all([
+          getDocs(collection(db, "schools", currentUser.uid, "students")),
+          getDocs(collection(db, "schools", currentUser.uid, "passedOutStudents"))
+        ]);
+        allStudents = [];
+        studentSnap.forEach((d) => allStudents.push({ id: d.id, _recordSource: "active", ...d.data() }));
+        archivedSnap.forEach((d) => allStudents.push({ id: d.id, _recordSource: "archive", ...d.data() }));
+        populateClassFilter();
+        document.getElementById("studentResult").innerHTML = emptySearchState();
+        showToast(`Loaded ${allStudents.length} students including passed out records.`, 'success');
+      } catch (error) {
+        console.error("Error loading students:", error);
+        document.getElementById("studentResult").innerHTML = `
+          <div class="error-state">
+            <div class="icon-circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <h4>Error loading students</h4>
+            <p>${esc(error.message)}</p>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="loadStudents()">Retry</button>
+          </div>`;
+        showToast('Error loading students', 'error');
+      }
+    };
+
+    window.loadAllStudents = async () => { await loadStudents(); renderSearchResults(allStudents); };
+
+    window.searchStudent = () => {
+      const searchName = document.getElementById("searchName")?.value?.trim().toLowerCase() || '';
+      const searchRoll = document.getElementById("searchRoll")?.value?.trim() || '';
+      const searchClass = document.getElementById("searchClass")?.value || '';
+      const searchStudentId = document.getElementById("searchStudentId")?.value?.trim().toLowerCase() || '';
+      if (!searchName && !searchRoll && !searchClass && !searchStudentId) {
+        document.getElementById("studentResult").innerHTML = emptySearchState();
+        return;
+      }
+      const found = allStudents.filter(s => {
+        const matchesName = !searchName || (studentDisplayName(s).toLowerCase().includes(searchName));
+        const matchesRoll = !searchRoll || (s.roll?.toString() === searchRoll);
+        const matchesClass = !searchClass || (s.class === searchClass) || (s.finalClass === searchClass);
+        const matchesId = !searchStudentId || (s.studentId?.toLowerCase().includes(searchStudentId));
+        return matchesName && matchesRoll && matchesClass && matchesId;
+      });
+      renderSearchResults(found);
+    };
+
+    function emptySearchState() {
+      return `<div class="empty-state">
+        <div class="icon-circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h4>Search for a student</h4>
+        <p>Enter Student Name, ID, Roll No, or Class to find students</p>
+      </div>`;
+    }
+
+    function renderSearchResults(students) {
+      const resultDiv = document.getElementById("studentResult");
+      if (students.length === 0) {
+        resultDiv.innerHTML = `<div class="empty-state">
+          <div class="icon-circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+          <h4>No students found</h4><p>Try different search criteria or Show All Students</p></div>`;
+        return;
+      }
+      const html = '<div class="cards-list">' + students.map(s => {
+        const issued = !!s.tcIssued;
+        const archived = s._recordSource === "archive";
+        const name = studentDisplayName(s);
+        return `
+        <div class="card-item ${issued ? 'tc-issued-card' : ''}" data-student-id="${esc(s.id)}" onclick="selectStudent('${esc(s.id)}')">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="avatar">${esc(initials(name))}</div>
+              <span>${esc(name)}</span>
+            </div>
+            ${archived ? '<span class="pill pill-warning">Passed Out</span>' : ''}
+            ${issued ? '<span class="pill pill-danger"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>TC Issued</span>' : ''}
+          </div>
+          <div class="card-body-grid">
+            <div><strong>Student ID:</strong>${esc(s.studentId || 'N/A')}</div>
+            <div><strong>Class:</strong>${esc(s.finalClass || s.class || '?')}${(s.finalSection || s.section) ? ' - ' + esc(s.finalSection || s.section) : ''}</div>
+            <div><strong>Roll No:</strong>${esc(s.roll || s.rollNo || '?')}</div>
+            ${archived ? `<div><strong>Passout Year:</strong>${esc(s.passoutYear || 'N/A')}</div>` : ''}
+            ${s.father ? `<div><strong>Father:</strong>${esc(s.father)}</div>` : ''}
+            ${s.mother ? `<div><strong>Mother:</strong>${esc(s.mother)}</div>` : ''}
+            ${s.phone ? `<div><strong>Phone:</strong>${esc(s.phone)}</div>` : ''}
+          </div>
+          ${issued ? '<div class="tc-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Transfer Certificate already issued. Cannot generate again.</div>' : ''}
+        </div>`;
+      }).join('') + '</div>';
+      resultDiv.innerHTML = html;
+    }
+
+    window.selectStudent = (id) => {
+      selectedStudent = allStudents.find(s => s.id === id);
+      if (!selectedStudent) { showToast('Student not found', 'error'); return; }
+      if (selectedStudent.tcIssued) { showToast('TC already issued for this student. Cannot generate again.', 'error'); return; }
+      document.querySelectorAll('.card-item').forEach(card => card.classList.remove('selected'));
+      const cardEl = document.querySelector(`.card-item[data-student-id="${id}"]`);
+      if (cardEl) cardEl.classList.add('selected');
+      document.getElementById("selectedStudentName").textContent = studentDisplayName(selectedStudent);
+      document.getElementById("tcFormSection").style.display = "block";
+      populateTCForm();
+      document.getElementById("tcFormSection").scrollIntoView({ behavior: 'smooth' });
+      showToast(`${studentDisplayName(selectedStudent)} selected. Fill TC details below.`, 'success');
+    };
+
+    function populateClassFilter() {
+      const classSet = new Set();
+      allStudents.forEach(s => {
+        if (s.class) classSet.add(s.class);
+        if (s.finalClass) classSet.add(s.finalClass);
+      });
+      const select = document.getElementById('searchClass');
+      select.innerHTML = '<option value="">Select Class</option>';
+      Array.from(classSet).sort().forEach(c => { select.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
+    }
+
+    function populateTCForm() {
+      if (!selectedStudent) return;
+      const today = new Date().toISOString().split('T')[0];
+      const iso = (v) => v ? new Date(v).toISOString().split('T')[0] : '';
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+      const s = selectedStudent;
+      set("tcNumber", `TC-${s.studentId || s.id || 'N/A'}-${Date.now().toString().slice(-6)}`);
+      set("bookNo", "");
+      set("applicationDate", today);
+      set("leavingDate", today);
+      set("issueDate", today);
+      set("placeOfIssue", "");
+      // Parent / guardian
+      set("fatherName", s.father || s.fatherName || '');
+      set("motherName", s.mother || s.motherName || '');
+      set("guardianName", s.guardian || s.guardianName || '');
+      set("nationality", s.nationality || 'Indian');
+      set("religion", s.religion || '');
+      set("category", s.category || 'General');
+      // Student / admission
+      set("admissionNo", s.admissionNo || s.studentId || '');
+      set("rollNo", s.roll || s.rollNo || '');
+      set("aadhaarPen", s.aadhaar || s.pen || '');
+      set("dob", iso(s.dob));
+      set("dobWords", "");
+      set("admissionDate", iso(s.admissionDate));
+      set("admittedClass", s.admittedClass || '');
+      const lastClass = s.finalClass || s.class || "";
+      const lastSection = s.finalSection || s.section || "";
+      set("lastClass", `${lastClass}${lastSection ? ` (${lastSection})` : ''}`.trim());
+      set("section", s.section || '');
+      set("medium", s.medium || 'English');
+      // Academic
+      set("lastExamResult", `Passed Class ${s.class || 'N/A'}`);
+      set("qualifiedPromotion", "Yes");
+      set("promotedTo", "");
+      set("failedRepeated", "No");
+      set("subjects", "English, Hindi, Mathematics, Science, Social Science");
+      set("coCurricular", "");
+      set("nccScout", "No");
+      set("workingDays", "220");
+      set("daysPresent", "210");
+      set("conduct", "Good");
+      // Fees / remarks
+      set("feesPaidUpto", "Paid in Full");
+      set("feeConcession", "Nil");
+      set("identMark1", "");
+      set("identMark2", "");
+      set("remarks", "Character and Conduct Good");
+      // School / signatories
+      set("schoolName", getStoredSchoolName());
+      set("schoolAddress", getDefaultSchoolAddress());
+      set("affiliationNo", "");
+      set("udise", "");
+      set("classTeacher", s.classTeacher || 'Class Teacher');
+      set("clerk", "");
+      set("principalName", 'Principal');
+    }
+
+    window.showTCPREVIEW = () => {
+      if (!selectedStudent) { showToast('Please select a student first', 'error'); return; }
+      const data = getFormData();
+      if (!data.reason || !data.leavingDate || !data.tcNumber) {
+        showToast("Reason, leaving date and TC number are required.", "error"); return;
+      }
+      tcPreviewData = { ...data, studentId: selectedStudent.studentId, studentName: studentDisplayName(selectedStudent) };
+      renderPreview();
+      document.getElementById("tcPreview").style.display = "block";
+      document.getElementById("tcFormSection").style.display = "none";
+      document.getElementById("tcPreview").scrollIntoView({ behavior: 'smooth' });
+    };
+
+    function getFormData() {
+      const val = (id) => document.getElementById(id)?.value ?? '';
+      return {
+        reason: val("reason"),
+        tcNumber: val("tcNumber"),
+        bookNo: val("bookNo"),
+        applicationDate: val("applicationDate"),
+        leavingDate: val("leavingDate"),
+        issueDate: val("issueDate"),
+        placeOfIssue: val("placeOfIssue"),
+        fatherName: val("fatherName"),
+        motherName: val("motherName"),
+        guardianName: val("guardianName"),
+        nationality: val("nationality"),
+        religion: val("religion"),
+        category: val("category"),
+        admissionNo: val("admissionNo"),
+        rollNo: val("rollNo"),
+        aadhaarPen: val("aadhaarPen"),
+        dob: val("dob"),
+        dobWords: val("dobWords"),
+        admissionDate: val("admissionDate"),
+        admittedClass: val("admittedClass"),
+        lastClass: val("lastClass"),
+        section: val("section"),
+        medium: val("medium"),
+        lastExamResult: val("lastExamResult"),
+        qualifiedPromotion: val("qualifiedPromotion"),
+        promotedTo: val("promotedTo"),
+        failedRepeated: val("failedRepeated"),
+        subjects: val("subjects"),
+        coCurricular: val("coCurricular"),
+        nccScout: val("nccScout"),
+        workingDays: val("workingDays"),
+        daysPresent: val("daysPresent"),
+        conduct: val("conduct"),
+        feesPaidUpto: val("feesPaidUpto"),
+        feeConcession: val("feeConcession"),
+        identMark1: val("identMark1"),
+        identMark2: val("identMark2"),
+        remarks: val("remarks"),
+        schoolName: val("schoolName"),
+        schoolAddress: val("schoolAddress"),
+        affiliationNo: val("affiliationNo"),
+        udise: val("udise"),
+        classTeacher: val("classTeacher"),
+        clerk: val("clerk"),
+        principal: val("principalName")
+      };
+    }
+
+    // Renders an inline-editable value span so every value can be edited in the preview
+    function ef(key, value, placeholder = '-') {
+      return `<span class="editable-field" contenteditable="true" data-key="${esc(key)}" data-placeholder="${esc(placeholder)}">${esc(value ?? '')}</span>`;
+    }
+
+    // Reads every edited value back out of the preview into a plain object
+    function collectEditedData() {
+      const previewContent = document.getElementById("previewContent");
+      const out = {};
+      previewContent.querySelectorAll('[data-key]').forEach(node => {
+        out[node.dataset.key] = node.textContent.trim();
+      });
+      out.previewHtml = previewContent.innerHTML;
+      return out;
+    }
+
+    function renderPreview() {
+      const previewContent = document.getElementById("previewContent");
+      const d = tcPreviewData;
+      const issueTxt = d.issueDate ? new Date(d.issueDate).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN');
+      previewContent.setAttribute('contenteditable', 'true');
+      previewContent.spellcheck = false;
+      previewContent.innerHTML = `
+        <h2>TRANSFER CERTIFICATE</h2>
+        <div class="school-name">${ef('schoolName', d.schoolName || getStoredSchoolName(), 'School name')}</div>
+        <div class="school-addr">${ef('schoolAddress', d.schoolAddress || getDefaultSchoolAddress(), 'School address')}
+          <div style="font-size:12px; color:#64748b; margin-top:4px;">
+            Affiliation No: ${ef('affiliationNo', d.affiliationNo, '-')} &nbsp;|&nbsp; Reg./UDISE No: ${ef('udise', d.udise, '-')}
+          </div>
+        </div>
+
+        <div class="meta-row">
+          <div><strong>Certificate No:</strong> ${ef('tcNumber', d.tcNumber, '-')}<br/>
+               <strong>Book No:</strong> ${ef('bookNo', d.bookNo, '-')}<br/>
+               <strong>Admission / Register No:</strong> ${ef('admissionNo', d.admissionNo, '-')}</div>
+          <div style="text-align:right;"><strong>Date of Issue:</strong> ${ef('issueDateText', issueTxt, '-')}<br/>
+               <strong>Place:</strong> ${ef('placeOfIssue', d.placeOfIssue, '-')}</div>
+        </div>
+
+        <div class="tc-field"><strong>1. Name of Pupil:</strong> ${ef('studentName', d.studentName)}</div>
+        <div class="tc-field"><strong>2. Mother's Name:</strong> ${ef('motherName', d.motherName)}</div>
+        <div class="tc-field"><strong>3. Father's Name:</strong> ${ef('fatherName', d.fatherName)}</div>
+        <div class="tc-field"><strong>4. Guardian's Name:</strong> ${ef('guardianName', d.guardianName)}</div>
+        <div class="tc-field"><strong>5. Nationality:</strong> ${ef('nationality', d.nationality || 'Indian')}</div>
+        <div class="tc-field"><strong>6. Religion:</strong> ${ef('religion', d.religion)}</div>
+        <div class="tc-field"><strong>7. Category (SC/ST/OBC/Gen):</strong> ${ef('category', d.category || 'General')}</div>
+        <div class="tc-field"><strong>8. Aadhaar / PEN No:</strong> ${ef('aadhaarPen', d.aadhaarPen)}</div>
+        <div class="tc-field"><strong>9. Date of Birth (in figures):</strong> ${ef('dob', safeDateText(d.dob))}</div>
+        <div class="tc-field"><strong>10. Date of Birth (in words):</strong> ${ef('dobWords', d.dobWords)}</div>
+        <div class="tc-field"><strong>11. Date of First Admission:</strong> ${ef('admissionDate', safeDateText(d.admissionDate))}</div>
+        <div class="tc-field"><strong>12. Class in which Admitted:</strong> ${ef('admittedClass', d.admittedClass)}</div>
+        <div class="tc-field"><strong>13. Class in which Last Studied:</strong> ${ef('lastClass', d.lastClass)}</div>
+        <div class="tc-field"><strong>14. Section:</strong> ${ef('section', d.section)}</div>
+        <div class="tc-field"><strong>15. Medium of Instruction:</strong> ${ef('medium', d.medium || 'English')}</div>
+        <div class="tc-field"><strong>16. Roll No:</strong> ${ef('rollNo', d.rollNo)}</div>
+        <div class="tc-field"><strong>17. Annual Exam Last Taken &amp; Result:</strong> ${ef('lastExamResult', d.lastExamResult)}</div>
+        <div class="tc-field"><strong>18. Whether Qualified for Promotion:</strong> ${ef('qualifiedPromotion', d.qualifiedPromotion || 'Yes')}</div>
+        <div class="tc-field"><strong>19. Promoted to Class:</strong> ${ef('promotedTo', d.promotedTo)}</div>
+        <div class="tc-field"><strong>20. Whether Failed / Repeated:</strong> ${ef('failedRepeated', d.failedRepeated || 'No')}</div>
+        <div class="tc-field"><strong>21. Subjects Studied:</strong> ${ef('subjects', d.subjects || 'English, Hindi, Mathematics, Science, Social Science')}</div>
+        <div class="tc-field"><strong>22. Co-curricular Activities / Games:</strong> ${ef('coCurricular', d.coCurricular)}</div>
+        <div class="tc-field"><strong>23. Whether NCC Cadet / Scout / Guide:</strong> ${ef('nccScout', d.nccScout || 'No')}</div>
+        <div class="tc-field"><strong>24. Total No. of Working Days:</strong> ${ef('workingDays', d.workingDays || '220')}</div>
+        <div class="tc-field"><strong>25. Total No. of Days Present:</strong> ${ef('daysPresent', d.daysPresent || '210')}</div>
+        <div class="tc-field"><strong>26. School Dues Paid Upto:</strong> ${ef('feesPaidUpto', d.feesPaidUpto || 'Paid in Full')}</div>
+        <div class="tc-field"><strong>27. Fee Concession (if any):</strong> ${ef('feeConcession', d.feeConcession || 'Nil')}</div>
+        <div class="tc-field"><strong>28. General Conduct:</strong> ${ef('conduct', d.conduct || 'Good')}</div>
+        <div class="tc-field"><strong>29. Date of Application for Certificate:</strong> ${ef('applicationDate', safeDateText(d.applicationDate))}</div>
+        <div class="tc-field"><strong>30. Date of Leaving School / Struck Off:</strong> ${ef('leavingDate', safeDateText(d.leavingDate))}</div>
+        <div class="tc-field"><strong>31. Reason for Leaving School:</strong> ${ef('reason', d.reason)}</div>
+        <div class="tc-field"><strong>32. Identification Mark (i):</strong> ${ef('identMark1', d.identMark1)}</div>
+        <div class="tc-field"><strong>33. Identification Mark (ii):</strong> ${ef('identMark2', d.identMark2)}</div>
+        <div class="tc-field"><strong>34. Any Other Remarks:</strong> ${ef('remarks', d.remarks || 'Character and Conduct Good')}</div>
+
+        <div class="sig-row">
+          <div class="sig-box"><div class="sig-line"></div><strong>Prepared / Clerk</strong><div>${ef('clerk', d.clerk)}</div></div>
+          <div class="sig-box"><div class="sig-line"></div><strong>Class Teacher</strong><div>${ef('classTeacher', d.classTeacher)}</div></div>
+          <div class="sig-box"><div class="sig-line"></div><strong>Principal / Head</strong><div>${ef('principal', d.principal)}</div></div>
+        </div>
+      `;
+    }
+
+    window.updatePreviewFromForm = () => {
+      if (!selectedStudent) return;
+      tcPreviewData = { ...getFormData(), studentId: selectedStudent.studentId, studentName: studentDisplayName(selectedStudent) };
+      renderPreview();
+      showToast('Preview updated from form.', 'success');
+    };
+
+    window.backToForm = () => {
+      document.getElementById("tcPreview").style.display = "none";
+      document.getElementById("tcFormSection").style.display = "block";
+    };
+
+    window.finalizeTC = async () => {
+      if (!selectedStudent) { showToast('Please select a student first', 'error'); return; }
+      if (selectedStudent.tcIssued) { showToast('This student already has a TC issued.', 'error'); return; }
+      try {
+        const edited = collectEditedData();
+        const finalData = {
+          ...tcPreviewData,
+          ...edited,
+          studentId: selectedStudent.studentId,
+          studentName: studentDisplayName(selectedStudent),
+          class: selectedStudent.finalClass || selectedStudent.class || 'N/A',
+          section: selectedStudent.finalSection || selectedStudent.section || '',
+          roll: selectedStudent.roll || 'N/A',
+          generatedBy: currentUser.uid,
+          generatedAt: new Date().toISOString(),
+          studentDocId: selectedStudent._recordSource === "archive" ? "" : selectedStudent.id,
+          archiveStudentDocId: selectedStudent._recordSource === "archive" ? selectedStudent.id : ""
+        };
+        if (!finalData.leavingDate) { showToast('Please set leaving date', 'error'); return; }
+        if (!finalData.tcNumber) { showToast('Please enter TC number', 'error'); return; }
+        const duplicateSnap = await getDocs(query(
+          collection(db, "schools", currentUser.uid, "transferCertificates"),
+          where("studentId", "==", selectedStudent.studentId)
+        ));
+        if (!duplicateSnap.empty) {
+          showToast("TC already exists for this student. Refreshing records.", "error");
+          await loadIssuedTCs(); return;
+        }
+        const docRef = await addDoc(collection(db, "schools", currentUser.uid, "transferCertificates"), finalData);
+        await archiveTCStudent(selectedStudent, finalData, docRef.id);
+        if (selectedStudent._recordSource === "archive") {
+          allStudents = allStudents.map((s) => s.id === selectedStudent.id ? {
+            ...s,
+            tcIssued: true,
+            tcNumber: finalData.tcNumber || "",
+            tcCertificateDocId: docRef.id,
+            transferCertificate: { id: docRef.id, ...finalData },
+            status: s.status || "Passed Out"
+          } : s);
+        } else {
+          allStudents = allStudents.filter((s) => s.id !== selectedStudent.id);
+        }
+        selectedStudent = null;
+        showToast(`TC ${finalData.tcNumber} saved and uploaded to student dashboard.`, 'success');
+        await loadIssuedTCs();
+        generateAndPrintTC(finalData);
+        resetForm();
+        switchTab('issued');
+      } catch (error) {
+        console.error("Error saving TC:", error);
+        showToast('Error saving TC: ' + error.message, 'error');
+      }
+    };
+
+    function resetForm() {
+      document.getElementById("tcPreview").style.display = "none";
+      document.getElementById("tcFormSection").style.display = "none";
+      selectedStudent = null;
+      tcPreviewData = {};
+      document.getElementById("selectedStudentName").textContent = '';
+      document.querySelectorAll('#tcFormSection input, #tcFormSection select, #tcFormSection textarea').forEach(el => { el.value = ''; });
+      ['searchName', 'searchRoll', 'searchClass', 'searchStudentId'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      document.getElementById("studentResult").innerHTML = emptySearchState();
+    }
+
+    async function loadIssuedTCs() {
+      try {
+        showLoading(true, "issuedTCsList");
+        const tcSnap = await getDocs(collection(db, "schools", currentUser.uid, "transferCertificates"));
+        allTCs = tcSnap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(b.generatedAt || 0) - new Date(a.generatedAt || 0));
+        populateTCClassFilter();
+        renderIssuedTCs(allTCs);
+      } catch (error) {
+        console.error("Error loading TCs:", error);
+        showToast('Error loading TCs', 'error');
+      }
+    }
+
+    window.searchIssuedTCs = () => {
+      const searchStudent = document.getElementById("tcSearchStudent")?.value?.trim().toLowerCase() || '';
+      const searchNumber = document.getElementById("tcSearchNumber")?.value?.trim().toLowerCase() || '';
+      const searchClass = document.getElementById("tcSearchClass")?.value || '';
+      const searchDate = document.getElementById("tcSearchDate")?.value || '';
+      let filtered = allTCs.filter(tc => {
+        if (searchStudent && !tc.studentName?.toLowerCase().includes(searchStudent) && !tc.studentId?.toLowerCase().includes(searchStudent)) return false;
+        if (searchNumber && !tc.tcNumber?.toLowerCase().includes(searchNumber)) return false;
+        if (searchClass && tc.class !== searchClass) return false;
+        if (searchDate) {
+          const generated = new Date(tc.generatedAt || 0);
+          if (Number.isNaN(generated.getTime()) || generated.toISOString().split('T')[0] !== searchDate) return false;
+        }
+        return true;
+      });
+      renderIssuedTCs(filtered);
+    };
+
+    function renderIssuedTCs(tcs) {
+      const resultDiv = document.getElementById("issuedTCsList");
+      if (tcs.length === 0) {
+        resultDiv.innerHTML = `<div class="empty-state">
+          <div class="icon-circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <h4>No TCs found</h4><p>No transfer certificates match your search criteria</p></div>`;
+        return;
+      }
+      const html = '<div class="cards-list">' + tcs.map(tc => `
+        <div class="card-item" style="cursor:default; border-left: 4px solid var(--success);">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="avatar" style="background: var(--success-50); color: var(--success);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <span>TC: ${esc(tc.tcNumber || 'N/A')}</span>
+            </div>
+            <span class="pill pill-success">Issued</span>
+          </div>
+          <div class="card-body-grid">
+            <div><strong>Student:</strong>${esc(tc.studentName || 'N/A')}</div>
+            <div><strong>ID:</strong>${esc(tc.studentId || 'N/A')}</div>
+            <div><strong>Class:</strong>${esc(tc.class || 'N/A')}${tc.section ? ` (${esc(tc.section)})` : ''}</div>
+            <div><strong>Issued:</strong>${esc(safeDateText(tc.generatedAt))}</div>
+            <div style="grid-column: 1 / -1;"><strong>Reason:</strong>${esc(tc.reason || '')}</div>
+          </div>
+          <div class="toolbar" style="margin-top: 14px;">
+            <button class="btn btn-primary btn-sm" onclick="printTC('${esc(tc.id)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print TC
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadTCPDF('${esc(tc.id)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      `).join('') + '</div>';
+      resultDiv.innerHTML = html;
+    }
+
+    function populateTCClassFilter() {
+      const classSet = new Set();
+      allTCs.forEach(tc => { if (tc.class) classSet.add(tc.class); });
+      const select = document.getElementById('tcSearchClass');
+      select.innerHTML = '<option value="">All Classes</option>';
+      Array.from(classSet).sort().forEach(c => { select.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
+    }
+
+    function generateAndPrintTC(tcData) {
+      const htmlContent = generateTCHTML(tcData);
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) { showToast("Popup blocked. Allow popups to print TC.", "error"); return; }
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+
+    function tcPrintStyles() {
+      return `
+        @page { size: A4; margin: 16mm; }
+        body { font-family: 'Times New Roman', Georgia, serif; color: #111; padding: 0; margin: 0; }
+        .tc-container { max-width: 800px; margin: 0 auto; padding: 30px; border: 2px solid #333; }
+        h2 { text-align: center; font-size: 26px; letter-spacing: 4px; margin: 0 0 8px; }
+        .school-name { text-align: center; font-size: 20px; font-weight: bold; }
+        .school-addr { text-align: center; font-size: 14px; color: #444; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 2px double #333; }
+        .meta-row { display: flex; justify-content: space-between; margin-bottom: 22px; font-size: 14px; gap: 20px; }
+        .tc-field { font-size: 14.5px; margin: 8px 0; }
+        .tc-field strong { display: inline-block; min-width: 300px; }
+        .sig-row { display: flex; justify-content: space-between; margin-top: 64px; gap: 24px; }
+        .sig-box { text-align: center; flex: 1; }
+        .sig-line { border-top: 1.5px solid #333; margin-bottom: 6px; height: 40px; }
+        /* Neutralise the on-screen editable styling for a clean printout */
+        .editable-field { border: none !important; background: transparent !important; padding: 0 !important; min-width: 0 !important; box-shadow: none !important; font: inherit !important; }
+        [contenteditable] { outline: none; }
+        @media print { body { margin: 0; padding: 0; } .tc-container { border: none; } }
+      `;
+    }
+
+    function generateTCHTML(tcData) {
+      // Prefer the exact certificate the user edited inline in the preview
+      const body = tcData.previewHtml
+        ? tcData.previewHtml
+        : fallbackTCBody(tcData);
+      return `<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+        <title>Transfer Certificate - ${esc(tcData.studentName || '')}</title>
+        <style>${tcPrintStyles()}</style>
+</head><body><div class="tc-container">${body}</div></body></html>`;
+    }
+
+    // Used only when no inline-edited HTML was stored (older records)
+    function fallbackTCBody(t) {
+      const row = (n, label, value) => `<div class="tc-field"><strong>${n}. ${label}:</strong> ${esc(value ?? '')}</div>`;
+      return `
+        <h2>TRANSFER CERTIFICATE</h2>
+        <div class="school-name">${esc(t.schoolName || getStoredSchoolName())}</div>
+        <div class="school-addr">${esc(t.schoolAddress || getDefaultSchoolAddress())}
+          <div style="font-size:12px;color:#555;margin-top:4px;">Affiliation No: ${esc(t.affiliationNo || '-')} | Reg./UDISE No: ${esc(t.udise || '-')}</div>
+        </div>
+        <div class="meta-row">
+          <div><strong>Certificate No:</strong> ${esc(t.tcNumber || '')}<br/><strong>Book No:</strong> ${esc(t.bookNo || '-')}<br/><strong>Admission / Register No:</strong> ${esc(t.admissionNo || t.rollNo || '')}</div>
+          <div style="text-align:right;"><strong>Date of Issue:</strong> ${esc(safeDateText(t.issueDate || t.generatedAt))}<br/><strong>Place:</strong> ${esc(t.placeOfIssue || '-')}</div>
+        </div>
+        ${row(1, "Name of Pupil", t.studentName)}
+        ${row(2, "Mother's Name", t.motherName)}
+        ${row(3, "Father's Name", t.fatherName)}
+        ${row(4, "Guardian's Name", t.guardianName)}
+        ${row(5, "Nationality", t.nationality || 'Indian')}
+        ${row(6, "Religion", t.religion)}
+        ${row(7, "Category (SC/ST/OBC/Gen)", t.category || 'General')}
+        ${row(8, "Aadhaar / PEN No", t.aadhaarPen)}
+        ${row(9, "Date of Birth (in figures)", safeDateText(t.dob))}
+        ${row(10, "Date of Birth (in words)", t.dobWords)}
+        ${row(11, "Date of First Admission", safeDateText(t.admissionDate))}
+        ${row(12, "Class in which Admitted", t.admittedClass)}
+        ${row(13, "Class in which Last Studied", t.lastClass)}
+        ${row(14, "Section", t.section)}
+        ${row(15, "Medium of Instruction", t.medium || 'English')}
+        ${row(16, "Roll No", t.rollNo)}
+        ${row(17, "Annual Exam Last Taken & Result", t.lastExamResult)}
+        ${row(18, "Whether Qualified for Promotion", t.qualifiedPromotion || 'Yes')}
+        ${row(19, "Promoted to Class", t.promotedTo)}
+        ${row(20, "Whether Failed / Repeated", t.failedRepeated || 'No')}
+        ${row(21, "Subjects Studied", t.subjects || 'English, Hindi, Mathematics, Science, Social Science')}
+        ${row(22, "Co-curricular Activities / Games", t.coCurricular)}
+        ${row(23, "Whether NCC Cadet / Scout / Guide", t.nccScout || 'No')}
+        ${row(24, "Total No. of Working Days", t.workingDays || '220')}
+        ${row(25, "Total No. of Days Present", t.daysPresent || '210')}
+        ${row(26, "School Dues Paid Upto", t.feesPaidUpto || 'Paid in Full')}
+        ${row(27, "Fee Concession (if any)", t.feeConcession || 'Nil')}
+        ${row(28, "General Conduct", t.conduct || 'Good')}
+        ${row(29, "Date of Application for Certificate", safeDateText(t.applicationDate))}
+        ${row(30, "Date of Leaving School / Struck Off", safeDateText(t.leavingDate))}
+        ${row(31, "Reason for Leaving School", t.reason)}
+        ${row(32, "Identification Mark (i)", t.identMark1)}
+        ${row(33, "Identification Mark (ii)", t.identMark2)}
+        ${row(34, "Any Other Remarks", t.remarks || 'Character and Conduct Good')}
+        <div class="sig-row">
+          <div class="sig-box"><div class="sig-line"></div><strong>Prepared / Clerk</strong><div>${esc(t.clerk || '')}</div></div>
+          <div class="sig-box"><div class="sig-line"></div><strong>Class Teacher</strong><div>${esc(t.classTeacher || 'Class Teacher')}</div></div>
+          <div class="sig-box"><div class="sig-line"></div><strong>Principal / Head</strong><div>${esc(t.principal || 'Principal')}</div></div>
+        </div>`;
+    }
+
+    window.printTC = (tcId) => { const tc = allTCs.find(t => t.id === tcId); if (tc) generateAndPrintTC(tc); };
+    window.downloadTCPDF = (tcId) => { const tc = allTCs.find(t => t.id === tcId); if (tc) generateAndPrintTC(tc); };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('confirmDelete')?.addEventListener('click', window.confirmDeleteTC);
+    });
+    document.getElementById('confirmDelete')?.addEventListener('click', window.confirmDeleteTC);
+  </script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

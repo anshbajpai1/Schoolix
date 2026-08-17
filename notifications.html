@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schoolix - App Notifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+<style>
+:root {
+  --page-bg: #f4f7fc;
+  --panel: #ffffff;
+  --line: #dce5f3;
+  --ink: #13203a;
+  --muted: #64748b;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --success: #067647;
+  --danger: #b42318;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--ink);
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+body.sx-admin-shell-enabled.sx-notifications-app {
+  padding-top: 0 !important;
+}
+body.sx-admin-shell-enabled.sx-notifications-app .notification-page {
+  padding-top: var(--sx-admin-header-offset);
+  z-index: auto !important;
+}
+body.sx-admin-shell-enabled.sx-notifications-app .notification-page [id*="notification" i] {
+  z-index: auto !important;
+}
+.notification-page {
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto 48px;
+}
+.page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.page-heading h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: 0; }
+.page-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.delivery-badge {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: var(--blue-soft);
+  color: var(--blue-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+.composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(30, 64, 175, 0.06);
+}
+.composer-form { padding: 24px; }
+.delivery-preview {
+  border-left: 1px solid var(--line);
+  background: var(--blue-soft);
+  padding: 24px;
+}
+.delivery-preview h2,
+.history-heading h2 { margin: 0 0 8px; font-size: 17px; letter-spacing: 0; }
+.delivery-preview p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.field { display: grid; gap: 7px; margin-bottom: 17px; }
+.field label { font-size: 13px; font-weight: 800; }
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  padding: 12px 13px;
+  outline: none;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.field textarea { min-height: 116px; resize: vertical; line-height: 1.55; }
+.field-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }
+.send-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.audience { color: var(--muted); font-size: 12px; }
+.send-btn {
+  min-width: 168px;
+  height: 42px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--blue);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+.send-btn:hover { background: var(--blue-dark); }
+.send-btn:disabled { cursor: wait; opacity: 0.65; }
+.phone-preview {
+  margin-top: 18px;
+  border: 1px solid #cbdcf7;
+  border-radius: 8px;
+  background: #fff;
+  padding: 13px;
+}
+.phone-preview-title { font-size: 13px; font-weight: 800; margin-bottom: 5px; overflow-wrap: anywhere; }
+.phone-preview-message { color: var(--muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.history { margin-top: 28px; }
+.history-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
+.history-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+.history-list { display: grid; gap: 10px; }
+.history-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 16px 18px;
+}
+.history-title { font-size: 14px; font-weight: 800; margin-bottom: 5px; }
+.history-message { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.history-meta { color: var(--muted); font-size: 11px; white-space: nowrap; text-align: right; }
+.empty-state { border: 1px dashed var(--line); border-radius: 8px; padding: 30px; color: var(--muted); text-align: center; background: #fff; }
+.toast {
+  position: fixed;
+  top: 110px;
+  right: 20px;
+  z-index: 2147483000;
+  max-width: min(360px, calc(100vw - 32px));
+  border-radius: 8px;
+  padding: 12px 15px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 700;
+}
+.toast.error { color: var(--danger); }
+@media (max-width: 760px) {
+  .notification-page { width: min(100% - 20px, 1080px); }
+  .page-heading { align-items: flex-start; flex-direction: column; }
+  .composer { grid-template-columns: minmax(0, 1fr); }
+  .delivery-preview { border-left: 0; border-top: 1px solid var(--line); }
+  .send-row { align-items: stretch; flex-direction: column; }
+  .send-btn { width: 100%; }
+  .history-item { grid-template-columns: minmax(0, 1fr); }
+  .history-meta { text-align: left; white-space: normal; }
+}
+@media print {
+  body.sx-admin-shell-enabled.sx-notifications-app .notification-page { padding-top: 0; }
+}
+</style>
+</head>
+<body class="sx-admin-app sx-notifications-app" data-sx-title="App Notifications">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+<main class="notification-page">
+  <div class="page-heading">
+    <div>
+      <h1>App Notifications</h1>
+      <p>Send an announcement to selected users of your school through the Schoolix Android app.</p>
+    </div>
+    <div class="delivery-badge" id="audienceBadge">Everyone in this school</div>
+  </div>
+
+  <section class="composer" aria-labelledby="composeTitle">
+    <form class="composer-form" id="notificationForm">
+      <div class="field">
+        <label for="notificationAudience">Send to</label>
+        <select id="notificationAudience" required>
+          <option value="all">Everyone in this school</option>
+          <option value="teachers">Teachers only</option>
+          <option value="students">Students and parents only</option>
+          <option value="drivers">Drivers only</option>
+          <option value="students_pending_dues">Students with pending dues</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="notificationTitle" id="composeTitle">Notification title</label>
+        <input id="notificationTitle" maxlength="80" minlength="3" placeholder="School announcement" required>
+        <div class="field-meta"><span>Shown in the notification bar</span><span id="titleCount">0 / 80</span></div>
+      </div>
+      <div class="field">
+        <label for="notificationMessage">Message</label>
+        <textarea id="notificationMessage" maxlength="240" minlength="3" placeholder="Write the message users should receive..." required></textarea>
+        <div class="field-meta"><span>Keep it clear and actionable</span><span id="messageCount">0 / 240</span></div>
+      </div>
+      <div class="send-row">
+        <div class="audience" id="audienceSummary">Audience: everyone in this school</div>
+        <button class="send-btn" id="sendNotificationBtn" type="submit">Send notification</button>
+      </div>
+    </form>
+    <aside class="delivery-preview">
+      <h2>Phone preview</h2>
+      <p>The final appearance may vary slightly by Android version.</p>
+      <div class="phone-preview">
+        <div class="phone-preview-title" id="previewTitle">School announcement</div>
+        <div class="phone-preview-message" id="previewMessage">Your notification message will appear here.</div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="history" aria-labelledby="historyTitle">
+    <div class="history-heading">
+      <div><h2 id="historyTitle">Recent notifications</h2><p>Latest messages sent by this school.</p></div>
+    </div>
+    <div class="history-list" id="notificationHistory"><div class="empty-state">Loading notification history...</div></div>
+  </section>
+</main>
+
+<script src="school-branding.js"></script>
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "./firebase-compat.js";
+import { collection, doc, getDoc, getDocs, limit, orderBy, query } from "./firebase-compat.js";
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const SEND_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/send-app-notification";
+const $ = (id) => document.getElementById(id);
+let currentUser = null;
+let schoolId = "";
+const AUDIENCE_LABELS = {
+  all: "Everyone in this school, including drivers",
+  teachers: "Teachers only",
+  students: "Students and parents only",
+  drivers: "Drivers only",
+  students_pending_dues: "Students with pending dues",
+};
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function showToast(message, type = "success") {
+  document.querySelector(".toast")?.remove();
+  const toast = document.createElement("div");
+  toast.className = `toast ${type === "error" ? "error" : ""}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4200);
+}
+
+function formatDate(value) {
+  const date = value?.toDate?.() || new Date(value || 0);
+  if (Number.isNaN(date.getTime())) return "Recently";
+  return date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function updatePreview() {
+  const title = $("notificationTitle").value;
+  const message = $("notificationMessage").value;
+  const audience = $("notificationAudience").value;
+  const audienceLabel = AUDIENCE_LABELS[audience] || AUDIENCE_LABELS.all;
+  $("titleCount").textContent = `${title.length} / 80`;
+  $("messageCount").textContent = `${message.length} / 240`;
+  $("previewTitle").textContent = title.trim() || "School announcement";
+  $("previewMessage").textContent = message.trim() || "Your notification message will appear here.";
+  $("audienceBadge").textContent = audienceLabel;
+  $("audienceSummary").textContent = `Audience: ${audienceLabel.toLowerCase()}`;
+}
+
+async function loadHistory() {
+  const container = $("notificationHistory");
+  if (!schoolId) return;
+  try {
+    const snapshot = await getDocs(query(
+      collection(db, "schools", schoolId, "notifications"),
+      orderBy("createdAt", "desc"),
+      limit(30),
+    ));
+    if (snapshot.empty) {
+      container.innerHTML = '<div class="empty-state">No app notifications sent yet.</div>';
+      return;
+    }
+    container.innerHTML = snapshot.docs.map((item) => {
+      const data = item.data();
+      const audienceLabel = AUDIENCE_LABELS[data.audience] || AUDIENCE_LABELS.all;
+      return `<article class="history-item">
+        <div><div class="history-title">${escapeHtml(data.title)}</div><div class="history-message">${escapeHtml(data.message)}</div></div>
+        <div class="history-meta">${escapeHtml(audienceLabel)}<br>${escapeHtml(String(data.directAccepted ?? 0))} phone(s) accepted<br>${escapeHtml(formatDate(data.createdAt))}</div>
+      </article>`;
+    }).join("");
+  } catch (error) {
+    console.error(error);
+    container.innerHTML = '<div class="empty-state">Unable to load notification history.</div>';
+  }
+}
+
+$("notificationForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!currentUser) return showToast("Admin login required.", "error");
+  const title = $("notificationTitle").value.trim();
+  const message = $("notificationMessage").value.trim();
+  const audience = $("notificationAudience").value;
+  if (title.length < 3 || message.length < 3) return showToast("Enter a valid title and message.", "error");
+
+  const button = $("sendNotificationBtn");
+  button.disabled = true;
+  button.textContent = "Sending...";
+  try {
+    const idToken = await currentUser.getIdToken(true);
+    const response = await fetch(SEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "x-firebase-token": idToken,
+      },
+      body: JSON.stringify({ title, message, audience }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) throw new Error(result.error || "Unable to send notification");
+    $("notificationForm").reset();
+    updatePreview();
+    const accepted = Number(result.directAccepted || 0);
+    const topicAccepted = Number(result.pendingTopicAccepted || 0);
+    const deliveryMode = String(result.deliveryMode || "");
+    const deliveryMessage = accepted + topicAccepted > 0
+      ? topicAccepted > 0 && accepted === 0
+        ? `Notification accepted for ${topicAccepted} pending-dues student topic(s).`
+        : topicAccepted > 0
+          ? `Notification accepted for ${accepted} phone(s) and ${topicAccepted} pending-dues topic(s).`
+          : `Notification accepted for ${accepted} registered phone(s).`
+      : deliveryMode === "targeted-no-devices"
+        ? "No pending-dues student phones are registered yet."
+        : "Topic fallback sent, but no updated app phone is registered yet.";
+    showToast(deliveryMessage, accepted + topicAccepted > 0 ? "success" : "error");
+    await loadHistory();
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || "Unable to send notification.", "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Send notification";
+  }
+});
+
+$("notificationTitle").addEventListener("input", updatePreview);
+$("notificationMessage").addEventListener("input", updatePreview);
+$("notificationAudience").addEventListener("change", updatePreview);
+updatePreview();
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "index.html";
+    return;
+  }
+  try {
+    const profileSnapshot = await getDoc(doc(db, "users", user.uid));
+    const profile = profileSnapshot.data() || {};
+    const role = String(profile.role || "").toLowerCase();
+    if (role !== "admin" && role !== "superadmin" && profile.superAdmin !== true) {
+      location.href = "index.html";
+      return;
+    }
+    currentUser = user;
+    schoolId = String(profile.schoolId || profile.adminId || user.uid);
+    await loadHistory();
+  } catch (error) {
+    console.error(error);
+    showToast("Unable to verify admin access.", "error");
+  }
+});
+</script>
+<script type="module" src="access-control.js"></script>
+<script src="schoolix-polish.js" defer></script>
+<script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

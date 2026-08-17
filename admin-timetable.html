@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 1600);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(59, 158, 255, 0.14), transparent 34%),
+    linear-gradient(180deg, #f7fbff 0%, #ffffff 62%);
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .sx-loader-card {
+  width: min(340px, 88vw);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 28px 26px;
+  border: 1px solid rgba(59, 158, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 22px 70px rgba(21, 43, 75, 0.14);
+}
+.sx-page-loader .sx-loader-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 4px solid rgba(59, 158, 255, 0.14);
+  border-top-color: #1f7eea;
+  border-right-color: #f0b429;
+  animation: sxLoaderSpin 0.72s linear infinite;
+}
+.sx-page-loader .sx-loader-title {
+  font: 800 1rem/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+}
+.sx-page-loader .sx-loader-subtitle {
+  font: 500 0.82rem/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #627084;
+  text-align: center;
+}
+.sx-page-loader .sx-loader-bar {
+  position: relative;
+  width: min(220px, 68vw);
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(59, 158, 255, 0.12);
+}
+.sx-page-loader .sx-loader-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1f7eea, #f0b429);
+  animation: sxLoaderBar 1s ease-in-out infinite;
+}
+@keyframes sxLoaderSpin { to { transform: rotate(360deg); } }
+@keyframes sxLoaderBar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(260%); }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Timetable</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0d1b2a;
+      --navy2:   #162032;
+      --navy3:   #1e2d40;
+      --accent:  #3b9eff;
+      --accent2: #1c7de4;
+      --gold:    #f0b429;
+      --green:   #22c55e;
+      --red:     #ef4444;
+      --white:   #f0f4f8;
+      --muted:   #8ca0b8;
+      --border:  rgba(59,158,255,0.15);
+      --card:    rgba(22,32,50,0.9);
+      --shadow:  0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,158,255,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(28,125,228,0.06) 0%, transparent 55%);
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--navy2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-logo {
+      width: 36px; height: 36px;
+      overflow: hidden;
+      background: #07111f;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .topbar-logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+    .topbar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .topbar-subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .topbar-badge {
+      background: rgba(59,158,255,0.12);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 2rem;
+    }
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    /* ── CONTROL CARD ── */
+    .control-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 160px;
+    }
+    .field-group label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .field-group label svg { opacity: 0.7; }
+    select {
+      background: var(--navy);
+      border: 1px solid var(--border);
+      color: var(--white);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ca0b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,158,255,0.15); }
+    select option { background: var(--navy2); }
+
+    /* ── ACTION BUTTONS ── */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(59,158,255,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,158,255,0.45); }
+    .btn-secondary {
+      background: rgba(59,158,255,0.1);
+      border: 1px solid var(--border);
+      color: var(--accent);
+    }
+    .btn-secondary:hover { background: rgba(59,158,255,0.18); border-color: var(--accent); }
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(34,197,94,0.25);
+    }
+    .btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
+    .btn-danger {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: var(--red);
+      padding: 6px 10px;
+      font-size: 0.78rem;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+    .stat-chip span { color: var(--muted); }
+    .stat-chip strong { color: var(--accent); font-weight: 700; }
+
+    /* ── TABLE WRAPPER ── */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: auto;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+    thead th {
+      background: var(--navy2);
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    thead th:first-child {
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0;
+      text-transform: none;
+      min-width: 130px;
+    }
+    thead th .day-icon { display: flex; align-items: center; gap: 6px; }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(59,158,255,0.03); }
+    tbody td {
+      padding: 12px 14px;
+      vertical-align: top;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    tbody td:last-child { border-right: none; }
+
+    /* Period label cell */
+    .period-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 120px;
+    }
+    .period-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--white);
+      font-weight: 600;
+    }
+    .period-time-display {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .period-time-controls {
+      display: grid;
+      gap: 6px;
+      margin-top: 7px;
+    }
+    .time-12-controls {
+      display: grid;
+      grid-template-columns: minmax(52px, 1fr) minmax(58px, 1fr) minmax(62px, 0.9fr);
+      gap: 6px;
+    }
+    .time-12-controls .slot-input {
+      min-width: 0;
+      padding: 7px 8px;
+      font-size: 0.76rem;
+    }
+    .period-remove {
+      margin-top: 6px;
+    }
+
+    /* Slot cell */
+    .slot-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      min-width: 155px;
+    }
+    .slot-input {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .slot-input:focus {
+      border-color: var(--accent);
+      background: rgba(59,158,255,0.07);
+    }
+    .slot-input::placeholder { color: rgba(140,160,184,0.5); }
+    .slot-input.subject-input { font-weight: 600; }
+    .slot-input.time-input {
+      color: var(--gold);
+      font-weight: 500;
+      font-size: 0.78rem;
+    }
+    .teacher-search-wrap { position: relative; }
+    .teacher-results {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .teacher-result-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .teacher-result-item:last-child { border-bottom: none; }
+    .teacher-result-item:hover { background: rgba(59,158,255,0.1); }
+    .teacher-result-item.busy {
+      opacity: 0.72;
+      cursor: not-allowed;
+      background: rgba(239,68,68,0.06);
+    }
+    .teacher-result-item.busy .t-id { color: var(--red); }
+    .teacher-result-item .t-name { font-size: 0.82rem; font-weight: 600; color: var(--white); }
+    .teacher-result-item .t-id   { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+    .teacher-id-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(59,158,255,0.08);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 7px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .teacher-view-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+    .teacher-view-card.show { display: block; }
+    .teacher-view-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .teacher-view-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--white);
+    }
+    .teacher-view-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+    .readonly-slot {
+      background: rgba(59,158,255,0.08);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 150px;
+    }
+    .readonly-slot strong { color: var(--white); display: block; margin-bottom: 4px; }
+    .readonly-slot div { color: var(--muted); font-size: 0.76rem; line-height: 1.45; }
+    .field-label-small {
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .empty-state svg { opacity: 0.3; margin-bottom: 1rem; }
+    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--muted); }
+    .empty-state p  { color: var(--muted); font-size: 0.85rem; margin-top: 6px; opacity: 0.7; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(34,197,94,0.4); }
+    .toast.success .toast-icon { color: var(--green); }
+    .toast.error   { border-color: rgba(239,68,68,0.4); }
+    .toast.error   .toast-icon { color: var(--red); }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(247, 251, 255, 0.78);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2147482550;
+      backdrop-filter: blur(8px);
+      display: none;
+      padding: 18px;
+    }
+    .loading-overlay.show { display: flex !important; }
+    .loader {
+      width: min(330px, 88vw);
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      padding: 26px 24px;
+      border: 1px solid rgba(59,158,255,0.16);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.94);
+      box-shadow: 0 22px 70px rgba(16,24,40,0.16);
+    }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 4px solid rgba(59,158,255,0.14);
+      border-top-color: var(--accent);
+      border-right-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.72s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader::after {
+      content: "";
+      width: min(210px, 68vw);
+      height: 4px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--gold), transparent);
+      background-size: 220% 100%;
+      animation: loaderTrack 1s ease-in-out infinite;
+    }
+    @keyframes loaderTrack {
+      0% { background-position: 100% 0; opacity: 0.72; }
+      50% { opacity: 1; }
+      100% { background-position: -120% 0; opacity: 0.72; }
+    }
+    .loader p {
+      color: #172033;
+      font-size: 0.92rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .subjects-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2147482600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.54);
+      backdrop-filter: blur(8px);
+    }
+    .subjects-modal.show { display: flex; }
+    .subjects-panel {
+      width: min(560px, 100%);
+      max-height: min(82vh, 720px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.32);
+    }
+    .subjects-panel-head,
+    .subjects-panel-actions {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .subjects-panel-actions {
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+      justify-content: flex-end;
+    }
+    .subjects-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+    .subjects-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .subjects-body {
+      padding: 16px 18px;
+      overflow: auto;
+    }
+    .subjects-add-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .sync-time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sync-time-note {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(59,158,255,0.06);
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+    .subjects-list {
+      display: grid;
+      gap: 8px;
+    }
+    .subject-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(59, 158, 255, 0.05);
+    }
+    .subject-name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .subjects-empty {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: rgba(140, 160, 184, 0.06);
+    }
+    .subject-delete-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--navy3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    @media (max-width: 700px) {
+      .control-card { flex-direction: column; }
+      .actions { width: 100%; }
+      .btn { flex: 1; justify-content: center; }
+    }
+
+    /* Schoolix admin blue/white theme override */
+    :root {
+      --navy: #f4f7fb;
+      --navy2: #ffffff;
+      --navy3: #eef4ff;
+      --accent: #1f5eff;
+      --accent2: #1746c7;
+      --gold: #1f5eff;
+      --green: #16a34a;
+      --red: #dc2626;
+      --white: #172033;
+      --muted: #667085;
+      --border: #e4e9f2;
+      --card: #ffffff;
+      --shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    body {
+      background: #f4f7fb;
+      background-image: none;
+      color: #172033;
+    }
+
+    .topbar,
+    .control-card,
+    .stat-chip,
+    .table-wrapper,
+    .teacher-view-card,
+    .empty-state,
+    .toast {
+      background: #ffffff;
+      border-color: #e4e9f2;
+      box-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    .topbar {
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+    }
+
+    .topbar-logo,
+    .btn-primary {
+      background: #1f5eff;
+    }
+
+    .topbar-logo {
+      background: #07111f;
+    }
+
+    .topbar-title,
+    .page-header h1,
+    thead th:first-child,
+    .period-num,
+    .teacher-view-title,
+    .teacher-result-item .t-name,
+    .readonly-slot strong,
+    .slot-input,
+    .topbar-badge {
+      color: #172033;
+    }
+
+    .topbar-subtitle,
+    .page-header p,
+    .field-group label,
+    .stat-chip span,
+    thead th,
+    .teacher-view-meta,
+    .teacher-result-item .t-id,
+    .readonly-slot div,
+    .field-label-small,
+    .empty-state h3,
+    .empty-state p,
+    .loader p {
+      color: #667085;
+    }
+
+    .topbar-badge,
+    .btn-secondary,
+    .teacher-id-badge,
+    .readonly-slot {
+      background: #eef4ff;
+      border-color: #d8e5ff;
+      color: #1746c7;
+    }
+
+    select,
+    .slot-input {
+      background-color: #f8fafc;
+      border-color: #d0d8e5;
+      color: #172033;
+    }
+
+    select option,
+    .teacher-results {
+      background: #ffffff;
+      color: #172033;
+    }
+
+    select:focus,
+    .slot-input:focus {
+      background: #ffffff;
+      border-color: #1f5eff;
+      box-shadow: 0 0 0 3px rgba(31, 94, 255, 0.14);
+    }
+
+    table thead th {
+      background: #eef4ff;
+      border-bottom-color: #d8e5ff;
+    }
+
+    tbody tr {
+      border-bottom-color: #e4e9f2;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    tbody td {
+      border-right-color: #e4e9f2;
+    }
+
+    .teacher-results {
+      border-color: #d0d8e5;
+      box-shadow: 0 14px 32px rgba(16, 24, 40, 0.12);
+    }
+
+    .teacher-result-item {
+      border-bottom-color: #e4e9f2;
+    }
+
+    .teacher-result-item:hover {
+      background: #eef4ff;
+    }
+
+    .loading-overlay {
+      background: rgba(244, 247, 251, 0.82);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c9d8f2;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #1f5eff;
+    }
+  </style>
+  <link rel="stylesheet" href="schoolix-erp.css">
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body class="sx-admin-tool">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="sx-loader-card" aria-label="Loading page">
+    <div class="sx-loader-mark"></div>
+    <div class="sx-loader-title">Schoolix Timetable</div>
+    <div class="sx-loader-subtitle">Preparing classes and teachers...</div>
+    <div class="sx-loader-bar"></div>
+  </section>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader">
+    <div class="spinner"></div>
+    <p id="loadingText">Loading data...</p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<div class="subjects-modal" id="subjectsModal" aria-hidden="true">
+  <div class="subjects-panel" role="dialog" aria-modal="true" aria-labelledby="subjectsModalTitle">
+    <div class="subjects-panel-head">
+      <div>
+        <div class="subjects-title" id="subjectsModalTitle">Class Subjects</div>
+        <div class="subjects-meta" id="subjectsModalMeta">Load a class to manage subjects.</div>
+      </div>
+      <button class="btn btn-secondary subject-delete-btn" onclick="closeSubjectsModal()" aria-label="Close subjects">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="subjects-body">
+      <div class="subjects-add-row">
+        <input id="subjectNameInput" type="text" placeholder="Subject name" onkeydown="if(event.key==='Enter') addClassSubject()">
+        <button class="btn btn-primary" onclick="addClassSubject()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Add
+        </button>
+      </div>
+      <div class="subjects-list" id="subjectsList"></div>
+    </div>
+    <div class="subjects-panel-actions">
+      <button class="btn btn-secondary" onclick="closeSubjectsModal()">Done</button>
+      <button class="btn btn-success" onclick="saveClassSubjects()">Save Subjects</button>
+    </div>
+  </div>
+</div>
+
+<div class="subjects-modal" id="syncTimeModal" aria-hidden="true">
+  <div class="subjects-panel" role="dialog" aria-modal="true" aria-labelledby="syncTimeModalTitle">
+    <div class="subjects-panel-head">
+      <div>
+        <div class="subjects-title" id="syncTimeModalTitle">Sync Period Time</div>
+        <div class="subjects-meta" id="syncTimeModalMeta">Choose class and section to copy period timings from.</div>
+      </div>
+      <button class="btn btn-secondary subject-delete-btn" onclick="closeSyncTimeModal()" aria-label="Close sync time">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="subjects-body">
+      <div class="sync-time-grid">
+        <div class="field-group">
+          <label>Class</label>
+          <select id="syncClassSelect" onchange="populateSyncSectionSelect()">
+            <option value="">Select Class</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Section</label>
+          <select id="syncSectionSelect">
+            <option value="">Select Section</option>
+          </select>
+        </div>
+      </div>
+      <div class="sync-time-note">Only period start and end times will be copied. Subjects and teachers in this timetable will stay the same.</div>
+    </div>
+    <div class="subjects-panel-actions">
+      <button class="btn btn-secondary" onclick="closeSyncTimeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="syncTimeFromSelectedTimetable()">Sync Time</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:8px;color:var(--accent)">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Class Timetable
+    </h1>
+    <p>Create and manage weekly schedules for each class section with subjects, teachers, and timings.</p>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="control-card">
+    <div class="field-group">
+      <label>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Class
+      </label>
+      <select id="classSelect">
+        <option value="">Select Class</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Section
+      </label>
+      <select id="sectionSelect">
+        <option value="">Select Section</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        View Teacher Timetable
+      </label>
+      <select id="teacherViewSelect">
+        <option value="">Select Teacher</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="loadTimetable()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.18"/>
+        </svg>
+        Load Timetable
+      </button>
+      <button class="btn btn-secondary" onclick="addPeriod()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Add Period
+      </button>
+      <button class="btn btn-secondary" onclick="openSubjectsModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Subjects
+      </button>
+      <button class="btn btn-secondary" onclick="openSyncTimeModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M4 4v5h5"/>
+        </svg>
+        Sync Time
+      </button>
+      <button class="btn btn-success" onclick="saveTimetable()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Save Timetable
+      </button>
+      <button class="btn btn-secondary" onclick="viewTeacherTimetable()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+        View Teacher
+      </button>
+    </div>
+  </div>
+
+  <div class="teacher-view-card" id="teacherViewCard">
+    <div class="teacher-view-head">
+      <div>
+        <div class="teacher-view-title" id="teacherViewTitle">Teacher Timetable</div>
+        <div class="teacher-view-meta" id="teacherViewMeta"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="closeTeacherTimetableView()">Close View</button>
+    </div>
+    <div id="teacherTimetableView"></div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="statsBar" style="display:none">
+    <div class="stat-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Class:</span> <strong id="statClass">—</strong>
+    </div>
+    <div class="stat-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Section:</span> <strong id="statSection" style="color:var(--gold)">—</strong>
+    </div>
+    <div class="stat-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Periods:</span> <strong id="statPeriods" style="color:var(--green)">0</strong>
+    </div>
+    <div class="stat-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <span>Days:</span> <strong style="color:var(--muted)">6</strong>
+    </div>
+  </div>
+
+  <!-- TIMETABLE AREA -->
+  <div id="timetableContainer">
+    <div class="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <h3>No Timetable Loaded</h3>
+      <p>Select a class and section above, then click "Load Timetable" to get started.</p>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp }          from "./firebase-compat.js";
+  import { getAuth, onAuthStateChanged } from "./firebase-compat.js";
+  import {
+    getFirestore, collection, getDocs,
+    query, where, doc, getDoc, setDoc, serverTimestamp
+  } from "./firebase-compat.js";
+
+  // ── FIREBASE ──
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    authDomain:        "schoolix-48107.firebaseapp.com",
+    projectId:         "schoolix-48107",
+    storageBucket:     "schoolix-48107.firebasestorage.app",
+    messagingSenderId: "133937954491",
+    appId:             "1:133937954491:web:69d8064422617eb8c4339e"
+  };
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let currentUser      = null;
+  let teachers         = [];
+  let allStudents      = [];
+  let currentTimetable = null;
+  let currentClassSubjects = [];
+  let allTimetables = [];
+  let timetableCachePromise = null;
+  let timetableCacheAt = 0;
+  let loadClassesRun = 0;
+
+  const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  // ── HELPERS ──
+  function showLoading(on, message = "Loading data...") {
+    const overlay = document.getElementById("loadingOverlay");
+    const text = document.getElementById("loadingText");
+    if (text) text.textContent = message;
+    overlay.classList.toggle("show", on);
+  }
+  function nextPaint() {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
+  function toast(msg, type = "success") {
+    const t    = document.getElementById("toast");
+    const icon = document.getElementById("toastIcon");
+    document.getElementById("toastMsg").textContent = msg;
+    t.className = `toast ${type} show`;
+    icon.innerHTML = type === "success"
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  // ── LOAD CLASSES ──
+  function cleanText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function canonicalClass(value) {
+    return cleanText(value);
+  }
+
+  function canonicalSection(value) {
+    return cleanText(value).toUpperCase();
+  }
+
+  function normalizeIdentity(value) {
+    return cleanText(value).toLowerCase();
+  }
+
+  function teacherIdentityKey(teacher = {}) {
+    const legacyUid = normalizeIdentity(teacher.legacyUid || teacher.firebaseUid);
+    if (legacyUid) return `uid:${legacyUid}`;
+    const teacherId = normalizeIdentity(teacher.teacherId);
+    if (teacherId) return `teacherId:${teacherId}`;
+    const email = normalizeIdentity(teacher.email || teacher.authEmail);
+    if (email) return `email:${email}`;
+    return `doc:${normalizeIdentity(teacher.uid || teacher.docId)}`;
+  }
+
+  function teacherScore(teacher = {}) {
+    const docId = cleanText(teacher.docId || teacher.uid);
+    const legacyUid = cleanText(teacher.legacyUid || teacher.firebaseUid);
+    const isMirror = Boolean(legacyUid && docId && legacyUid !== docId);
+    return (isMirror ? 0 : 100)
+      + (teacher.removedFromPanel === true || teacher.panelStatus === "removed" || teacher.active === false ? 0 : 10)
+      + (teacher.teacherId ? 4 : 0)
+      + (teacher.name ? 2 : 0);
+  }
+
+  function dedupeTeachers(list = []) {
+    const byIdentity = new Map();
+    list.forEach(teacher => {
+      const key = teacherIdentityKey(teacher);
+      const current = byIdentity.get(key);
+      if (!current || teacherScore(teacher) > teacherScore(current)) {
+        byIdentity.set(key, teacher);
+      }
+    });
+    return [...byIdentity.values()];
+  }
+
+  function timetableKey(timetable = {}) {
+    const className = canonicalClass(timetable.class || String(timetable.id || "").split("-")[0]);
+    const sectionName = canonicalSection(timetable.section || String(timetable.id || "").split("-").slice(1).join("-"));
+    if (className || sectionName) return `${className}|${sectionName}`;
+    return cleanText(timetable.id);
+  }
+
+  function dedupeTimetables(list = []) {
+    const byClassSection = new Map();
+    list.forEach(timetable => {
+      const key = timetableKey(timetable);
+      if (!key) return;
+      const current = byClassSection.get(key);
+      if (!current || String(timetable.updatedAt || "").localeCompare(String(current.updatedAt || "")) >= 0) {
+        byClassSection.set(key, timetable);
+      }
+    });
+    return [...byClassSection.values()];
+  }
+
+  function createSelectOption(value, label = value) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }
+
+  function replaceSelectOptions(select, placeholder, values = [], selectedValue = "") {
+    if (!select) return;
+    const options = [
+      createSelectOption("", placeholder),
+      ...values.map(value => createSelectOption(value))
+    ];
+    select.replaceChildren(...options);
+    if (selectedValue && values.some(value => String(value) === String(selectedValue))) {
+      select.value = selectedValue;
+    }
+  }
+
+  async function loadClasses() {
+    const runId = ++loadClassesRun;
+    const classSelect   = document.getElementById("classSelect");
+    const sectionSelect = document.getElementById("sectionSelect");
+    if (!classSelect || !sectionSelect) return;
+    const previousClass = classSelect.value;
+    const previousSection = sectionSelect.value;
+
+    const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+    const nextStudents = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const className = canonicalClass(data.class);
+      const sectionName = canonicalSection(data.section);
+      if (className && sectionName)
+        nextStudents.push({ class: className, section: sectionName });
+    });
+    const seenPlacements = new Set();
+    const uniquePlacements = nextStudents.filter(student => {
+      const key = `${student.class}|${student.section}`;
+      if (seenPlacements.has(key)) return false;
+      seenPlacements.add(key);
+      return true;
+    });
+    if (runId !== loadClassesRun) return;
+    allStudents = uniquePlacements;
+
+    const uniqueClasses = [...new Set(allStudents.map(s => s.class))];
+    uniqueClasses.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+
+    const renderSections = (selectedSection = "") => {
+      const sel = classSelect.value;
+      const sections = [...new Set(allStudents.filter(s => s.class === sel).map(s => s.section))];
+      sections.sort();
+      replaceSelectOptions(sectionSelect, "Select Section", sections, selectedSection);
+    };
+
+    replaceSelectOptions(classSelect, "Select Class", uniqueClasses, previousClass);
+    renderSections(classSelect.value === previousClass ? previousSection : "");
+
+    classSelect.onchange = () => {
+      renderSections("");
+    };
+  }
+
+  // ── LOAD TEACHERS ──
+  async function loadTeachers() {
+    const nextTeachers = [];
+    const q    = query(collection(db, "users"), where("role","==","teacher"), where("adminId","==",currentUser.uid));
+    const snap = await getDocs(q);
+    snap.forEach(d => {
+      const data = d.data();
+      nextTeachers.push({
+        uid: d.id,
+        docId: d.id,
+        teacherId: data.teacherId || "",
+        email: cleanText(data.email || ""),
+        authEmail: cleanText(data.authEmail || ""),
+        name: cleanText(data.name || "Teacher"),
+        legacyUid: data.legacyUid || "",
+        firebaseUid: data.firebaseUid || "",
+        panelStatus: data.panelStatus || "",
+        removedFromPanel: data.removedFromPanel === true,
+        active: data.active !== false
+      });
+    });
+    teachers = dedupeTeachers(nextTeachers)
+      .filter(teacher => teacher.removedFromPanel !== true && teacher.panelStatus !== "removed" && teacher.active !== false);
+    populateTeacherViewSelect();
+  }
+
+  function populateTeacherViewSelect() {
+    const sel = document.getElementById("teacherViewSelect");
+    if (!sel) return;
+    sel.innerHTML = `<option value="">Select Teacher</option>`;
+    teachers
+      .slice()
+      .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
+      .forEach(teacher => {
+        const opt = document.createElement("option");
+        opt.value = teacher.uid;
+        opt.textContent = `${teacher.name} (${teacher.teacherId || teacher.uid})`;
+        sel.appendChild(opt);
+      });
+  }
+
+  function findTeacherBySlot(slot = {}) {
+    const candidates = [slot.teacherUid, slot.teacherId, slot.teacher, slot.teacherEmail]
+      .map(v => String(v || "").trim().toLowerCase())
+      .filter(Boolean);
+    return teachers.find(t => {
+      const ids = [t.uid, t.teacherId, t.email, t.name]
+        .map(v => String(v || "").trim().toLowerCase())
+        .filter(Boolean);
+      return candidates.some(candidate => ids.includes(candidate));
+    }) || null;
+  }
+
+  function hasTeacherReference(slot = {}) {
+    return [slot.teacherUid, slot.teacherId, slot.teacherName, slot.teacherEmail, slot.teacher]
+      .some(value => cleanText(value));
+  }
+
+  function clearTeacherReference(slot = {}) {
+    slot.teacherUid = "";
+    slot.teacherId = "";
+    slot.teacherName = "";
+    slot.teacherEmail = "";
+    if ("teacher" in slot) slot.teacher = "";
+    return slot;
+  }
+
+  function clearInactiveTeacherSlots(schedule = currentTimetable?.schedule) {
+    if (!schedule) return;
+    Object.values(schedule || {}).forEach(daySlots => {
+      Object.values(daySlots || {}).forEach(slot => {
+        if (hasTeacherReference(slot) && !findTeacherBySlot(slot)) clearTeacherReference(slot);
+      });
+    });
+  }
+
+  function getTeacherReadableId(slot = {}) {
+    const teacher = findTeacherBySlot(slot);
+    return teacher?.teacherId || slot.teacherReadableId || slot.teacherId || slot.teacherUid || "—";
+  }
+
+  function slotBelongsToTeacher(slot = {}, teacher = {}) {
+    const slotIds = [slot.teacherUid, slot.teacherId, slot.teacher, slot.teacherEmail, slot.teacherName]
+      .map(v => String(v || "").trim().toLowerCase())
+      .filter(Boolean);
+    const teacherIds = [teacher.uid, teacher.teacherId, teacher.email, teacher.name]
+      .map(v => String(v || "").trim().toLowerCase())
+      .filter(Boolean);
+    return slotIds.some(id => teacherIds.includes(id));
+  }
+
+  // ── EMPTY SCHEDULE ──
+  function createEmptySchedule() {
+    const schedule = {};
+    days.forEach(day => {
+      schedule[day] = {};
+      for (let i = 1; i <= 7; i++) {
+        schedule[day][`Period ${i}`] = { subject: "", teacherUid: "", teacherId: "", teacherName: "" };
+      }
+    });
+    return schedule;
+  }
+
+  function createEmptyPeriodTimes(count = 7) {
+    const periodTimes = {};
+    for (let i = 1; i <= count; i++) {
+      periodTimes[`Period ${i}`] = { startTime: "", endTime: "" };
+    }
+    return periodTimes;
+  }
+
+  function getSortedPeriodKeys(schedule = currentTimetable?.schedule) {
+    return Object.keys(schedule?.Monday || {})
+      .sort((a,b) => parseInt(a.replace("Period ","")) - parseInt(b.replace("Period ","")));
+  }
+
+  function normalizeTimetablePeriods() {
+    if (!currentTimetable?.schedule) return;
+    const orderedPeriods = getSortedPeriodKeys();
+    const normalized = {};
+    const normalizedTimes = {};
+    days.forEach(day => { normalized[day] = {}; });
+
+    orderedPeriods.forEach((period, index) => {
+      const nextKey = `Period ${index + 1}`;
+      const savedTime = currentTimetable.periodTimes?.[period] || {};
+      const legacyTimeSlot = days
+        .map(day => currentTimetable.schedule[day]?.[period])
+        .find(slot => slot?.startTime || slot?.endTime) || {};
+      normalizedTimes[nextKey] = {
+        startTime: savedTime.startTime || legacyTimeSlot.startTime || "",
+        endTime: savedTime.endTime || legacyTimeSlot.endTime || ""
+      };
+      days.forEach(day => {
+        const slot = currentTimetable.schedule[day]?.[period] || {};
+        const matchedTeacher = findTeacherBySlot(slot);
+        const teacherFields = matchedTeacher ? {
+          teacherUid: slot.teacherUid || matchedTeacher.uid || "",
+          teacherId: matchedTeacher.teacherId || slot.teacherId || "",
+          teacherName: slot.teacherName || matchedTeacher.name || "",
+          teacherEmail: slot.teacherEmail || matchedTeacher.email || ""
+        } : {
+          teacherUid: "",
+          teacherId: "",
+          teacherName: "",
+          teacherEmail: ""
+        };
+        normalized[day][nextKey] = {
+          subject: slot.subject || "",
+          ...teacherFields
+        };
+      });
+    });
+
+    currentTimetable.schedule = normalized;
+    currentTimetable.periodTimes = normalizedTimes;
+    syncPeriodTimesToSlots();
+  }
+
+  function getPeriodTime(period) {
+    currentTimetable.periodTimes = currentTimetable.periodTimes || {};
+    currentTimetable.periodTimes[period] = currentTimetable.periodTimes[period] || { startTime: "", endTime: "" };
+    return currentTimetable.periodTimes[period];
+  }
+
+  function syncPeriodTimesToSlots() {
+    if (!currentTimetable?.schedule) return;
+    getSortedPeriodKeys().forEach(period => {
+      const time = getPeriodTime(period);
+      days.forEach(day => {
+        currentTimetable.schedule[day][period] = currentTimetable.schedule[day][period] || {};
+        currentTimetable.schedule[day][period].startTime = time.startTime || "";
+        currentTimetable.schedule[day][period].endTime = time.endTime || "";
+      });
+    });
+  }
+
+  // ── LOAD TIMETABLE ──
+  function extractPeriodTimes(timetable = {}) {
+    const schedule = timetable.schedule || {};
+    const sourcePeriods = sortPeriodKeys([
+      ...new Set([
+        ...Object.keys(timetable.periodTimes || {}),
+        ...Object.keys(schedule.Monday || {})
+      ])
+    ]);
+    const extracted = {};
+    sourcePeriods.forEach((period, index) => {
+      const targetPeriod = `Period ${index + 1}`;
+      const savedTime = timetable.periodTimes?.[period] || {};
+      const legacyTimeSlot = days
+        .map(day => schedule[day]?.[period])
+        .find(slot => slot?.startTime || slot?.endTime) || {};
+      extracted[targetPeriod] = {
+        startTime: savedTime.startTime || legacyTimeSlot.startTime || "",
+        endTime: savedTime.endTime || legacyTimeSlot.endTime || ""
+      };
+    });
+    return extracted;
+  }
+
+  function normalizeSubjectName(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function mergeSubjects(...lists) {
+    const seen = new Set();
+    const subjects = [];
+    lists.flat().forEach(value => {
+      const name = normalizeSubjectName(typeof value === "string" ? value : value?.name);
+      const key = name.toLowerCase();
+      if (!name || seen.has(key)) return;
+      seen.add(key);
+      subjects.push(name);
+    });
+    return subjects.sort((a, b) => a.localeCompare(b));
+  }
+
+  function collectSubjectsFromSchedule(schedule = currentTimetable?.schedule) {
+    const subjects = [];
+    Object.values(schedule || {}).forEach(daySlots => {
+      Object.values(daySlots || {}).forEach(slot => subjects.push(slot?.subject || ""));
+    });
+    return mergeSubjects(subjects);
+  }
+
+  function classSubjectDocId(className = currentTimetable?.class) {
+    return `timetable-${String(className || "").replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+  }
+
+  function classSubjectsRef(className = currentTimetable?.class) {
+    return doc(db, "schools", currentUser.uid, "subjects", classSubjectDocId(className));
+  }
+
+  async function refreshTimetableCache(force = false) {
+    if (!currentUser) return allTimetables;
+    const cacheIsFresh = allTimetables.length && (Date.now() - timetableCacheAt < 60000);
+    if (!force && cacheIsFresh) return allTimetables;
+    if (!force && timetableCachePromise) return timetableCachePromise;
+    timetableCachePromise = getDocs(collection(db, "schools", currentUser.uid, "timetables"))
+      .then(snapshot => {
+        allTimetables = dedupeTimetables(snapshot.docs.map(item => ({ id: item.id, ...(item.data() || {}) })));
+        timetableCacheAt = Date.now();
+        return allTimetables;
+      })
+      .finally(() => { timetableCachePromise = null; });
+    return timetableCachePromise;
+  }
+
+  async function loadClassSubjects(className) {
+    const subjectSnap = await getDoc(classSubjectsRef(className));
+    if (subjectSnap.exists()) {
+      const data = subjectSnap.data() || {};
+      return mergeSubjects(data.subjects || []);
+    }
+
+    const lists = [];
+    allTimetables.forEach(timetable => {
+      const data = timetable || {};
+      const docClass = data.class || String(data.id || "").split("-")[0] || "";
+      if (String(docClass) !== String(className)) return;
+      lists.push(data.classSubjects || []);
+      lists.push(collectSubjectsFromSchedule(data.schedule || {}));
+    });
+    return mergeSubjects(...lists);
+  }
+
+  function subjectOptions(selected = "") {
+    const selectedName = normalizeSubjectName(selected);
+    const subjects = currentClassSubjects;
+    const options = [`<option value="">Select subject</option>`];
+    subjects.forEach(subject => {
+      const isSelected = subject.toLowerCase() === selectedName.toLowerCase() ? " selected" : "";
+      options.push(`<option value="${escHtml(subject)}"${isSelected}>${escHtml(subject)}</option>`);
+    });
+    if (!subjects.length) options.push(`<option value="" disabled>No saved subjects</option>`);
+    return options.join("");
+  }
+
+  window.updateSubjectFromSelect = function (day, period, select) {
+    updateSlot(day, period, "subject", select.value || "");
+  };
+
+  function renderSubjectsModal() {
+    const list = document.getElementById("subjectsList");
+    const meta = document.getElementById("subjectsModalMeta");
+    if (meta) {
+      const cls = currentTimetable?.class || document.getElementById("classSelect").value || "-";
+      meta.textContent = `Class ${cls} subjects`;
+    }
+    if (!list) return;
+    if (!currentClassSubjects.length) {
+      list.innerHTML = `<div class="subjects-empty">No subjects saved yet. Add subjects here, then use them in the timetable dropdown.</div>`;
+      return;
+    }
+    list.innerHTML = currentClassSubjects.map((subject, index) => `
+      <div class="subject-row">
+        <span class="subject-name">${escHtml(subject)}</span>
+        <button class="btn btn-danger subject-delete-btn" onclick="deleteClassSubject(${index})" aria-label="Delete ${escHtml(subject)}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+    `).join("");
+  }
+
+  window.openSubjectsModal = function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    renderSubjectsModal();
+    const modal = document.getElementById("subjectsModal");
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    setTimeout(() => document.getElementById("subjectNameInput")?.focus(), 50);
+  };
+
+  window.closeSubjectsModal = function () {
+    const modal = document.getElementById("subjectsModal");
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  };
+
+  function getClassOptions() {
+    return [...new Set(allStudents.map(student => student.class).filter(Boolean))]
+      .sort((a, b) => (parseInt(a, 10) || 0) - (parseInt(b, 10) || 0) || String(a).localeCompare(String(b)));
+  }
+
+  function getSectionOptions(className) {
+    return [...new Set(allStudents
+      .filter(student => String(student.class) === String(className))
+      .map(student => student.section)
+      .filter(Boolean))]
+      .sort((a, b) => String(a).localeCompare(String(b)));
+  }
+
+  window.populateSyncSectionSelect = function () {
+    const className = document.getElementById("syncClassSelect")?.value || "";
+    const sectionSelect = document.getElementById("syncSectionSelect");
+    if (!sectionSelect) return;
+    sectionSelect.innerHTML = `<option value="">Select Section</option>`;
+    getSectionOptions(className).forEach(section => {
+      const option = document.createElement("option");
+      option.value = option.textContent = section;
+      sectionSelect.appendChild(option);
+    });
+  };
+
+  window.openSyncTimeModal = function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    const classSelect = document.getElementById("syncClassSelect");
+    const meta = document.getElementById("syncTimeModalMeta");
+    if (meta) meta.textContent = `Copy timings into Class ${currentTimetable.class}-${currentTimetable.section}`;
+    classSelect.innerHTML = `<option value="">Select Class</option>`;
+    getClassOptions().forEach(className => {
+      const option = document.createElement("option");
+      option.value = option.textContent = className;
+      classSelect.appendChild(option);
+    });
+    classSelect.value = currentTimetable.class || "";
+    populateSyncSectionSelect();
+    document.getElementById("syncSectionSelect").value = currentTimetable.section || "";
+    const modal = document.getElementById("syncTimeModal");
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+  };
+
+  window.closeSyncTimeModal = function () {
+    const modal = document.getElementById("syncTimeModal");
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  };
+
+  window.syncTimeFromSelectedTimetable = async function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    const sourceClass = document.getElementById("syncClassSelect")?.value || "";
+    const sourceSection = document.getElementById("syncSectionSelect")?.value || "";
+    if (!sourceClass || !sourceSection) { toast("Select source class and section", "error"); return; }
+    showLoading(true, "Syncing period times...");
+    try {
+      await nextPaint();
+      const sourceRef = doc(db, "schools", currentUser.uid, "timetables", `${sourceClass}-${sourceSection}`);
+      const sourceSnap = await getDoc(sourceRef);
+      if (!sourceSnap.exists()) {
+        toast("Selected timetable not found", "error");
+        showLoading(false);
+        return;
+      }
+      const sourceTimes = extractPeriodTimes(sourceSnap.data() || {});
+      const currentPeriods = getSortedPeriodKeys();
+      let synced = 0;
+      currentTimetable.periodTimes = currentTimetable.periodTimes || {};
+      currentPeriods.forEach(period => {
+        const sourceTime = sourceTimes[period];
+        if (!sourceTime || (!sourceTime.startTime && !sourceTime.endTime)) return;
+        currentTimetable.periodTimes[period] = {
+          startTime: sourceTime.startTime || "",
+          endTime: sourceTime.endTime || ""
+        };
+        synced += 1;
+      });
+      syncPeriodTimesToSlots();
+      renderTimetable();
+      closeSyncTimeModal();
+      toast(synced ? `Synced ${synced} period time${synced === 1 ? "" : "s"}` : "No period times found to sync", synced ? "success" : "error");
+    } catch(e) {
+      console.error(e);
+      toast("Error syncing period times", "error");
+    }
+    showLoading(false);
+  };
+
+  function clearSubjectFromSchedule(subject) {
+    const target = normalizeSubjectName(subject).toLowerCase();
+    if (!target || !currentTimetable?.schedule) return;
+    Object.values(currentTimetable.schedule).forEach(daySlots => {
+      Object.values(daySlots || {}).forEach(slot => {
+        if (normalizeSubjectName(slot?.subject).toLowerCase() === target) slot.subject = "";
+      });
+    });
+  }
+
+  function clearSubjectsNotInClassList() {
+    const allowed = new Set(currentClassSubjects.map(subject => subject.toLowerCase()));
+    if (!currentTimetable?.schedule) return;
+    Object.values(currentTimetable.schedule).forEach(daySlots => {
+      Object.values(daySlots || {}).forEach(slot => {
+        const subject = normalizeSubjectName(slot?.subject);
+        if (subject && !allowed.has(subject.toLowerCase())) slot.subject = "";
+      });
+    });
+  }
+
+  function currentTimetableDocId() {
+    if (!currentTimetable) return "";
+    return `${currentTimetable.class}-${currentTimetable.section}`;
+  }
+
+  function sameTeacher(teacher = {}, slot = {}) {
+    const teacherIds = [teacher.uid, teacher.teacherId, teacher.email, teacher.name]
+      .map(value => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+    const slotIds = [slot.teacherUid, slot.teacherId, slot.teacher, slot.teacherEmail, slot.teacherName]
+      .map(value => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+    return teacherIds.some(id => slotIds.includes(id));
+  }
+
+  function findTeacherConflict(teacher, day, period) {
+    const currentId = currentTimetableDocId();
+    return allTimetables.find(timetable => {
+      const timetableId = timetable.id || `${timetable.class || ""}-${timetable.section || ""}`;
+      if (timetableId === currentId) return false;
+      const slot = timetable.schedule?.[day]?.[period];
+      return slot && sameTeacher(teacher, slot);
+    }) || null;
+  }
+
+  function conflictMessage(teacher, conflict, day, period) {
+    const classLabel = [conflict?.class, conflict?.section].filter(Boolean).join(" ");
+    return `${teacher.name} already has ${period} on ${day}${classLabel ? ` in Class ${classLabel}` : ""}.`;
+  }
+
+  function validateNoTeacherConflicts() {
+    if (!currentTimetable?.schedule) return true;
+    for (const day of days) {
+      const slots = currentTimetable.schedule[day] || {};
+      for (const period of Object.keys(slots)) {
+        const slot = slots[period] || {};
+        const teacher = findTeacherBySlot(slot);
+        if (!teacher) continue;
+        const conflict = findTeacherConflict(teacher, day, period);
+        if (conflict) {
+          toast(conflictMessage(teacher, conflict, day, period), "error");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  window.addClassSubject = function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    const input = document.getElementById("subjectNameInput");
+    const subject = normalizeSubjectName(input?.value || "");
+    if (!subject) { toast("Enter subject name", "error"); return; }
+    currentClassSubjects = mergeSubjects(currentClassSubjects, [subject]);
+    currentTimetable.classSubjects = currentClassSubjects;
+    if (input) input.value = "";
+    renderSubjectsModal();
+    renderTimetable();
+  };
+
+  window.deleteClassSubject = function (index) {
+    const subject = currentClassSubjects[index];
+    if (!subject) return;
+    currentClassSubjects = currentClassSubjects.filter((_, i) => i !== index);
+    clearSubjectFromSchedule(subject);
+    currentTimetable.classSubjects = currentClassSubjects;
+    renderSubjectsModal();
+    renderTimetable();
+  };
+
+  window.saveClassSubjects = async function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    showLoading(true, "Saving subjects...");
+    try {
+      await nextPaint();
+      currentClassSubjects = mergeSubjects(currentClassSubjects);
+      currentTimetable.classSubjects = currentClassSubjects;
+      await setDoc(classSubjectsRef(), {
+        type: "timetableClassSubjects",
+        className: currentTimetable.class,
+        subjects: currentClassSubjects,
+        updatedAt: serverTimestamp()
+      });
+      const ref = doc(db, "schools", currentUser.uid, "timetables", `${currentTimetable.class}-${currentTimetable.section}`);
+      await setDoc(ref, { ...currentTimetable, updatedAt: serverTimestamp() });
+      allTimetables = allTimetables.filter(timetable => (timetable.id || `${timetable.class || ""}-${timetable.section || ""}`) !== currentTimetableDocId());
+      allTimetables.push({ id: currentTimetableDocId(), ...currentTimetable });
+      allTimetables = dedupeTimetables(allTimetables);
+      toast("Subjects saved successfully!");
+    } catch(e) {
+      console.error(e);
+      toast("Error saving subjects", "error");
+    }
+    showLoading(false);
+  };
+
+  window.loadTimetable = async function () {
+    const cls = document.getElementById("classSelect").value;
+    const sec = document.getElementById("sectionSelect").value;
+    if (!cls || !sec) { toast("Please select a class and section", "error"); return; }
+    showLoading(true, "Loading timetable...");
+    try {
+      await nextPaint();
+      const ref  = doc(db, "schools", currentUser.uid, "timetables", `${cls}-${sec}`);
+      const [snap, classSubjects] = await Promise.all([getDoc(ref), loadClassSubjects(cls)]);
+      currentClassSubjects = classSubjects;
+      if (snap.exists()) {
+        currentTimetable = snap.data();
+        currentTimetable.class = currentTimetable.class || cls;
+        currentTimetable.section = currentTimetable.section || sec;
+        normalizeTimetablePeriods();
+        clearInactiveTeacherSlots();
+        currentClassSubjects = mergeSubjects(currentClassSubjects, currentTimetable.classSubjects || []);
+        currentTimetable.classSubjects = currentClassSubjects;
+        clearSubjectsNotInClassList();
+      } else {
+        currentTimetable = { class: cls, section: sec, schedule: createEmptySchedule(), periodTimes: createEmptyPeriodTimes(), classSubjects: currentClassSubjects };
+        syncPeriodTimesToSlots();
+      }
+      renderTimetable();
+      document.getElementById("statsBar").style.display = "flex";
+      document.getElementById("statClass").textContent   = cls;
+      document.getElementById("statSection").textContent = sec;
+      refreshTimetableCache().catch(console.error);
+    } catch(e) {
+      toast("Failed to load timetable", "error");
+    }
+    showLoading(false);
+  };
+
+  // ── ADD PERIOD ──
+  window.addPeriod = function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    normalizeTimetablePeriods();
+    const periods = getSortedPeriodKeys();
+    const next    = periods.length + 1;
+    currentTimetable.periodTimes = currentTimetable.periodTimes || {};
+    currentTimetable.periodTimes[`Period ${next}`] = { startTime: "", endTime: "" };
+    days.forEach(day => {
+      currentTimetable.schedule[day][`Period ${next}`] = { subject: "", teacherUid: "", teacherId: "", teacherName: "", startTime: "", endTime: "" };
+    });
+    renderTimetable();
+    toast(`Period ${next} added`);
+  };
+
+  // ── REMOVE PERIOD ──
+  window.removePeriod = function (periodNum) {
+    if (!currentTimetable) return;
+    const key = `Period ${periodNum}`;
+    days.forEach(day => { delete currentTimetable.schedule[day][key]; });
+    if (currentTimetable.periodTimes) delete currentTimetable.periodTimes[key];
+    normalizeTimetablePeriods();
+    renderTimetable();
+    toast(`Period ${periodNum} removed`);
+  };
+
+  // ── UPDATE SLOT ──
+  window.updateSlot = function (day, period, field, value) {
+    currentTimetable.schedule[day][period][field] = value;
+    if (field === "teacherName") {
+      currentTimetable.schedule[day][period].teacherUid = "";
+      currentTimetable.schedule[day][period].teacherId = "";
+      currentTimetable.schedule[day][period].teacherEmail = "";
+      const badge = document.getElementById(`tid-${day}-${period.replace(" ","_")}`);
+      if (badge) badge.textContent = "—";
+    }
+  };
+
+  window.updatePeriodTime = function (period, field, value) {
+    if (!["startTime", "endTime"].includes(field)) return;
+    const time = getPeriodTime(period);
+    time[field] = value;
+    syncPeriodTimesToSlots();
+    updatePeriodTimeDisplay(period);
+  };
+
+  function updatePeriodTimeDisplay(period) {
+    const slot = getPeriodTime(period);
+    const el   = document.getElementById(`time-display-${period.replace(" ","_")}`);
+    if (!el) return;
+    if (slot.startTime && slot.endTime) {
+      el.textContent = `${slot.startTime} – ${slot.endTime}`;
+    } else if (slot.startTime) {
+      el.textContent = `From ${slot.startTime}`;
+    } else {
+      el.textContent = "";
+    }
+  }
+
+  // ── SEARCH TEACHER ──
+  window.searchTeacher = function (input, day, period) {
+    const value     = input.value.toLowerCase();
+    const resultBox = document.getElementById(`tr-${day}-${period.replace(" ","_")}`);
+    resultBox.innerHTML = "";
+    if (!value) return;
+    const filtered = teachers.filter(t =>
+      (t.name || "").toLowerCase().includes(value) ||
+      (t.teacherId || "").toLowerCase().includes(value)
+    );
+    filtered.slice(0, 6).forEach(teacher => {
+      const conflict = findTeacherConflict(teacher, day, period);
+      const div = document.createElement("div");
+      div.className = `teacher-result-item${conflict ? " busy" : ""}`;
+      div.innerHTML = `<div class="t-name">${escHtml(teacher.name)}</div><div class="t-id">${conflict ? escHtml(conflictMessage(teacher, conflict, day, period)) : escHtml(teacher.teacherId || teacher.uid)}</div>`;
+      div.onclick = () => {
+        if (conflict) {
+          toast(conflictMessage(teacher, conflict, day, period), "error");
+          return;
+        }
+        input.value = teacher.name;
+        currentTimetable.schedule[day][period].teacherUid  = teacher.uid;
+        currentTimetable.schedule[day][period].teacherId   = teacher.teacherId || teacher.uid;
+        currentTimetable.schedule[day][period].teacherName = teacher.name;
+        currentTimetable.schedule[day][period].teacherEmail = teacher.email || "";
+        // Update badge
+        const badge = document.getElementById(`tid-${day}-${period.replace(" ","_")}`);
+        if (badge) badge.textContent = teacher.teacherId || teacher.uid;
+        resultBox.innerHTML = "";
+      };
+      resultBox.appendChild(div);
+    });
+  };
+
+  // ── RENDER ──
+  function renderTimetableLegacyDailyTime() {
+    const container = document.getElementById("timetableContainer");
+    normalizeTimetablePeriods();
+    const periods = getSortedPeriodKeys();
+
+    document.getElementById("statPeriods").textContent = periods.length;
+
+    const dayIcons = {
+      Monday:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+      Tuesday:   `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1M4.22 4.22l.707.707m12.728 12.728.707.707M3 12h1m16 0h1M4.927 19.073l.707-.707M18.364 5.636l.707-.707"/></svg>`,
+      Wednesday: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+      Thursday:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+      Friday:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      Saturday:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12z"/></svg>`,
+    };
+
+    let html = `<div class="table-wrapper"><table>
+      <thead><tr>
+        <th>Period / Time</th>
+        ${days.map(d => `<th><div class="day-icon">${dayIcons[d] || ""} ${d}</div></th>`).join("")}
+      </tr></thead>
+      <tbody>`;
+
+    periods.forEach(period => {
+      const pNum   = period.replace("Period ","");
+      const pKey   = period.replace(" ","_");
+      const monday = currentTimetable.schedule["Monday"][period];
+      const timeDisplay = (monday.startTime && monday.endTime)
+        ? `${monday.startTime} – ${monday.endTime}`
+        : (monday.startTime ? `From ${monday.startTime}` : "");
+
+      html += `<tr>
+        <td>
+          <div class="period-cell">
+            <div class="period-num">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${period}
+            </div>
+            <div class="period-time-display" id="time-display-${pKey}">${timeDisplay}</div>
+            ${periods.length > 1 ? `<button class="btn btn-danger period-remove" onclick="removePeriod(${pNum})">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Remove
+            </button>` : ""}
+          </div>
+        </td>`;
+
+      days.forEach(day => {
+        const slot    = currentTimetable.schedule[day][period] || {};
+        const slotKey = `${day}-${pKey}`;
+        html += `<td>
+          <div class="slot-cell">
+
+            <div class="field-label-small">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Subject
+            </div>
+            <input class="slot-input subject-input" type="text" placeholder="e.g. Mathematics"
+              value="${escHtml(slot.subject || '')}"
+              onchange="updateSlot('${day}','${period}','subject',this.value)">
+
+            <div class="field-label-small" style="margin-top:2px">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style="color:var(--gold)">Start</span>
+            </div>
+            <input class="slot-input time-input" type="text"
+              value="${escHtml(slot.startTime || '')}"
+              onchange="updateSlot('${day}','${period}','startTime',this.value)">
+
+            <div class="field-label-small">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style="color:var(--gold)">End</span>
+            </div>
+            <input class="slot-input time-input" type="text"
+              value="${escHtml(slot.endTime || '')}"
+              onchange="updateSlot('${day}','${period}','endTime',this.value)">
+
+            <div class="field-label-small" style="margin-top:2px">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Teacher
+            </div>
+            <div class="teacher-search-wrap">
+              <input class="slot-input" type="text" placeholder="Search teacher…"
+                value="${escHtml(slot.teacherName || '')}"
+                oninput="updateSlot('${day}','${period}','teacherName',this.value); searchTeacher(this,'${day}','${period}')">
+              <div class="teacher-results" id="tr-${slotKey}"></div>
+            </div>
+
+            <div class="teacher-id-badge">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12z"/></svg>
+              <span id="tid-${slotKey}">${escHtml(getTeacherReadableId(slot))}</span>
+            </div>
+          </div>
+        </td>`;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+  }
+
+  function renderTimetable() {
+    const container = document.getElementById("timetableContainer");
+    normalizeTimetablePeriods();
+    const periods = getSortedPeriodKeys();
+
+    document.getElementById("statPeriods").textContent = periods.length;
+
+    const dayIcons = {
+      Monday:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+      Tuesday:   `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1M4.22 4.22l.707.707m12.728 12.728.707.707M3 12h1m16 0h1M4.927 19.073l.707-.707M18.364 5.636l.707-.707"/></svg>`,
+      Wednesday: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+      Thursday:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+      Friday:    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      Saturday:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12z"/></svg>`
+    };
+
+    let html = `<div class="table-wrapper"><table>
+      <thead><tr>
+        <th>Period / Time</th>
+        ${days.map(d => `<th><div class="day-icon">${dayIcons[d] || ""} ${d}</div></th>`).join("")}
+      </tr></thead>
+      <tbody>`;
+
+    periods.forEach(period => {
+      const pNum = period.replace("Period ", "");
+      const pKey = period.replace(" ", "_");
+      const periodTime = getPeriodTime(period);
+      const timeDisplay = getTimeLabel(periodTime);
+
+      html += `<tr>
+        <td>
+          <div class="period-cell">
+            <div class="period-num">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${period}
+            </div>
+            <div class="period-time-display" id="time-display-${pKey}">${escHtml(timeDisplay)}</div>
+            <div class="period-time-controls">
+              <div class="field-label-small">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span style="color:var(--gold)">Start</span>
+              </div>
+              <input class="slot-input time-input" type="text" value="${escHtml(periodTime.startTime || "")}" onchange="updatePeriodTime('${period}','startTime',this.value)">
+              <div class="field-label-small">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span style="color:var(--gold)">End</span>
+              </div>
+              <input class="slot-input time-input" type="text" value="${escHtml(periodTime.endTime || "")}" onchange="updatePeriodTime('${period}','endTime',this.value)">
+            </div>
+            ${periods.length > 1 ? `<button class="btn btn-danger period-remove" onclick="removePeriod(${pNum})">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Remove
+            </button>` : ""}
+          </div>
+        </td>`;
+
+      days.forEach(day => {
+        const slot = currentTimetable.schedule[day][period] || {};
+        const slotKey = `${day}-${pKey}`;
+        html += `<td>
+          <div class="slot-cell">
+            <div class="field-label-small">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Subject
+            </div>
+            <input class="slot-input subject-input" type="text" placeholder="e.g. Mathematics" value="${escHtml(slot.subject || "")}" onchange="updateSlot('${day}','${period}','subject',this.value)">
+
+            <div class="field-label-small" style="margin-top:2px">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Teacher
+            </div>
+            <div class="teacher-search-wrap">
+              <input class="slot-input" type="text" placeholder="Search teacher..." value="${escHtml(slot.teacherName || "")}" oninput="updateSlot('${day}','${period}','teacherName',this.value); searchTeacher(this,'${day}','${period}')">
+              <div class="teacher-results" id="tr-${slotKey}"></div>
+            </div>
+
+            <div class="teacher-id-badge">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12z"/></svg>
+              <span id="tid-${slotKey}">${escHtml(getTeacherReadableId(slot))}</span>
+            </div>
+          </div>
+        </td>`;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+  }
+
+  function sortPeriodKeys(periods = []) {
+    return periods.slice().sort((a, b) =>
+      (parseInt(String(a).replace("Period ", ""), 10) || 0) -
+      (parseInt(String(b).replace("Period ", ""), 10) || 0)
+    );
+  }
+
+  function getTimeLabel(slot = {}) {
+    if (slot.startTime && slot.endTime) return `${formatTime12(slot.startTime)} - ${formatTime12(slot.endTime)}`;
+    if (slot.startTime) return `From ${formatTime12(slot.startTime)}`;
+    if (slot.endTime) return `Until ${formatTime12(slot.endTime)}`;
+    return "";
+  }
+
+  function formatTime12(value) {
+    const match = String(value || "").trim().match(/^(\d{1,2}):(\d{2})/);
+    if (!match) return String(value || "");
+    let hours = Number(match[1]);
+    const minutes = match[2];
+    if (!Number.isFinite(hours)) return String(value || "");
+    const suffix = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes} ${suffix}`;
+  }
+
+  function timeParts12(value) {
+    const match = String(value || "").trim().match(/^(\d{1,2}):(\d{2})/);
+    if (!match) return { hour: "", minute: "", meridiem: "AM" };
+    const rawHour = Number(match[1]);
+    const minute = match[2];
+    if (!Number.isFinite(rawHour)) return { hour: "", minute: "", meridiem: "AM" };
+    return {
+      hour: String(rawHour % 12 || 12),
+      minute,
+      meridiem: rawHour >= 12 ? "PM" : "AM"
+    };
+  }
+
+  function toTime24(hour, minute, meridiem) {
+    let value = Number(hour || 0);
+    if (!Number.isFinite(value) || value < 1 || value > 12 || !minute) return "";
+    const suffix = meridiem === "PM" ? "PM" : "AM";
+    if (suffix === "AM" && value === 12) value = 0;
+    if (suffix === "PM" && value !== 12) value += 12;
+    return `${String(value).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  }
+
+  function timeOptions(selectedValue, values) {
+    return values.map(value => `<option value="${escHtml(value)}" ${String(value) === String(selectedValue) ? "selected" : ""}>${escHtml(value)}</option>`).join("");
+  }
+
+  function renderTime12Controls(period, field, value) {
+    const parts = timeParts12(value);
+    const id = `${period.replace(/\s+/g, "_")}_${field}`;
+    const hours = Array.from({ length: 12 }, (_, index) => String(index + 1));
+    const minutes = Array.from({ length: 12 }, (_, index) => String(index * 5).padStart(2, "0"));
+    return `<div class="time-12-controls" data-period="${escHtml(period)}" data-field="${escHtml(field)}">
+      <select class="slot-input time-input" id="${id}_hour" aria-label="${escHtml(period)} ${field} hour" onchange="updatePeriodTime12('${period}','${field}')">
+        <option value="">Hr</option>${timeOptions(parts.hour, hours)}
+      </select>
+      <select class="slot-input time-input" id="${id}_minute" aria-label="${escHtml(period)} ${field} minute" onchange="updatePeriodTime12('${period}','${field}')">
+        <option value="">Min</option>${timeOptions(parts.minute, minutes)}
+      </select>
+      <select class="slot-input time-input" id="${id}_meridiem" aria-label="${escHtml(period)} ${field} AM PM" onchange="updatePeriodTime12('${period}','${field}')">
+        ${timeOptions(parts.meridiem, ["AM", "PM"])}
+      </select>
+    </div>`;
+  }
+
+  window.updatePeriodTime12 = function (period, field) {
+    const id = `${period.replace(/\s+/g, "_")}_${field}`;
+    const hour = document.getElementById(`${id}_hour`)?.value || "";
+    const minute = document.getElementById(`${id}_minute`)?.value || "";
+    const meridiem = document.getElementById(`${id}_meridiem`)?.value || "AM";
+    updatePeriodTime(period, field, toTime24(hour, minute, meridiem));
+  };
+
+  window.closeTeacherTimetableView = function() {
+    document.getElementById("teacherViewCard").classList.remove("show");
+    document.getElementById("teacherTimetableView").innerHTML = "";
+  };
+
+  window.viewTeacherTimetable = async function() {
+    const teacherUid = document.getElementById("teacherViewSelect").value;
+    if (!teacherUid) {
+      toast("Please select a teacher first", "error");
+      return;
+    }
+
+    const teacher = teachers.find(t => t.uid === teacherUid);
+    if (!teacher) {
+      toast("Teacher not found", "error");
+      return;
+    }
+
+    showLoading(true, "Loading teacher timetable...");
+    try {
+      await nextPaint();
+      const timetables = await refreshTimetableCache(true);
+      const teacherSchedule = {};
+      let slotCount = 0;
+      const classSet = new Set();
+      const seenSlots = new Set();
+
+      timetables.forEach(timetable => {
+        const className = timetable.class || String(timetable.id).split("-")[0] || "";
+        const sectionName = timetable.section || String(timetable.id).split("-").slice(1).join("-") || "";
+        const classLabel = sectionName ? `${className}-${sectionName}` : className;
+
+        Object.entries(timetable.schedule || {}).forEach(([day, daySlots]) => {
+          Object.entries(daySlots || {}).forEach(([period, slot]) => {
+            if (!slotBelongsToTeacher(slot, teacher)) return;
+            const commonTime = timetable.periodTimes?.[period] || {};
+            const uniqueSlotKey = `${timetableKey(timetable)}|${day}|${period}|${teacher.uid}`;
+            if (seenSlots.has(uniqueSlotKey)) return;
+            seenSlots.add(uniqueSlotKey);
+            if (!teacherSchedule[day]) teacherSchedule[day] = {};
+            if (!teacherSchedule[day][period]) teacherSchedule[day][period] = [];
+            teacherSchedule[day][period].push({
+              ...slot,
+              startTime: commonTime.startTime || slot.startTime || "",
+              endTime: commonTime.endTime || slot.endTime || "",
+              classLabel,
+              class: className,
+              section: sectionName
+            });
+            slotCount += 1;
+            if (classLabel) classSet.add(classLabel);
+          });
+        });
+      });
+
+      const card = document.getElementById("teacherViewCard");
+      document.getElementById("teacherViewTitle").textContent =
+        `${teacher.name} - Full Timetable`;
+      document.getElementById("teacherViewMeta").textContent =
+        `Teacher ID: ${teacher.teacherId || teacher.uid} | ${slotCount} lecture${slotCount === 1 ? "" : "s"} | ${classSet.size} class${classSet.size === 1 ? "" : "es"}`;
+
+      document.getElementById("teacherTimetableView").innerHTML = renderTeacherReadonlyTimetable(teacherSchedule);
+      card.classList.add("show");
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      console.error(error);
+      toast("Failed to load teacher timetable", "error");
+    }
+    showLoading(false);
+  };
+
+  function renderTeacherReadonlyTimetable(schedule = {}) {
+    const scheduleDays = days.filter(day => schedule[day]);
+    const allPeriods = sortPeriodKeys([...new Set(scheduleDays.flatMap(day => Object.keys(schedule[day] || {})))]);
+
+    if (!scheduleDays.length || !allPeriods.length) {
+      return `<div class="empty-state" style="padding:2rem;"><h3>No timetable found</h3><p>No periods are assigned to this teacher yet.</p></div>`;
+    }
+
+    let html = `<div class="table-wrapper"><table>
+      <thead><tr>
+        <th>Period / Time</th>
+        ${days.map(day => `<th>${day}</th>`).join("")}
+      </tr></thead><tbody>`;
+
+    allPeriods.forEach(period => {
+      html += `<tr><td><div class="period-cell"><div class="period-num">${escHtml(period)}</div></div></td>`;
+      days.forEach(day => {
+        const slots = schedule[day]?.[period] || [];
+        if (!slots.length) {
+          html += `<td><span style="color:var(--muted);font-size:0.8rem;">—</span></td>`;
+          return;
+        }
+        html += `<td>${slots.map(slot => `
+          <div class="readonly-slot">
+            <strong>${escHtml(slot.subject || "Lecture")}</strong>
+            <div>Class: ${escHtml(slot.classLabel || "—")}</div>
+            <div>Teacher ID: ${escHtml(getTeacherReadableId(slot))}</div>
+          </div>
+        `).join('<div style="height:8px"></div>')}</td>`;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ── SAVE ──
+  renderTimetable = function renderTimetableFlipped() {
+    const container = document.getElementById("timetableContainer");
+    normalizeTimetablePeriods();
+    const periods = getSortedPeriodKeys();
+    document.getElementById("statPeriods").textContent = periods.length;
+
+    let html = `<div class="table-wrapper"><table><thead><tr><th>Day</th>`;
+    html += periods.map(period => {
+      const periodTime = getPeriodTime(period);
+      const timeLabel = getTimeLabel(periodTime);
+      const pNum = period.replace("Period ", "");
+      return `<th><div class="period-cell"><div class="period-num">${escHtml(period)}</div><div class="period-time-display" id="time-display-${period.replace(" ", "_")}">${escHtml(timeLabel)}</div><div class="period-time-controls"><div class="field-label-small"><span style="color:var(--gold)">Start</span></div>${renderTime12Controls(period, "startTime", periodTime.startTime || "")}<div class="field-label-small"><span style="color:var(--gold)">End</span></div>${renderTime12Controls(period, "endTime", periodTime.endTime || "")}${periods.length > 1 ? `<button class="btn btn-danger period-remove" onclick="removePeriod(${pNum})">Remove</button>` : ""}</div></div></th>`;
+    }).join("");
+    html += `</tr></thead><tbody>`;
+
+    days.forEach(day => {
+      html += `<tr><td><strong>${escHtml(day)}</strong></td>`;
+      periods.forEach(period => {
+        const slot = currentTimetable.schedule[day]?.[period] || {};
+        const slotKey = `${day}-${period.replace(" ", "_")}`;
+        html += `<td><div class="slot-cell"><div class="field-label-small">Subject</div><select class="slot-input subject-input" onchange="updateSubjectFromSelect('${day}','${period}',this)">${subjectOptions(slot.subject || "")}</select><div class="field-label-small" style="margin-top:2px">Teacher</div><div class="teacher-search-wrap"><input class="slot-input" type="text" placeholder="Search teacher..." value="${escHtml(slot.teacherName || "")}" oninput="updateSlot('${day}','${period}','teacherName',this.value); searchTeacher(this,'${day}','${period}')"><div class="teacher-results" id="tr-${slotKey}"></div></div><div class="teacher-id-badge"><span id="tid-${slotKey}">${escHtml(getTeacherReadableId(slot))}</span></div></div></td>`;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+  };
+
+  renderTeacherReadonlyTimetable = function renderTeacherReadonlyTimetableFlipped(schedule = {}) {
+    const scheduleDays = days.filter(day => schedule[day]);
+    const allPeriods = sortPeriodKeys([...new Set(scheduleDays.flatMap(day => Object.keys(schedule[day] || {})))]);
+    if (!scheduleDays.length || !allPeriods.length) return `<div class="empty-state" style="padding:2rem;"><h3>No timetable found</h3><p>No periods are assigned to this teacher yet.</p></div>`;
+    let html = `<div class="table-wrapper"><table><thead><tr><th>Day</th>`;
+    allPeriods.forEach(period => {
+      const firstSlot = scheduleDays.flatMap(day => schedule[day]?.[period] || []).find(slot => getTimeLabel(slot)) || {};
+      const time = getTimeLabel(firstSlot);
+      html += `<th><strong>${escHtml(period)}</strong>${time ? `<div class="class-info">${escHtml(time)}</div>` : ""}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+    scheduleDays.forEach(day => {
+      html += `<tr><td><strong>${escHtml(day)}</strong></td>`;
+      allPeriods.forEach(period => {
+        const slots = schedule[day]?.[period] || [];
+        html += slots.length ? `<td>${slots.map(slot => `<div class="readonly-slot"><strong>${escHtml(slot.subject || "Lecture")}</strong><div>Class: ${escHtml(slot.classLabel || "-")}</div><div>Teacher ID: ${escHtml(getTeacherReadableId(slot))}</div></div>`).join('<div style="height:8px"></div>')}</td>` : `<td><span style="color:var(--muted);font-size:0.8rem;">-</span></td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+    return html;
+  };
+
+  window.saveTimetable = async function () {
+    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
+    showLoading(true, "Saving timetable...");
+    try {
+      await nextPaint();
+      normalizeTimetablePeriods();
+      syncPeriodTimesToSlots();
+      await refreshTimetableCache(true);
+      if (!validateNoTeacherConflicts()) {
+        showLoading(false);
+        return;
+      }
+      currentClassSubjects = mergeSubjects(currentClassSubjects);
+      currentTimetable.classSubjects = currentClassSubjects;
+      await setDoc(classSubjectsRef(), {
+        type: "timetableClassSubjects",
+        className: currentTimetable.class,
+        subjects: currentClassSubjects,
+        updatedAt: serverTimestamp()
+      });
+      const ref = doc(db, "schools", currentUser.uid, "timetables",
+        `${currentTimetable.class}-${currentTimetable.section}`);
+      await setDoc(ref, { ...currentTimetable, updatedAt: serverTimestamp() });
+      allTimetables = allTimetables.filter(timetable => (timetable.id || `${timetable.class || ""}-${timetable.section || ""}`) !== currentTimetableDocId());
+      allTimetables.push({ id: currentTimetableDocId(), ...currentTimetable });
+      allTimetables = dedupeTimetables(allTimetables);
+      toast("Timetable saved successfully!");
+    } catch(e) {
+      console.error(e);
+      toast("Error saving timetable", "error");
+    }
+    showLoading(false);
+  };
+
+  // ── AUTH ──
+  onAuthStateChanged(auth, async user => {
+    if (!user) { toast("Please login first", "error"); return; }
+    currentUser = user;
+    showLoading(true, "Preparing admin timetable...");
+    await nextPaint();
+    await loadTeachers();
+    await loadClasses();
+    showLoading(false);
+    refreshTimetableCache().catch(console.error);
+  });
+</script>
+<script type="module" src="access-control.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

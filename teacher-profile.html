@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body { min-height: 100%; background: #ffffff !important; }
+html.sx-page-loading body::before,
+html.sx-page-loading body::after { visibility: hidden !important; }
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) { visibility: hidden !important; }
+.sx-page-loader { position: fixed; inset: 0; z-index: 2147482500; display: flex; align-items: center; justify-content: center; background: #ffffff; transition: opacity 0.26s ease, visibility 0.26s ease; }
+.sx-page-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.sx-page-loader .dots-container { display: flex; align-items: center; justify-content: center; width: min(180px, 54vw); height: 72px; }
+.sx-page-loader .dot { height: clamp(12px, 4vw, 20px); width: clamp(12px, 4vw, 20px); margin-right: clamp(7px, 2.3vw, 10px); border-radius: 999px; background-color: #b3d4fc; animation: pulse 1.5s infinite ease-in-out; }
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% { transform: scale(0.8); background-color: #b3d4fc; box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7); }
+  50% { transform: scale(1.2); background-color: #6793fb; box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0); }
+  100% { transform: scale(0.8); background-color: #b3d4fc; box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7); }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Profile | Schoolix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="teacher-profile.css">
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body class="sx-admin-app" data-sx-title="Staff Profile">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+
+<main class="profile-shell" id="profileShell">
+  <section class="profile-hero card">
+    <div class="hero-bg"></div>
+    <div class="hero-main">
+      <button type="button" class="back-link" id="profileBackButton" onclick="goBackToRolePage()">Back</button>
+      <div class="hero-identity">
+        <button type="button" class="teacher-photo-xl" id="heroPhoto" onclick="previewTeacherPhoto()">T</button>
+        <div class="hero-copy">
+          <span class="eyebrow" id="profileRoleLabel">Faculty Profile</span>
+          <h1 id="teacherName">Loading profile...</h1>
+          <div class="hero-subline">
+            <span id="teacherIdChip">Staff ID</span>
+            <span id="teacherEmailChip">Email</span>
+            <span id="teacherPhoneChip">Phone</span>
+            <span class="status-badge status-active" id="teacherStatusBadge">Active</span>
+          </div>
+          <div class="hero-tags" id="heroTags"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button type="button" class="btn btn-primary" onclick="openEditProfile()">Edit Profile</button>
+      <button type="button" class="btn btn-light" id="generateQrAction" onclick="generateTeacherQr()">Generate QR</button>
+      <button type="button" class="btn btn-light" onclick="jumpToSection('attendanceSection')">Attendance</button>
+      <button type="button" class="btn btn-light" onclick="jumpToSection('salarySection')">Salary</button>
+      <button type="button" class="btn btn-light" onclick="printTeacherProfile()">Print Profile</button>
+    </div>
+  </section>
+
+  <div id="globalStatus"></div>
+
+  <section class="skeleton-grid" id="skeletonState" hidden aria-hidden="true">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card wide"></div>
+    <div class="skeleton-card wide"></div>
+  </section>
+
+  <section class="profile-layout" id="profileContent" hidden>
+    <aside class="sidebar-card card">
+      <button type="button" class="teacher-photo-lg" id="sidebarPhoto" onclick="previewTeacherPhoto()">T</button>
+      <h2 id="sidebarName">Loading profile...</h2>
+      <p id="sidebarDesignation">Designation</p>
+      <div class="sidebar-summary" id="sidebarSummary"></div>
+    </aside>
+
+    <div class="content-stack">
+      <section class="metric-grid" id="metricGrid"></section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Personal</span><h2>Personal Details</h2></div></div>
+        <div class="detail-grid" id="personalDetails"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Professional</span><h2>Professional Details</h2></div></div>
+        <div class="detail-grid" id="professionalDetails"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head">
+          <div><span class="kicker">Identity</span><h2>Identity Documents</h2></div>
+        </div>
+        <div class="document-grid" id="identityDocuments"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Payroll</span><h2>Bank Details</h2></div></div>
+        <div class="detail-grid" id="bankDetails"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Safety</span><h2>Emergency Contact</h2></div></div>
+        <div class="detail-grid" id="emergencyDetails"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head">
+          <div><span class="kicker">Files</span><h2>Documents</h2></div>
+        </div>
+        <div class="document-grid" id="profileDocuments"></div>
+      </section>
+
+      <section class="card detail-card" id="salarySection">
+        <div class="card-head"><div><span class="kicker">Salary</span><h2>Salary History</h2></div></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Month</th><th>Basic</th><th>Allowances</th><th>Deductions</th><th>Net</th><th>Paid</th><th>Remaining</th><th>Status</th><th>Payment Date</th><th>Receipt</th></tr></thead><tbody id="salaryRows"></tbody></table></div>
+      </section>
+
+      <section class="card detail-card" id="attendanceSection">
+        <div class="card-head">
+          <div><span class="kicker">Attendance</span><h2>Monthly Attendance Calendar</h2></div>
+          <div class="attendance-month-actions">
+            <input type="month" id="attendanceMonth">
+            <button type="button" class="btn btn-primary" id="attendanceMonthShow">Show</button>
+          </div>
+        </div>
+        <div class="calendar-wrap" id="attendanceCalendar"></div>
+        <div class="metric-grid compact" id="attendanceMetrics"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Leaves</span><h2>Leave History</h2></div></div>
+        <div class="timeline" id="leaveTimeline"></div>
+      </section>
+
+      <section class="card detail-card">
+        <div class="card-head"><div><span class="kicker">Activity</span><h2>Activity Timeline</h2></div></div>
+        <div class="timeline" id="activityTimeline"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="editModal" hidden>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div><span class="kicker">Edit</span><h2 id="editProfileTitle">Edit Staff Profile</h2></div>
+      <button type="button" class="icon-btn" onclick="closeEditProfile()" aria-label="Close edit profile">x</button>
+    </div>
+    <form id="editProfileForm" class="edit-form">
+      <div class="form-tabs" id="editTabs"></div>
+      <div id="editFields"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-light" onclick="closeEditProfile()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="detailModal" hidden>
+  <div class="modal-panel small">
+    <div class="modal-head">
+      <div><span class="kicker" id="detailKicker">Details</span><h2 id="detailTitle">Details</h2></div>
+      <button type="button" class="icon-btn" onclick="closeDetailModal()" aria-label="Close details">x</button>
+    </div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<script src="school-branding.js"></script>
+<script type="module" src="teacher-profile.js"></script>
+<script type="module" src="access-control.js"></script>
+<script src="schoolix-polish.js" defer></script>
+<script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

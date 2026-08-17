@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script id="sxCriticalLoaderScript">
+        (function () {
+            var root = document.documentElement;
+            root.classList.add("sx-page-loading");
+            window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+            function markEarlyReady(reason) {
+                window.SchoolixPageLoaderEarly.ready = true;
+                window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+                try {
+                    window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+                } catch (_) { }
+            }
+
+            function afterFirstPaint(reason) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () { markEarlyReady(reason); });
+                });
+            }
+
+            function emergencyHide() {
+                if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+                root.classList.remove("sx-page-loading");
+                root.classList.add("sx-page-loaded");
+                var loader = document.getElementById("sxPageLoader");
+                if (!loader) return;
+                loader.classList.add("is-hidden");
+                setTimeout(function () { loader.remove(); }, 260);
+            }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+            } else {
+                afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+            }
+            window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+            setTimeout(emergencyHide, 3200);
+        }());
+    </script>
+    <style id="sxCriticalLoaderStyle">
+        html.sx-page-loading,
+        html.sx-page-loading body {
+            min-height: 100%;
+            background: #ffffff !important;
+        }
+
+        html.sx-page-loading body::before,
+        html.sx-page-loading body::after {
+            visibility: hidden !important;
+        }
+
+        html.sx-page-loading body> :not(#sxPageLoader):not(script):not(style) {
+            visibility: hidden !important;
+        }
+
+        .sx-page-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 2147482500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            transition: opacity 0.26s ease, visibility 0.26s ease;
+        }
+
+        .sx-page-loader.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .sx-page-loader .dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: min(180px, 54vw);
+            height: 72px;
+        }
+
+        .sx-page-loader .dot {
+            height: clamp(12px, 4vw, 20px);
+            width: clamp(12px, 4vw, 20px);
+            margin-right: clamp(7px, 2.3vw, 10px);
+            border-radius: 999px;
+            background-color: #b3d4fc;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .sx-page-loader .dot:last-child {
+            margin-right: 0;
+        }
+
+        .sx-page-loader .dot:nth-child(1) {
+            animation-delay: -0.3s;
+        }
+
+        .sx-page-loader .dot:nth-child(2) {
+            animation-delay: -0.1s;
+        }
+
+        .sx-page-loader .dot:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                background-color: #b3d4fc;
+                box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+            }
+
+            50% {
+                transform: scale(1.2);
+                background-color: #6793fb;
+                box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+            }
+
+            100% {
+                transform: scale(0.8);
+                background-color: #b3d4fc;
+                box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="teachers-ops.css">
+    <link rel="stylesheet" href="schoolix-polish.css">
+    <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+
+<body>
+    <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+        <section class="dots-container" aria-label="Loading page">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </section>
+    </div>
+    <div class="page-shell">
+        <header class="panel hero">
+            <div class="hero-copy">
+                <div class="eyebrow">Faculty Operations</div>
+                <h1 id="heroSchoolName">Teacher Operations Hub</h1>
+                <p id="heroSubtitle">Create teacher accounts, mark daily attendance with check-in and check-out time,
+                    and manage month-wise salary payout records.</p>
+            </div>
+            <div class="hero-actions">
+                <button type="button" class="btn btn-light" onclick="goBack()">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="panel stat-card">
+                <div class="stat-label">Total Teachers</div>
+                <div class="stat-value" id="teacherCountStat">0</div>
+                <div class="stat-note">Active teacher accounts under this school panel.</div>
+            </div>
+            <div class="panel stat-card">
+                <div class="stat-label">Today Present</div>
+                <div class="stat-value" id="todayPresentStat">0</div>
+                <div class="stat-note" id="todayAttendanceNote">Attendance appears after the selected date is loaded.
+                </div>
+            </div>
+            <div class="panel stat-card">
+                <div class="stat-label">This Month Paid</div>
+                <div class="stat-value" id="monthlyPaidStat">₹0</div>
+                <div class="stat-note">Total salary already paid in the selected salary month.</div>
+            </div>
+            <div class="panel stat-card">
+                <div class="stat-label">Pending Payroll</div>
+                <div class="stat-value" id="monthlyPendingStat">₹0</div>
+                <div class="stat-note">Remaining salary balance across generated salary records.</div>
+            </div>
+        </section>
+
+        <section class="panel tabs-panel">
+            <div class="tabs">
+                <button type="button" class="tab-btn active" data-tab="directory"
+                    onclick="switchTab('directory')">Teacher Accounts</button>
+                <button type="button" class="tab-btn" data-tab="attendance" onclick="switchTab('attendance')">Daily
+                    Attendance</button>
+                <button type="button" class="tab-btn" data-tab="salary" onclick="switchTab('salary')">Salary
+                    Desk</button>
+            </div>
+        </section>
+
+        <section class="panel tab-panel active" id="directoryTab">
+            <div class="section-grid">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Create Teacher Account</h2>
+                            <p>Assign login access, class responsibility, and base monthly salary in one go.</p>
+                        </div>
+                    </div>
+                    <form id="addTeacherForm">
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="teacherName">Teacher Name</label>
+                                <input type="text" id="teacherName" placeholder="Enter full name" required>
+                            </div>
+                            <div class="field">
+                                <label for="teacherEmail">Email Address</label>
+                                <input type="email" id="teacherEmail" placeholder="teacher@school.com" required>
+                            </div>
+                            <div class="field">
+                                <label for="teacherPassword">Password</label>
+                                <input type="password" id="teacherPassword" placeholder="Minimum 6 characters"
+                                    minlength="6" required>
+                            </div>
+                            <div class="field">
+                                <label for="teacherSalary">Monthly Salary</label>
+                                <input type="number" id="teacherSalary" placeholder="45000" min="0" required>
+                            </div>
+                            <div class="field">
+                                <label for="classSelect">Assigned Class</label>
+                                <select id="classSelect" onchange="updateSections()">
+                                    <option value="">Select class</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="sectionSelect">Assigned Section</label>
+                                <select id="sectionSelect">
+                                    <option value="">Select section</option>
+                                </select>
+                            </div>
+                            <div class="field full">
+                                <label>Class Teacher Assignments</label>
+                                <div class="assignment-picker">
+                                    <button type="button" class="btn btn-secondary" onclick="addTeacherAssignment()">Add
+                                        Selected Class</button>
+                                    <div id="teacherAssignmentsList" class="assignment-list"></div>
+                                </div>
+                                <div class="helper-text">Add one or more class-section responsibilities. Teacher will
+                                    see only these classes in their panel.</div>
+                            </div>
+                            <div class="field full">
+                                <label for="teacherPhoto">Teacher Photo</label>
+                                <input type="file" id="teacherPhoto" accept="image/*">
+                                <div class="helper-text">Optional. The photo appears on the teacher dashboard and admin
+                                    teacher panel.</div>
+                            </div>
+                            <div class="field full">
+                                <button type="submit" class="btn btn-primary" id="createTeacherBtn">Create Teacher
+                                    Account</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Quick School Snapshot</h2>
+                            <p>The current teacher and payroll summary refreshes as you work.</p>
+                        </div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="pill-row">
+                            <span class="pill" id="schoolNamePill">School panel</span>
+                            <span class="pill" id="salaryMonthPill">Salary month</span>
+                        </div>
+                        <div class="summary-grid">
+                            <div class="mini-stat"><span>Teachers</span><strong id="summaryTeacherCount">0</strong>
+                            </div>
+                            <div class="mini-stat"><span>Attendance Marked</span><strong
+                                    id="summaryAttendanceMarked">0</strong></div>
+                            <div class="mini-stat"><span>Paid Out</span><strong id="summaryPaidOut">₹0</strong></div>
+                            <div class="mini-stat"><span>Pending</span><strong id="summaryPendingOut">₹0</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="policy-card">
+                        <div class="policy-header">
+                            <div class="policy-icon"></div>
+                            <div>
+                                <div class="policy-title">No Deduction Absent Policy</div>
+                                <div class="policy-subtitle">Absent days up to this limit won't deduct salary</div>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top:14px;">
+                            <div class="field">
+                                <label for="noDeductionDays">No Deduction Absent Days / Month</label>
+                                <input type="number" id="noDeductionDays" placeholder="e.g. 2" min="0" max="31"
+                                    value="0">
+                            </div>
+                            <div class="field">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-primary" onclick="saveLeavePolicy()">Save
+                                    Policy</button>
+                            </div>
+                        </div>
+                        <div class="helper-text info-note" id="leavePolicyNote">
+                            Currently: <strong id="currentLeavePolicy">0 days</strong> absent days per month are allowed
+                            without deduction. Extra absent days will be deducted from salary.
+                        </div>
+                    </div>
+
+                    <div class="helper-text info-note">Removing a teacher hides them from active attendance and salary
+                        generation, while keeping their old attendance and salary records searchable in Removed
+                        Teachers.</div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div>
+                        <h3>Teachers Directory</h3>
+                        <p>Update monthly salary, jump straight into salary management, edit teacher details, or remove
+                            a teacher record.</p>
+                    </div>
+                    <div class="search-wrap">
+                        <input type="text" id="teacherSearch"
+                            placeholder="Search by name, email, ID, class, section or status">
+                        <div class="button-row top-gap teacher-directory-switch">
+                            <button type="button" class="btn btn-primary" id="activeTeacherViewBtn"
+                                onclick="setTeacherDirectoryView('active')">Active Teachers</button>
+                            <button type="button" class="btn btn-light" id="removedTeacherViewBtn"
+                                onclick="setTeacherDirectoryView('removed')">Removed Teachers</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="teachersList" class="teacher-list"></div>
+            </div>
+        </section>
+
+        <section class="panel tab-panel" id="attendanceTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <div>
+                        <h2>Teacher Daily Attendance</h2>
+                        <p>Mark teacher attendance day by day, store check-in and check-out time, and keep remarks with
+                            the record.</p>
+                    </div>
+                    <!-- ─── NEW: Monthly Report Button ─── -->
+                    <div>
+                        <button type="button" class="btn btn-secondary" onclick="openMonthlyReportModal()">Monthly
+                            Report</button>
+                    </div>
+                </div>
+                <div class="attendance-toolbar">
+                    <div class="field">
+                        <label for="attendanceDate">Attendance Date</label>
+                        <input type="date" id="attendanceDate">
+                    </div>
+                    <div class="field">
+                        <label>Bulk Status</label>
+                        <div class="button-row">
+                            <button type="button" class="btn btn-secondary"
+                                onclick="fillTeacherAttendanceStatus('Present')">All Present</button>
+                            <button type="button" class="btn btn-warning"
+                                onclick="fillTeacherAttendanceStatus('Half Day')">All Half Day</button>
+                            <button type="button" class="btn btn-danger"
+                                onclick="fillTeacherAttendanceStatus('Absent')">All Absent</button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Quick Time</label>
+                        <div class="button-row">
+                            <button type="button" class="btn btn-light" onclick="setBulkCheckInNow()">Set Check-In
+                                Now</button>
+                            <button type="button" class="btn btn-light" onclick="clearBulkTimes()">Clear Times</button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Actions</label>
+                        <div class="button-row">
+                            <button type="button" class="btn btn-secondary"
+                                onclick="loadTeacherAttendanceForDate()">Reload Date</button>
+                            <button type="button" class="btn btn-warning" onclick="markRemainingTeachersAbsent()">Mark
+                                Remaining Absent</button>
+                            <button type="button" class="btn btn-success" onclick="saveTeacherAttendance()">Save
+                                Attendance</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mini-grid attendance-mini-grid">
+                    <div class="mini-stat"><span>Present</span><strong id="attendancePresentCount">0</strong></div>
+                    <div class="mini-stat"><span>Half Day</span><strong id="attendanceHalfCount">0</strong></div>
+                    <div class="mini-stat"><span>Absent</span><strong id="attendanceAbsentCount">0</strong></div>
+                </div>
+
+                <div id="teacherAttendanceList" class="attendance-list"></div>
+            </div>
+        </section>
+
+        <section class="panel tab-panel" id="salaryTab">
+            <div class="section-grid">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Monthly Salary Generator</h2>
+                            <p>Generate payroll from monthly salary plus marked attendance. Absent days follow the
+                                no-deduction limit, and half-day deducts half-day value.</p>
+                        </div>
+                    </div>
+                    <div class="salary-toolbar">
+                        <div class="field">
+                            <label for="salaryTeacherSelect">Teacher</label>
+                            <select id="salaryTeacherSelect">
+                                <option value="">Select teacher</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="salaryMonth">Salary Month</label>
+                            <input type="month" id="salaryMonth">
+                        </div>
+                        <div class="field">
+                            <label for="salaryStatusFilter">Payment Status</label>
+                            <select id="salaryStatusFilter">
+                                <option value="">All records</option>
+                                <option value="due">Due / unpaid</option>
+                                <option value="unpaid">Unpaid only</option>
+                                <option value="partial">Partial due</option>
+                                <option value="paid">Paid only</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Actions</label>
+                            <div class="button-row">
+                                <button type="button" class="btn btn-primary"
+                                    onclick="generateSelectedSalaryRecord()">Generate Selected</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="loadSalaryPreview()">Preview</button>
+                                <button type="button" class="btn btn-warning"
+                                    onclick="generateAllSalaryRecords()">Generate All</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="salaryPreviewBox" class="summary-box">
+                        <strong>Select a teacher and month to preview salary.</strong>
+                        <div class="helper-text top-gap">Generated salary records stay editable through payment history
+                            below.</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <div>
+                            <h2>Salary Payment Entry</h2>
+                            <p>Add salary payments to the selected salary record. Status updates automatically to paid
+                                or partial paid.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="paymentAmount">Payment Amount</label>
+                            <input type="number" id="paymentAmount" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="paymentDate">Payment Date</label>
+                            <input type="date" id="paymentDate">
+                        </div>
+                        <div class="field full">
+                            <label for="paymentNote">Payment Note</label>
+                            <textarea id="paymentNote" placeholder="Optional note for this salary payment"></textarea>
+                        </div>
+                        <div class="field full">
+                            <button type="button" class="btn btn-success" id="recordPaymentBtn"
+                                onclick="recordSalaryPayment()">Record Salary Payment</button>
+                        </div>
+                    </div>
+                    <div class="helper-text top-gap" id="activeSalaryHint">Pick a generated salary record from the list
+                        below before recording payment.</div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div>
+                        <h3>Salary Records</h3>
+                        <p>Inspect attendance-linked salary, payment history, and remaining payable balance.</p>
+                    </div>
+                </div>
+                <div id="salaryRecordsList" class="salary-records"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+     MODAL: Monthly Attendance Report
+═══════════════════════════════════════════════ -->
+    <div id="teacherQrModal" class="modal-overlay" style="display:none;" onclick="closeTeacherQrModal(event)">
+        <div class="modal-box qr-modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h2 id="qrModalTitle">Teacher QR</h2>
+                    <p id="qrModalSubtitle">Scan this QR from the teacher dashboard to mark today's attendance.</p>
+                </div>
+                <button type="button" class="btn btn-light modal-close" onclick="closeTeacherQrModal()">Close</button>
+            </div>
+            <div class="field top-gap">
+                <label for="teacherQrMode">QR Attendance Type</label>
+                <select id="teacherQrMode">
+                    <option value="checkin">Check-In Present</option>
+                    <option value="halfday">Half Day Check-Out</option>
+                    <option value="checkout">Check-Out</option>
+                </select>
+            </div>
+            <div class="button-row top-gap">
+                <button type="button" class="btn btn-primary" id="confirmGenerateQrBtn"
+                    onclick="confirmGenerateTeacherAttendanceQr()">Generate Selected QR</button>
+            </div>
+            <div class="qr-display">
+                <img id="teacherQrImage" alt="Teacher attendance QR code">
+                <div class="qr-code-text" id="teacherQrCodeText"></div>
+            </div>
+            <div class="helper-text top-gap" id="teacherQrMeta"></div>
+        </div>
+    </div>
+
+    <div id="monthlyReportModal" class="modal-overlay" style="display:none;" onclick="closeMonthlyReportModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h2> Monthly Attendance Report</h2>
+                    <p>Full month-wise attendance breakdown for each teacher.</p>
+                </div>
+                <button type="button" class="btn btn-light modal-close" onclick="closeMonthlyReportModal()">✕
+                    Close</button>
+            </div>
+            <div class="modal-toolbar">
+                <div class="field">
+                    <label for="reportMonth">Select Month</label>
+                    <input type="month" id="reportMonth">
+                </div>
+                <div class="field">
+                    <label for="reportTeacherFilter">Filter by Teacher</label>
+                    <select id="reportTeacherFilter">
+                        <option value="">All Teachers</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-primary" onclick="loadMonthlyReport()">Load Report</button>
+                </div>
+            </div>
+            <div id="monthlyReportContent" class="report-content">
+                <div class="empty-state">Select a month and click Load Report to see attendance summary.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+     MODAL: Edit Teacher Details
+═══════════════════════════════════════════════ -->
+    <div id="editTeacherClassesModal" class="modal-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="editTeacherClassesTitle">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h2 id="editTeacherClassesTitle">Edit Assigned Classes</h2>
+                    <p id="editTeacherClassesSubtitle">Add or remove class-section assignments only.</p>
+                </div>
+                <button type="button" class="teacher-dialog-close" onclick="closeEditTeacherClassesModal()"
+                    aria-label="Close class editor" title="Close">&times;</button>
+            </div>
+            <input type="hidden" id="editClassesTeacherUid">
+            <div class="form-grid" style="margin-top:18px;">
+                <div class="field">
+                    <label for="editClassesClassSelect">Assigned Class</label>
+                    <select id="editClassesClassSelect" onchange="updateEditClassSections()">
+                        <option value="">Select class</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="editClassesSectionSelect">Assigned Section</label>
+                    <select id="editClassesSectionSelect">
+                        <option value="">Select section</option>
+                    </select>
+                </div>
+                <div class="field full">
+                    <label>Current Assignments</label>
+                    <div class="assignment-picker">
+                        <button type="button" class="btn btn-secondary" onclick="addTeacherClassOnlyAssignment()">Add
+                            Selected Class</button>
+                        <div id="editClassesAssignmentsList" class="assignment-list"></div>
+                    </div>
+                    <div class="helper-text">Only assigned classes will change. Name, email, salary, photo and other
+                        details stay untouched.</div>
+                </div>
+                <div class="field full">
+                    <div class="edit-teacher-actions">
+                        <button type="button" class="btn btn-light"
+                            onclick="closeEditTeacherClassesModal()">Cancel</button>
+                        <button type="button" class="btn btn-success" id="saveEditClassesBtn"
+                            onclick="saveTeacherClassAssignments()">Save Classes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editTeacherModal" class="modal-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="editTeacherModalTitle">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h2 id="editTeacherModalTitle">Edit Teacher Details</h2>
+                    <p>Update name, email, class, and section assignments.</p>
+                </div>
+                <button type="button" class="teacher-dialog-close" id="editTeacherCloseBtn"
+                    aria-label="Close edit teacher dialog" title="Close">&times;</button>
+            </div>
+            <input type="hidden" id="editTeacherUid">
+            <input type="hidden" id="removeTeacherPhotoFlag" value="0">
+            <div class="form-grid" style="margin-top:18px;">
+                <div class="field full">
+                    <label>Teacher Photo</label>
+                    <div class="teacher-photo-editor">
+                        <button type="button" class="teacher-photo-preview" id="editTeacherPhotoPreview"
+                            onclick="previewCurrentTeacherPhoto()">No photo</button>
+                        <div class="teacher-photo-controls">
+                            <input type="file" id="editTeacherPhoto" accept="image/*"
+                                onchange="previewEditedTeacherPhoto()">
+                            <div class="button-row">
+                                <button type="button" class="btn btn-light" onclick="previewCurrentTeacherPhoto()">View
+                                    Photo</button>
+                                <button type="button" class="btn btn-secondary" onclick="removeTeacherPhoto()">Remove
+                                    Photo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="editTeacherName">Teacher Name</label>
+                    <input type="text" id="editTeacherName" placeholder="Full name" required>
+                </div>
+                <div class="field">
+                    <label for="editTeacherEmail">Email Address</label>
+                    <input type="email" id="editTeacherEmail" placeholder="teacher@school.com" required>
+                </div>
+                <div class="field">
+                    <label for="editClassSelect">Assigned Class</label>
+                    <select id="editClassSelect" onchange="updateEditSections()">
+                        <option value="">Select class</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="editSectionSelect">Assigned Section</label>
+                    <select id="editSectionSelect">
+                        <option value="">Select section</option>
+                    </select>
+                </div>
+                <div class="field full">
+                    <label>Class Teacher Assignments</label>
+                    <div class="assignment-picker">
+                        <button type="button" class="btn btn-secondary" onclick="addEditTeacherAssignment()">Add
+                            Selected Class</button>
+                        <div id="editTeacherAssignmentsList" class="assignment-list"></div>
+                    </div>
+                    <div class="helper-text">Use this when a teacher is class teacher for more than one class-section.
+                    </div>
+                </div>
+                <div class="field full">
+                    <div class="edit-teacher-actions">
+                        <button type="button" class="btn btn-light" id="editTeacherCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-success" id="saveEditTeacherBtn"
+                            onclick="saveEditedTeacher()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+            <div class="helper-text top-gap">Note: Changing email here updates the Firestore profile only. Firebase Auth
+                email is not changed automatically.</div>
+        </div>
+    </div>
+
+    <div id="photoPreviewModal" class="modal-overlay" style="display:none;" onclick="closePhotoPreviewModal(event)">
+        <div class="modal-box photo-preview-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h2 id="photoPreviewTitle">Photo</h2>
+                    <p>Click outside or close to return.</p>
+                </div>
+                <button type="button" class="btn btn-light modal-close"
+                    onclick="closePhotoPreviewModal()">Close</button>
+            </div>
+            <div class="photo-preview-stage">
+                <img id="photoPreviewImage" alt="Preview">
+            </div>
+        </div>
+    </div>
+
+    <script src="school-branding.js"></script>
+    <script type="module" src="teachers-ops.js"></script>
+    <script type="module" src="access-control.js"></script>
+    <script src="schoolix-polish.js" defer></script>
+    <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+
+</html>

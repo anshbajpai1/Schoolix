@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accountant Dashboard - Schoolix</title>
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="accountant-portal.css?v=accountant-portal-20260806-4">
+<style>
+.accounts-hero {
+  overflow: hidden;
+  padding: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fbff 55%, #edf8f2 100%);
+}
+.accounts-hero .top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.accounts-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #155eef;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.accounts-eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #0f9f6e;
+}
+.accounts-hero h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+.accounts-actions,
+.accounts-grid {
+  display: grid;
+  gap: 12px;
+}
+.accounts-actions {
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+}
+.accounts-grid {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  margin-top: 16px;
+}
+.account-tile {
+  min-height: 124px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 7px 12px;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.account-tile:hover {
+  transform: translateY(-1px);
+  border-color: #bfd0ea;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.09);
+}
+.account-tile-icon {
+  grid-row: 1 / 3;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #1f5eff;
+}
+.account-tile strong {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.account-tile span:last-child {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.account-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.account-stat {
+  min-height: 108px;
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.account-stat strong {
+  color: #111827;
+  font-size: 28px;
+  line-height: 1;
+}
+.account-stat span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+.is-native-app .accounts-btn[href="fees-report.html"],
+.is-native-app .accounts-btn[href="school-accounts.html"],
+.is-native-app .accounts-btn[href="accountant-salary.html"],
+.is-native-app .account-tile[href="fees-report.html"],
+.is-native-app .account-tile[href="school-accounts.html"],
+.is-native-app .account-tile[href="accountant-salary.html"] {
+  display: none;
+}
+.is-native-app .accounts-actions {
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+}
+.is-native-app .accounts-grid {
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+}
+.accountant-salary-card {
+  margin-top: 16px;
+}
+.salary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.salary-head h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+.salary-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.salary-filters input,
+.salary-filters select {
+  min-height: 40px;
+  min-width: 150px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  padding: 9px 11px;
+  font: 800 13px/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  outline: none;
+}
+.salary-breakdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+.salary-box {
+  min-height: 100px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.salary-box strong {
+  font-size: 24px;
+  line-height: 1;
+}
+.salary-box span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.salary-box.green strong { color: #0f9f6e; }
+.salary-box.orange strong { color: #b45309; }
+.salary-box.blue strong { color: #1f5eff; }
+.salary-progress-wrap {
+  margin: 16px 0 12px;
+}
+.salary-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+.salary-progress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6ecf5;
+}
+.salary-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1f5eff, #0f9f6e);
+  transition: width 0.35s ease;
+}
+.salary-history {
+  display: grid;
+  gap: 8px;
+}
+.salary-payment-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  font-size: 12px;
+}
+.salary-payment-row strong {
+  display: block;
+  font-size: 14px;
+}
+.salary-empty {
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 800;
+}
+.accounts-btn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #1746c7;
+  padding: 10px 13px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+.accounts-btn.primary {
+  border-color: #1f5eff;
+  background: #1f5eff;
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(31, 94, 255, 0.18);
+}
+.accounts-btn.danger {
+  border-color: #fac5be;
+  color: #b42318;
+}
+.accounts-admin {
+  display: none;
+}
+.accounts-card + .accounts-card {
+  margin-top: 16px;
+}
+svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 1180px) {
+  .accounts-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .accounts-actions,
+  .accounts-grid,
+  .account-stats,
+  .salary-breakdown {
+    grid-template-columns: 1fr;
+  }
+  .salary-filters,
+  .salary-filters input,
+  .salary-filters select,
+  .salary-filters .accounts-btn {
+    width: 100%;
+  }
+  .accounts-hero h1 {
+    font-size: 26px;
+  }
+}
+</style>
+</head>
+<body class="library-dashboard-app sx-accountant-shell-enabled sx-accountant-simple-shell" data-accountant-page="dashboard" data-accountant-simple-shell="true">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </section>
+</div>
+<div class="library-app-layout">
+  <div class="library-sidebar-overlay" id="librarySidebarOverlay" aria-hidden="true"></div>
+  <aside class="library-sidebar" id="librarySidebar"></aside>
+  <main class="library-main">
+    <header class="library-page-topbar">
+      <div>
+        <h1 class="library-page-title">Accounts Workspace</h1>
+        <div class="library-page-meta" id="schoolName">Loading school account...</div>
+      </div>
+      <button class="library-menu-button" id="libraryMenuButton" type="button" aria-label="Open accounts navigation" aria-expanded="false">
+        <span class="library-toggle-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></span>
+      </button>
+    </header>
+
+    <section class="library-card accounts-hero">
+      <div class="top">
+        <div>
+          <div class="accounts-eyebrow">Accounts Portal</div>
+          <h1 id="welcomeTitle">Accountant Dashboard</h1>
+          <p class="library-page-meta">Fees, ledger, notices, and staff attendance in one professional workspace.</p>
+        </div>
+        <div class="accounts-actions">
+          <a class="accounts-btn primary" href="fees-report.html"><svg viewBox="0 0 24 24"><path d="M6 3h12"></path><path d="M6 8h12"></path><path d="M8 3c4 0 6 2 6 5s-2 5-6 5l7 8"></path></svg>Fees</a>
+          <a class="accounts-btn" href="school-accounts.html"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"></path></svg>Ledger</a>
+          <a class="accounts-btn" href="accountant-salary.html"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 9h10"></path><path d="M7 13h4"></path><path d="M15 13h2"></path></svg>Salary</a>
+          <a class="accounts-btn accounts-admin" id="adminBackBtn" href="admin-dashboard.html"><svg viewBox="0 0 24 24"><path d="M3 12h18"></path><path d="M3 6h18"></path><path d="M3 18h18"></path></svg>Admin</a>
+          <button class="accounts-btn danger" type="button" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>Logout</button>
+        </div>
+      </div>
+      <div class="account-stats">
+        <div class="account-stat"><strong>Fees</strong><span>Collection, dues, exports, and payment history</span></div>
+        <div class="account-stat"><strong>Ledger</strong><span>Income, expenses, references, and account balances</span></div>
+        <div class="account-stat"><strong>Salary</strong><span>Teacher and staff salary payments debit to ledger</span></div>
+      </div>
+    </section>
+
+    <section class="library-card accountant-salary-card" aria-label="Accountant salary details">
+      <div class="salary-head">
+        <div>
+          <div class="accounts-eyebrow">Salary</div>
+          <h2>My Salary Record</h2>
+          <p class="library-page-meta" id="salarySubtext">Month and session wise salary status.</p>
+        </div>
+        <div class="salary-filters">
+          <input type="month" id="salaryMonthPicker" aria-label="Salary month">
+          <button class="accounts-btn primary" type="button" onclick="loadAccountantSalary()">Load</button>
+        </div>
+      </div>
+      <div class="salary-breakdown">
+        <div class="salary-box blue"><strong id="salaryBase">₹0</strong><span>Monthly Salary</span></div>
+        <div class="salary-box"><strong id="salaryNet">₹0</strong><span>Net Salary</span></div>
+        <div class="salary-box green"><strong id="salaryPaid">₹0</strong><span>Salary Paid</span></div>
+        <div class="salary-box orange"><strong id="salaryDue">₹0</strong><span>Pending</span></div>
+      </div>
+      <div class="salary-progress-wrap">
+        <div class="salary-progress-label"><span id="salaryProgressLabel">0% paid</span><span id="salaryStatus">Not generated</span></div>
+        <div class="salary-progress" aria-hidden="true"><span id="salaryProgressBar"></span></div>
+      </div>
+      <div class="salary-history" id="salaryPaymentHistory">
+        <div class="salary-empty">Loading salary details...</div>
+      </div>
+    </section>
+
+    <section class="accounts-grid" aria-label="Accountant tools">
+      <a href="fees-report.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="M8 13h8"></path><path d="M8 17h5"></path></svg></span>
+        <strong>Fees Management</strong>
+        <span>Collect payments, impose fees, view dues, and export reports.</span>
+      </a>
+      <a href="school-accounts.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"></path><path d="M8 7h8"></path><path d="M8 11h6"></path></svg></span>
+        <strong>School Accounts</strong>
+        <span>Record income, expenses, reasons, references, and balances.</span>
+      </a>
+      <a href="accountant-salary.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 9h10"></path><path d="M7 13h4"></path><path d="M15 13h2"></path></svg></span>
+        <strong>Salary Management</strong>
+        <span>Generate teacher and staff salary records and debit paid salary to ledger.</span>
+      </a>
+      <a href="accountant-qr-checkin.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg></span>
+        <strong>QR Check-In</strong>
+        <span>Open a dedicated page for daily staff attendance QR scan.</span>
+      </a>
+      <a href="accountant-attendance.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span>
+        <strong>Attendance Records</strong>
+        <span>Review your monthly check-in and attendance history.</span>
+      </a>
+      <a href="accountant-notices.html" class="account-tile">
+        <span class="account-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 0 0 2 2h2l4 4v-4h4l6 3V6l-6 3H5a2 2 0 0 0-2 2Z"></path><path d="M21 9v6"></path></svg></span>
+        <strong>Latest Notices</strong>
+        <span>Read current school notices shared with accounts staff.</span>
+      </a>
+    </section>
+  </main>
+</div>
+
+<script>window.SchoolixDisablePageLoader = true; document.documentElement.classList.remove("sx-page-loading"); document.documentElement.classList.add("sx-page-loaded"); document.getElementById("sxPageLoader")?.classList.add("is-hidden");</script>
+<script src="school-branding.js?v=branding-safe-20260806-2"></script>
+<script src="accountant-portal.js?v=accountant-portal-20260806-4"></script>
+<script>
+window.setTimeout(function () {
+  var schoolName = document.getElementById("schoolName");
+  if (schoolName && /Loading school account/i.test(schoolName.textContent || "")) {
+    schoolName.textContent = "Unable to load the accountant session. Please refresh or sign in again.";
+  }
+  var salaryHistory = document.getElementById("salaryPaymentHistory");
+  if (salaryHistory && /Loading salary details/i.test(salaryHistory.textContent || "")) {
+    salaryHistory.innerHTML = '<div class="salary-empty">Unable to load the accountant session. Please refresh or sign in again.</div>';
+  }
+}, 10000);
+</script>
+<script type="module">
+import { initializeApp, getApps } from "./firebase-compat.js?v=accountant-guard-20260806-3";
+import { getAuth, onAuthStateChanged, signOut } from "./firebase-compat.js?v=accountant-guard-20260806-3";
+import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit } from "./firebase-compat.js?v=accountant-guard-20260806-3";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  authDomain: "schoolix-48107.firebaseapp.com",
+  projectId: "schoolix-48107",
+  storageBucket: "schoolix-48107.firebasestorage.app",
+  messagingSenderId: "133937954491",
+  appId: "1:133937954491:web:69d8064422617eb8c4339e"
+};
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let accountantProfile = {};
+let accountantSchoolId = "";
+let salarySessions = [];
+let activeSalarySessionId = "";
+
+function accountantLinkedSchoolId(data = {}) {
+  return data.adminId || data.schoolId || data.schoolID || data.adminUID || data.adminUid || data.schoolUID || data.schoolUid || data.schoolDocId || data.schoolDocID || "";
+}
+
+async function resolveAccountantProfile(user) {
+  const directSnap = await getDoc(doc(db, "users", user.uid));
+  if (directSnap.exists()) return { id: directSnap.id, ...directSnap.data() };
+
+  const uid = String(user.uid || "").trim();
+  const rawEmail = String(user.email || "").trim();
+  const email = rawEmail.toLowerCase();
+  const lookups = [];
+  if (uid) lookups.push(["authUid", uid], ["uid", uid], ["legacyUid", uid], ["firebaseUid", uid]);
+  if (email) lookups.push(["email", email], ["authEmail", email]);
+  if (rawEmail && rawEmail !== email) lookups.push(["email", rawEmail], ["authEmail", rawEmail]);
+
+  for (const [field, value] of lookups) {
+    try {
+      const snap = await getDocs(query(collection(db, "users"), where(field, "==", value), limit(1)));
+      if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    } catch (error) {
+      if (error?.code !== "permission-denied") console.warn(`Accountant profile ${field} lookup failed:`, error);
+    }
+  }
+  return null;
+}
+
+const $ = (id) => document.getElementById(id);
+const money = (value) => Number(value || 0);
+const fmt = (value) => `₹${money(value).toLocaleString("en-IN")}`;
+const currentMonth = () => new Date().toISOString().slice(0, 7);
+const monthLabel = (value) => value ? new Date(`${value}-01T12:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Selected month";
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+
+function getSessionLabel(session = {}) {
+  return session.label || session.name || session.session || session.academicSession || session.year || session.id || "";
+}
+
+function renderSalarySessions() {
+  const sorted = salarySessions.slice().sort((a, b) => {
+    const aTime = a.createdAt?.seconds || a.startDate || a.id || "";
+    const bTime = b.createdAt?.seconds || b.startDate || b.id || "";
+    return String(bTime).localeCompare(String(aTime));
+  });
+  const active = sorted.find((session) => session.id === activeSalarySessionId) || sorted.find((session) => session.active || session.isActive || session.current) || sorted[0];
+  activeSalarySessionId = active?.id || activeSalarySessionId || "";
+}
+
+async function loadSalarySessions() {
+  if (!accountantSchoolId) return;
+  try {
+    const [activeSnap, snap] = await Promise.all([
+      getDoc(doc(db, "schools", accountantSchoolId, "settings", "activeSession")),
+      getDocs(collection(db, "schools", accountantSchoolId, "sessions"))
+    ]);
+    let viewSessionId = "";
+    try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
+    activeSalarySessionId = viewSessionId || (activeSnap.exists() ? activeSnap.data().sessionId || "" : "");
+    salarySessions = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+    renderSalarySessions();
+  } catch (error) {
+    console.warn("Unable to load salary sessions", error);
+  }
+}
+
+function resetSalaryCard(message) {
+  $("salaryBase").textContent = fmt(accountantProfile.monthlySalary || 0);
+  $("salaryNet").textContent = "₹0";
+  $("salaryPaid").textContent = "₹0";
+  $("salaryDue").textContent = "₹0";
+  $("salaryProgressBar").style.width = "0%";
+  $("salaryProgressLabel").textContent = "0% paid";
+  $("salaryStatus").textContent = "Not generated";
+  $("salaryPaymentHistory").innerHTML = `<div class="salary-empty">${escapeHtml(message)}</div>`;
+}
+
+window.loadAccountantSalary = async function() {
+  const month = $("salaryMonthPicker")?.value || currentMonth();
+  if (!accountantSchoolId || !accountantProfile.uid || !month) return;
+  const selectedSessionId = window.SchoolixAccountantSession?.sessionId || activeSalarySessionId || "";
+  const selectedSession = salarySessions.find((session) => session.id === selectedSessionId) || {};
+  const sessionLabel = getSessionLabel(selectedSession) || "Current Session";
+  $("salarySubtext").textContent = `${monthLabel(month)} | ${sessionLabel}`;
+  try {
+    const salaryIds = Array.from(new Set([
+      accountantProfile.uid,
+      accountantProfile.authUid,
+      accountantProfile.uid,
+      accountantProfile.legacyUid,
+      accountantProfile.firebaseUid,
+      accountantProfile.staffUid,
+      accountantProfile.staffId,
+      accountantProfile.employeeId
+    ].map((value) => String(value || "").trim()).filter(Boolean)));
+    let snap = null;
+    for (const staffUid of salaryIds) {
+      snap = await getDoc(doc(db, "schools", accountantSchoolId, "staff_salary_records", `${staffUid}_${month}`));
+      if (snap.exists()) break;
+    }
+    if (!snap.exists()) {
+      resetSalaryCard(`Salary record for ${monthLabel(month)} has not been generated yet.`);
+      return;
+    }
+    const record = snap.data();
+    const recordSessionId = String(record.sessionId || "");
+    if (selectedSessionId && recordSessionId && recordSessionId !== selectedSessionId) {
+      resetSalaryCard(`No salary record was found for ${monthLabel(month)} in the selected session.`);
+      return;
+    }
+    const base = money(record.baseSalary || accountantProfile.monthlySalary);
+    const net = money(record.netSalary || base);
+    const paid = money(record.paidAmount);
+    const due = money(record.remainingAmount ?? Math.max(net - paid, 0));
+    const pct = net > 0 ? Math.min(100, Math.round((paid / net) * 100)) : 0;
+    $("salaryBase").textContent = fmt(base);
+    $("salaryNet").textContent = fmt(net);
+    $("salaryPaid").textContent = fmt(paid);
+    $("salaryDue").textContent = fmt(due);
+    $("salaryProgressBar").style.width = `${pct}%`;
+    $("salaryProgressLabel").textContent = `${pct}% paid`;
+    $("salaryStatus").textContent = record.status || (paid >= net && net > 0 ? "Paid" : paid > 0 ? "Partially Paid" : "Unpaid");
+    const payments = Array.isArray(record.payments) ? record.payments.slice().reverse() : [];
+    $("salaryPaymentHistory").innerHTML = payments.length
+      ? payments.map((payment) => `<div class="salary-payment-row">
+          <div><strong>${fmt(payment.amount)}</strong><span>${escapeHtml(payment.note || payment.paymentMode || "Salary payment")}</span></div>
+          <span>${payment.paymentDate ? new Date(`${payment.paymentDate}T00:00:00`).toLocaleDateString("en-IN") : "Date not set"}</span>
+        </div>`).join("")
+      : `<div class="salary-empty">No payment history has been recorded for this month.</div>`;
+  } catch (error) {
+    console.error("Unable to load accountant salary", error);
+    resetSalaryCard("Unable to load salary details.");
+  }
+};
+
+window.addEventListener("schoolix:accountant-session-ready", (event) => {
+  activeSalarySessionId = event.detail?.sessionId || activeSalarySessionId;
+  window.loadAccountantSalary?.();
+});
+
+let accountantDashboardAuthSettled = false;
+const accountantDashboardAuthTimer = window.setTimeout(() => {
+  if (accountantDashboardAuthSettled) return;
+  document.getElementById("schoolName").textContent = "Unable to load the accountant session. Please refresh or sign in again.";
+  resetSalaryCard("Unable to load the accountant session. Please refresh or sign in again.");
+}, 9000);
+
+function markAccountantDashboardAuthSettled() {
+  accountantDashboardAuthSettled = true;
+  window.clearTimeout(accountantDashboardAuthTimer);
+}
+
+function showAccountantDashboardNotice(message) {
+  document.getElementById("schoolName").textContent = message;
+  document.getElementById("welcomeTitle").textContent = "Accountant Dashboard";
+  resetSalaryCard(message);
+}
+
+onAuthStateChanged(auth, async (user) => {
+  try {
+    if (!user) {
+      markAccountantDashboardAuthSettled();
+      showAccountantDashboardNotice("Accountant session is missing. Please sign in again from the login page.");
+      return;
+    }
+    const data = await resolveAccountantProfile(user);
+    if (!data) {
+      markAccountantDashboardAuthSettled();
+      showAccountantDashboardNotice("Accountant profile was not found. Please ask the admin to relink this account.");
+      return;
+    }
+    const role = String(data.role || "").toLowerCase();
+    if (role !== "accountant" && role !== "admin") {
+      markAccountantDashboardAuthSettled();
+      showAccountantDashboardNotice("Access denied. Accountant account required.");
+      return;
+    }
+
+    document.getElementById("welcomeTitle").textContent = `Welcome, ${data.name || user.email || "Accountant"}`;
+    document.getElementById("adminBackBtn").style.display = role === "admin" ? "inline-flex" : "none";
+    const profileUid = data.id || user.uid;
+    const schoolId = role === "admin" ? profileUid : accountantLinkedSchoolId(data);
+    accountantProfile = { uid: profileUid, authUid: user.uid, ...data };
+    accountantSchoolId = schoolId;
+    $("salaryMonthPicker").value = currentMonth();
+    let school = data.schoolName || "";
+    if (schoolId) {
+      try {
+        const adminSnap = await getDoc(doc(db, "users", schoolId));
+        school = adminSnap.exists() ? (adminSnap.data().schoolName || school) : school;
+      } catch (error) {
+        console.warn("Unable to load accountant school profile", error);
+      }
+      document.getElementById("schoolName").textContent = school || window.SchoolBranding?.getSchoolName() || "Schoolix";
+      const sidebarSchool = document.getElementById("sidebarSchoolName");
+      if (sidebarSchool) sidebarSchool.textContent = school || "Schoolix";
+      await loadSalarySessions();
+      await window.loadAccountantSalary();
+    } else {
+      document.getElementById("schoolName").textContent = "School link missing. Contact admin.";
+      resetSalaryCard("School link missing. Contact admin.");
+    }
+    markAccountantDashboardAuthSettled();
+  } catch (error) {
+    markAccountantDashboardAuthSettled();
+    console.error("Unable to open accountant dashboard", error);
+    document.getElementById("schoolName").textContent = "Unable to open accountant panel.";
+    resetSalaryCard(error.message || "Unable to open accountant panel.");
+  }
+});
+
+window.logout = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
+</script>
+<script type="module" src="access-control.js?v=accountant-guard-20260806-3"></script>
+<script src="schoolix-polish.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library Management - Schoolix</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #f6f8fc 0%, #edf2f9 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1f2937;
+}
+.container { max-width: 980px; margin: 0 auto; }
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    margin-bottom: 20px;
+}
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+h1 { font-size: 28px; letter-spacing: -0.02em; }
+h2 { font-size: 20px; letter-spacing: -0.01em; }
+.muted { color: #64748b; margin-top: 6px; }
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-family: inherit;
+    font-size: 14px;
+}
+input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+    background: #fff;
+}
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 14px;
+    transition: opacity 0.15s;
+}
+button:hover { opacity: 0.88; }
+button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+.primary-btn {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+}
+.logout-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+}
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+}
+.list-meta {
+    color: #475569;
+    line-height: 1.5;
+    font-size: 14px;
+}
+.list-meta strong {
+    color: #0f172a;
+    font-size: 16px;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+.badge-librarian {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.danger-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.secondary-btn {
+    background: linear-gradient(135deg, #f8fafc, #eff6ff);
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.item-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.empty {
+    margin-top: 12px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    color: #64748b;
+}
+.section-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.section-icon svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .list-item { flex-direction: column; align-items: flex-start; }
+}
+</style>
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body>
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+<div class="container">
+
+    <!-- Header -->
+    <div class="card">
+        <div class="header-row">
+            <div>
+                <h1>Library Staff Management</h1>
+                <p class="muted">Create and manage librarian accounts.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Librarian -->
+    <div class="card">
+        <h2 class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            Add Librarian
+        </h2>
+        <form id="addLibrarianForm">
+            <div class="form-grid">
+                <input type="text" id="librarianName" placeholder="Librarian Name" required>
+                <input type="email" id="librarianEmail" placeholder="Librarian Email" required>
+                <input type="password" id="librarianPassword" placeholder="Set Password" required minlength="6">
+                <button type="submit" class="primary-btn">Create Librarian Account</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Librarians List -->
+    <div class="card">
+        <h2 class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Librarians List
+        </h2>
+        <div id="librarianList"></div>
+    </div>
+
+<script src="school-branding.js"></script>
+<script type="module">
+import { initializeApp } from "./firebase-compat.js";
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "./firebase-compat.js";
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    collection,
+    deleteDoc,
+    serverTimestamp,
+    query,
+    where
+} from "./firebase-compat.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    authDomain: "schoolix-48107.firebaseapp.com",
+    projectId: "schoolix-48107",
+    storageBucket: "schoolix-48107.firebasestorage.app",
+    messagingSenderId: "133937954491",
+    appId: "1:133937954491:web:69d8064422617eb8c4339e"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Secondary app instance for creating new users without affecting admin session
+const staffCreatorApp = initializeApp(firebaseConfig, "staffCreatorApp");
+const staffCreatorAuth = getAuth(staffCreatorApp);
+
+const librarianForm = document.getElementById("addLibrarianForm");
+const librarianListEl = document.getElementById("librarianList");
+let adminUID = null;
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists() || userDoc.data().role !== "admin") {
+        alert("Access denied. Only admin can manage staff.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    adminUID = user.uid;
+    loadStaff("librarian", librarianListEl);
+});
+
+// ── Librarian form ──────────────────────────────────────────
+librarianForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await createStaff(
+        "librarian",
+        document.getElementById("librarianName").value.trim(),
+        document.getElementById("librarianEmail").value.trim().toLowerCase(),
+        document.getElementById("librarianPassword").value.trim(),
+        librarianForm
+    );
+});
+
+// ── Shared create function ───────────────────────────────────
+async function createStaff(role, name, email, password, formEl) {
+    const submitBtn = formEl.querySelector("button[type='submit']");
+    const originalText = submitBtn.textContent;
+    if (!name || !email || !password) {
+        alert("Please fill all fields.");
+        return;
+    }
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Creating...";
+        const userCred = await createUserWithEmailAndPassword(staffCreatorAuth, email, password);
+        const uid = userCred.user.uid;
+
+        await setDoc(doc(db, "users", uid), {
+            name,
+            email,
+            role,
+            adminId: adminUID,
+            schoolId: adminUID,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+
+        alert(`${capitalize(role)} account created successfully.`);
+        formEl.reset();
+
+        await loadStaff("librarian", librarianListEl);
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+}
+
+// ── Shared load function ─────────────────────────────────────
+async function loadStaff(role, listEl) {
+    if (!adminUID) return;
+    listEl.innerHTML = `<div class="empty">Loading ${role}s...</div>`;
+    try {
+        const [adminSnap, schoolSnap] = await Promise.all([
+            getDocs(query(collection(db, "users"), where("role", "==", role), where("adminId", "==", adminUID))),
+            getDocs(query(collection(db, "users"), where("role", "==", role), where("schoolId", "==", adminUID)))
+        ]);
+        listEl.innerHTML = "";
+        let count = 0;
+        const seen = new Set();
+
+        [...adminSnap.docs, ...schoolSnap.docs].forEach((docSnap) => {
+            if (seen.has(docSnap.id)) return;
+            seen.add(docSnap.id);
+            const data = docSnap.data();
+            count++;
+            const row = document.createElement("div");
+            row.className = "list-item";
+            row.innerHTML = `
+                <div class="list-meta">
+                    <strong>${data.name || "N/A"}</strong><br>
+                    ${data.email || "N/A"}<br>
+                    <span class="badge badge-librarian">${capitalize(role)}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="secondary-btn" onclick="window.location.href='teacher-profile.html?id=${docSnap.id}'">View Profile</button>
+                    <button class="danger-btn" onclick="deleteStaff('${docSnap.id}', '${role}')">Delete</button>
+                </div>
+            `;
+            listEl.appendChild(row);
+        });
+
+        if (count === 0) {
+            listEl.innerHTML = `<div class="empty">No ${role}s found.</div>`;
+        }
+    } catch (error) {
+        console.error(`${role} load failed:`, error);
+        listEl.innerHTML = `<div class="empty">Unable to load ${role}s: ${error.message}</div>`;
+    }
+}
+
+// ── Delete ───────────────────────────────────────────────────
+window.deleteStaff = async (uid, role) => {
+    if (!confirm(`Delete ${role} record?`)) return;
+    await deleteDoc(doc(db, "users", uid));
+    alert(`${capitalize(role)} record deleted.`);
+    loadStaff("librarian", librarianListEl);
+};
+
+// ── Logout ───────────────────────────────────────────────────
+window.logout = async () => {
+    try {
+        await signOut(auth);
+        window.location.href = "index.html";
+    } catch (error) {
+        alert("Logout failed.");
+    }
+};
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+</script>
+<script type="module" src="access-control.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

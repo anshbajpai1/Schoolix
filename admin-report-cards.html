@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<title>Admin - Report Cards Management</title>
+<link rel="stylesheet" href="schoolix-theme.css">
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); margin: 0; padding: 20px; color: #2d3748; }
+.container { max-width: 1400px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); overflow: hidden; }
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.header h1 { margin: 0 0 5px 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+.header p { margin: 0; font-size: 14px; opacity: 0.9; }
+.header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.lock-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.2); color: white; }
+.lock-status-badge.locked { background: rgba(229,62,62,0.9); }
+.lock-status-badge.unlocked { background: rgba(72,187,120,0.9); }
+.content { padding: 30px; }
+.section-title { font-size: 18px; font-weight: 600; color: #2d3748; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+.filters-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 10px; }
+input, select { padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; font-family: inherit; transition: all 0.3s; width: 100%; }
+input:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+input::placeholder { color: #a0aec0; }
+.button-group { display: flex; gap: 10px; flex-wrap: wrap; }
+button { padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+button.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+button.primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+button.secondary { background: #e2e8f0; color: #2d3748; }
+button.secondary:hover { background: #cbd5e0; }
+button.danger { background: #e53e3e; color: white; }
+button.danger:hover { background: #c53030; transform: translateY(-2px); }
+button.success { background: #48bb78; color: white; }
+button.success:hover { background: #38a169; }
+button.warning { background: #ed8936; color: white; }
+button.warning:hover { background: #dd6b20; }
+.icon { width: 18px; height: 18px; flex-shrink: 0; }
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 22px; height: 22px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 15px; }
+.stat-icon-wrap { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #ebf4ff; color: #667eea; }
+.stat-card.secondary .stat-icon-wrap { background: #e6fffa; color: #38b2ac; }
+.stat-card.success .stat-icon-wrap { background: #c6f6d5; color: #38a169; }
+.stat-card.warning .stat-icon-wrap { background: #feebc8; color: #d69e2e; }
+.stat-card.danger .stat-icon-wrap { background: #fed7d7; color: #e53e3e; }
+.stat-label { font-size: 12px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.stat-value { font-size: 26px; font-weight: 700; color: #2d3748; line-height: 1; }
+.table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid #e2e8f0; }
+table { width: 100%; border-collapse: collapse; background: white; }
+thead { background: #f7fafc; border-bottom: 2px solid #e2e8f0; }
+th { padding: 14px; text-align: left; font-weight: 600; font-size: 12px; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+td { padding: 14px; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
+tr:hover { background: #f7fafc; }
+tr:last-child td { border-bottom: none; }
+.student-cell { font-weight: 600; color: #2d3748; }
+.student-id { font-size: 12px; color: #718096; }
+.grade-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; }
+.grade-a\+ { background: #c6f6d5; color: #22543d; }
+.grade-a { background: #bee3f8; color: #2c5282; }
+.grade-b { background: #feebc8; color: #7c2d12; }
+.grade-c { background: #fefcbf; color: #744210; }
+.grade-f { background: #fed7d7; color: #742a2a; }
+.grade-n\/a { background: #edf2f7; color: #4a5568; }
+.percentage { font-weight: 700; }
+.percentage.high { color: #22543d; }
+.percentage.medium { color: #7c2d12; }
+.percentage.low { color: #742a2a; }
+.admin-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+.teacher-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; background: #edf2f7; color: #4a5568; font-size: 11px; font-weight: 600; }
+.actions { display: flex; gap: 6px; }
+.action-btn { padding: 6px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.action-btn.view { background: #bee3f8; color: #2c5282; }
+.action-btn.view:hover { background: #90cdf4; }
+.action-btn.print { background: #c6f6d5; color: #22543d; }
+.action-btn.print:hover { background: #9ae6b4; }
+.action-btn.delete { background: #fed7d7; color: #742a2a; }
+.action-btn.delete:hover { background: #fc8181; color: white; }
+.empty-state { text-align: center; padding: 60px 20px; color: #718096; }
+.empty-state svg { width: 64px; height: 64px; opacity: 0.4; margin-bottom: 15px; }
+.empty-state h3 { margin: 0 0 8px 0; color: #4a5568; font-size: 18px; }
+.empty-state p { margin: 0; font-size: 14px; }
+.loading { text-align: center; padding: 40px; color: #718096; }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; vertical-align: middle; margin-right: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.lock-banner { display: none; align-items: center; gap: 12px; padding: 14px 18px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 10px; color: #742a2a; margin-bottom: 20px; font-size: 14px; }
+.lock-banner.show { display: flex; }
+.lock-banner svg { color: #e53e3e; flex-shrink: 0; }
+.term-lock-panel { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(220px, 280px) auto auto; gap: 14px; align-items: center; padding: 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; margin-bottom: 24px; }
+.term-lock-title { font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+.term-lock-note { font-size: 13px; color: #718096; }
+.term-lock-status { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.term-lock-status.locked { background: #fed7d7; color: #742a2a; }
+.term-lock-status.unlocked { background: #c6f6d5; color: #22543d; }
+.term-lock-status.live { background: #c6f6d5; color: #22543d; }
+.term-lock-status.hidden { background: #feebc8; color: #7c2d12; }
+.live-banner { display: none; align-items: center; gap: 12px; padding: 14px 18px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; color: #065f46; margin-bottom: 20px; font-size: 14px; }
+.live-banner.show { display: flex; }
+.class-results-panel { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(180px, 220px) minmax(160px, 200px) auto; gap: 14px; align-items: center; padding: 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; margin-bottom: 24px; }
+.class-results-title { font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+.class-results-note { font-size: 13px; color: #718096; }
+.action-btn.edit { background: #e9d8fd; color: #553c9a; }
+.action-btn.edit:hover { background: #d6bcfa; }
+.edit-grid { display: grid; gap: 12px; }
+.edit-row { display: grid; grid-template-columns: 1fr 140px 120px; gap: 12px; align-items: center; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+.edit-row strong { color: #2d3748; }
+.edit-row small { color: #718096; }
+.modal { display: none; position: fixed; z-index: 1000; inset: 0; background: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-content { background: white; margin: 5% auto; border-radius: 12px; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideIn 0.3s; }
+@keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { margin: 0; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+.modal-close { background: none; border: none; color: white; cursor: pointer; padding: 6px; border-radius: 6px; display: flex; }
+.modal-close:hover { background: rgba(255,255,255,0.15); }
+.modal-body { padding: 30px; }
+.report-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+.report-info-item { display: flex; flex-direction: column; }
+.report-info-label { font-size: 11px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.report-info-value { font-size: 16px; font-weight: 600; color: #2d3748; }
+.subjects-table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+.subjects-table thead { background: #f7fafc; }
+.subjects-table th, .subjects-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+.subjects-table tr:last-child td { border-bottom: none; }
+@media (max-width: 768px) {
+  .header { padding: 20px; }
+  .header h1 { font-size: 20px; }
+  .content { padding: 20px; }
+  .filters-section { grid-template-columns: 1fr; }
+  table { font-size: 12px; min-width: 800px; }
+  th, td { padding: 8px; }
+  .term-lock-panel { grid-template-columns: 1fr; }
+  .class-results-panel { grid-template-columns: 1fr; }
+  .edit-row { grid-template-columns: 1fr; }
+}
+</style>
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body>
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+
+<!-- SVG Icon Sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 9v6l-4-2v-4z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></symbol>
+    <symbol id="i-percent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 13.5-1.5 8 5-3 5 3-1.5-8"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><rect x="4" y="9" width="16" height="9" rx="2"/><path d="M6 18h12v4H6z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l4 6 5-8 5 8 4-6-2 13H5z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 9v5"/><circle cx="12" cy="17.5" r="0.5" fill="currentColor"/></symbol>
+    <symbol id="i-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></symbol>
+  </defs>
+</svg>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <h1><svg class="icon-lg"><use href="#i-clipboard"/></svg> Report Cards Management</h1>
+      <p>View, manage, and analyze student report cards</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="lockBanner" class="lock-banner">
+      <svg class="icon-lg"><use href="#i-lock"/></svg>
+      <div><strong>Selected term is locked.</strong> Teachers cannot edit marks or regenerate report cards for this term. Admin edits from this page are still allowed.</div>
+    </div>
+    <div id="liveBanner" class="live-banner">
+      <svg class="icon-lg"><use href="#i-check"/></svg>
+      <div><strong>Selected term is live.</strong> Students with cleared dues can now view this term's report cards.</div>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-lock"/></svg> Term-wise Report Card Lock</h2>
+    <div class="term-lock-panel">
+      <div>
+        <div class="term-lock-title">Lock one term at a time</div>
+        <div class="term-lock-note">When a term is locked, teachers can only view marks/report cards for that term. Admin can still edit marks here.</div>
+      </div>
+      <select id="termLockSelect" onchange="onTermLockSelectChange()">
+        <option value="">Loading terms...</option>
+      </select>
+      <span id="termLockStatus" class="term-lock-status unlocked"><svg class="icon-sm"><use href="#i-unlock"/></svg><span>Unlocked</span></span>
+      <button id="termLockToggleBtn" class="danger" onclick="toggleSelectedTermLock()">
+        <svg class="icon"><use href="#i-lock"/></svg>
+        <span id="termLockToggleText">Lock Term</span>
+      </button>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-eye"/></svg> Result Visibility</h2>
+    <div class="term-lock-panel">
+      <div>
+        <div class="term-lock-title">Make one term live for students</div>
+        <div class="term-lock-note">Teacher/admin reports stay private until this is turned live. Existing fee-dues lock still applies for students.</div>
+      </div>
+      <select id="termLiveSelect" onchange="onTermLiveSelectChange()">
+        <option value="">Loading terms...</option>
+      </select>
+      <span id="termLiveStatus" class="term-lock-status hidden"><svg class="icon-sm"><use href="#i-lock"/></svg><span>Hidden</span></span>
+      <button id="termLiveToggleBtn" class="success" onclick="toggleSelectedTermLive()">
+        <svg class="icon"><use href="#i-eye"/></svg>
+        <span id="termLiveToggleText">Make Live</span>
+      </button>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-filter"/></svg> Search and Filter</h2>
+    <div class="filters-section">
+      <input type="text" id="searchName" placeholder="Search by student name...">
+      <input type="text" id="searchStudentId" placeholder="Search by student ID...">
+      <input type="text" id="searchClass" placeholder="Search by class (e.g. 10-A)">
+      <select id="gradeFilter">
+        <option value="">All Grades</option>
+        <option value="A+">Grade A+</option>
+        <option value="A">Grade A</option>
+        <option value="B">Grade B</option>
+        <option value="C">Grade C</option>
+        <option value="F">Grade F</option>
+      </select>
+      <select id="termFilter">
+        <option value="">All Terms</option>
+      </select>
+      <div class="button-group">
+        <button class="primary" onclick="applyFilters()"><svg class="icon"><use href="#i-search"/></svg> Search</button>
+        <button class="secondary" onclick="resetFilters()"><svg class="icon"><use href="#i-refresh"/></svg> Reset</button>
+      </div>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-user"/></svg> Class-wise Results</h2>
+    <div class="class-results-panel">
+      <div>
+        <div class="class-results-title">View report cards by class-section</div>
+        <div class="class-results-note">Select a class and section to list all generated student results below.</div>
+      </div>
+      <select id="classResultSelect" onchange="populateClassResultSections()">
+        <option value="">All Classes</option>
+      </select>
+      <select id="sectionResultSelect">
+        <option value="">All Sections</option>
+      </select>
+      <button class="primary" onclick="showClassWiseResults()"><svg class="icon"><use href="#i-search"/></svg> Show Results</button>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-chart"/></svg> Statistics</h2>
+    <div class="stats-grid" id="statsGrid" style="display:none;">
+      <div class="stat-card">
+        <div class="stat-icon-wrap"><svg class="icon-lg"><use href="#i-clipboard"/></svg></div>
+        <div><div class="stat-label">Total Reports</div><div class="stat-value" id="totalReports">0</div></div>
+      </div>
+      <div class="stat-card secondary">
+        <div class="stat-icon-wrap"><svg class="icon-lg"><use href="#i-percent"/></svg></div>
+        <div><div class="stat-label">Average %</div><div class="stat-value" id="avgPercentage">0%</div></div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon-wrap"><svg class="icon-lg"><use href="#i-check"/></svg></div>
+        <div><div class="stat-label">Passed Students</div><div class="stat-value" id="passedCount">0</div></div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon-wrap"><svg class="icon-lg"><use href="#i-award"/></svg></div>
+        <div><div class="stat-label">A+ Grades</div><div class="stat-value" id="aPlusCount">0</div></div>
+      </div>
+    </div>
+
+    <h2 class="section-title"><svg class="icon"><use href="#i-clipboard"/></svg> All Report Cards</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Student ID</th>
+            <th>Class</th>
+            <th>Percentage</th>
+            <th>Grade</th>
+            <th>Term</th>
+            <th>Generated By</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="9" class="loading"><span class="spinner"></span> Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="reportModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2><svg class="icon-lg"><use href="#i-clipboard"/></svg> Report Card Details</h2>
+      <button type="button" class="modal-close" onclick="closeModal(event)" aria-label="Close report card details"><svg class="icon-lg"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="modal-body" id="modalBody">Loading...</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "./firebase-compat.js";
+import { getFirestore, collection, query, orderBy, getDocs, doc, getDoc, setDoc, deleteDoc } from "./firebase-compat.js";
+import { getAuth, onAuthStateChanged } from "./firebase-compat.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  authDomain: "schoolix-48107.firebaseapp.com",
+  projectId: "schoolix-48107",
+  storageBucket: "schoolix-48107.firebasestorage.app",
+  messagingSenderId: "133937954491",
+  appId: "1:133937954491:web:69d8064422617eb8c4339e",
+  measurementId: "G-EG23XE5Q0Z"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const RESULT_NOTIFICATION_SEND_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/send-app-notification";
+const RESULT_NOTIFICATION_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+
+let allReports = [];
+let allTerms = [];
+let reportTermLocks = {};
+let reportTermVisibility = {};
+let currentAdminId = null;
+let activeSessionId = "";
+let activeSessionLabel = "";
+let selectedLockTermKey = "";
+let selectedLiveTermKey = "";
+
+async function loadActiveSession() {
+  activeSessionId = "";
+  activeSessionLabel = "";
+  try {
+    let viewSessionId = "";
+    try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
+    const activeSnap = await getDoc(doc(db, "schools", currentAdminId, "settings", "activeSession"));
+    activeSessionId = viewSessionId || (activeSnap.exists() ? activeSnap.data().sessionId || "" : "");
+    if (!activeSessionId) return;
+    const sessionSnap = await getDoc(doc(db, "schools", currentAdminId, "sessions", activeSessionId));
+    if (!sessionSnap.exists()) {
+      try { if (viewSessionId) localStorage.removeItem("schoolix.viewSessionId"); } catch (_) {}
+      activeSessionId = activeSnap.exists() ? activeSnap.data().sessionId || "" : "";
+      if (!activeSessionId || activeSessionId === viewSessionId) return;
+      const fallbackSnap = await getDoc(doc(db, "schools", currentAdminId, "sessions", activeSessionId));
+      if (!fallbackSnap.exists()) return;
+      const fallbackData = fallbackSnap.data();
+      activeSessionLabel = fallbackData.session || fallbackData.name || "";
+      return;
+    }
+    const data = sessionSnap.data();
+    activeSessionLabel = data.session || data.name || "";
+  } catch (e) { console.error("Session load error:", e); }
+}
+
+function normalizeTermKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function getTermLabel(termKey) {
+  return allTerms.find((term) => term.termKey === termKey)?.label || termKey || "Selected term";
+}
+
+function getTermLockKey(termKey) {
+  if (!termKey) return "";
+  return activeSessionId ? `${activeSessionId}__${termKey}` : termKey;
+}
+
+function isTermLocked(termKey) {
+  return reportTermLocks[getTermLockKey(termKey)]?.locked === true;
+}
+
+function getTermVisibilityKey(termKey) {
+  return getTermLockKey(termKey);
+}
+
+function isTermLive(termKey) {
+  return reportTermVisibility[getTermVisibilityKey(termKey)]?.live === true;
+}
+
+async function sendResultLiveNotification(termLabel) {
+  const token = await auth.currentUser?.getIdToken(true);
+  if (!token) return;
+  const response = await fetch(RESULT_NOTIFICATION_SEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": RESULT_NOTIFICATION_ANON_KEY,
+      "Authorization": `Bearer ${RESULT_NOTIFICATION_ANON_KEY}`,
+      "x-firebase-auth": token
+    },
+    body: JSON.stringify({
+      title: "Result is live",
+      message: `${termLabel} result is now live. Students with cleared dues can view it in the app.`,
+      audience: "students"
+    })
+  });
+  if (!response.ok) throw new Error(await response.text());
+}
+
+function getReportTermKey(report = {}) {
+  return report.termKey || normalizeTermKey(report.termLabel || report.term || "");
+}
+
+async function loadTermsAndLocks() {
+  allTerms = [];
+  reportTermLocks = {};
+  reportTermVisibility = {};
+  try {
+    const termSnap = await getDocs(collection(db, "schools", currentAdminId, "terms"));
+    const unique = new Map();
+    termSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(term => {
+        if (!activeSessionId && !activeSessionLabel) return true;
+        if (!term.sessionId && !term.session && !term.currentYear && !term.academicSession) return true;
+        return term.sessionId === activeSessionId ||
+          term.session === activeSessionLabel ||
+          term.currentYear === activeSessionLabel ||
+          term.academicSession === activeSessionLabel;
+      })
+      .forEach(term => {
+        const termKey = term.termKey || normalizeTermKey(term.label || term.term || term.name || term.id);
+        if (!termKey) return;
+        unique.set(termKey, {
+          ...term,
+          termKey,
+          label: term.label || term.term || term.name || termKey
+        });
+      });
+    allTerms = Array.from(unique.values()).sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+    const lockSnap = await getDoc(doc(db, "schools", currentAdminId, "settings", "reportCardTermLocks"));
+    reportTermLocks = lockSnap.exists() ? (lockSnap.data().locks || {}) : {};
+    const visibilitySnap = await getDoc(doc(db, "schools", currentAdminId, "settings", "reportCardTermVisibility"));
+    reportTermVisibility = visibilitySnap.exists() ? (visibilitySnap.data().terms || {}) : {};
+  } catch (e) { console.error("Term lock load error:", e); }
+  populateTermControls();
+  updateTermLockUI();
+  updateTermLiveUI();
+}
+
+function populateTermControls() {
+  const lockSelect = document.getElementById("termLockSelect");
+  const liveSelect = document.getElementById("termLiveSelect");
+  const filterSelect = document.getElementById("termFilter");
+  if (lockSelect) {
+    lockSelect.innerHTML = allTerms.length
+      ? allTerms.map(term => `<option value="${escapeHtml(term.termKey)}">${escapeHtml(term.label)}</option>`).join("")
+      : '<option value="">No terms found</option>';
+    if (!selectedLockTermKey || !allTerms.some(term => term.termKey === selectedLockTermKey)) {
+      selectedLockTermKey = allTerms[0]?.termKey || "";
+    }
+    lockSelect.value = selectedLockTermKey;
+  }
+  if (liveSelect) {
+    liveSelect.innerHTML = allTerms.length
+      ? allTerms.map(term => `<option value="${escapeHtml(term.termKey)}">${escapeHtml(term.label)}</option>`).join("")
+      : '<option value="">No terms found</option>';
+    if (!selectedLiveTermKey || !allTerms.some(term => term.termKey === selectedLiveTermKey)) {
+      selectedLiveTermKey = selectedLockTermKey || allTerms[0]?.termKey || "";
+    }
+    liveSelect.value = selectedLiveTermKey;
+  }
+  if (filterSelect) {
+    const current = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">All Terms</option>' +
+      allTerms.map(term => `<option value="${escapeHtml(term.termKey)}">${escapeHtml(term.label)}</option>`).join("");
+    filterSelect.value = allTerms.some(term => term.termKey === current) ? current : "";
+  }
+}
+
+function updateTermLockUI() {
+  const btn = document.getElementById("termLockToggleBtn");
+  const btnText = document.getElementById("termLockToggleText");
+  const btnIcon = btn?.querySelector("svg use");
+  const status = document.getElementById("termLockStatus");
+  const statusText = status?.querySelector("span");
+  const statusIcon = status?.querySelector("svg use");
+  const banner = document.getElementById("lockBanner");
+  const locked = isTermLocked(selectedLockTermKey);
+
+  if (!selectedLockTermKey) {
+    if (btn) btn.disabled = true;
+    if (statusText) statusText.textContent = "No term";
+    if (banner) banner.classList.remove("show");
+    return;
+  }
+  if (btn) btn.disabled = false;
+  if (locked) {
+    btn.classList.remove("danger"); btn.classList.add("success");
+    btnText.textContent = "Unlock Term";
+    btnIcon?.setAttribute("href", "#i-unlock");
+    status.classList.remove("unlocked"); status.classList.add("locked");
+    statusText.textContent = "Locked";
+    statusIcon?.setAttribute("href", "#i-lock");
+    banner.classList.add("show");
+  } else {
+    btn.classList.remove("success"); btn.classList.add("danger");
+    btnText.textContent = "Lock Term";
+    btnIcon?.setAttribute("href", "#i-lock");
+    status.classList.remove("locked"); status.classList.add("unlocked");
+    statusText.textContent = "Unlocked";
+    statusIcon?.setAttribute("href", "#i-unlock");
+    banner.classList.remove("show");
+  }
+}
+
+window.onTermLockSelectChange = () => {
+  selectedLockTermKey = document.getElementById("termLockSelect").value;
+  updateTermLockUI();
+};
+
+window.toggleSelectedTermLock = async () => {
+  if (!currentAdminId) return;
+  if (!selectedLockTermKey) return alert("Select a term first.");
+  const newState = !isTermLocked(selectedLockTermKey);
+  const label = getTermLabel(selectedLockTermKey);
+  const msg = newState
+    ? `Lock report cards for ${label}?\n\nTeachers will NOT be able to edit marks or regenerate report cards for this term. Admin can still edit from this page.`
+    : `Unlock report cards for ${label}?\n\nTeachers will be able to edit marks and regenerate report cards for this term again.`;
+  if (!confirm(msg)) return;
+  try {
+    const lockKey = getTermLockKey(selectedLockTermKey);
+    reportTermLocks = {
+      ...reportTermLocks,
+      [lockKey]: {
+        locked: newState,
+        termKey: selectedLockTermKey,
+        termLabel: label,
+        sessionId: activeSessionId || "",
+        session: activeSessionLabel || "",
+        updatedAt: new Date(),
+        updatedBy: auth.currentUser?.uid || "admin"
+      }
+    };
+    await setDoc(doc(db, "schools", currentAdminId, "settings", "reportCardTermLocks"), {
+      locks: reportTermLocks,
+      updatedAt: new Date(),
+      updatedBy: auth.currentUser?.uid || "admin"
+    }, { merge: true });
+    updateTermLockUI();
+    alert(newState ? `${label} locked successfully.` : `${label} unlocked successfully.`);
+  } catch (e) {
+    console.error(e);
+    alert("Failed to update term lock.");
+  }
+};
+
+function updateTermLiveUI() {
+  const btn = document.getElementById("termLiveToggleBtn");
+  const btnText = document.getElementById("termLiveToggleText");
+  const btnIcon = btn?.querySelector("svg use");
+  const status = document.getElementById("termLiveStatus");
+  const statusText = status?.querySelector("span");
+  const statusIcon = status?.querySelector("svg use");
+  const banner = document.getElementById("liveBanner");
+  const live = isTermLive(selectedLiveTermKey);
+
+  if (!selectedLiveTermKey) {
+    if (btn) btn.disabled = true;
+    if (statusText) statusText.textContent = "No term";
+    if (banner) banner.classList.remove("show");
+    return;
+  }
+  if (btn) btn.disabled = false;
+  if (live) {
+    btn.classList.remove("success"); btn.classList.add("warning");
+    btnText.textContent = "Hide From Students";
+    btnIcon?.setAttribute("href", "#i-lock");
+    status.classList.remove("hidden"); status.classList.add("live");
+    statusText.textContent = "Live";
+    statusIcon?.setAttribute("href", "#i-eye");
+    banner.classList.add("show");
+  } else {
+    btn.classList.remove("warning"); btn.classList.add("success");
+    btnText.textContent = "Make Live";
+    btnIcon?.setAttribute("href", "#i-eye");
+    status.classList.remove("live"); status.classList.add("hidden");
+    statusText.textContent = "Hidden";
+    statusIcon?.setAttribute("href", "#i-lock");
+    banner.classList.remove("show");
+  }
+}
+
+window.onTermLiveSelectChange = () => {
+  selectedLiveTermKey = document.getElementById("termLiveSelect").value;
+  updateTermLiveUI();
+};
+
+window.toggleSelectedTermLive = async () => {
+  if (!currentAdminId) return;
+  if (!selectedLiveTermKey) return alert("Select a term first.");
+  const newState = !isTermLive(selectedLiveTermKey);
+  const label = getTermLabel(selectedLiveTermKey);
+  const msg = newState
+    ? `Make ${label} live?\n\nStudents with no pending dues will be able to view this term's result. Students with dues will stay locked.`
+    : `Hide ${label} from students?\n\nTeachers and admin can still see reports, but students will not see this term.`;
+  if (!confirm(msg)) return;
+  try {
+    const visibilityKey = getTermVisibilityKey(selectedLiveTermKey);
+    reportTermVisibility = {
+      ...reportTermVisibility,
+      [visibilityKey]: {
+        live: newState,
+        termKey: selectedLiveTermKey,
+        termLabel: label,
+        sessionId: activeSessionId || "",
+        session: activeSessionLabel || "",
+        updatedAt: new Date(),
+        updatedBy: auth.currentUser?.uid || "admin"
+      }
+    };
+    await setDoc(doc(db, "schools", currentAdminId, "settings", "reportCardTermVisibility"), {
+      terms: reportTermVisibility,
+      updatedAt: new Date(),
+      updatedBy: auth.currentUser?.uid || "admin"
+    }, { merge: true });
+    if (newState) {
+      try {
+        await sendResultLiveNotification(label);
+      } catch (notificationError) {
+        console.warn("Result live notification failed", notificationError);
+      }
+    }
+    updateTermLiveUI();
+    alert(newState ? `${label} is now live for eligible students.` : `${label} is now hidden from students.`);
+  } catch (e) {
+    console.error(e);
+    alert("Failed to update result visibility.");
+  }
+};
+
+function reportBelongsToActiveSession(report) {
+  if (!activeSessionId && !activeSessionLabel) return true;
+  if (!report.sessionId && !report.session && !report.currentYear && !report.academicSession) return false;
+  return report.sessionId === activeSessionId ||
+    report.session === activeSessionLabel ||
+    report.currentYear === activeSessionLabel ||
+    report.academicSession === activeSessionLabel;
+}
+
+function isAdminGenerated(report) {
+  if (report.generatedByAdmin === true) return true;
+  if (report.createdByRole && String(report.createdByRole).toLowerCase() === "admin") return true;
+  const cb = String(report.createdBy || "").toLowerCase();
+  return cb === "admin" || cb.includes("admin");
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "index.html"; return; }
+  currentAdminId = user.uid;
+  await loadAllReports();
+});
+
+window.loadAllReports = async () => {
+  if (!currentAdminId) return;
+  const tableBody = document.getElementById('tableBody');
+  tableBody.innerHTML = '<tr><td colspan="9" class="loading"><span class="spinner"></span> Loading all reports...</td></tr>';
+  try {
+    await loadActiveSession();
+    await loadTermsAndLocks();
+    const q = query(collection(db, "schools", currentAdminId, "reportCards"), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    allReports = [];
+    snapshot.forEach((d) => {
+      const report = { id: d.id, ...d.data() };
+      if (reportBelongsToActiveSession(report)) allReports.push(report);
+    });
+    populateClassResultControls();
+    displayReports(allReports);
+    updateStats(allReports);
+  } catch (error) {
+    console.error("Load error:", error);
+    tableBody.innerHTML = '<tr><td colspan="9" class="empty-state"><svg><use href="#i-alert"/></svg><h3>Error loading reports</h3><p>' + (error.message || '') + '</p></td></tr>';
+  }
+};
+
+function getReportClass(report = {}) {
+  return String(report.student?.class || report.class || "").trim();
+}
+
+function getReportSection(report = {}) {
+  return String(report.student?.section || report.section || "").trim();
+}
+
+function populateClassResultControls() {
+  const classSelect = document.getElementById("classResultSelect");
+  const sectionSelect = document.getElementById("sectionResultSelect");
+  if (!classSelect || !sectionSelect) return;
+  const previousClass = classSelect.value;
+  const classes = Array.from(new Set(allReports.map(getReportClass).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  classSelect.innerHTML = '<option value="">All Classes</option>' +
+    classes.map(className => `<option value="${escapeHtml(className)}">${escapeHtml(className)}</option>`).join("");
+  classSelect.value = classes.includes(previousClass) ? previousClass : "";
+  populateClassResultSections();
+}
+
+window.populateClassResultSections = () => {
+  const classSelect = document.getElementById("classResultSelect");
+  const sectionSelect = document.getElementById("sectionResultSelect");
+  if (!classSelect || !sectionSelect) return;
+  const selectedClass = classSelect.value;
+  const previousSection = sectionSelect.value;
+  const sections = Array.from(new Set(
+    allReports
+      .filter(report => !selectedClass || getReportClass(report) === selectedClass)
+      .map(getReportSection)
+      .filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  sectionSelect.innerHTML = '<option value="">All Sections</option>' +
+    sections.map(section => `<option value="${escapeHtml(section)}">${escapeHtml(section)}</option>`).join("");
+  sectionSelect.value = sections.includes(previousSection) ? previousSection : "";
+};
+
+window.showClassWiseResults = () => {
+  const selectedClass = document.getElementById("classResultSelect")?.value || "";
+  const selectedSection = document.getElementById("sectionResultSelect")?.value || "";
+  const filtered = allReports.filter(report => {
+    const classMatch = !selectedClass || getReportClass(report) === selectedClass;
+    const sectionMatch = !selectedSection || getReportSection(report) === selectedSection;
+    return classMatch && sectionMatch;
+  });
+  document.getElementById("searchClass").value = selectedClass
+    ? `${selectedClass}${selectedSection ? `-${selectedSection}` : ""}`
+    : "";
+  document.getElementById("searchName").value = "";
+  document.getElementById("searchStudentId").value = "";
+  document.getElementById("gradeFilter").value = "";
+  displayReports(filtered);
+  updateStats(filtered);
+};
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+window.displayReports = (reports) => {
+  const tableBody = document.getElementById('tableBody');
+  if (reports.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><svg><use href="#i-empty"/></svg><h3>No Reports Found</h3><p>No report cards match your criteria</p></div></td></tr>';
+    return;
+  }
+  tableBody.innerHTML = '';
+  reports.forEach(report => {
+    const studentName = report.student?.name || 'N/A';
+    const studentId = report.student?.studentId || 'N/A';
+    const classInfo = `${report.student?.class || '-'}-${report.student?.section || '-'}`;
+    const percentage = report.percentage ? Number(report.percentage).toFixed(1) : 0;
+    const grade = report.grade || 'N/A';
+    const termLabel = report.termLabel || report.term || getTermLabel(getReportTermKey(report)) || 'N/A';
+    const date = report.createdAt?.toDate ? new Date(report.createdAt.toDate()).toLocaleDateString('en-IN') : 'N/A';
+    const gradeClass = 'grade-' + String(grade).toLowerCase();
+    const percentageClass = percentage >= 75 ? 'high' : percentage >= 40 ? 'medium' : 'low';
+    const generatedBy = isAdminGenerated(report)
+      ? `<span class="admin-badge"><svg class="icon-sm"><use href="#i-crown"/></svg> Admin Generated</span>`
+      : `<span class="teacher-badge"><svg class="icon-sm"><use href="#i-user"/></svg> ${escapeHtml(report.createdBy || 'Teacher')}</span>`;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><div class="student-cell">${escapeHtml(studentName)}</div></td>
+      <td><span class="student-id">${escapeHtml(studentId)}</span></td>
+      <td>${escapeHtml(classInfo)}</td>
+      <td><span class="percentage ${percentageClass}">${percentage}%</span></td>
+      <td><span class="grade-badge ${gradeClass}">${escapeHtml(grade)}</span></td>
+      <td>${escapeHtml(termLabel)}</td>
+      <td>${generatedBy}</td>
+      <td>${date}</td>
+      <td>
+        <div class="actions">
+          <button class="action-btn view" onclick="viewReport('${report.id}')"><svg class="icon-sm"><use href="#i-eye"/></svg> View</button>
+          <button class="action-btn edit" onclick="editReport('${report.id}')"><svg class="icon-sm"><use href="#i-clipboard"/></svg> Edit</button>
+          <button class="action-btn print" onclick="printReport('${report.id}')"><svg class="icon-sm"><use href="#i-print"/></svg> Print</button>
+          <button class="action-btn delete" onclick="deleteReportCard('${report.id}', '${escapeHtml(studentName).replace(/'/g,"\\'")}')"><svg class="icon-sm"><use href="#i-trash"/></svg> Delete</button>
+        </div>
+      </td>`;
+    tableBody.appendChild(row);
+  });
+};
+
+window.updateStats = (reports) => {
+  const total = reports.length;
+  const grid = document.getElementById('statsGrid');
+  if (total === 0) { grid.style.display = 'none'; return; }
+  const avgPercentage = reports.reduce((s, r) => s + (Number(r.percentage) || 0), 0) / total;
+  const passedCount = reports.filter(r => (Number(r.percentage) || 0) >= 40).length;
+  const aPlusCount = reports.filter(r => r.grade === 'A+').length;
+  grid.style.display = 'grid';
+  document.getElementById('totalReports').textContent = total;
+  document.getElementById('avgPercentage').textContent = avgPercentage.toFixed(1) + '%';
+  document.getElementById('passedCount').textContent = passedCount;
+  document.getElementById('aPlusCount').textContent = aPlusCount;
+};
+
+window.applyFilters = () => {
+  const searchName = document.getElementById('searchName').value.toLowerCase();
+  const searchStudentId = document.getElementById('searchStudentId').value.toLowerCase();
+  const searchClass = document.getElementById('searchClass').value.toUpperCase();
+  const gradeFilter = document.getElementById('gradeFilter').value;
+  const termFilter = document.getElementById('termFilter').value;
+  const filtered = allReports.filter(report => {
+    const nameMatch = !searchName || (report.student?.name || '').toLowerCase().includes(searchName);
+    const studentIdMatch = !searchStudentId || String(report.student?.studentId || report.studentId || '').toLowerCase().includes(searchStudentId);
+    const classMatch = !searchClass || `${report.student?.class || ''}-${report.student?.section || ''}`.toUpperCase().includes(searchClass);
+    const gradeMatch = !gradeFilter || report.grade === gradeFilter;
+    const termMatch = !termFilter || getReportTermKey(report) === termFilter;
+    return nameMatch && studentIdMatch && classMatch && gradeMatch && termMatch;
+  });
+  displayReports(filtered);
+  updateStats(filtered);
+};
+
+window.resetFilters = () => {
+  document.getElementById('searchName').value = '';
+  document.getElementById('searchStudentId').value = '';
+  document.getElementById('searchClass').value = '';
+  document.getElementById('gradeFilter').value = '';
+  document.getElementById('termFilter').value = '';
+  displayReports(allReports);
+  updateStats(allReports);
+};
+
+window.viewReport = (reportId) => {
+  const report = allReports.find(r => r.id === reportId);
+  if (!report) return alert('Report not found');
+  const percentage = report.percentage ? Number(report.percentage).toFixed(1) : 0;
+  const subjectsHtml = (report.subjects || []).map(sub => `
+    <tr><td>${escapeHtml(sub.name)}</td><td>${escapeHtml(sub.obtained)} / ${escapeHtml(sub.maxMarks)}</td></tr>`).join('');
+  const genBadge = isAdminGenerated(report)
+    ? `<span class="admin-badge"><svg class="icon-sm"><use href="#i-crown"/></svg> Admin Generated</span>`
+    : `<span class="teacher-badge"><svg class="icon-sm"><use href="#i-user"/></svg> ${escapeHtml(report.createdBy || 'Teacher')}</span>`;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="report-info">
+      <div class="report-info-item"><span class="report-info-label">Student Name</span><span class="report-info-value">${escapeHtml(report.student?.name || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Student ID</span><span class="report-info-value">${escapeHtml(report.student?.studentId || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Class</span><span class="report-info-value">${escapeHtml(report.student?.class || 'N/A')}-${escapeHtml(report.student?.section || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Grade</span><span class="report-info-value">${escapeHtml(report.grade || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Percentage</span><span class="report-info-value">${percentage}%</span></div>
+      <div class="report-info-item"><span class="report-info-label">Generated By</span><span class="report-info-value">${genBadge}</span></div>
+    </div>
+    <h3 class="section-title" style="font-size:16px;">Subject Marks</h3>
+    <table class="subjects-table">
+      <thead><tr><th>Subject</th><th>Marks</th></tr></thead>
+      <tbody>${subjectsHtml || '<tr><td colspan="2" style="text-align:center;color:#718096;">No subjects</td></tr>'}</tbody>
+    </table>`;
+  document.getElementById('reportModal').style.display = 'block';
+};
+
+function getReportGrade(percentage) {
+  const pct = Number(percentage || 0);
+  if (pct >= 90) return "A+";
+  if (pct >= 75) return "A";
+  if (pct >= 60) return "B";
+  if (pct >= 40) return "C";
+  return "F";
+}
+
+function getReportMarksTermKey(report = {}) {
+  const termKey = getReportTermKey(report);
+  return report.sessionId ? `${report.sessionId}__${termKey}` : termKey;
+}
+
+window.editReport = (reportId) => {
+  const report = allReports.find(r => r.id === reportId);
+  if (!report) return alert('Report not found');
+  const subjects = report.subjects || [];
+  const rows = subjects.map((sub, index) => `
+    <div class="edit-row">
+      <div>
+        <strong>${escapeHtml(sub.name || `Subject ${index + 1}`)}</strong><br>
+        <small>Max marks: ${escapeHtml(sub.maxMarks || 100)}</small>
+      </div>
+      <input class="admin-mark-input" data-index="${index}" data-subject="${escapeHtml(sub.name || '')}" type="number" min="0" max="${escapeHtml(sub.maxMarks || 100)}" value="${escapeHtml(sub.obtained ?? 0)}">
+      <input class="admin-max-input" data-index="${index}" type="number" min="1" value="${escapeHtml(sub.maxMarks || 100)}">
+    </div>
+  `).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="report-info">
+      <div class="report-info-item"><span class="report-info-label">Student</span><span class="report-info-value">${escapeHtml(report.student?.name || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Student ID</span><span class="report-info-value">${escapeHtml(report.student?.studentId || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Term</span><span class="report-info-value">${escapeHtml(report.termLabel || report.term || 'N/A')}</span></div>
+      <div class="report-info-item"><span class="report-info-label">Lock Status</span><span class="report-info-value">${isTermLocked(getReportTermKey(report)) ? 'Locked for teachers' : 'Unlocked'}</span></div>
+    </div>
+    <h3 class="section-title" style="font-size:16px;">Admin Edit Marks</h3>
+    <div class="edit-grid">${rows || '<div class="empty-state">No subjects found in this report.</div>'}</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap;">
+      <button class="secondary" onclick="viewReport('${report.id}')">Cancel</button>
+      <button class="primary" onclick="saveReportEdits('${report.id}')"><svg class="icon"><use href="#i-check"/></svg> Save Marks</button>
+    </div>
+  `;
+  document.getElementById('reportModal').style.display = 'block';
+};
+
+window.saveReportEdits = async (reportId) => {
+  const report = allReports.find(r => r.id === reportId);
+  if (!report) return alert('Report not found');
+  const marks = Array.from(document.querySelectorAll('.admin-mark-input'));
+  const maxInputs = Array.from(document.querySelectorAll('.admin-max-input'));
+  const previousSubjects = report.subjects || [];
+  let total = 0;
+  let totalMax = 0;
+  const updatedSubjects = previousSubjects.map((sub, index) => {
+    const obtained = Number(marks.find(input => Number(input.dataset.index) === index)?.value || 0);
+    const maxMarks = Math.max(1, Number(maxInputs.find(input => Number(input.dataset.index) === index)?.value || sub.maxMarks || 100));
+    total += obtained;
+    totalMax += maxMarks;
+    return { ...sub, obtained, maxMarks };
+  });
+  const percentage = totalMax ? Math.round((total / totalMax) * 100) : 0;
+  const grade = getReportGrade(percentage);
+  const studentId = report.student?.studentId || report.studentId;
+  const marksTermKey = getReportMarksTermKey(report);
+
+  try {
+    await setDoc(doc(db, "schools", currentAdminId, "reportCards", reportId), {
+      subjects: updatedSubjects,
+      totalMarks: total,
+      totalMaxMarks: totalMax,
+      percentage,
+      grade,
+      generatedByAdmin: true,
+      editedByAdmin: true,
+      updatedAt: new Date(),
+      updatedBy: auth.currentUser?.uid || "admin"
+    }, { merge: true });
+
+    if (studentId && marksTermKey) {
+      const marksPayload = {};
+      updatedSubjects.forEach((sub) => {
+        if (!sub.name) return;
+        marksPayload[sub.name] = {
+          obtained: Number(sub.obtained || 0),
+          maxMarks: Number(sub.maxMarks || 100)
+        };
+      });
+      await setDoc(doc(db, "schools", currentAdminId, "marks", studentId), {
+        terms: { [marksTermKey]: marksPayload },
+        updatedAt: new Date(),
+        updatedBy: auth.currentUser?.uid || "admin",
+        updatedByRole: "admin"
+      }, { merge: true });
+    }
+
+    alert("Marks updated successfully.");
+    await loadAllReports();
+    editReport(reportId);
+  } catch (error) {
+    console.error("Save marks error:", error);
+    alert("Unable to save marks.");
+  }
+};
+
+window.printReport = (reportId) => {
+  const report = allReports.find(r => r.id === reportId);
+  if (!report) return alert('Report not found');
+  const percentage = report.percentage ? Number(report.percentage).toFixed(1) : 0;
+  const genLabel = isAdminGenerated(report) ? 'Admin Generated' : (report.createdBy || 'Teacher');
+  const subjectsHtml = (report.subjects || []).map(sub => `
+    <tr><td>${escapeHtml(sub.name)}</td><td>${escapeHtml(sub.obtained)}</td><td>${escapeHtml(sub.maxMarks)}</td></tr>`).join('');
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+<title>Report Card</title>
+    <style>
+      body{font-family:Segoe UI,sans-serif;padding:40px;color:#2d3748;}
+      .rc{max-width:800px;margin:0 auto;border:2px solid #667eea;border-radius:12px;padding:30px;}
+      h1{text-align:center;color:#667eea;margin:0 0 5px;}
+      .sub{text-align:center;color:#718096;margin-bottom:25px;}
+      .info{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:25px;padding:15px;background:#f7fafc;border-radius:8px;}
+      .info div{font-size:14px;} .info b{color:#4a5568;display:block;font-size:11px;text-transform:uppercase;margin-bottom:3px;}
+      table{width:100%;border-collapse:collapse;margin:15px 0;}
+      th,td{padding:10px;border:1px solid #e2e8f0;text-align:left;}
+      th{background:#667eea;color:white;}
+      .totals{display:flex;justify-content:space-around;padding:20px;background:#f0f4ff;border-radius:8px;margin-top:20px;}
+      .totals div{text-align:center;} .totals b{display:block;font-size:24px;color:#667eea;}
+      .foot{text-align:center;margin-top:30px;font-size:12px;color:#718096;}
+      @media print{body{padding:0;} .rc{border:none;}}
+    </style></head><body>
+    <div class="rc">
+      <h1>Student Report Card</h1>
+      <p class="sub">Academic Performance Report</p>
+      <div class="info">
+        <div><b>Student Name</b>${escapeHtml(report.student?.name || 'N/A')}</div>
+        <div><b>Student ID</b>${escapeHtml(report.student?.studentId || 'N/A')}</div>
+        <div><b>Class</b>${escapeHtml(report.student?.class || 'N/A')}-${escapeHtml(report.student?.section || 'N/A')}</div>
+        <div><b>Generated By</b>${escapeHtml(genLabel)}</div>
+      </div>
+      <table>
+        <thead><tr><th>Subject</th><th>Marks Obtained</th><th>Max Marks</th></tr></thead>
+        <tbody>${subjectsHtml}</tbody>
+      </table>
+      <div class="totals">
+        <div><b>${escapeHtml(report.grade || 'N/A')}</b>Overall Grade</div>
+        <div><b>${percentage}%</b>Percentage</div>
+      </div>
+      <p class="foot">Generated on ${new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'})}</p>
+    </div>
+    <script>window.onload=()=>window.print();<\/script></body></html>`);
+  w.document.close();
+};
+
+window.deleteReportCard = async (reportId, studentName) => {
+  if (!confirm(`Delete report card for "${studentName}"?\n\nThis action cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, "schools", currentAdminId, "reportCards", reportId));
+    alert('Report card deleted successfully');
+    await loadAllReports();
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert('Error deleting report card');
+  }
+};
+
+function setReportModalOpen(isOpen) {
+  const modal = document.getElementById('reportModal');
+  if (!modal) return;
+  modal.style.display = isOpen ? 'block' : 'none';
+  modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+}
+
+window.closeModal = (event) => {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  setReportModalOpen(false);
+};
+
+document.getElementById('reportModal')?.addEventListener('click', (event) => {
+  if (event.target === event.currentTarget) setReportModalOpen(false);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.getElementById('reportModal')?.style.display !== 'none') {
+    setReportModalOpen(false);
+  }
+});
+
+document.getElementById('searchName').addEventListener('input', applyFilters);
+document.getElementById('searchStudentId').addEventListener('input', applyFilters);
+document.getElementById('searchClass').addEventListener('input', applyFilters);
+document.getElementById('gradeFilter').addEventListener('change', applyFilters);
+document.getElementById('termFilter').addEventListener('change', applyFilters);
+
+</script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

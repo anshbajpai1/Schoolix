@@ -1,0 +1,881 @@
+/* Professional ERP visual layer for Schoolix.
+   Scoped to the login and admin shells so existing feature pages stay stable. */
+
+:root {
+  --erp-bg: #f4f7fb;
+  --erp-surface: #ffffff;
+  --erp-surface-soft: #f8fafc;
+  --erp-ink: #172033;
+  --erp-muted: #667085;
+  --erp-faint: #98a2b3;
+  --erp-line: #e4e9f2;
+  --erp-line-strong: #d0d8e5;
+  --erp-primary: #1f5eff;
+  --erp-primary-strong: #1746c7;
+  --erp-primary-soft: #eef4ff;
+  --erp-success: #168255;
+  --erp-warning: #b7791f;
+  --erp-danger: #c2413a;
+  --erp-radius: 8px;
+  --erp-shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
+  --erp-shadow-soft: 0 4px 14px rgba(16, 24, 40, 0.06);
+}
+
+body.sx-login-app,
+body.sx-admin-app {
+  background: var(--erp-bg) !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-login-app *,
+body.sx-admin-app * {
+  letter-spacing: 0 !important;
+}
+
+body.sx-login-app button,
+body.sx-login-app input,
+body.sx-admin-app button,
+body.sx-admin-app input,
+body.sx-admin-app select,
+body.sx-admin-app textarea {
+  font: inherit;
+}
+
+/* Login */
+body.sx-login-app .shell {
+  background:
+    linear-gradient(180deg, rgba(31, 94, 255, 0.06), transparent 320px),
+    var(--erp-bg) !important;
+}
+
+body.sx-login-app .panel-left {
+  background: #ffffff !important;
+  border-right: 1px solid var(--erp-line) !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-login-app .panel-left::before,
+body.sx-login-app .panel-left::after,
+body.sx-login-app .orb,
+body.sx-login-app .grid-overlay,
+body.sx-admin-app::before,
+body.sx-admin-app::after {
+  display: none !important;
+}
+
+body.sx-login-app .brand-logo,
+body.sx-login-app .hero-heading,
+body.sx-login-app .stat-num,
+body.sx-login-app .mobile-brand-logo {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-login-app .brand-icon,
+body.sx-admin-app .welcome-avatar {
+  background: var(--erp-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+body.sx-login-app .hero-tag {
+  background: var(--erp-primary-soft) !important;
+  border-color: #d8e5ff !important;
+  color: var(--erp-primary-strong) !important;
+  border-radius: 999px !important;
+}
+
+body.sx-login-app .hero-tag-dot {
+  background: var(--erp-primary) !important;
+}
+
+body.sx-login-app .hero-heading {
+  max-width: 420px;
+  font-size: clamp(2.1rem, 3.5vw, 3.25rem) !important;
+  line-height: 1.04 !important;
+}
+
+body.sx-login-app .hero-heading span {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--erp-primary) !important;
+}
+
+body.sx-login-app .hero-desc,
+body.sx-login-app .stat-label,
+body.sx-login-app .form-subtitle {
+  color: var(--erp-muted) !important;
+}
+
+body.sx-login-app .stats-row {
+  gap: 18px !important;
+  margin-top: 36px !important;
+}
+
+body.sx-login-app .stat-item {
+  min-width: 112px;
+  padding: 14px 16px;
+  border: 1px solid var(--erp-line);
+  border-radius: var(--erp-radius);
+  background: var(--erp-surface-soft);
+}
+
+body.sx-login-app .stat-divider,
+body.sx-login-app .dots-row {
+  display: none !important;
+}
+
+body.sx-login-app .panel-right {
+  width: 500px !important;
+  background: var(--erp-surface) !important;
+  border-left: 1px solid var(--erp-line) !important;
+  box-shadow: -12px 0 36px rgba(16, 24, 40, 0.05);
+}
+
+body.sx-login-app .panel-right::before {
+  display: none !important;
+}
+
+body.sx-login-app .form-card {
+  max-width: 382px !important;
+  animation: none !important;
+}
+
+body.sx-login-app .form-welcome {
+  color: var(--erp-primary) !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+}
+
+body.sx-login-app .form-title {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  color: var(--erp-ink) !important;
+  font-size: 1.8rem !important;
+}
+
+body.sx-login-app .form-hint {
+  background: var(--erp-primary-soft) !important;
+  border-color: #d8e5ff !important;
+  border-radius: var(--erp-radius) !important;
+}
+
+body.sx-login-app .form-hint p,
+body.sx-login-app .form-hint strong {
+  color: var(--erp-primary-strong) !important;
+}
+
+body.sx-login-app .form-hint-icon svg {
+  fill: var(--erp-primary) !important;
+}
+
+body.sx-login-app .field-label {
+  color: #344054 !important;
+  font-weight: 700 !important;
+}
+
+body.sx-login-app .field-input {
+  background: #ffffff !important;
+  border-color: var(--erp-line-strong) !important;
+  border-radius: var(--erp-radius) !important;
+  color: var(--erp-ink) !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+body.sx-login-app .field-input:focus {
+  border-color: var(--erp-primary) !important;
+  box-shadow: 0 0 0 4px rgba(31, 94, 255, 0.12) !important;
+}
+
+body.sx-login-app .forgot-link {
+  color: var(--erp-primary-strong) !important;
+}
+
+body.sx-login-app .btn-primary,
+body.sx-admin-app .btn-primary {
+  background: var(--erp-primary) !important;
+  border: 1px solid var(--erp-primary) !important;
+  border-radius: var(--erp-radius) !important;
+  box-shadow: var(--erp-shadow-soft) !important;
+  color: #fff !important;
+}
+
+body.sx-login-app .btn-primary:hover,
+body.sx-admin-app .btn-primary:hover {
+  background: var(--erp-primary-strong) !important;
+  border-color: var(--erp-primary-strong) !important;
+  transform: translateY(-1px);
+}
+
+body.sx-login-app .btn-primary::before {
+  display: none !important;
+}
+
+body.sx-login-app .or-line {
+  background: var(--erp-line) !important;
+}
+
+body.sx-login-app .or-text {
+  color: var(--erp-faint) !important;
+}
+
+body.sx-login-app .btn-google,
+body.sx-login-app .btn-apk {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-line-strong) !important;
+  border-radius: var(--erp-radius) !important;
+  color: #344054 !important;
+}
+
+body.sx-login-app .btn-google:hover,
+body.sx-login-app .btn-apk:hover {
+  background: var(--erp-surface-soft) !important;
+  border-color: #b9c4d4 !important;
+}
+
+body.sx-login-app .mobile-brand {
+  background: var(--erp-surface) !important;
+  border-bottom: 1px solid var(--erp-line) !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-login-app .mobile-brand-tag {
+  background: var(--erp-primary-soft) !important;
+  border-color: #d8e5ff !important;
+  color: var(--erp-primary-strong) !important;
+}
+
+/* Admin dashboard */
+body.sx-admin-app {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+}
+
+body.sx-admin-app .page-wrap {
+  max-width: 1200px !important;
+  padding: 22px 24px 42px !important;
+}
+
+body.sx-admin-app .top-bar {
+  margin-bottom: 14px !important;
+}
+
+body.sx-admin-app .btn-logout {
+  background: #fff !important;
+  border: 1px solid #f0c7c4 !important;
+  border-radius: var(--erp-radius) !important;
+  color: var(--erp-danger) !important;
+  padding: 9px 14px !important;
+}
+
+body.sx-admin-app .hero,
+body.sx-admin-app .user-welcome,
+body.sx-admin-app .stat-item,
+body.sx-admin-app .card,
+body.sx-admin-app .login-section,
+body.sx-admin-app .modal-content {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-line) !important;
+  border-radius: var(--erp-radius) !important;
+  box-shadow: var(--erp-shadow-soft) !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-app .hero {
+  display: grid !important;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+  text-align: left !important;
+  padding: 24px 26px !important;
+  margin-bottom: 18px !important;
+  overflow: visible !important;
+}
+
+body.sx-admin-app .hero::before {
+  display: none !important;
+}
+
+body.sx-admin-app .hero-badge {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  background: var(--erp-primary-soft) !important;
+  border: 1px solid #d8e5ff !important;
+  border-radius: 999px !important;
+  color: var(--erp-primary-strong) !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  white-space: nowrap;
+}
+
+body.sx-admin-app .school-name {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-size: clamp(1.8rem, 3vw, 2.35rem) !important;
+  line-height: 1.1 !important;
+  color: var(--erp-ink) !important;
+  margin: 0 !important;
+}
+
+body.sx-admin-app .school-name span {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-app .school-owner,
+body.sx-admin-app .welcome-subtitle,
+body.sx-admin-app .card-subtitle,
+body.sx-admin-app .features-text {
+  color: var(--erp-muted) !important;
+}
+
+body.sx-admin-app .user-welcome.show {
+  padding: 16px 18px !important;
+  margin-bottom: 18px !important;
+}
+
+body.sx-admin-app .welcome-title {
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-app .stats-bar {
+  gap: 12px !important;
+  margin-bottom: 22px !important;
+}
+
+body.sx-admin-app .stat-item {
+  padding: 16px 18px !important;
+}
+
+body.sx-admin-app .stat-item:hover,
+body.sx-admin-app .card:hover {
+  border-color: var(--erp-line-strong) !important;
+}
+
+body.sx-admin-app .stat-icon {
+  color: var(--erp-muted) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+}
+
+body.sx-admin-app .stat-number {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  color: var(--erp-ink) !important;
+  font-size: 1.85rem !important;
+}
+
+body.sx-admin-app .section-label {
+  color: var(--erp-ink) !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  margin: 4px 0 12px !important;
+  padding: 0 !important;
+}
+
+body.sx-admin-app .section-label::after {
+  content: "Manage daily school operations from one workspace";
+  display: block;
+  margin-top: 3px;
+  color: var(--erp-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+body.sx-admin-app .dashboard-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+body.sx-admin-app .card {
+  min-height: 86px;
+  padding: 18px !important;
+  box-shadow: none !important;
+}
+
+body.sx-admin-app .card::before {
+  top: 14px !important;
+  bottom: 14px !important;
+  opacity: 1 !important;
+  background: var(--accent-color, var(--erp-primary)) !important;
+}
+
+body.sx-admin-app .card:hover {
+  background: var(--erp-surface-soft) !important;
+  box-shadow: var(--erp-shadow-soft) !important;
+  transform: translateY(-1px) !important;
+}
+
+body.sx-admin-app .card-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: var(--erp-radius) !important;
+  background: var(--icon-bg, var(--erp-primary-soft)) !important;
+  color: var(--icon-color, var(--erp-primary)) !important;
+}
+
+body.sx-admin-app .card:hover .card-icon {
+  transform: none !important;
+}
+
+body.sx-admin-app .card-title {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  color: var(--erp-ink) !important;
+  font-weight: 800 !important;
+}
+
+body.sx-admin-app .card-arrow {
+  color: var(--erp-faint) !important;
+}
+
+body.sx-admin-app .login-section {
+  margin-top: 4px;
+  padding: 24px !important;
+}
+
+@media (max-width: 900px) {
+  body.sx-login-app .panel-right {
+    width: 100% !important;
+    border-left: 0 !important;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  body.sx-admin-app .page-wrap {
+    padding: 16px 14px 34px !important;
+  }
+
+  body.sx-admin-app .hero {
+    grid-template-columns: 1fr !important;
+    padding: 20px !important;
+  }
+
+  body.sx-admin-app .hero-badge {
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: start;
+    white-space: normal;
+  }
+
+  body.sx-admin-app .stats-bar {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  body.sx-login-app .stat-item {
+    min-width: 0;
+  }
+}
+
+/* Shared light theme for admin feature pages */
+body.sx-admin-tool {
+  background:
+    linear-gradient(180deg, rgba(31, 94, 255, 0.05), transparent 300px),
+    var(--erp-bg) !important;
+  color: var(--erp-ink) !important;
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+}
+
+body.sx-admin-tool * {
+  letter-spacing: 0 !important;
+}
+
+body.sx-admin-tool .topbar {
+  height: 64px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid var(--erp-line) !important;
+  box-shadow: 0 2px 12px rgba(16, 24, 40, 0.05) !important;
+  backdrop-filter: blur(12px);
+}
+
+body.sx-admin-tool .topbar-logo {
+  background: var(--erp-primary) !important;
+  border-radius: var(--erp-radius) !important;
+}
+
+body.sx-admin-tool .topbar-title,
+body.sx-admin-tool .page-header h1,
+body.sx-admin-tool .period-num,
+body.sx-admin-tool .teacher-view-title,
+body.sx-admin-tool .empty-state h3 {
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-tool .topbar-subtitle,
+body.sx-admin-tool .page-header p,
+body.sx-admin-tool .field-group label,
+body.sx-admin-tool .stat-chip span,
+body.sx-admin-tool .teacher-view-meta,
+body.sx-admin-tool .field-label-small,
+body.sx-admin-tool .empty-state p,
+body.sx-admin-tool .loader p {
+  color: var(--erp-muted) !important;
+}
+
+body.sx-admin-tool .topbar-badge {
+  background: var(--erp-primary-soft) !important;
+  border: 1px solid #d8e5ff !important;
+  color: var(--erp-primary-strong) !important;
+  border-radius: 999px !important;
+  text-transform: none !important;
+}
+
+body.sx-admin-tool .main {
+  max-width: 1240px !important;
+  padding: 28px 24px 48px !important;
+}
+
+body.sx-admin-tool .page-header {
+  margin-bottom: 18px !important;
+}
+
+body.sx-admin-tool .page-header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.35rem) !important;
+  line-height: 1.15 !important;
+}
+
+body.sx-admin-tool .control-card,
+body.sx-admin-tool .table-wrapper,
+body.sx-admin-tool .stat-chip,
+body.sx-admin-tool .teacher-view-card,
+body.sx-admin-tool .empty-state,
+body.sx-admin-tool .toast {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-line) !important;
+  border-radius: var(--erp-radius) !important;
+  box-shadow: var(--erp-shadow-soft) !important;
+}
+
+body.sx-admin-tool .control-card {
+  padding: 18px !important;
+  gap: 14px !important;
+}
+
+body.sx-admin-tool select,
+body.sx-admin-tool .slot-input {
+  background-color: #fff !important;
+  border: 1px solid var(--erp-line-strong) !important;
+  border-radius: var(--erp-radius) !important;
+  color: var(--erp-ink) !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+body.sx-admin-tool select:focus,
+body.sx-admin-tool .slot-input:focus {
+  border-color: var(--erp-primary) !important;
+  box-shadow: 0 0 0 4px rgba(31, 94, 255, 0.12) !important;
+}
+
+body.sx-admin-tool select option {
+  background: #fff !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-tool .btn {
+  border-radius: var(--erp-radius) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.sx-admin-tool .btn-primary {
+  background: var(--erp-primary) !important;
+  border: 1px solid var(--erp-primary) !important;
+  color: #fff !important;
+}
+
+body.sx-admin-tool .btn-primary:hover {
+  background: var(--erp-primary-strong) !important;
+}
+
+body.sx-admin-tool .btn-secondary,
+body.sx-admin-tool .btn-ghost {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-line-strong) !important;
+  color: #344054 !important;
+}
+
+body.sx-admin-tool .btn-secondary:hover,
+body.sx-admin-tool .btn-ghost:hover {
+  background: var(--erp-surface-soft) !important;
+  border-color: #b9c4d4 !important;
+}
+
+body.sx-admin-tool .btn-success {
+  background: var(--erp-success) !important;
+  border: 1px solid var(--erp-success) !important;
+  color: #fff !important;
+}
+
+body.sx-admin-tool .btn-danger {
+  background: #fff5f5 !important;
+  border: 1px solid #f3c7c3 !important;
+  color: var(--erp-danger) !important;
+}
+
+body.sx-admin-tool .stats-bar {
+  gap: 10px !important;
+}
+
+body.sx-admin-tool .stat-chip strong,
+body.sx-admin-tool .period-time-display {
+  color: var(--erp-primary) !important;
+}
+
+body.sx-admin-tool thead th {
+  background: #f8fafc !important;
+  border-bottom: 1px solid var(--erp-line) !important;
+  color: var(--erp-muted) !important;
+  text-transform: none !important;
+}
+
+body.sx-admin-tool tbody tr {
+  border-bottom: 1px solid var(--erp-line) !important;
+}
+
+body.sx-admin-tool tbody tr:hover {
+  background: #fbfdff !important;
+}
+
+body.sx-admin-tool tbody td {
+  border-right: 1px solid var(--erp-line) !important;
+}
+
+body.sx-admin-tool .slot-input::placeholder {
+  color: var(--erp-faint) !important;
+}
+
+body.sx-admin-tool .slot-input.time-input {
+  color: var(--erp-warning) !important;
+}
+
+body.sx-admin-tool .teacher-results {
+  background: #fff !important;
+  border: 1px solid var(--erp-line) !important;
+  box-shadow: var(--erp-shadow) !important;
+}
+
+body.sx-admin-tool .teacher-result-item {
+  border-bottom: 1px solid var(--erp-line) !important;
+}
+
+body.sx-admin-tool .teacher-result-item:hover,
+body.sx-admin-tool .readonly-slot {
+  background: var(--erp-primary-soft) !important;
+}
+
+body.sx-admin-tool .teacher-result-item .t-name,
+body.sx-admin-tool .readonly-slot strong {
+  color: var(--erp-ink) !important;
+}
+
+body.sx-admin-tool .teacher-result-item .t-id,
+body.sx-admin-tool .readonly-slot div,
+body.sx-admin-tool .teacher-id-badge {
+  color: var(--erp-muted) !important;
+}
+
+body.sx-admin-tool .teacher-id-badge,
+body.sx-admin-tool .readonly-slot {
+  border: 1px solid #d8e5ff !important;
+}
+
+body.sx-admin-tool .loading-overlay {
+  background: rgba(244, 247, 251, 0.78) !important;
+}
+
+body.sx-admin-tool .spinner {
+  border-color: var(--erp-line) !important;
+  border-top-color: var(--erp-primary) !important;
+}
+
+body.sx-admin-tool ::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+}
+
+body.sx-admin-tool ::-webkit-scrollbar-thumb:hover {
+  background: var(--erp-primary) !important;
+}
+
+/* Additional settings professional layout */
+body.sx-settings-app {
+  background:
+    linear-gradient(180deg, rgba(31, 94, 255, 0.06), transparent 340px),
+    var(--erp-bg) !important;
+  color: var(--erp-ink) !important;
+  display: block !important;
+  padding: 28px 18px 56px !important;
+}
+
+body.sx-settings-app .shell {
+  max-width: 1120px !important;
+  margin: 0 auto;
+  gap: 16px !important;
+}
+
+body.sx-settings-app .card {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-line) !important;
+  border-radius: var(--erp-radius) !important;
+  box-shadow: var(--erp-shadow-soft) !important;
+  backdrop-filter: none !important;
+}
+
+body.sx-settings-app .page-header {
+  align-items: flex-start !important;
+  padding: 24px 26px !important;
+}
+
+body.sx-settings-app .page-title {
+  color: var(--erp-ink) !important;
+  font-size: clamp(1.7rem, 3vw, 2.25rem) !important;
+  letter-spacing: 0 !important;
+}
+
+body.sx-settings-app .page-title span {
+  color: var(--erp-primary) !important;
+}
+
+body.sx-settings-app .badge-pill,
+body.sx-settings-app .tag-open {
+  background: var(--erp-primary-soft) !important;
+  border: 1px solid #d8e5ff !important;
+  color: var(--erp-primary-strong) !important;
+}
+
+body.sx-settings-app h3,
+body.sx-settings-app .field label,
+body.sx-settings-app .hint-text,
+body.sx-settings-app .term-meta,
+body.sx-settings-app .empty-state {
+  color: var(--erp-muted) !important;
+}
+
+body.sx-settings-app h3,
+body.sx-settings-app .field label {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+body.sx-settings-app .field label {
+  font-size: 13px !important;
+}
+
+body.sx-settings-app input[type=number],
+body.sx-settings-app input[type=text],
+body.sx-settings-app select {
+  background: #fff !important;
+  border: 1px solid var(--erp-line-strong) !important;
+  border-radius: var(--erp-radius) !important;
+  color: var(--erp-ink) !important;
+}
+
+body.sx-settings-app input:focus,
+body.sx-settings-app select:focus {
+  border-color: var(--erp-primary) !important;
+  box-shadow: 0 0 0 4px rgba(31, 94, 255, 0.12) !important;
+}
+
+body.sx-settings-app .btn {
+  border-radius: var(--erp-radius) !important;
+  box-shadow: none !important;
+}
+
+body.sx-settings-app .btn-primary {
+  background: var(--erp-primary) !important;
+  color: #fff !important;
+  width: auto !important;
+  min-width: 180px;
+}
+
+body.sx-settings-app .btn-primary:hover {
+  background: var(--erp-primary-strong) !important;
+}
+
+body.sx-settings-app .btn-success {
+  background: var(--erp-success) !important;
+}
+
+body.sx-settings-app .btn-danger {
+  background: #fff5f5 !important;
+  border: 1px solid #f3c7c3 !important;
+  color: var(--erp-danger) !important;
+}
+
+body.sx-settings-app .btn-warning {
+  background: #fff8eb !important;
+  border: 1px solid #f4d7a1 !important;
+  color: #8a5a08 !important;
+}
+
+body.sx-settings-app .btn-ghost {
+  background: #fff !important;
+  border: 1px solid var(--erp-line-strong) !important;
+  color: #344054 !important;
+}
+
+body.sx-settings-app .session-item,
+body.sx-settings-app .term-item,
+body.sx-settings-app .empty-state {
+  background: var(--erp-surface-soft) !important;
+  border: 1px solid var(--erp-line) !important;
+  border-radius: var(--erp-radius) !important;
+}
+
+body.sx-settings-app .session-item.active {
+  border-color: rgba(22, 130, 85, 0.38) !important;
+  background: #f0fdf7 !important;
+  box-shadow: none !important;
+}
+
+body.sx-settings-app .session-item.locked-item {
+  border-color: rgba(194, 65, 58, 0.32) !important;
+  background: #fff8f7 !important;
+}
+
+body.sx-settings-app .session-year,
+body.sx-settings-app .term-name {
+  color: var(--erp-ink) !important;
+}
+
+body.sx-settings-app .tag-active {
+  background: #eafaf1 !important;
+  border: 1px solid #bdebd0 !important;
+  color: var(--erp-success) !important;
+}
+
+body.sx-settings-app .tag-locked {
+  background: #fff5f5 !important;
+  border: 1px solid #f3c7c3 !important;
+  color: var(--erp-danger) !important;
+}
+
+@media (min-width: 900px) {
+  body.sx-settings-app .shell {
+    grid-template-columns: 0.9fr 1.1fr;
+    align-items: start;
+  }
+
+  body.sx-settings-app .page-header,
+  body.sx-settings-app .card:nth-of-type(4) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  body.sx-admin-tool .main {
+    padding: 20px 14px 38px !important;
+  }
+
+  body.sx-admin-tool .topbar {
+    padding: 0 14px !important;
+  }
+
+  body.sx-settings-app {
+    padding: 18px 14px 42px !important;
+  }
+
+  body.sx-settings-app .card {
+    padding: 20px !important;
+  }
+}

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Driver Dashboard - Schoolix</title>
+<link rel="stylesheet" href="schoolix-app.css">
+<style>
+body { margin:0; font-family:"Segoe UI",sans-serif; background:#f4f7fb; color:#0f172a; }
+.driver-shell { max-width:860px; margin:0 auto; padding:20px; }
+.panel { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:18px; margin-bottom:14px; box-shadow:0 12px 28px rgba(15,23,42,.06); }
+.top { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+h1 { margin:0; font-size:24px; }
+.muted { color:#64748b; margin-top:5px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+.metric { border:1px solid #e2e8f0; border-radius:8px; padding:14px; background:#f8fafc; }
+.metric strong { display:block; font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+.metric span { font-weight:700; font-size:17px; }
+.badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:7px 11px; font-weight:800; font-size:12px; }
+.badge.on { background:#dcfce7; color:#166534; }
+.badge.off { background:#fee2e2; color:#991b1b; }
+.permission { border:1px solid #bfdbfe; background:#eff6ff; }
+button { border:0; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; background:#2563eb; color:#fff; }
+button.secondary { background:#e2e8f0; color:#0f172a; }
+.map { height:300px; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#e0f2fe; position:relative; }
+.sx-map-fallback { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; color:#334155; padding:18px; }
+.sx-map-fallback span { color:#64748b; font-size:13px; }
+.sx-map-recenter { position:absolute; left:14px; bottom:14px; z-index:3; min-height:34px; padding:8px 12px; background:#fff; color:#2563eb; border:1px solid #cbd5e1; }
+.sx-vehicle-marker { width:auto; height:42px; min-width:42px; border:0; background:transparent; box-shadow:none; display:inline-flex; align-items:center; gap:8px; color:#101828; }
+.sx-vehicle-marker-dot { width:42px; height:42px; display:block; border-radius:999px; background:transparent; border:0; box-shadow:0 8px 18px rgba(16,24,40,.28); animation:sxVehicleFloat 1.7s ease-in-out infinite; }
+.sx-vehicle-avatar { width:42px; height:42px; display:block; }
+.sx-vehicle-avatar-pulse { fill:rgba(22,130,85,.18); animation:sxVehiclePulse 1.6s ease-out infinite; transform-origin:center; }
+.sx-vehicle-avatar-body { fill:#168255; stroke:#fff; stroke-width:2.2; }
+.sx-vehicle-avatar-window { fill:#e0f2fe; }
+.sx-vehicle-avatar-light { stroke:#fff; stroke-width:2.2; stroke-linecap:round; }
+.sx-vehicle-avatar-wheel { fill:#172033; stroke:#fff; stroke-width:1.4; }
+.sx-vehicle-marker[data-status="stale"] .sx-vehicle-avatar-body { fill:#d97706; }
+.sx-vehicle-marker-label { display:grid; gap:1px; max-width:190px; padding:6px 9px; border:1px solid rgba(16,24,40,.12); border-radius:8px; background:rgba(255,255,255,.96); box-shadow:0 8px 18px rgba(16,24,40,.16); line-height:1.1; }
+.sx-vehicle-marker-label strong,.sx-vehicle-marker-label small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sx-vehicle-marker-label strong { color:#101828; font-size:12px; font-weight:900; }
+.sx-vehicle-marker-label small { color:#667085; font-size:11px; font-weight:800; }
+@keyframes sxVehicleFloat { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-3px) rotate(1deg)} }
+@keyframes sxVehiclePulse { 0%{transform:scale(.72);opacity:.85} 100%{transform:scale(1.25);opacity:0} }
+.sx-map-popup { min-width:170px; font:13px/1.45 "Segoe UI", sans-serif; color:#172033; }
+.sx-map-popup strong { display:block; font-size:14px; margin-bottom:4px; }
+.sx-map-popup span { display:inline-flex; margin-bottom:6px; padding:2px 7px; border-radius:999px; background:#e7f8ef; color:#16794f; font-weight:800; font-size:11px; }
+body { background:#070b14; color:#e8eef8; }
+.driver-shell { max-width:1100px; padding:24px; }
+.panel { background:#101827; border-color:#26364d; border-radius:14px; box-shadow:0 18px 48px rgba(0,0,0,.22); }
+.top { padding:20px 22px; }
+h1 { color:#f8fafc; letter-spacing:0; }
+.muted { color:#9aacbf; }
+.metric { background:#0c1422; border-color:#26364d; }
+.metric strong { color:#8fa3ba; letter-spacing:.04em; }
+.metric span { color:#f8fafc; }
+.badge.on { background:rgba(45,212,191,.16); color:#99f6e4; border:1px solid rgba(45,212,191,.28); }
+.badge.off { background:rgba(248,113,113,.13); color:#fecaca; border:1px solid rgba(248,113,113,.24); }
+.permission { background:#10233d; border-color:#2f6fb2; }
+button { background:#2563eb; color:#fff; box-shadow:0 10px 22px rgba(37,99,235,.22); }
+button.secondary { background:#182337; color:#dbeafe; border:1px solid #30425f; box-shadow:none; }
+button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
+.map { min-height:360px; height:min(56vh,560px); background:#0b1320; border-color:#2c3b54; }
+.sx-map-recenter { background:#101c2e; color:#8fd3ff; border-color:#38506e; }
+.sx-vehicle-marker-label { background:rgba(10,18,31,.94); border-color:#38506e; box-shadow:0 8px 20px rgba(0,0,0,.3); }
+.sx-vehicle-marker-label strong { color:#f8fafc; }
+.sx-vehicle-marker-label small { color:#a8bad1; }
+.sx-map-popup { color:#172033; }
+@media (max-width:640px) { .driver-shell { padding:14px; } .panel { padding:15px; } .top { padding:17px; } h1 { font-size:21px; } .map { min-height:310px; height:52vh; } }
+</style>
+</head>
+<body>
+<main class="driver-shell">
+  <section class="panel top">
+    <div>
+      <h1>Driver Dashboard</h1>
+      <p class="muted">Tracking is controlled by the school administrator.</p>
+    </div>
+    <button class="secondary" id="logoutBtn">Logout</button>
+  </section>
+
+  <section class="panel permission" id="permissionPanel" hidden>
+    <h2 style="margin:0 0 8px;font-size:18px;">Location Permission Required</h2>
+    <p class="muted">Schoolix needs your location while you are driving so your assigned school vehicle can be tracked when the administrator activates a trip.</p>
+    <button id="grantPermissionBtn">Grant Location Permission</button>
+  </section>
+
+  <section class="panel">
+    <div class="grid">
+      <div class="metric"><strong>Driver</strong><span id="driverName">Loading...</span></div>
+      <div class="metric"><strong>Vehicle</strong><span id="vehicleNumber">-</span></div>
+      <div class="metric"><strong>Trip Status</strong><span id="tripStatus">-</span></div>
+      <div class="metric"><strong>Location Tracking</strong><span id="trackingStatus" class="badge off">OFF</span></div>
+      <div class="metric"><strong>GPS</strong><span id="gpsStatus">Checking...</span></div>
+      <div class="metric"><strong>Last Location Update</strong><span id="lastUpdate">-</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 style="margin:0 0 12px;font-size:18px;">Assigned Vehicle</h2>
+    <div class="map" id="driverMap"></div>
+    <p class="muted" id="driverNote">No start or stop controls are available on driver accounts.</p>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp, getAuth, getFirestore, onAuthStateChanged, signOut, doc, getDoc, collection, getDocs, query, where } from "./firebase-compat.js";
+import { activeTrips, accessToken, myDriverProfile, subscribeTransport, upsertLiveLocation } from "./schoolix-transport.js";
+import { calibratedSpeedKmh, createVehicleMap } from "./schoolix-maplibre.js";
+
+const app = initializeApp({ projectId: "schoolix-48107" });
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const state = { user: null, profile: null, activeTrip: null, watchId: null, lastLocationAt: null, map: null, lastUploadAt: 0, nativeTripId: null, lastPosition: null };
+
+function setText(id, value) { $(id).textContent = value || "-"; }
+function setTracking(on) {
+  $("trackingStatus").textContent = on ? "ON" : "OFF";
+  $("trackingStatus").className = `badge ${on ? "on" : "off"}`;
+  setText("tripStatus", on ? "ACTIVE" : "NOT ACTIVE");
+}
+function relativeTime(value) {
+  if (!value) return "-";
+  const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+  if (seconds < 60) return `${seconds} seconds ago`;
+  return `${Math.round(seconds / 60)} minutes ago`;
+}
+function hasNativeBridge() { return Boolean(window.SchoolixNativeLocation?.startTracking); }
+async function locationPermissionReady() {
+  if (hasNativeBridge() && window.SchoolixNativeLocation.hasLocationPermission) {
+    return window.SchoolixNativeLocation.hasLocationPermission() === "true";
+  }
+  if (!navigator.permissions?.query) return Boolean(navigator.geolocation);
+  try {
+    const status = await navigator.permissions.query({ name: "geolocation" });
+    return status.state === "granted";
+  } catch (_) {
+    return Boolean(navigator.geolocation);
+  }
+}
+async function updatePermissionUi() {
+  const ready = await locationPermissionReady();
+  $("permissionPanel").hidden = ready;
+  setText("gpsStatus", ready ? "Connected" : "Permission needed");
+  return ready;
+}
+function stopBrowserWatch() {
+  if (state.watchId != null) navigator.geolocation?.clearWatch(state.watchId);
+  state.watchId = null;
+}
+function stopTracking() {
+  try { window.SchoolixNativeLocation?.stopTracking?.(); } catch (_) {}
+  state.nativeTripId = null;
+  state.activeTrip = null;
+  state.lastUploadAt = 0;
+  setTracking(false);
+  $("logoutBtn").disabled = false;
+  $("logoutBtn").title = "";
+  setText("driverNote", "Tracking is controlled by the school administrator. Logout is available when tracking is OFF.");
+}
+async function sendBrowserLocation(position) {
+  if (!state.profile?.vehicle) return;
+  state.lastPosition = position;
+  const coords = position.coords;
+  const speed = calibratedSpeedKmh(coords.speed, "mps");
+  const updatedAt = new Date().toISOString();
+  state.map?.setVehicle(state.profile.vehicle.id, {
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    speed,
+    heading: coords.heading,
+    accuracy: coords.accuracy,
+    updated_at: updatedAt
+  }, state.profile.vehicle.vehicle_number || "Vehicle", {
+    driver: `${state.profile.name || "You"} - You are here`,
+    status: "live"
+  });
+  setText("gpsStatus", "GPS connected");
+  if (!state.activeTrip || Date.now() - state.lastUploadAt < 3000) return;
+  state.lastUploadAt = Date.now();
+  try {
+    await upsertLiveLocation({
+      school_id: state.profile.school_id,
+      vehicle_id: state.profile.vehicle.id,
+      trip_id: state.activeTrip.id,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      speed,
+      heading: coords.heading,
+      accuracy: coords.accuracy,
+      updated_at: updatedAt
+    });
+    state.lastLocationAt = updatedAt;
+    setText("gpsStatus", "Live location shared");
+    setText("lastUpdate", "just now");
+  } catch (error) {
+    console.warn("Live location upload failed", error);
+    setText("gpsStatus", "Upload retrying");
+  }
+}
+
+function startBrowserWatch() {
+  stopBrowserWatch();
+  if (!navigator.geolocation) {
+    setText("gpsStatus", "GPS unavailable");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(sendBrowserLocation, () => {
+    setText("gpsStatus", "GPS unavailable");
+  }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+  state.watchId = navigator.geolocation.watchPosition(sendBrowserLocation, () => {
+    setText("gpsStatus", "GPS unavailable");
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+}
+
+async function startTracking(trip) {
+  state.activeTrip = trip;
+  state.lastUploadAt = 0;
+  $("logoutBtn").disabled = true;
+  $("logoutBtn").title = "Admin must stop location tracking before logout";
+  setTracking(true);
+  const ready = await updatePermissionUi();
+  if (state.lastPosition) sendBrowserLocation(state.lastPosition);
+  if (state.watchId == null) startBrowserWatch();
+  if (!ready) return;
+  if (hasNativeBridge() && state.nativeTripId !== trip.id) {
+    state.nativeTripId = trip.id;
+    window.SchoolixNativeLocation.startTracking(JSON.stringify({
+      supabaseUrl: "https://ezkmeedcqetztkeppxil.supabase.co",
+      anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg",
+      accessToken: accessToken(),
+      schoolId: state.profile.school_id,
+      vehicleId: state.profile.vehicle.id,
+      tripId: trip.id
+    }));
+  }
+}
+async function refreshTrip() {
+  const vehicleId = state.profile?.vehicle?.id;
+  if (!vehicleId) return stopTracking();
+  const trips = await activeTrips([vehicleId]);
+  if (trips.length) await startTracking(trips[0]);
+  else stopTracking();
+}
+async function findDriverUserProfile(user) {
+  const direct = await getDoc(doc(db, "users", user.uid)).catch(() => null);
+  if (direct?.exists?.()) return { id: direct.id, ...direct.data() };
+  const lookups = [
+    ["authUid", user.supabaseUid || user.uid],
+    ["uid", user.supabaseUid || user.uid],
+    ["email", user.email || ""],
+    ["authEmail", user.email || ""]
+  ].filter(([, value]) => String(value || "").trim());
+  for (const [field, value] of lookups) {
+    const snap = await getDocs(query(collection(db, "users"), where(field, "==", value))).catch(() => null);
+    if (snap && !snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  }
+  return null;
+}
+
+async function fallbackDriverProfile(user) {
+  const userProfile = await findDriverUserProfile(user);
+  const vehicleId = userProfile?.assignedVehicleId || userProfile?.vehicleId || "";
+  if (!userProfile || !vehicleId) return null;
+  const vehicleSnap = await getDoc(doc(db, "schools", userProfile.schoolId || userProfile.adminId, "vehicles", vehicleId)).catch(() => null);
+  const vehicle = vehicleSnap?.exists?.() ? { id: vehicleSnap.id, ...vehicleSnap.data() } : null;
+  return {
+    id: userProfile.driverId || userProfile.transportDriverId || userProfile.id,
+    school_id: userProfile.schoolId || userProfile.adminId,
+    name: userProfile.name || userProfile.driverName || user.email,
+    phone: userProfile.phone || "",
+    email: userProfile.email || user.email,
+    vehicle: vehicle ? {
+      id: vehicle.id,
+      vehicle_number: vehicle.vehicleNumber || vehicle.vehicle_number,
+      vehicle_type: vehicle.vehicleType || vehicle.vehicle_type,
+      route_id: vehicle.routeId || null,
+      data: vehicle
+    } : null
+  };
+}
+
+async function loadDriver() {
+  let profile = await myDriverProfile().catch((error) => {
+    console.warn("Supabase driver profile unavailable, using Firestore fallback", error);
+    return null;
+  });
+  if (!profile) profile = await fallbackDriverProfile(state.user);
+  state.profile = profile;
+  if (!profile) {
+    setText("driverName", "Driver profile not found");
+    setText("driverNote", "Admin se vehicle edit karke driver email/password save karwao, phir login retry karo.");
+    return;
+  }
+  setText("driverName", profile.name);
+  setText("vehicleNumber", profile.vehicle?.vehicle_number || "Not assigned");
+  state.map = await createVehicleMap($("driverMap"), { zoom: 15 });
+  await updatePermissionUi();
+  startBrowserWatch();
+  await refreshTrip();
+  if (profile.vehicle?.id) {
+    subscribeTransport("schoolix_transport_trips", `vehicle_id=eq.${profile.vehicle.id}`, refreshTrip, refreshTrip);
+  }
+}
+window.SchoolixNativeLocationStatus = {
+  receiveStatus(payload = {}) {
+    setText("gpsStatus", payload.status || "Connected");
+    if (payload.updatedAt) setText("lastUpdate", relativeTime(payload.updatedAt));
+  }
+};
+$("grantPermissionBtn").addEventListener("click", async () => {
+  if (window.SchoolixNativeLocation?.requestLocationPermission) window.SchoolixNativeLocation.requestLocationPermission();
+  else navigator.geolocation?.getCurrentPosition(() => updatePermissionUi(), () => updatePermissionUi(), { enableHighAccuracy: true });
+  setTimeout(updatePermissionUi, 1200);
+});
+$("logoutBtn").addEventListener("click", async () => {
+  if (state.activeTrip || state.nativeTripId || $("trackingStatus").classList.contains("on")) {
+    setText("driverNote", "Logout is locked while location tracking is ON. Ask the administrator to stop the trip first.");
+    return;
+  }
+  stopBrowserWatch();
+  await signOut(auth);
+  location.href = "index.html";
+});
+setInterval(() => setText("lastUpdate", relativeTime(state.lastLocationAt)), 3000);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { location.href = "index.html"; return; }
+  state.user = user;
+  const userProfile = await findDriverUserProfile(user);
+  if (!userProfile || String(userProfile.role || "").toLowerCase() !== "driver") {
+    alert("Access denied. Driver account required.");
+    location.href = "index.html";
+    return;
+  }
+  await loadDriver();
+});
+</script>
+</body>
+</html>

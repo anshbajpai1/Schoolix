@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 1400);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #ffffff !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: opacity 0.26s ease, visibility 0.26s ease;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(180px, 54vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(12px, 4vw, 20px);
+  width: clamp(12px, 4vw, 20px);
+  margin-right: clamp(7px, 2.3vw, 10px);
+  border-radius: 999px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 clamp(7px, 2.6vw, 10px) rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://ezkmeedcqetztkeppxil.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="//ezkmeedcqetztkeppxil.supabase.co">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Schoolix is a secure school ERP for attendance, fees, admissions, reports, teachers, transport, notices, and student dashboards.">
+    <meta name="theme-color" content="#0e0f1a">
+    <meta name="application-name" content="Schoolix">
+    <meta name="apple-mobile-web-app-title" content="Schoolix">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Schoolix - Sign In</title>
+    <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/schoolix-app-icon.svg">
+    <link rel="modulepreload" href="/firebase-compat.js">
+    <link rel="modulepreload" href="/supabase-config.js">
+    <link rel="preload" href="/school-branding.js" as="script">
+    <link rel="preload" href="/schoolix-app.css?v=navbar-20260721" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/schoolix-app.css?v=navbar-20260721"></noscript>
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #f5f7fb;
+            --bg-panel: #ffffff;
+            --bg-input: #f8fafc;
+            --bg-input-focus: #ffffff;
+            --border-subtle: rgba(15, 23, 42, 0.1);
+            --border-focus: rgba(37, 99, 235, 0.45);
+            --accent: #2563eb;
+            --accent-soft: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.18);
+            --text-primary: #101828;
+            --text-secondary: #475467;
+            --text-muted: #98a2b3;
+            --error-bg: rgba(239, 68, 68, 0.12);
+            --error-border: rgba(239, 68, 68, 0.4);
+            --error-text: #fc8181;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .shell {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .mobile-brand {
+            display: none;
+        }
+
+        /* ── LEFT PANEL ─────────────────────────────── */
+        .panel-left {
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 44px;
+            background: #0f172a;
+        }
+
+        .panel-left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(37, 99, 235, 0.24) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(20, 184, 166, 0.2) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 60% 40%, rgba(14, 165, 233, 0.12) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .panel-left::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        /* Decorative orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 360px; height: 360px;
+            background: radial-gradient(circle, rgba(109,40,217,0.22) 0%, transparent 70%);
+            top: -80px; left: -100px;
+        }
+        .orb-2 {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(67,56,202,0.2) 0%, transparent 70%);
+            bottom: 60px; right: -60px;
+        }
+        .orb-3 {
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+            top: 45%; left: 35%;
+        }
+
+        /* Grid overlay */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: 0;
+        }
+
+        .panel-left-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .brand-logo {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-icon svg {
+            width: 18px; height: 18px;
+            fill: white;
+        }
+
+        .brand-icon img,
+        .auth-loader-mark img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .left-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 0 20px;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(124, 58, 237, 0.25);
+            border-radius: 100px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #a78bfa;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+
+        .hero-tag-dot {
+            width: 6px; height: 6px;
+            background: #a78bfa;
+            border-radius: 50%;
+        }
+
+        .hero-heading {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 3.2vw, 3rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .hero-heading span {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 340px;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: flex;
+            gap: 32px;
+            margin-top: 44px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .stat-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: var(--border-subtle);
+            align-self: stretch;
+        }
+
+        /* Dots indicator */
+        .dots-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dot {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.18);
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            width: 28px;
+            background: #2563eb;
+        }
+
+        .dot:not(.active) {
+            width: 14px;
+        }
+
+        /* ── RIGHT PANEL ─────────────────────────────── */
+        .panel-right {
+            width: 480px;
+            flex-shrink: 0;
+            min-height: 100vh;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 52px;
+            position: relative;
+        }
+
+        .panel-right::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, #2563eb 40%, #0ea5e9 70%, transparent 100%);
+            opacity: 0.7;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 360px;
+            animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+        }
+
+        .form-welcome {
+            font-size: 12.5px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-soft);
+            margin-bottom: 10px;
+        }
+
+        .form-title {
+            font-family: inherit;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .form-subtitle {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .form-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 16px;
+            margin-bottom: 28px;
+        }
+
+        .form-hint-icon {
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .form-hint-icon svg {
+            width: 15px; height: 15px;
+            fill: #2563eb;
+        }
+
+        .form-hint p {
+            font-size: 12.5px;
+            color: #2563eb;
+            line-height: 1.55;
+        }
+
+        /* Fields */
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+            letter-spacing: 0.01em;
+        }
+
+        .field-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-input {
+            width: 100%;
+            height: 50px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 0 50px 0 16px;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            caret-color: #2563eb;
+        }
+
+        .field-input::placeholder {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .field-input:focus {
+            border-color: var(--border-focus);
+            background: var(--bg-input-focus);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .field-suffix {
+            position: absolute;
+            right: 0;
+            top: 0; bottom: 0;
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 0 12px 12px 0;
+            transition: color 0.2s;
+        }
+
+        .field-suffix:hover {
+            color: var(--accent-soft);
+        }
+
+        .field-suffix svg {
+            width: 18px; height: 18px;
+            fill: currentColor;
+            pointer-events: none;
+        }
+
+        /* Forgot */
+        .forgot-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 22px;
+            margin-top: -10px;
+        }
+
+        .forgot-link {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-soft);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* CTA Button */
+        .btn-primary {
+            width: 100%;
+            height: 52px;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.18s, box-shadow 0.2s;
+            margin-bottom: 14px;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Divider */
+        .or-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .or-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .or-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* Google Button */
+        .btn-google {
+            width: 100%;
+            height: 50px;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .btn-google:hover {
+            border-color: rgba(37, 99, 235, 0.18);
+            background: rgba(37, 99, 235, 0.04);
+            color: var(--text-primary);
+        }
+
+        .btn-apk {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 12px;
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.22);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #c4b5fd;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: border-color .2s, background .2s, color .2s;
+        }
+
+        .btn-apk:hover {
+            background: rgba(139, 92, 246, 0.14);
+            border-color: rgba(139, 92, 246, 0.36);
+            color: #fff;
+        }
+
+        .btn-apk svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .download-meta {
+            display: block;
+            width: 100%;
+            margin-top: 7px;
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        body.is-native-app {
+            --bg-deep: #0e0f1a;
+            --bg-panel: #13141f;
+            --bg-input: #1c1e2e;
+            --bg-input-focus: #21233a;
+            --border-subtle: rgba(255,255,255,0.07);
+            --border-focus: rgba(139, 92, 246, 0.6);
+            --accent: #7c3aed;
+            --accent-soft: #8b5cf6;
+            --accent-glow: rgba(124, 58, 237, 0.35);
+            --text-primary: #f0f1f8;
+            --text-secondary: #9496b0;
+            --text-muted: #5b5d78;
+            background: #0e0f1a;
+            color: var(--text-primary);
+        }
+
+        body.is-native-app .shell {
+            min-height: 100dvh;
+            display: block;
+            background:
+                radial-gradient(circle at 16% 0%, rgba(124, 58, 237, 0.24), transparent 32%),
+                radial-gradient(circle at 92% 10%, rgba(79, 70, 229, 0.16), transparent 34%),
+                linear-gradient(180deg, rgba(124, 58, 237, 0.12), transparent 260px),
+                #0e0f1a;
+        }
+
+        body.is-native-app .panel-left,
+        body.is-native-app .btn-apk {
+            display: none !important;
+        }
+
+        body.is-native-app .mobile-brand {
+            display: flex;
+            color: #f0f1f8;
+            background: rgba(10, 11, 20, 0.94);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(16px);
+        }
+
+        body.is-native-app .mobile-brand-logo {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        body.is-native-app .mobile-brand-tag {
+            color: #c4b5fd;
+            border-color: rgba(139, 92, 246, 0.35);
+            background: rgba(124, 58, 237, 0.14);
+        }
+
+        body.is-native-app .brand-icon {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        }
+
+        body.is-native-app .panel-right {
+            width: 100%;
+            min-height: calc(100dvh - 66px);
+            padding: 22px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+            border-left: 0;
+            background: transparent;
+            align-items: flex-start;
+        }
+
+        body.is-native-app .panel-right::before {
+            display: none;
+        }
+
+        body.is-native-app .form-card {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 26px 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            background: rgba(19, 20, 31, 0.94);
+            box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
+        }
+
+        body.is-native-app .form-header {
+            margin-bottom: 24px;
+        }
+
+        body.is-native-app .form-welcome {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.15);
+            color: #c4b5fd;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        body.is-native-app .form-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.82rem;
+            letter-spacing: 0;
+            margin-top: 10px;
+        }
+
+        body.is-native-app .form-hint {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(139, 92, 246, 0.2);
+            margin-bottom: 22px;
+        }
+
+        body.is-native-app .field-input {
+            color: #f0f1f8;
+            height: 52px;
+            border-radius: 14px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        body.is-native-app .btn-primary {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            box-shadow: 0 12px 26px rgba(124, 58, 237, 0.28);
+            border-radius: 14px;
+        }
+
+        body.is-native-app .btn-google {
+            color: #d8d6e8;
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+        }
+
+        body.is-native-app .forgot-link {
+            color: #c4b5fd;
+        }
+
+        body.is-native-app .or-row {
+            margin: 18px 0;
+        }
+
+        body.is-native-app {
+            --bg-deep: #070a12;
+            --bg-panel: rgba(12, 18, 31, 0.92);
+            --bg-input: rgba(255, 255, 255, 0.055);
+            --bg-input-focus: rgba(255, 255, 255, 0.085);
+            --border-subtle: rgba(226, 232, 240, 0.12);
+            --border-focus: rgba(45, 212, 191, 0.62);
+            --accent: #2dd4bf;
+            --accent-soft: #67e8f9;
+            --accent-glow: rgba(45, 212, 191, 0.24);
+            --text-primary: #f8fafc;
+            --text-secondary: #b8c3d7;
+            --text-muted: #7c8aa3;
+            --error-bg: rgba(248, 113, 113, 0.12);
+            --error-border: rgba(248, 113, 113, 0.34);
+            --error-text: #fecaca;
+            background: #070a12;
+        }
+
+        body.is-native-app .shell {
+            min-height: 100dvh;
+            display: block;
+            overflow: hidden auto;
+            background:
+                linear-gradient(160deg, rgba(8, 145, 178, 0.18) 0%, transparent 34%),
+                linear-gradient(340deg, rgba(79, 70, 229, 0.18) 0%, transparent 36%),
+                linear-gradient(180deg, #070a12 0%, #0b1220 52%, #070a12 100%);
+        }
+
+        body.is-native-app .shell::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.85), transparent 72%);
+        }
+
+        body.is-native-app .mobile-brand {
+            min-height: 70px;
+            padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 12px;
+            background: rgba(7, 10, 18, 0.84);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+            box-shadow: none;
+        }
+
+        body.is-native-app .mobile-brand-logo {
+            font-size: 1.08rem;
+            color: #f8fafc;
+        }
+
+        body.is-native-app .mobile-brand .brand-icon {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 12px !important;
+            background: #0f172a;
+            box-shadow: 0 12px 28px rgba(45, 212, 191, 0.18);
+        }
+
+        body.is-native-app .mobile-brand-tag {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border-color: rgba(45, 212, 191, 0.28);
+            background: rgba(45, 212, 191, 0.1);
+            color: #99f6e4;
+            font-size: 10px;
+        }
+
+        body.is-native-app .panel-right {
+            min-height: calc(100dvh - 70px);
+            padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            align-items: center;
+        }
+
+        body.is-native-app .form-card {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 24px 18px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.13);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.072), rgba(255, 255, 255, 0.032)),
+                rgba(12, 18, 31, 0.92);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+            backdrop-filter: blur(18px);
+        }
+
+        body.is-native-app .form-header {
+            margin-bottom: 20px;
+        }
+
+        body.is-native-app .form-welcome {
+            min-height: 22px;
+            padding: 3px 9px;
+            border: 1px solid rgba(45, 212, 191, 0.22);
+            background: rgba(45, 212, 191, 0.09);
+            color: #99f6e4;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        body.is-native-app .form-title {
+            margin-top: 12px;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-size: 1.9rem;
+            line-height: 1.05;
+        }
+
+        body.is-native-app .form-subtitle {
+            max-width: 310px;
+            color: #b8c3d7;
+            font-size: 13px;
+        }
+
+        body.is-native-app .form-hint {
+            margin-top: 14px;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(14, 165, 233, 0.08);
+            border-color: rgba(103, 232, 249, 0.16);
+        }
+
+        body.is-native-app .form-hint-icon svg {
+            fill: #67e8f9;
+        }
+
+        body.is-native-app .form-hint p,
+        body.is-native-app .form-hint strong {
+            color: #c8f7ff !important;
+        }
+
+        body.is-native-app .field {
+            margin-bottom: 15px;
+        }
+
+        body.is-native-app .field-label {
+            margin-bottom: 8px;
+            color: #dbeafe;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        body.is-native-app .field-input {
+            height: 54px;
+            padding-left: 15px;
+            padding-right: 52px;
+            border-radius: 14px;
+            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.055);
+            border-color: rgba(226, 232, 240, 0.12);
+            font-size: 16px;
+        }
+
+        body.is-native-app .field-input::placeholder {
+            color: #718096;
+        }
+
+        body.is-native-app .field-input:focus {
+            background: rgba(255, 255, 255, 0.085);
+            border-color: rgba(45, 212, 191, 0.62);
+            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.12);
+        }
+
+        body.is-native-app .field-suffix {
+            color: #8ea0ba;
+        }
+
+        body.is-native-app .field-suffix:hover {
+            color: #67e8f9;
+        }
+
+        body.is-native-app .forgot-row {
+            margin-top: -4px;
+            margin-bottom: 18px;
+        }
+
+        body.is-native-app .forgot-link {
+            color: #67e8f9;
+            font-weight: 800;
+        }
+
+        body.is-native-app .btn-primary,
+        body.is-native-app .btn-google {
+            min-height: 52px;
+            border-radius: 14px;
+            font-weight: 800;
+        }
+
+        body.is-native-app .btn-primary {
+            background: linear-gradient(135deg, #14b8a6, #2563eb);
+            color: #ffffff;
+            box-shadow: 0 16px 34px rgba(20, 184, 166, 0.22);
+        }
+
+        body.is-native-app .btn-primary:hover {
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.26);
+        }
+
+        body.is-native-app .btn-google {
+            background: rgba(255, 255, 255, 0.045);
+            border-color: rgba(226, 232, 240, 0.13);
+            color: #e5edf9;
+        }
+
+        body.is-native-app .btn-google:hover {
+            background: rgba(255, 255, 255, 0.075);
+            border-color: rgba(103, 232, 249, 0.25);
+            color: #ffffff;
+        }
+
+        body.is-native-app .or-row {
+            gap: 12px;
+            margin: 17px 0;
+        }
+
+        body.is-native-app .or-line {
+            background: rgba(226, 232, 240, 0.12);
+        }
+
+        body.is-native-app .or-text {
+            color: #8494ad;
+            font-size: 11px;
+        }
+
+        body.is-native-app .error-msg {
+            border-radius: 13px;
+            margin-top: 12px;
+        }
+
+        body.is-native-app .loading-bar {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #2dd4bf, #60a5fa, transparent);
+        }
+
+        body.is-native-app .auth-gate {
+            background:
+                linear-gradient(160deg, rgba(20, 184, 166, 0.2), transparent 38%),
+                linear-gradient(340deg, rgba(37, 99, 235, 0.2), transparent 40%),
+                #070a12;
+        }
+
+        body.is-native-app .auth-loader-card {
+            border-color: rgba(226, 232, 240, 0.14);
+            background: rgba(12, 18, 31, 0.92);
+            color: #f8fafc;
+        }
+
+        body.is-native-app .auth-loader-title {
+            color: #f8fafc;
+        }
+
+        body.is-native-app .auth-loader-subtitle {
+            color: #b8c3d7;
+        }
+
+        body.is-native-app .auth-loader-ring {
+            background: rgba(148, 163, 184, 0.16);
+        }
+
+        body.is-native-app .auth-loader-ring span {
+            background: linear-gradient(90deg, #14b8a6, #2563eb);
+        }
+
+        @media (max-width: 380px) {
+            body.is-native-app .panel-right {
+                align-items: flex-start;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            body.is-native-app .form-card {
+                padding: 20px 14px 16px;
+            }
+
+            body.is-native-app .form-title {
+                font-size: 1.62rem;
+            }
+        }
+
+        .google-svg {
+            width: 18px; height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Keep the native login surface readable on compact phone displays. */
+        body.is-native-app .form-card,
+        body.is-native-app .panel-right {
+            color: #f8fafc;
+        }
+
+        body.is-native-app .form-subtitle,
+        body.is-native-app .form-hint p,
+        body.is-native-app .download-meta {
+            color: #b8c3d7 !important;
+        }
+
+        body.is-native-app .field-input {
+            color: #f8fafc !important;
+            caret-color: #67e8f9;
+        }
+
+        body.is-native-app .field-input:-webkit-autofill,
+        body.is-native-app .field-input:-webkit-autofill:hover,
+        body.is-native-app .field-input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #f8fafc;
+            -webkit-box-shadow: 0 0 0 1000px #172337 inset;
+            transition: background-color 9999s ease-out;
+        }
+
+        body.is-native-app .error-msg p,
+        body.is-native-app .error-msg strong {
+            color: #fecaca !important;
+        }
+
+        body.is-native-app button:focus-visible,
+        body.is-native-app input:focus-visible,
+        body.is-native-app a:focus-visible {
+            outline: 3px solid rgba(103, 232, 249, .42);
+            outline-offset: 3px;
+        }
+
+        /* Native APK uses the same responsive website login surface. */
+        body.is-native-app {
+            --bg-deep: #f5f7fb;
+            --bg-panel: #ffffff;
+            --bg-input: #f8fafc;
+            --bg-input-focus: #ffffff;
+            --border-subtle: rgba(15, 23, 42, 0.1);
+            --border-focus: rgba(37, 99, 235, 0.45);
+            --accent: #2563eb;
+            --accent-soft: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.18);
+            --text-primary: #101828;
+            --text-secondary: #475467;
+            --text-muted: #98a2b3;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+        }
+
+        body.is-native-app .shell {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            background: var(--bg-deep);
+        }
+
+        body.is-native-app .shell::before,
+        body.is-native-app .panel-right::before {
+            display: none;
+        }
+
+        body.is-native-app .panel-left {
+            display: none !important;
+        }
+
+        body.is-native-app .mobile-brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            min-height: 0;
+            padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 16px;
+            color: #101828;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        body.is-native-app .mobile-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #101828;
+        }
+
+        body.is-native-app .mobile-brand .brand-icon {
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 10px !important;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            box-shadow: none;
+        }
+
+        body.is-native-app .mobile-brand-tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        body.is-native-app .panel-right {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 22px calc(28px + env(safe-area-inset-bottom, 0px));
+            border-left: 0;
+            background: var(--bg-deep);
+        }
+
+        body.is-native-app .form-card {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        body.is-native-app .form-header { margin-bottom: 32px; }
+        body.is-native-app .form-welcome {
+            display: block;
+            min-height: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #2563eb;
+            font-size: 12.5px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        body.is-native-app .form-title {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #101828;
+            font-size: 2rem;
+            line-height: 1.1;
+        }
+        body.is-native-app .form-subtitle { color: #475467 !important; font-size: 13.5px; }
+        body.is-native-app .form-hint {
+            margin-top: 16px;
+            margin-bottom: 28px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.16);
+        }
+        body.is-native-app .form-hint p,
+        body.is-native-app .form-hint strong { color: #2563eb !important; }
+        body.is-native-app .field { margin-bottom: 18px; }
+        body.is-native-app .field-label { color: #475467; margin-bottom: 7px; font-size: 13px; }
+        body.is-native-app .field-input {
+            height: 50px;
+            border-radius: 12px;
+            padding-left: 16px;
+            color: #101828 !important;
+            background: #f8fafc;
+            border-color: rgba(15, 23, 42, 0.1);
+            font-size: 16px;
+        }
+        body.is-native-app .field-input::placeholder { color: #98a2b3; }
+        body.is-native-app .field-input:focus {
+            background: #ffffff;
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        body.is-native-app .field-suffix { color: #98a2b3; }
+        body.is-native-app .forgot-row { margin-top: -10px; margin-bottom: 22px; }
+        body.is-native-app .forgot-link { color: #2563eb; }
+        body.is-native-app .btn-primary,
+        body.is-native-app .btn-google { min-height: 0; border-radius: 12px; }
+        body.is-native-app .btn-primary {
+            height: 52px;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #ffffff;
+            box-shadow: none;
+        }
+        body.is-native-app .btn-google {
+            height: 50px;
+            background: transparent;
+            border-color: rgba(15, 23, 42, 0.1);
+            color: #475467;
+        }
+        body.is-native-app .btn-apk {
+            display: none !important;
+            color: #6d28d9;
+            background: rgba(139, 92, 246, 0.08);
+            border-color: rgba(139, 92, 246, 0.22);
+        }
+        body.is-native-app .or-row { margin: 20px 0; }
+        body.is-native-app .or-line { background: rgba(15, 23, 42, 0.1); }
+        body.is-native-app .or-text { color: #98a2b3; }
+        body.is-native-app .download-meta { color: #98a2b3 !important; }
+        body.is-native-app .error-msg p { color: #b42318 !important; }
+        body.is-native-app .auth-gate {
+            background: rgba(245, 247, 251, 0.96);
+            color: #101828;
+        }
+        body.is-native-app .auth-loader-card {
+            border-color: rgba(15, 23, 42, 0.1);
+            background: #ffffff;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+        }
+        body.is-native-app .auth-loader-title { color: #101828; }
+        body.is-native-app .auth-loader-subtitle { color: #475467; }
+        body.is-native-app .auth-loader-ring { background: #dbeafe; }
+        body.is-native-app .auth-loader-ring span { background: linear-gradient(90deg, #2563eb, #0ea5e9); }
+
+        @media (max-width: 480px) {
+            body.is-native-app .panel-right {
+                align-items: flex-start;
+                padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+            }
+            body.is-native-app .form-title { font-size: 1.55rem; }
+            body.is-native-app .field-input { height: 48px; }
+            body.is-native-app .btn-primary { height: 50px; }
+        }
+
+        /* Error & Loading */
+        .error-msg {
+            display: none;
+            align-items: flex-start;
+            gap: 9px;
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 14px;
+        }
+
+        .error-msg.visible {
+            display: flex;
+        }
+
+        .error-msg-icon svg {
+            width: 16px; height: 16px;
+            fill: var(--error-text);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .error-msg p {
+            font-size: 13px;
+            color: var(--error-text);
+            line-height: 1.5;
+        }
+
+        .loading-bar {
+            display: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #1d4ed8, #4f90ff, transparent);
+            background-size: 200% 100%;
+            border-radius: 2px;
+            margin-top: 14px;
+            animation: shimmer 1.2s ease-in-out infinite;
+        }
+
+        .loading-bar.visible {
+            display: block;
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* ── RESPONSIVE ──────────────────────────────── */
+        @media (max-width: 900px) {
+            .shell {
+                flex-direction: column;
+            }
+
+            .panel-left {
+                display: none;
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 16px;
+                background: #0a0b14;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .mobile-brand-logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-family: Georgia, "Times New Roman", serif;
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+
+            .mobile-brand-tag {
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #a78bfa;
+                padding: 4px 10px;
+                border-radius: 999px;
+                border: 1px solid rgba(139, 92, 246, 0.35);
+                background: rgba(124, 58, 237, 0.12);
+                white-space: nowrap;
+            }
+
+            .panel-right {
+                width: 100%;
+                flex: 1;
+                border-left: none;
+                padding: 28px 22px calc(28px + env(safe-area-inset-bottom, 0px));
+                background: var(--bg-deep);
+                min-height: 0;
+            }
+
+            .panel-right::before {
+                display: none;
+            }
+
+            .form-card {
+                max-width: 420px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-right {
+                align-items: flex-start;
+                padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .form-title {
+                font-size: 1.55rem;
+            }
+
+            .field-input {
+                height: 48px;
+                font-size: 16px;
+            }
+
+            .btn-primary {
+                height: 50px;
+                min-height: 48px;
+            }
+        }
+
+        .auth-gate {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(37, 99, 235, 0.28), transparent 28%),
+                radial-gradient(circle at 75% 80%, rgba(20, 184, 166, 0.22), transparent 30%),
+                #070b14;
+            transition: opacity .35s ease, visibility .35s ease;
+        }
+
+        .auth-gate.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .auth-loader-card {
+            width: min(86vw, 360px);
+            display: grid;
+            justify-items: center;
+            gap: 18px;
+            text-align: center;
+            padding: 28px;
+            border: 1px solid rgba(203, 213, 225, 0.95);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 24px 70px rgba(2, 6, 23, 0.35);
+        }
+
+        .auth-loader-mark {
+            width: 84px;
+            height: 84px;
+            border-radius: 26px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            background: linear-gradient(135deg, #1d4ed8, #0f766e);
+            box-shadow: 0 24px 70px rgba(37, 99, 235, 0.38);
+            animation: gateFloat 1.8s ease-in-out infinite;
+        }
+
+        .auth-loader-ring {
+            width: 148px;
+            height: 4px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #dbeafe;
+        }
+
+        .auth-loader-ring span {
+            display: block;
+            width: 45%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #1d4ed8, #0f766e);
+            animation: gateSweep 1.1s ease-in-out infinite;
+        }
+
+        .auth-loader-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0;
+            color: #0f172a;
+        }
+
+        .auth-loader-subtitle {
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.5;
+            font-weight: 700;
+        }
+
+        body.auth-checking .shell {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gateFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.03); }
+        }
+
+        @keyframes gateSweep {
+            0% { transform: translateX(-110%); }
+            100% { transform: translateX(260%); }
+        }
+    </style>
+    <link rel="preload" href="/schoolix-erp.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="schoolix-polish.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="/schoolix-erp.css">
+      <link rel="stylesheet" href="schoolix-polish.css">
+    </noscript>
+</head>
+<body class="sx-login-app auth-checking">
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+
+<div class="auth-gate" id="authGate" role="status" aria-live="polite">
+        <div class="auth-loader-card">
+        <div class="auth-loader-mark">
+            <img src="/schoolix-app-icon.svg" alt="Schoolix logo">
+        </div>
+        <div>
+            <div class="auth-loader-title">Opening Schoolix</div>
+            <div class="auth-loader-subtitle" id="authGateText">Checking your saved login...</div>
+        </div>
+        <div class="auth-loader-ring"><span></span></div>
+    </div>
+</div>
+
+<main class="shell">
+
+    <header class="mobile-brand" aria-label="Schoolix">
+        <div class="mobile-brand-logo">
+            <div class="brand-icon" style="width:32px;height:32px;border-radius:10px;">
+                <img src="/schoolix-app-icon.svg" alt="">
+            </div>
+            Schoolix
+        </div>
+        <span class="mobile-brand-tag">Sign in</span>
+    </header>
+
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-overlay"></div>
+
+        <div class="panel-left-content">
+            <!-- Brand -->
+            <div class="brand-logo">
+                <div class="brand-icon">
+                    <img src="/schoolix-app-icon.svg" alt="">
+                </div>
+                Schoolix
+            </div>
+
+            <!-- Hero -->
+            <div class="left-hero">
+                <div class="hero-tag">
+                    <span class="hero-tag-dot"></span>
+                    School ERP Platform
+                </div>
+                <h1 class="hero-heading">
+                    Empowering<br>
+                    <span>Education,</span><br>
+                    Simplified.
+                </h1>
+                <p class="hero-desc">
+                    A practical workspace for admissions, attendance, fees, reports, teachers, and transport.
+                </p>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-num">500+</span>
+                        <span class="stat-label">Schools</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">1.2L+</span>
+                        <span class="stat-label">Students</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">24/7</span>
+                        <span class="stat-label">Access</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dots -->
+            <div class="dots-row">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot active"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+        <div class="form-card">
+
+            <div class="form-header">
+                <p class="form-welcome">Welcome back</p>
+                <h2 class="form-title">Sign In</h2>
+                <p class="form-subtitle">Access your dashboard using your school credentials.</p>
+
+                <div class="form-hint">
+                    <span class="form-hint-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    </span>
+                    <p>Use your <strong style="color:#c4b5fd;font-weight:600;">email</strong>, parent email, or <strong style="color:#c4b5fd;font-weight:600;">Student ID</strong> to continue.</p>
+                </div>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="field">
+                    <label class="field-label" for="email">Email Address / Student ID</label>
+                    <div class="field-wrap">
+                        <input
+                            class="field-input"
+                            type="text"
+                            id="email"
+                            placeholder="Enter email or Student ID"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <div class="field-wrap">
+                        <input
+                            class="field-input"
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="field-suffix toggle-password"
+                            id="togglePassword"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            title="Show password"
+                        >
+                            <svg id="eyeIcon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 5c-5.5 0-10 4.5-11 7 1 2.5 5.5 7 11 7s10-4.5 11-7c-1-2.5-5.5-7-11-7Zm0 11.5A4.5 4.5 0 1 1 12 7a4.5 4.5 0 0 1 0 9.5Zm0-2A2.5 2.5 0 1 0 12 9a2.5 2.5 0 0 0 0 5Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="forgot-row">
+                    <a href="#" class="forgot-link" onclick="resetPassword(); return false;">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+
+            <div class="loading-bar" id="loading"></div>
+
+            <div class="error-msg" id="errorMsg">
+                <span class="error-msg-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                </span>
+                <p id="errorText"></p>
+            </div>
+
+            <div class="or-row">
+                <div class="or-line"></div>
+                <span class="or-text">or continue with</span>
+                <div class="or-line"></div>
+            </div>
+
+            <button class="btn-google" onclick="loginWithGoogle()">
+                <svg class="google-svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <a class="btn-apk" id="downloadAndroidApp" href="/dist/Schoolix-download" download="Schoolix.apk">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
+                </svg>
+                <span id="downloadAndroidLabel">Download Android App</span>
+            </a>
+            <span class="download-meta" id="downloadAndroidMeta">Latest APK</span>
+
+        </div>
+    </div>
+</main>
+
+<script src="school-branding.js" defer></script>
+<script src="/schoolix-app.js?v=navbar-20260721" defer></script>
+<script type="module">
+import { initializeApp } from "./firebase-compat.js";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
+    signInWithCredential,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signOut
+} from "./firebase-compat.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    getDocs,
+    collection,
+    query,
+    where,
+    limit,
+    setDoc
+} from "./firebase-compat.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    authDomain: "schoolix-48107.firebaseapp.com",
+    projectId: "schoolix-48107"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
+
+const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const PASSWORD_RESET_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-password-reset-email`;
+
+const loginForm = document.getElementById('loginForm');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const loadingEl = document.getElementById('loading');
+const errorEl = document.getElementById('errorMsg');
+const errorText = document.getElementById('errorText');
+const togglePasswordBtn = document.getElementById('togglePassword');
+const eyeIcon = document.getElementById('eyeIcon');
+const downloadAndroidApp = document.getElementById('downloadAndroidApp');
+const downloadAndroidLabel = document.getElementById('downloadAndroidLabel');
+const downloadAndroidMeta = document.getElementById('downloadAndroidMeta');
+const authGate = document.getElementById('authGate');
+const authGateText = document.getElementById('authGateText');
+let authRedirectInProgress = false;
+let nativeGoogleResolve = null;
+let nativeGoogleReject = null;
+
+const STUDENT_SESSION_KEY = "schoolixStudentSession";
+const SUPER_ADMIN_EMAIL = "anshbajpai4@gmail.com";
+
+function loadStudentSession() {
+    try { return JSON.parse(localStorage.getItem(STUDENT_SESSION_KEY)); } catch { return null; }
+}
+function saveStudentSession(data) {
+    localStorage.setItem(STUDENT_SESSION_KEY, JSON.stringify(data));
+}
+function clearStudentSession() {
+    localStorage.removeItem(STUDENT_SESSION_KEY);
+}
+
+function linkedSchoolId(profile = {}, adminData = null) {
+    return String(
+        profile.schoolId || profile.schoolID || profile.schoolUid || profile.schoolUID || profile.schoolDocId || profile.schoolDocID ||
+        profile.adminId || profile.adminID || profile.adminUid || profile.adminUID || profile.adminDocId || profile.adminDocID ||
+        adminData?.schoolId || adminData?.schoolID || adminData?.schoolUid || adminData?.schoolUID ||
+        adminData?.adminId || adminData?.adminID || adminData?.adminUid || adminData?.adminUID ||
+        adminData?.schoolDocId || adminData?.schoolDocID || adminData?.adminDocId || adminData?.adminID || adminData?.id || ""
+    ).trim();
+}
+
+function buildStudentSession(user, student = {}, adminData = null, extra = {}) {
+    const schoolId = linkedSchoolId(student, adminData);
+    const schoolName = student.schoolName || adminData?.schoolName || window.SchoolBranding?.getSchoolName?.() || "";
+    return {
+        uid: user.uid,
+        authUid: user.supabaseUid || user.uid,
+        supabaseAuthUid: user.supabaseUid || "",
+        studentId: student.studentId || student.id || user.uid,
+        studentDocId: student.studentDocId || student.id || "",
+        name: student.name || student.fullName || student.studentName || "",
+        class: student.class || "",
+        section: student.section || "",
+        rollNo: student.rollNo || student.roll || "",
+        email: student.email || student.authEmail || user.email || "",
+        schoolId,
+        schoolName,
+        role: "student",
+        loginAt: new Date().toISOString(),
+        ...extra
+    };
+}
+
+const FEATURE_LABELS = {
+    dashboard: "Dashboard",
+    teachers: "Teachers",
+    students: "Students",
+    attendance: "Attendance",
+    payroll: "Payroll",
+    reports: "Reports",
+    announcements: "Announcements",
+    settings: "Settings"
+};
+
+async function hydrateAndroidDownloadLink() {
+    if (!downloadAndroidApp) return;
+    const fallbackUrl = "/dist/Schoolix-download";
+    try {
+        const response = await fetch(`/version.json?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("version.json unavailable");
+        const data = await response.json();
+        const apkUrl = String(data.apkUrl || fallbackUrl).trim();
+        downloadAndroidApp.href = apkUrl || fallbackUrl;
+        if (downloadAndroidLabel) downloadAndroidLabel.textContent = "Download Latest Android App";
+        if (downloadAndroidMeta) {
+            const versionName = data.versionName ? `v${data.versionName}` : "Latest version";
+            const versionCode = data.versionCode ? ` build ${data.versionCode}` : "";
+            downloadAndroidMeta.textContent = `${versionName}${versionCode}`;
+        }
+    } catch (error) {
+        console.warn("Unable to load APK metadata:", error);
+        downloadAndroidApp.href = fallbackUrl;
+        if (downloadAndroidMeta) downloadAndroidMeta.textContent = "Latest APK";
+    }
+}
+
+function scheduleAndroidDownloadHydration() {
+    const run = () => {
+        if ("requestIdleCallback" in window) window.requestIdleCallback(() => hydrateAndroidDownloadLink(), { timeout: 3000 });
+        else setTimeout(() => hydrateAndroidDownloadLink(), 1500);
+    };
+    if (document.readyState === "complete") run();
+    else window.addEventListener("load", run, { once: true });
+}
+
+scheduleAndroidDownloadHydration();
+
+function accessErrorFor(adminData, featureKey = "") {
+    if (!adminData || adminData.access === false) {
+        return "Your school's platform access has been disabled by the Super Admin. Please contact support.";
+    }
+    if (featureKey && (adminData.features || {})[featureKey] === false) {
+        return `${FEATURE_LABELS[featureKey] || "This"} access has been disabled for your school by the Super Admin.`;
+    }
+    return "";
+}
+
+async function getAdminAccessData(userId, userData) {
+    if (!userData) return null;
+    if ((userData.role || "").toLowerCase() === "admin") return { id: userId, ...userData };
+    const adminId = linkedSchoolId(userData);
+    if (!adminId) return null;
+    try {
+        const adminSnap = await getDoc(doc(db, "users", adminId));
+        return adminSnap.exists() ? { id: adminSnap.id, ...adminSnap.data() } : null;
+    } catch (error) {
+        console.warn("Unable to load admin access profile", error);
+        return null;
+    }
+}
+
+const EYE_OPEN = `<path d="M12 5c-5.5 0-10 4.5-11 7 1 2.5 5.5 7 11 7s10-4.5 11-7c-1-2.5-5.5-7-11-7Zm0 11.5A4.5 4.5 0 1 1 12 7a4.5 4.5 0 0 1 0 9.5Zm0-2A2.5 2.5 0 1 0 12 9a2.5 2.5 0 0 0 0 5Z"/>`;
+const EYE_CLOSED = `<path d="M2.1 3.51 3.51 2.1l18.38 18.38-1.41 1.41-3.3-3.3A10.96 10.96 0 0 1 12 21C6.5 21 2 16.5 1 14c.52-1.31 1.63-2.97 3.22-4.49l-.21-.21A.99.99 0 0 1 2.1 3.51ZM12 7c2.76 0 5 2.24 5 5 0 .62-.11 1.21-.32 1.76l-1.6-1.6A2.97 2.97 0 0 0 12 9c-.7 0-1.34.24-1.85.64L8.79 8.28A4.97 4.97 0 0 1 12 7Zm0 10c-2.76 0-5-2.24-5-5 0-.74.16-1.45.43-2.08L5.37 8.86C4 10.12 3.1 11.42 2.78 12c1 2.09 4.59 6 9.22 6 1.11 0 2.17-.18 3.14-.5l-1.69-1.69c-.45.12-.93.19-1.45.19Zm5.63-2.69 1.48 1.48C20.48 14.93 21.48 13.46 21.9 12c-1-2.5-5.5-7-9.9-7-1.25 0-2.46.23-3.56.65l1.56 1.56c.62-.14 1.28-.21 1.98-.21 2.76 0 5 2.24 5 5 0 .47-.07.92-.2 1.31Z"/>`;
+
+togglePasswordBtn.addEventListener('click', () => {
+    const isHidden = passwordInput.type === "password";
+    passwordInput.type = isHidden ? "text" : "password";
+    eyeIcon.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
+    togglePasswordBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+    togglePasswordBtn.setAttribute("aria-pressed", String(isHidden));
+});
+
+function showError(message) {
+    errorText.textContent = message;
+    errorEl.classList.add('visible');
+    setTimeout(() => errorEl.classList.remove('visible'), 5500);
+}
+
+const accessError = new URLSearchParams(window.location.search).get("access_error");
+if (accessError) {
+    showError(accessError);
+    history.replaceState({}, document.title, window.location.pathname);
+}
+
+function showLoading(show) {
+    loadingEl.classList.toggle('visible', show);
+    loginForm.style.opacity = show ? '0.65' : '1';
+    loginForm.style.pointerEvents = show ? 'none' : '';
+}
+
+function setAuthGate(message) {
+    if (authGateText && message) authGateText.textContent = message;
+    document.body.classList.add("auth-checking");
+    authGate?.classList.remove("hidden");
+}
+
+function hideAuthGate() {
+    document.body.classList.remove("auth-checking");
+    authGate?.classList.add("hidden");
+}
+
+function isNativeSchoolixApp() {
+    try {
+        if (window.Capacitor?.isNativePlatform?.()) return true;
+        return location.protocol === "capacitor:";
+    } catch {
+        return false;
+    }
+}
+
+function signInWithNativeGoogle() {
+    return new Promise((resolve, reject) => {
+        if (!window.SchoolixNativeAuth?.signInWithGoogle) {
+            reject(new Error("Native Google login is not available"));
+            return;
+        }
+        nativeGoogleResolve = resolve;
+        nativeGoogleReject = reject;
+        window.SchoolixNativeAuth.signInWithGoogle();
+    });
+}
+
+window.SchoolixNativeGoogleAuth = {
+    async receiveIdToken(idToken) {
+        try {
+            const token = String(idToken || "").trim();
+            if (!token) throw new Error("Google login token was not received");
+            const credential = GoogleAuthProvider.credential(token);
+            const result = await signInWithCredential(auth, credential);
+            nativeGoogleResolve?.(result);
+        } catch (error) {
+            nativeGoogleReject?.(error);
+        } finally {
+            nativeGoogleResolve = null;
+            nativeGoogleReject = null;
+        }
+    },
+    receiveError(message) {
+        nativeGoogleReject?.(new Error(message || "Google login failed"));
+        nativeGoogleResolve = null;
+        nativeGoogleReject = null;
+    }
+};
+
+function isParentIdentifier(identifier, student) {
+    const lowered = String(identifier || "").trim().toLowerCase();
+    if (!lowered || !lowered.includes("@")) return false;
+    if (String(student.email || "").trim().toLowerCase() === lowered) return false;
+    if (String(student.authEmail || "").trim().toLowerCase() === lowered) return false;
+    return [student.parentEmail, student.fatherEmail, student.motherEmail, student.guardianEmail]
+        .some(email => String(email || "").trim().toLowerCase() === lowered);
+}
+
+function uniqueLookupValues(values = []) {
+    const seen = new Set();
+    return values
+        .map(value => typeof value === "string" ? value.trim() : value)
+        .filter(value => value !== "" && value !== null && value !== undefined)
+        .filter(value => {
+            const key = `${typeof value}:${String(value)}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+}
+
+async function findStudentRecord(identifier, options = {}) {
+    const normalized = identifier.trim();
+    if (!normalized) return null;
+    const lowered = normalized.toLowerCase();
+    const uppered = normalized.toUpperCase();
+    const idValues = uniqueLookupValues([
+        normalized,
+        lowered,
+        uppered,
+        /^\d+$/.test(normalized) ? Number(normalized) : null
+    ]);
+
+    for (const docId of uniqueLookupValues([normalized, lowered, uppered])) {
+        try {
+            const byIdDoc = await getDoc(doc(db, "users", docId));
+            if (byIdDoc.exists() && (byIdDoc.data().role || "").toLowerCase() === "student") {
+                return { id: byIdDoc.id, ...byIdDoc.data() };
+            }
+        } catch (error) {
+            if (error?.code !== "permission-denied") console.warn("Student direct lookup failed:", error);
+        }
+    }
+
+    const lookups = [
+        ["studentId", idValues],
+        ["email", uniqueLookupValues([lowered, normalized])],
+        ["authEmail", uniqueLookupValues([lowered, normalized])]
+    ];
+    if (options.parent) {
+        const emailValues = uniqueLookupValues([lowered, normalized]);
+        lookups.push(
+            ["parentEmail", emailValues],
+            ["fatherEmail", emailValues],
+            ["motherEmail", emailValues],
+            ["guardianEmail", emailValues]
+        );
+    }
+    for (const [field, values] of lookups) {
+        for (const value of values) {
+            try {
+                const snap = await getDocs(query(
+                    collection(db, "users"),
+                    where("role", "==", "student"),
+                    where(field, "==", value),
+                    limit(1)
+                ));
+                if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+            } catch (error) {
+                if (error?.code !== "permission-denied") console.warn(`Student ${field} lookup failed:`, error);
+            }
+        }
+    }
+    return null;
+}
+
+async function loginStudent(identifier, password, options = {}) {
+    const student = await findStudentRecord(identifier, { parent: true });
+    if (!student) return { success: false, reason: "Student or parent record not found." };
+    const authEmail = String(student.authEmail || student.email || "").trim().toLowerCase();
+    if (!authEmail || authEmail.endsWith("@schoolix.student")) {
+        return { success: false, reason: "Registered email is missing for this student. Contact admin to update the student login email." };
+    }
+    const cred = await signInWithEmailAndPassword(auth, authEmail, password);
+    const expectedAuthUid = String(student.authUid || "").trim();
+    const signedInIds = [cred.user.uid, cred.user.supabaseUid].map(value => String(value || "").trim()).filter(Boolean);
+    const signedInEmail = String(cred.user.email || "").trim().toLowerCase();
+    const studentEmails = [student.authEmail, student.email]
+        .map(value => String(value || "").trim().toLowerCase())
+        .filter(Boolean);
+    if (expectedAuthUid && !signedInIds.includes(expectedAuthUid) && !studentEmails.includes(signedInEmail)) {
+        await signOut(auth).catch(() => {});
+        return { success: false, reason: "Student login record is linked to a different account. Contact admin to refresh this student's login." };
+    }
+    const adminData = await getAdminAccessData(cred.user.uid, student);
+    const accessReason = accessErrorFor(adminData);
+    if (accessReason) {
+        await signOut(auth).catch(() => {});
+        return { success: false, reason: accessReason };
+    }
+    if (isParentIdentifier(identifier, student)) {
+        saveStudentSession(buildStudentSession(cred.user, student, adminData, {
+            loginAs: "parent",
+            parentEmail: identifier.toLowerCase()
+        }));
+        window.location.href = "student-dashboard.html";
+        return { success: true };
+    }
+    saveStudentSession(buildStudentSession(cred.user, student, adminData));
+    setAuthGate("Opening student dashboard...");
+    window.location.href = "student-dashboard.html";
+    return { success: true };
+}
+
+async function findSignedInStudentRecord(user) {
+    if (!user) return null;
+    const uid = String(user.uid || "").trim();
+    const email = String(user.email || "").trim().toLowerCase();
+    if (uid) {
+        try {
+            const snap = await getDocs(query(
+                collection(db, "users"),
+                where("role", "==", "student"),
+                where("authUid", "==", uid),
+                limit(1)
+            ));
+            if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        } catch (error) {
+            if (error?.code !== "permission-denied") console.warn("Student auth UID lookup failed:", error);
+        }
+    }
+    return email ? await findStudentRecord(email, { parent: true }) : null;
+}
+
+async function findSignedInUserRecord(user) {
+    if (!user) return null;
+    const uid = String(user.uid || "").trim();
+    const email = String(user.email || "").trim().toLowerCase();
+    const lookups = [];
+    if (uid) lookups.push(["authUid", uid], ["uid", uid]);
+    if (email) lookups.push(["email", email], ["authEmail", email]);
+    for (const [field, value] of lookups) {
+        try {
+            const snap = await getDocs(query(collection(db, "users"), where(field, "==", value), limit(1)));
+            if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        } catch (error) {
+            if (error?.code !== "permission-denied") console.warn(`Profile ${field} recovery failed:`, error);
+        }
+    }
+    return null;
+}
+
+async function syncSchoolName(userId, userData) {
+    try {
+        const branding = window.SchoolBranding;
+        if (!branding) return;
+        const direct = branding.normalizeSchoolName(userData.schoolName);
+        if (userData.logoUrl || userData.schoolLogoUrl) branding.persistSchoolLogo?.(userData.logoUrl || userData.schoolLogoUrl);
+        if (direct) { branding.persistSchoolName(direct); return; }
+        const adminId = linkedSchoolId(userData) || (userData.role === "admin" ? userId : "");
+        if (!adminId) return;
+        let appliedName = false;
+        const adminDoc = await getDoc(doc(db, "users", adminId));
+        if (adminDoc.exists()) {
+            const adminData = adminDoc.data();
+            const n = branding.normalizeSchoolName(adminData.schoolName);
+            if (adminData.logoUrl || adminData.schoolLogoUrl) branding.persistSchoolLogo?.(adminData.logoUrl || adminData.schoolLogoUrl);
+            if (n) { branding.persistSchoolName(n); appliedName = true; }
+        }
+        const brandDoc = await getDoc(doc(db, "schools", adminId, "config", "branding"));
+        if (brandDoc.exists()) {
+            const brandData = brandDoc.data();
+            const n = branding.normalizeSchoolName(brandData.schoolName);
+            if (brandData.logoUrl || brandData.schoolLogoUrl) branding.persistSchoolLogo?.(brandData.logoUrl || brandData.schoolLogoUrl);
+            if (n && !appliedName) branding.persistSchoolName(n);
+        }
+    } catch (e) { console.warn("Branding sync failed:", e); }
+}
+
+async function checkUserRoleAndRedirect(user) {
+    try {
+        setAuthGate("Restoring your dashboard...");
+        const email = String(user.email || "").trim().toLowerCase();
+        if (email === SUPER_ADMIN_EMAIL) {
+            clearStudentSession();
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    name: "Ansh Bajpai",
+                    email: SUPER_ADMIN_EMAIL,
+                    role: "superAdmin",
+                    superAdmin: true,
+                    access: true,
+                    updatedAt: new Date()
+                }, { merge: true });
+            } catch (profileError) {
+                console.warn("Super admin profile bootstrap failed:", profileError);
+            }
+            setAuthGate("Opening super admin console...");
+            window.location.href = "admin-signup.html";
+            return;
+        }
+        const docRef = await getDoc(doc(db, "users", user.uid));
+        let data = docRef.exists() ? docRef.data() : null;
+        if (!data) {
+            const recoveredUser = await findSignedInUserRecord(user);
+            if (recoveredUser) {
+                data = recoveredUser;
+            }
+        }
+        if (!data) {
+            const recoveredStudent = await findSignedInStudentRecord(user);
+            if (recoveredStudent) {
+                const adminData = await getAdminAccessData(user.uid, recoveredStudent);
+                const accessReason = accessErrorFor(adminData);
+                if (accessReason) {
+                    await signOut(auth).catch(() => {});
+                    hideAuthGate();
+                    showError(accessReason);
+                    return;
+                }
+                syncSchoolName(user.uid, recoveredStudent).catch(() => {});
+                saveStudentSession(buildStudentSession(user, recoveredStudent, adminData));
+                setAuthGate("Opening student dashboard...");
+                window.location.href = "student-dashboard.html";
+                return;
+            }
+            hideAuthGate(); showError("User data not found. Contact admin."); return;
+        }
+        const role = data.role;
+        if (data.email && user.email && data.email.toLowerCase() !== user.email.toLowerCase()) {
+            hideAuthGate();
+            showError("Account mismatch detected"); return;
+        }
+        clearStudentSession();
+        const adminData = await getAdminAccessData(user.uid, data);
+        const accessReason = accessErrorFor(adminData || data, role === "admin" ? "dashboard" : "");
+        if (accessReason) {
+            await signOut(auth).catch(() => {});
+            hideAuthGate();
+            showError(accessReason);
+            return;
+        }
+        syncSchoolName(user.uid, data).catch(() => {});
+        if (isNativeSchoolixApp() && role === "admin") {
+            await signOut(auth).catch(() => {});
+            hideAuthGate();
+            showError("Admin login is only available on the web panel. Please use a student, parent, teacher, librarian, or accountant account in the app.");
+            return;
+        }
+        if (role === "teacher") {
+            setAuthGate("Opening teacher dashboard...");
+            localStorage.setItem("teacherSection", data.section || "");
+            window.location.href = "teacher-dashboard.html"; return;
+        }
+        if (role === "admin") { window.location.href = "admin-dashboard.html"; return; }
+        if (role === "librarian") { window.location.href = "library-dashboard.html"; return; }
+        if (role === "accountant") { window.location.href = "accountant-dashboard.html?v=accountant-dashboard-recovery-20260806"; return; }
+        if (role === "driver") {
+            setAuthGate("Opening driver dashboard...");
+            window.location.href = "driver-dashboard.html"; return;
+        }
+        if (role === "student") {
+            setAuthGate("Opening student dashboard...");
+            saveStudentSession(buildStudentSession(user, data, adminData, { loginAs: "student" }));
+            window.location.href = "student-dashboard.html"; return;
+        }
+        hideAuthGate();
+        showError("Invalid role assigned");
+    } catch (e) { hideAuthGate(); showError("Login error. Try again."); }
+}
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const identifier = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!identifier || !password) { showError('Please fill all fields'); return; }
+    showLoading(true);
+
+    const looksLikeEmail = identifier.includes("@") || identifier.toLowerCase().includes(".com") || identifier.toLowerCase().includes(".in");
+
+    try {
+        let directAuthError = null;
+        if (looksLikeEmail) {
+            try {
+                const authId = identifier.toLowerCase();
+                const cred = await signInWithEmailAndPassword(auth, authId, password);
+                await checkUserRoleAndRedirect(cred.user);
+                return;
+            } catch (error) {
+                directAuthError = error;
+            }
+        }
+
+        let studentLogin = { success: false, reason: "" };
+        try {
+            studentLogin = await loginStudent(identifier, password);
+            if (studentLogin.success) return;
+        } catch (studentAuthError) {
+            studentLogin.reason = studentAuthError.code === "auth/wrong-password" || studentAuthError.code === "auth/invalid-credential"
+                ? "Wrong student password"
+                : studentAuthError.code === "auth/user-not-found"
+                    ? "No login account found for this student. Contact admin."
+                    : studentAuthError.message;
+        }
+
+        const authError = directAuthError || new Error(studentLogin.reason || "Login failed");
+        let msg = "Login failed";
+        switch (authError.code) {
+            case 'auth/user-not-found': msg = 'User not found'; break;
+            case 'auth/wrong-password': msg = 'Wrong password'; break;
+            case 'auth/invalid-credential': msg = 'Invalid login credentials'; break;
+            case 'auth/invalid-email': msg = 'Invalid email'; break;
+            default: msg = authError.message;
+        }
+        showError(studentLogin.reason || msg);
+    } catch (authError) {
+        showError(authError.message || "Login failed");
+    } finally { showLoading(false); }
+});
+
+async function finishGoogleLogin(user) {
+    if (!user) return false;
+    authRedirectInProgress = true;
+    try {
+        await checkUserRoleAndRedirect(user);
+    } finally {
+        setTimeout(() => { authRedirectInProgress = false; }, 1500);
+    }
+    return true;
+}
+
+
+async function handleGoogleRedirectResult() {
+    try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+            setAuthGate("Opening your dashboard...");
+            await finishGoogleLogin(result.user);
+        }
+    } catch (error) {
+        hideAuthGate();
+        showError(error.message || "Google login failed. Please try again.");
+    }
+}
+
+window.loginWithGoogle = async () => {
+    showLoading(true);
+    try {
+        if (isNativeSchoolixApp() && window.SchoolixNativeAuth?.signInWithGoogle) {
+            const result = await signInWithNativeGoogle();
+            await finishGoogleLogin(result.user);
+            return;
+        }
+        const result = await signInWithPopup(auth, googleProvider);
+        await finishGoogleLogin(result.user);
+    } catch (e) {
+        const code = String(e?.code || "");
+        if (code.includes("popup") || code.includes("cancelled") || code.includes("operation-not-supported")) {
+            try {
+                await signInWithRedirect(auth, googleProvider);
+                return;
+            } catch (redirectError) {
+                showError(redirectError.message || "Google login failed. Please try again.");
+            }
+        } else {
+            showError(e.message || "Google login failed. Please try again.");
+        }
+    } finally { showLoading(false); }
+};
+
+window.resetPassword = async () => {
+    const identifier = emailInput.value.trim();
+    if (!identifier) { showError('Please enter your email or Student ID first'); return; }
+    showLoading(true);
+    try {
+        let emailToReset = identifier;
+        if (!identifier.includes("@")) {
+            const student = await findStudentRecord(identifier, { parent: true });
+            if (!student) { showError('Student record not found'); return; }
+            emailToReset = String(student.authEmail || student.email || "").trim();
+            if (!emailToReset || emailToReset.endsWith("@schoolix.student")) {
+                showError('No registered email found for this student. Contact admin.');
+                return;
+            }
+        }
+        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+                email: emailToReset,
+                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"
+            })
+        });
+        if (!response.ok) {
+            const details = await response.text();
+            throw new Error(details || "Password reset email failed");
+        }
+        showError('Password reset email sent to your registered address');
+    } catch (e) {
+        showError(e.message || "Password reset email failed. Contact admin.");
+    } finally { showLoading(false); }
+};
+
+handleGoogleRedirectResult();
+
+onAuthStateChanged(auth, async (user) => {
+    if (authRedirectInProgress) return;
+    if (user) { await checkUserRoleAndRedirect(user); return; }
+    const savedStudentSession = loadStudentSession();
+    if (savedStudentSession) {
+        clearStudentSession();
+        showError("Your saved session expired. Please sign in again.");
+    }
+    hideAuthGate();
+});
+</script>
+  <script src="schoolix-polish.js" defer></script>
+</body>
+</html>

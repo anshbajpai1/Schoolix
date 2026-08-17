@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Librarian Notices - Schoolix</title>
+  <link rel="stylesheet" href="library-portal.css">
+  <link rel="stylesheet" href="schoolix-polish.css">
+  <link rel="stylesheet" href="notice-board.css">
+</head>
+<body class="notice-board-app librarian-notice-app library-dashboard-app" data-notice-role="librarian" data-library-page="notices">
+  <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+    <section class="dots-container" aria-label="Loading page">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </section>
+  </div>
+  <div class="notice-app-layout library-app-layout">
+    <div class="sidebar-overlay library-sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+    <aside class="notice-sidebar library-sidebar" id="noticeSidebar"></aside>
+    <div class="notice-main">
+      <header class="notice-page-topbar">
+        <div class="notice-topbar-left">
+          <button class="notice-menu-button" id="noticeMenuButton" type="button" aria-label="Open library navigation" aria-expanded="false">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+          </button>
+          <div>
+            <div class="notice-page-title">Notices</div>
+            <div class="notice-page-meta">Library notice board</div>
+          </div>
+        </div>
+        <div class="notice-topbar-actions">
+          <button class="notice-topbar-refresh" id="refreshNotices" type="button">
+            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9.5 9.5 0 0 1-6.7-2.8"></path><path d="M3 12a9 9 0 0 1 9-9 9.5 9.5 0 0 1 6.7 2.8"></path><path d="M21 3v6h-6"></path><path d="M3 21v-6h6"></path></svg>
+            <span>Refresh</span>
+          </button>
+          <div class="notice-user-chip">
+            <span class="notice-avatar" id="topbarAvatar">L</span>
+            <span id="topbarUserName">Librarian</span>
+          </div>
+          <span class="notice-role" id="roleLabel">Librarian</span>
+        </div>
+      </header>
+      <main class="notice-shell">
+        <section class="notice-hero">
+          <div class="notice-hero-copy">
+            <span class="notice-eyebrow"><span class="notice-live-dot"></span>Library Notices</span>
+            <h1>Notices</h1>
+            <p class="notice-subtitle" id="noticeSummary">Latest school notices shared with library staff.</p>
+          </div>
+          <div class="notice-hero-stat">
+            <strong id="noticeCount">--</strong>
+            <span>Notices</span>
+          </div>
+        </section>
+        <section class="notice-toolbar">
+          <div>
+            <h2>Latest Notices</h2>
+            <p>Announcements assigned to library staff.</p>
+          </div>
+        </section>
+        <section class="notice-list" id="noticeList"><div class="notice-empty notice-loading"><span class="notice-spinner"></span><strong>Loading notices</strong><small>Please wait a moment...</small></div></section>
+      </main>
+    </div>
+  </div>
+  <script src="library-portal.js"></script>
+  <script type="module" src="notice-board.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="sxCriticalLoaderScript">
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+</script>
+<style id="sxCriticalLoaderStyle">
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #f5f7fb !important;
+  overflow: hidden;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after { visibility: hidden !important; }
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) { visibility: hidden !important; }
+
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(700px 420px at 50% 38%, #ffffff 0%, #f1f5f9 100%);
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.sx-page-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.sx-page-loader .dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(200px, 56vw);
+  height: 72px;
+}
+.sx-page-loader .dot {
+  height: clamp(11px, 3.6vw, 16px);
+  width: clamp(11px, 3.6vw, 16px);
+  margin-right: clamp(8px, 2.4vw, 12px);
+  border-radius: 50%;
+  background: #2563eb;
+  animation: sxLoaderPulse 1.5s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+.sx-page-loader .dot:last-child { margin-right: 0; }
+.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
+.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
+.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
+.sx-page-loader .dot:nth-child(4) { animation-delay: 0.3s; }
+.sx-page-loader .dot:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes sxLoaderPulse {
+  0% { transform: scale(0.8); background-color: #93b4fc; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+  50% { transform: scale(1.2); background-color: #2563eb; box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+  100% { transform: scale(0.8); background-color: #93b4fc; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-page-loader .dot { animation-duration: 0.001ms; }
+}
+</style>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Management - Schoolix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Schoolix Transport Control Center - manage school vehicles, drivers, routes and live GPS bus tracking from one admin workspace.">
+<style id="sxTransportDesignSystem">
+/* =====================================================================
+   Schoolix • Transport Control Center — unified design system
+   Single source of truth. No competing overrides.
+   ===================================================================== */
+
+:root {
+  --font-sans: "Inter", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+
+  --bg: #f5f7fb;
+  --bg-grid: rgba(15, 23, 42, 0.035);
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+
+  --ink: #0f172a;
+  --ink-2: #334155;
+  --muted: #64748b;
+  --faint: #94a3b8;
+
+  --line: #e6ebf3;
+  --line-strong: #d7dfea;
+
+  --brand: #2563eb;
+  --brand-ink: #1d4ed8;
+  --brand-soft: #eff6ff;
+  --brand-ring: rgba(37, 99, 235, 0.18);
+
+  --success: #10b981;
+  --success-soft: #e8f9f1;
+  --success-ink: #0f766e;
+  --warn: #f59e0b;
+  --warn-soft: #fff5e5;
+  --warn-ink: #a16207;
+  --danger: #ef4444;
+  --danger-soft: #fef2f2;
+  --danger-ink: #b91c1c;
+  --violet: #7c3aed;
+  --teal: #0d9488;
+
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 12px 30px -12px rgba(15, 23, 42, 0.22);
+  --shadow-lg: 0 28px 60px -28px rgba(15, 23, 42, 0.38);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* legacy aliases kept so older selectors never break */
+  --transport-primary: var(--brand);
+  --transport-success: var(--success);
+  --transport-danger: var(--danger);
+  --ops-amber: var(--warn);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body.sx-transport-page {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 520px at 12% -10%, #e8efff 0%, rgba(232, 239, 255, 0) 60%),
+    radial-gradient(900px 460px at 96% 0%, #eafaf4 0%, rgba(234, 250, 244, 0) 55%),
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: auto, auto, 56px 56px, 56px 56px;
+  min-height: 100vh;
+  padding: 26px 20px 64px;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container { max-width: 1280px; margin: 0 auto; display: block; }
+
+::selection { background: var(--brand); color: #fff; }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--brand-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- type */
+h1 { font-size: clamp(24px, 3vw, 32px); line-height: 1.18; letter-spacing: -0.025em; font-weight: 800; }
+h2 { font-size: 18px; letter-spacing: -0.015em; font-weight: 750; }
+h3 { font-size: 15px; font-weight: 700; }
+.muted { color: var(--muted); font-size: 14px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --------------------------------------------------------------- cards */
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-heading {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.section-title-block { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.section-subtitle { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+.section-divider { height: 1px; background: var(--line); margin: 22px 0; border: 0; }
+
+.icon-tile {
+  width: 44px; height: 44px; flex: 0 0 auto;
+  border-radius: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #f3f7ff, #e6efff);
+  color: var(--brand-ink);
+  border: 1px solid #dce7fb;
+  box-shadow: inset 0 1px 0 #fff;
+}
+.icon { width: 16px; height: 16px; flex: 0 0 auto; stroke-linecap: round; stroke-linejoin: round; }
+.icon-tile .icon { width: 20px; height: 20px; }
+.icon-lg { width: 22px; height: 22px; }
+
+/* ---------------------------------------------------------------- hero */
+.transport-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 26px;
+  align-items: stretch;
+  color: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background:
+    radial-gradient(760px 320px at 88% -30%, rgba(56, 189, 248, 0.34), transparent 62%),
+    radial-gradient(560px 320px at 0% 120%, rgba(124, 58, 237, 0.32), transparent 60%),
+    linear-gradient(135deg, #0b1220 0%, #16233f 52%, #1e3a8a 100%);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  padding: 30px;
+}
+.transport-hero::after {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(70% 90% at 80% 0%, #000, transparent 75%);
+  pointer-events: none;
+}
+.transport-hero > * { position: relative; z-index: 1; }
+.transport-hero h1 { color: #fff; }
+.transport-hero .muted { color: rgba(226, 232, 240, 0.78); }
+
+.transport-hero-main { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-width: 0; }
+.transport-hero-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px; border-radius: 999px;
+  background: rgba(148, 197, 255, 0.14);
+  border: 1px solid rgba(148, 197, 255, 0.28);
+  color: #cfe4ff;
+  font-size: 11.5px; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.transport-command-panel {
+  display: flex; flex-direction: column; gap: 16px; justify-content: center;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: rgba(9, 14, 28, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  backdrop-filter: blur(8px);
+}
+.command-title { font-weight: 750; font-size: 14px; letter-spacing: 0.01em; color: #fff; }
+.transport-command-panel .muted { color: rgba(203, 213, 225, 0.72); font-size: 12.5px; }
+.command-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.command-tile {
+  border-radius: 12px; padding: 13px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+.command-tile:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.12); }
+.command-tile strong { display: block; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: #fff; font-variant-numeric: tabular-nums; }
+.command-tile span { font-size: 11.5px; color: rgba(203, 213, 225, 0.8); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+/* --------------------------------------------------------------- stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.stat {
+  display: flex; align-items: center; gap: 13px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #fff, var(--surface-2));
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.stat:hover { transform: translateY(-2px); border-color: #cfe0ff; box-shadow: var(--shadow-md); }
+.stat-icon {
+  width: 40px; height: 40px; flex: 0 0 auto; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--brand-soft); color: var(--brand-ink); border: 1px solid #dbeafe;
+}
+.stat-icon .icon { width: 18px; height: 18px; }
+.stat strong { display: block; font-size: 23px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12.5px; color: var(--muted); font-weight: 550; }
+
+/* ------------------------------------------------------------ buttons */
+button, .btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-purple, .btn-teal {
+  font-family: inherit;
+}
+.btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-purple, .btn-teal {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font-size: 14px; font-weight: 650; line-height: 1.2;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+.btn-primary:hover, .btn-secondary:hover, .btn-danger:hover,
+.btn-success:hover, .btn-purple:hover, .btn-teal:hover { transform: translateY(-1px); }
+.btn-primary:active, .btn-secondary:active, .btn-danger:active,
+.btn-success:active, .btn-purple:active, .btn-teal:active { transform: translateY(0); }
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.btn-primary {
+  background: linear-gradient(180deg, #3b82f6, var(--brand-ink));
+  color: #fff;
+  box-shadow: 0 10px 22px -12px rgba(37, 99, 235, 0.9), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.btn-primary:hover { box-shadow: 0 16px 30px -14px rgba(37, 99, 235, 0.95); }
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink-2);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-xs);
+}
+.btn-secondary:hover { background: #fff; border-color: #bfd2ee; color: var(--brand-ink); }
+.transport-hero .btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.26);
+  color: #eaf2ff;
+}
+.transport-hero .btn-secondary:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+
+.btn-success { background: linear-gradient(180deg, #34d399, #059669); color: #fff; box-shadow: 0 10px 22px -14px rgba(5, 150, 105, 0.9); }
+.btn-danger  { background: linear-gradient(180deg, #f87171, #dc2626); color: #fff; box-shadow: 0 10px 22px -14px rgba(220, 38, 38, 0.9); }
+.btn-purple  { background: linear-gradient(180deg, #a78bfa, #6d28d9); color: #fff; box-shadow: 0 10px 22px -14px rgba(109, 40, 217, 0.9); }
+.btn-teal    { background: linear-gradient(180deg, #2dd4bf, #0f766e); color: #fff; box-shadow: 0 10px 22px -14px rgba(15, 118, 110, 0.9); }
+
+/* -------------------------------------------------------------- forms */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.field-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field-group.full-row, .full-row { grid-column: 1 / -1; }
+.field-label { font-size: 12.5px; font-weight: 650; color: var(--ink-2); letter-spacing: 0.01em; }
+.field-hint { font-size: 12px; color: var(--faint); }
+
+input, select, textarea {
+  width: 100%;
+  font: inherit; font-size: 14px;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease);
+}
+input::placeholder, textarea::placeholder { color: var(--faint); }
+input:hover, select:hover, textarea:hover { border-color: #c3d2e6; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-ring);
+}
+textarea { resize: vertical; min-height: 84px; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 34px;
+}
+form .btn-primary, form .btn-secondary { margin-top: 4px; }
+
+/* ------------------------------------------------------ filters/search */
+.filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  margin-bottom: 18px;
+}
+.search-box { position: relative; display: flex; align-items: center; }
+.search-box .icon { position: absolute; left: 12px; color: var(--faint); pointer-events: none; }
+.search-box input { padding-left: 36px; }
+
+/* --------------------------------------------------------- workspace */
+.transport-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.workspace-column { display: flex; flex-direction: column; min-width: 0; }
+.workspace-column > .card:last-child { margin-bottom: 0; }
+.transport-section { min-width: 0; }
+
+/* -------------------------------------------------------------- lists */
+.list { display: flex; flex-direction: column; gap: 12px; }
+.list > div,
+.list > article {
+  min-width: 0;
+}
+
+.vehicle-title {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 16px; font-weight: 750; letter-spacing: -0.01em;
+}
+.meta { color: var(--muted); font-size: 13px; }
+.empty, .loading-msg {
+  padding: 26px 18px; text-align: center;
+  color: var(--muted); font-size: 13.5px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 750; letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--surface-3); color: var(--ink-2); border: 1px solid var(--line-strong);
+}
+.pill.active { background: var(--success-soft); color: var(--success-ink); border-color: #bfe9d7; }
+.pill.maintenance { background: var(--warn-soft); color: var(--warn-ink); border-color: #f6dfae; }
+.pill.inactive { background: var(--danger-soft); color: var(--danger-ink); border-color: #f6cccc; }
+
+.vehicle-meta-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.vehicle-meta-box:hover { border-color: #cfe0ff; box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.vehicle-meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px; margin-top: 12px;
+}
+.vehicle-meta-grid > div {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius-xs); padding: 9px 11px; font-size: 13px;
+}
+.vehicle-compliance { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.vehicle-compliance span {
+  font-size: 12px; padding: 4px 9px; border-radius: 999px;
+  background: var(--surface-3); color: var(--ink-2); border: 1px solid var(--line);
+}
+.action-col { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.action-col button { padding: 8px 13px; font-size: 13px; }
+
+/* ------------------------------------------------------------- routes */
+.route-id-badge {
+  display: inline-flex; align-items: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 3px 9px; border-radius: 7px;
+  background: var(--brand-soft); color: var(--brand-ink); border: 1px solid #dbeafe;
+}
+.route-lookup-box {
+  display: none;
+  margin-top: 14px; padding: 16px;
+  border: 1px solid var(--line); border-left: 3px solid var(--brand);
+  border-radius: var(--radius); background: var(--surface-2);
+  font-size: 14px;
+}
+.route-lookup-box.show { display: block; animation: sxRise 0.24s var(--ease) both; }
+.via-section { margin-top: 12px; }
+.via-stops-list { margin: 8px 0 0 18px; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2); }
+
+/* ---------------------------------------------------------- live map */
+.transport-live-card { padding-bottom: 24px; }
+.live-map-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 16px;
+  margin-top: 18px;
+  min-height: 440px;
+}
+.transport-map {
+  position: relative;
+  min-height: 440px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background:
+    linear-gradient(135deg, #eef3fb, #e3ebf7);
+  box-shadow: inset 0 1px 0 #fff, var(--shadow-xs);
+}
+.transport-map canvas { outline: none; }
+.sx-map-fallback {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  text-align: center; color: var(--ink-2); padding: 20px; font-size: 14px;
+}
+.sx-map-fallback span { color: var(--muted); font-size: 13px; }
+.sx-map-recenter {
+  position: absolute; right: 12px; bottom: 12px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2); font-size: 13px; font-weight: 650;
+  cursor: pointer; box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(6px);
+}
+.sx-map-recenter:hover { color: var(--brand-ink); border-color: #bfd2ee; }
+
+.live-vehicle-list {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 470px; overflow: auto; padding-right: 4px;
+}
+.live-vehicle-item {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); padding: 13px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.live-vehicle-item:hover { border-color: #cfe0ff; transform: translateX(2px); }
+
+/* map markers (used by schoolix-maplibre.js) */
+.sx-vehicle-marker {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  filter: drop-shadow(0 6px 12px rgba(15, 23, 42, 0.28));
+}
+.sx-vehicle-marker-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--success); border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.18);
+  animation: sxPulse 2.1s ease-out infinite;
+}
+.sx-vehicle-marker[data-status="stale"] .sx-vehicle-marker-dot {
+  background: var(--warn); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18); animation: none;
+}
+.sx-vehicle-marker[data-status="offline"] .sx-vehicle-marker-dot {
+  background: var(--faint); box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.18); animation: none;
+}
+.sx-vehicle-avatar-body { fill: var(--success); }
+.sx-vehicle-marker[data-status="stale"] .sx-vehicle-avatar-body { fill: var(--warn); }
+.sx-vehicle-marker-label {
+  background: rgba(15, 23, 42, 0.9);
+  color: #fff; border-radius: 8px; padding: 4px 8px;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.25;
+}
+.sx-vehicle-marker-label strong { font-size: 12px; font-weight: 700; color: #fff; }
+.sx-vehicle-marker-label small { font-size: 10.5px; color: rgba(226, 232, 240, 0.8); }
+.sx-map-popup { min-width: 178px; font-family: var(--font-sans); font-size: 13px; line-height: 1.45; color: var(--ink); }
+.sx-map-popup strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.sx-map-popup span {
+  display: inline-flex; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px;
+  background: var(--success-soft); color: var(--success-ink); font-weight: 800; font-size: 11px;
+}
+
+/* ---------------------------------------------------------- students */
+.assigned-list-section { margin-top: 16px; }
+.assigned-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.assigned-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--surface-2); font-size: 13.5px;
+}
+.students-count-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--brand-soft); color: var(--brand-ink);
+  border: 1px solid #dbeafe; font-size: 12px; font-weight: 700;
+}
+.student-search-result {
+  max-height: 280px; overflow: auto;
+  display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+}
+.sr-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--surface);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.sr-item:hover { border-color: #cfe0ff; background: var(--brand-soft); }
+.sr-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; min-width: 0; }
+.sr-info small, .ai-info small { color: var(--muted); font-size: 12px; }
+.ai-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+/* ------------------------------------------------------------- modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(5px);
+}
+.modal-overlay.open { display: flex; animation: sxFade 0.18s var(--ease) both; }
+.modal-box {
+  width: min(660px, 100%);
+  max-height: 88vh; display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: sxRise 0.22s var(--ease) both;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px 22px; border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.modal-body { padding: 20px 22px; overflow: auto; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 16px 22px; border-top: 1px solid var(--line); background: var(--surface-2);
+}
+
+/* ------------------------------------------------------------- toast */
+.sx-toast {
+  position: fixed; right: 20px; bottom: 20px; z-index: 2000;
+  max-width: min(360px, calc(100vw - 40px));
+  padding: 12px 16px; border-radius: 12px;
+  color: #fff; font-size: 14px; font-weight: 600;
+  background: var(--ink);
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.sx-toast.is-visible { opacity: 1; transform: translateY(0); }
+.sx-toast.success { background: linear-gradient(180deg, #10b981, #047857); }
+.sx-toast.error { background: linear-gradient(180deg, #f87171, #dc2626); }
+.sx-toast.info { background: linear-gradient(180deg, #3b82f6, #1d4ed8); }
+
+/* ----------------------------------------------- loaders / skeletons */
+.sx-spinner {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid rgba(37, 99, 235, 0.18);
+  border-top-color: var(--brand);
+  animation: sxSpin 0.75s linear infinite;
+}
+.sx-transport-page-busy {
+  position: fixed; inset: 0; z-index: 1400;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(241, 245, 249, 0.72);
+  backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.22s var(--ease), visibility 0.22s var(--ease);
+}
+.sx-transport-page-busy.is-visible { opacity: 1; visibility: visible; }
+.sx-transport-busy-card {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 26px 30px; text-align: center;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+}
+.sx-transport-busy-card strong { font-size: 15px; }
+
+.sx-skeleton-card {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; background: var(--surface);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sx-skeleton-line {
+  height: 12px; border-radius: 999px; width: 100%;
+  background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 37%, #eef2f7 63%);
+  background-size: 400% 100%;
+  animation: sxShimmer 1.35s ease-in-out infinite;
+}
+.sx-skeleton-line.w60 { width: 60%; }
+.sx-skeleton-line.w80 { width: 80%; }
+
+/* ---------------------------------------------------------- keyframes */
+@keyframes sxSpin { to { transform: rotate(360deg); } }
+@keyframes sxShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@keyframes sxFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sxRise { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
+@keyframes sxPulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+  70% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ------------------------------------------------------- scrollbars */
+.live-vehicle-list::-webkit-scrollbar,
+.student-search-result::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar { width: 9px; }
+.live-vehicle-list::-webkit-scrollbar-thumb,
+.student-search-result::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb { background: #d6dfeb; border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+.live-vehicle-list::-webkit-scrollbar-thumb:hover,
+.student-search-result::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover { background: #bfcbdb; background-clip: content-box; }
+
+/* ------------------------------------------------------- responsive */
+@media (max-width: 1100px) {
+  .transport-hero { grid-template-columns: 1fr; }
+  .live-map-grid { grid-template-columns: 1fr; }
+  .live-vehicle-list { max-height: 320px; }
+  .transport-workspace { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  body.sx-transport-page { padding: 16px 13px 44px; }
+  .card { padding: 18px; border-radius: 16px; }
+  .transport-hero { padding: 22px; gap: 20px; }
+  .command-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid { grid-template-columns: 1fr; }
+  .filters { grid-template-columns: 1fr; }
+  .transport-map, .live-map-grid { min-height: 320px; }
+  .hero-actions .btn-primary, .hero-actions .btn-secondary { flex: 1 1 auto; }
+  .modal-header, .modal-body, .modal-footer { padding-left: 16px; padding-right: 16px; }
+  .action-col button { flex: 1 1 auto; }
+}
+
+@media print {
+  body.sx-transport-page { background: #fff; padding: 0; }
+  .card { box-shadow: none; border-color: #d8dee8; break-inside: avoid; }
+  .hero-actions, .action-col, .sx-map-recenter, .filters { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+/* Dynamic list alignment: these elements are rendered after the page loads. */
+.vehicle-card,
+.route-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 164px;
+  gap: 18px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.vehicle-card {
+  border-left: 3px solid #dbeafe;
+}
+.vehicle-card.is-tracking {
+  border-color: #b8e7d5;
+  border-left-color: var(--success);
+  background: linear-gradient(90deg, #f2fcf7, #fff 30%);
+}
+.vehicle-card .meta,
+.route-card .meta {
+  min-width: 0;
+  line-height: 1.55;
+}
+.vehicle-card .vehicle-title {
+  margin-bottom: 12px;
+}
+.vehicle-card .vehicle-title > strong {
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 800;
+}
+.vehicle-card .vehicle-meta-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0;
+}
+.vehicle-card .vehicle-meta-box {
+  min-width: 0;
+  padding: 10px 11px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  box-shadow: none;
+  transform: none;
+}
+.vehicle-card .vehicle-meta-box:hover { box-shadow: none; transform: none; }
+.vehicle-card .vehicle-meta-box small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--faint);
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+.vehicle-card .vehicle-meta-box span {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.vehicle-card .vehicle-compliance {
+  grid-column: 1 / -1;
+  margin: 1px 0 0;
+  padding: 9px 11px;
+  border-radius: var(--radius-xs);
+  background: #fffaf0;
+  color: #7c5b1f;
+  border: 1px solid #f7e5bd;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+.vehicle-card .action-col,
+.route-card .action-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 164px;
+  margin: 0;
+}
+.vehicle-card .action-col button,
+.route-card .action-col button {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  justify-content: flex-start;
+  font-size: 12px;
+}
+.route-card {
+  padding: 15px 16px;
+  align-items: center;
+}
+.route-card .meta > strong:first-child { margin-right: 6px; }
+.route-card .via-stops-list { margin-top: 9px; }
+.students-count-badge { margin-left: 0; }
+.search-box { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.search-box input { min-width: 0; padding-left: 12px; }
+.search-box button { min-width: 96px; }
+
+@media (max-width: 980px) {
+  .vehicle-card .vehicle-meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .vehicle-card,
+  .route-card { grid-template-columns: 1fr; gap: 14px; padding: 15px; }
+  .vehicle-card .vehicle-meta-grid { grid-template-columns: 1fr; }
+  .vehicle-card .action-col,
+  .route-card .action-col { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vehicle-card .action-col button,
+  .route-card .action-col button { justify-content: center; }
+  .search-box { grid-template-columns: 1fr; }
+  .search-box button { width: 100%; }
+}
+</style>
+<link rel="stylesheet" href="schoolix-polish.css">
+<link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+</head>
+<body class="sx-admin-tool sx-transport-page" data-sx-title="Transport management">
+<div class="sx-transport-page-busy" id="transportPageBusy" aria-live="polite" aria-hidden="true">
+  <div class="sx-transport-busy-card">
+    <div class="sx-spinner" aria-hidden="true"></div>
+    <strong id="transportBusyTitle">Loading transport workspace...</strong>
+    <p class="muted" id="transportBusyText">Fetching routes, vehicles and live tracking status.</p>
+  </div>
+</div>
+<div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+  <section class="dots-container" aria-label="Loading page">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </section>
+</div>
+<div class="container">
+    <div class="card transport-hero">
+        <div class="transport-hero-main">
+            <div>
+                <span class="transport-hero-kicker">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    Transport Control Center
+                </span>
+                <h1>Vehicles, routes and live bus tracking</h1>
+                <p class="muted">Manage fleet records, assign students, save routes, and monitor live GPS from one clean transport workspace.</p>
+            </div>
+            <div class="hero-actions">
+                <button type="button" class="btn-primary" onclick="document.getElementById('vehicleFormCard').scrollIntoView({behavior:'smooth',block:'start'})">Add Vehicle</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('adminLiveMap').scrollIntoView({behavior:'smooth',block:'center'})">Open Live Map</button>
+            </div>
+        </div>
+        <div class="transport-command-panel">
+            <div>
+                <div class="command-title">Today at a glance</div>
+                <p class="muted">Fleet health, assignments, and route coverage update as records load.</p>
+            </div>
+            <div class="command-grid">
+                <div class="command-tile"><strong id="heroActiveVehicles">0</strong><span>Active fleet</span></div>
+                <div class="command-tile"><strong id="heroAssignedStudents">0</strong><span>Assigned students</span></div>
+                <div class="command-tile"><strong id="heroSavedRoutes">0</strong><span>Saved routes</span></div>
+                <div class="command-tile"><strong id="heroLiveVehicles">0</strong><span>Live vehicles</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card transport-section">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-7"/></svg></span>
+                <div>
+                    <h2>Overview</h2>
+                    <div class="section-subtitle">Fast fleet counts for admin review.</div>
+                </div>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-3.2c.1-.7.2-1.4.2-2.1V8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg></span><div><strong id="totalVehicles">0</strong><span>Total Vehicles</span></div></div>
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></span><div><strong id="activeVehicles">0</strong><span>Active</span></div></div>
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6.7 6.7a2.1 2.1 0 0 1-3-3l6.7-6.7a6 6 0 0 1 7.9-7.9z"/></svg></span><div><strong id="maintenanceVehicles">0</strong><span>In Maintenance</span></div></div>
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg></span><div><strong id="inactiveVehicles">0</strong><span>Inactive</span></div></div>
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7H8a3 3 0 0 1 0-6h10"/><circle cx="18" cy="5" r="3"/></svg></span><div><strong id="totalRoutes">0</strong><span>Saved Routes</span></div></div>
+            <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><strong id="totalAssigned">0</strong><span>Students Assigned</span></div></div>
+        </div>
+    </div>
+
+    <div class="card transport-live-card">
+        <div class="section-heading transport-section" style="margin-bottom:0;">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+                <div>
+                    <h2>Live Tracking Map</h2>
+                    <div class="section-subtitle">Active GPS locations appear here through Supabase Realtime and MapLibre.</div>
+                </div>
+            </div>
+        </div>
+        <div class="live-map-grid">
+            <div class="transport-map" id="adminLiveMap">
+              <div class="sx-map-fallback">
+                <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z"/><path d="M9 4v13"/><path d="M15 6.5v13"/></svg>
+                <strong>Preparing live map…</strong>
+                <span>Vehicle positions load as soon as an active trip streams GPS.</span>
+              </div>
+            </div>
+            <div class="live-vehicle-list" id="adminLiveVehicleList">
+                <div class="empty">Live locations will appear when active trips send GPS updates.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="transport-workspace">
+    <div class="workspace-column">
+    <div class="card transport-section" id="vehicleFormCard">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-3.2c.1-.7.2-1.4.2-2.1V8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg></span>
+                <div>
+                    <h2 id="formTitle">Add Vehicle</h2>
+                    <div class="section-subtitle">Vehicle details, driver info, compliance dates, and assigned route.</div>
+                </div>
+            </div>
+        </div>
+        <form id="vehicleForm">
+            <div class="grid">
+                <div class="field-group">
+                    <label class="field-label" for="vehicleNumber">Vehicle registration number</label>
+                    <input id="vehicleNumber" placeholder="e.g. UP32AB1234" required>
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="vehicleType">Vehicle type</label>
+                    <select id="vehicleType" required>
+                        <option value="">Select Type</option>
+                        <option value="Bus">Bus</option>
+                        <option value="Van">Van</option>
+                        <option value="Mini Bus">Mini Bus</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="vehicleModel">Model / manufacturer</label>
+                    <input id="vehicleModel" placeholder="e.g. Tata Starbus">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="capacity">Seating capacity</label>
+                    <input id="capacity" type="number" min="1" placeholder="Number of seats">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="driverName">Driver name</label>
+                    <input id="driverName" placeholder="Full name">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="driverPhone">Driver phone</label>
+                    <input id="driverPhone" placeholder="Mobile number">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="driverEmail">Driver login email</label>
+                    <input id="driverEmail" type="email" placeholder="driver@example.com" autocomplete="username">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="driverPassword">Set driver password</label>
+                    <input id="driverPassword" type="password" minlength="6" placeholder="Min 6 characters" autocomplete="new-password">
+                    <span class="field-hint">Required only when creating a new driver login.</span>
+                </div>
+                <div class="field-group full-row">
+                    <label class="field-label" for="vehicleRouteSelect">Assign route (optional)</label>
+                    <span class="field-hint">Pick a saved route (From - To) or use manual name below.</span>
+                    <select id="vehicleRouteSelect"></select>
+                </div>
+                <div class="field-group full-row">
+                    <label class="field-label" for="routeName">Route name / label (manual)</label>
+                    <span class="field-hint">Required if no saved route selected.</span>
+                    <input id="routeName" placeholder="e.g. Route A / Morning North">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="permitExpiry">Permit valid till</label>
+                    <input id="permitExpiry" type="date">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="insuranceExpiry">Insurance valid till</label>
+                    <input id="insuranceExpiry" type="date">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="fitnessExpiry">Fitness certificate valid till</label>
+                    <input id="fitnessExpiry" type="date">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="vehicleStatus">Vehicle status</label>
+                    <select id="vehicleStatus" required>
+                        <option value="active">Active</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="field-group full-row">
+                    <label class="field-label" for="notes">Notes (optional)</label>
+                    <textarea id="notes" rows="3" placeholder="Any extra remarks"></textarea>
+                </div>
+                <div class="full-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary" id="saveBtn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Save Vehicle</button>
+                    <button type="button" class="btn-secondary" onclick="resetForm()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+
+    <div class="workspace-column">
+    <div class="card transport-section" id="routeLookupCard">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg></span>
+                <div>
+                    <h2>Route lookup</h2>
+                    <div class="section-subtitle">Find saved route details quickly.</div>
+                </div>
+            </div>
+        </div>
+        <p class="muted">Enter a saved route ID (e.g. RT123456) to load that route's details.</p>
+        <div class="grid" style="margin-top: 12px; align-items: end;">
+            <div class="field-group">
+                <label class="field-label" for="routeLookupInput">Route ID</label>
+                <input id="routeLookupInput" placeholder="e.g. RT123456" autocomplete="off">
+            </div>
+            <button type="button" class="btn-primary" onclick="fetchRouteById()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>Fetch route</button>
+        </div>
+        <div id="routeLookupResult" class="route-lookup-box">
+            <p style="margin-bottom: 8px;"><strong>Route ID:</strong> <span class="route-id-badge" id="lookupRouteId"></span></p>
+            <p><strong>From:</strong> <span id="lookupFrom"></span></p>
+            <div id="lookupViaBlock" style="display: none; margin: 8px 0;">
+                <strong>Via (bus stops in order):</strong>
+                <ol class="via-stops-list" id="lookupViaList"></ol>
+            </div>
+            <p><strong>To:</strong> <span id="lookupTo"></span></p>
+            <p><strong>Notes:</strong> <span id="lookupNotes"></span></p>
+        </div>
+    </div>
+
+    <div class="card transport-section">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7H8a3 3 0 0 1 0-6h10"/><circle cx="18" cy="5" r="3"/></svg></span>
+                <div>
+                    <h2>School routes</h2>
+                    <div class="section-subtitle">Build reusable routes and ordered via stops.</div>
+                </div>
+            </div>
+        </div>
+        <p class="muted">Save every school route with a clear start and end point.</p>
+        <form id="routeForm">
+            <div class="grid">
+                <div class="field-group">
+                    <label class="field-label" for="routeFrom">From (start point)</label>
+                    <input id="routeFrom" placeholder="e.g. School gate / Sector 5" required>
+                </div>
+                <div class="field-group full-row via-section">
+                    <label class="field-label">Via stops (optional)</label>
+                    <span class="field-hint">Bus ya vehicle jahan-jahan rukta hai - order mein add karo.</span>
+                    <div id="viaStopsContainer"></div>
+                    <button type="button" class="btn-success" style="margin-top:10px;" onclick="addViaStopRow()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Add via stop</button>
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="routeTo">To (end point)</label>
+                    <input id="routeTo" placeholder="e.g. City bus stand / Village name" required>
+                </div>
+                <div class="field-group full-row">
+                    <label class="field-label" for="routeNotes">Route notes (optional)</label>
+                    <textarea id="routeNotes" rows="2" placeholder="Optional details"></textarea>
+                </div>
+                <div class="full-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Save route</button>
+                    <button type="button" class="btn-secondary" onclick="resetRouteForm()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>Clear</button>
+                </div>
+            </div>
+        </form>
+        <h3 style="margin-top: 20px; margin-bottom: 8px; font-size: 1rem;">All saved routes</h3>
+        <div class="list" id="routeList"></div>
+    </div>
+    </div>
+    </div>
+
+    <div class="card transport-section">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></span>
+                <div>
+                    <h2>Vehicle Records</h2>
+                    <div class="section-subtitle">Search, edit, assign students, or remove vehicles.</div>
+                </div>
+            </div>
+        </div>
+        <div class="filters">
+            <input id="searchInput" placeholder="Search by vehicle no, route, driver, phone">
+            <select id="statusFilter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <select id="typeFilter">
+                <option value="all">All Types</option>
+                <option value="Bus">Bus</option>
+                <option value="Van">Van</option>
+                <option value="Mini Bus">Mini Bus</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="list" id="vehicleList"></div>
+    </div>
+</div>
+
+<!-- Assign students modal -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="assignModalTitle">Assign Students</h3>
+            <p id="assignModalSub">Loading vehicle info...</p>
+        </div>
+        <div class="modal-body">
+            <!-- Assigned students list -->
+            <div class="assigned-list-section">
+                <h4>Currently Assigned Students (<span id="assignedCount">0</span>)</h4>
+                <div id="assignedStudentsList">
+                    <div class="loading-msg">Loading...</div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Search to add students -->
+            <div class="field-group" style="margin-bottom:12px;">
+                <label class="field-label">Search & Add Student</label>
+                <span class="field-hint">Student ka naam ya ID daalo. Sirf usi school ke students dikhenge.</span>
+            </div>
+            <div class="search-box">
+                <input id="studentSearchInput" placeholder="Name ya Student ID..." autocomplete="off">
+                <button type="button" class="btn-primary" onclick="searchStudents()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>Search</button>
+            </div>
+            <div id="studentSearchResults">
+                <div class="empty" style="font-size:13px;">Student dhundho upar se - naam ya ID daalo.</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeAssignModal()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="school-branding.js"></script>
+<script type="module">
+import { initializeApp } from "./firebase-compat.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "./firebase-compat.js";
+import {
+    getFirestore, doc, getDoc, collection, getDocs,
+    addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp,
+    query, where, arrayUnion, arrayRemove
+} from "./firebase-compat.js";
+import { calibratedSpeedKmh, createVehicleMap, locationStatus } from "./schoolix-maplibre.js";
+import { activeTrips, assignDriver, deactivateStudentTransport, isTransportAccessDenied, isTransportDriverReferenceMissing, isTransportSetupMissing, liveLocations, startTrip, stopTrip, subscribeTransport, upsertDriver, upsertStudentTransport, upsertVehicle } from "./schoolix-transport.js";
+
+const firebaseConfig = {
+    apiKey: "@secret:GOOGLE_API_KEY",
+    authDomain: "schoolix-48107.firebaseapp.com",
+    projectId: "schoolix-48107",
+    storageBucket: "schoolix-48107.firebasestorage.app",
+    messagingSenderId: "133937954491",
+    appId: "1:133937954491:web:69d8064422617eb8c4339e"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const vehicleForm   = document.getElementById("vehicleForm");
+const routeForm     = document.getElementById("routeForm");
+const vehicleListEl = document.getElementById("vehicleList");
+const routeListEl   = document.getElementById("routeList");
+const searchInput   = document.getElementById("searchInput");
+const statusFilter  = document.getElementById("statusFilter");
+const typeFilter    = document.getElementById("typeFilter");
+const formTitleEl   = document.getElementById("formTitle");
+const saveBtnEl     = document.getElementById("saveBtn");
+const vehicleRouteSelect = document.getElementById("vehicleRouteSelect");
+const routeLookupInput   = document.getElementById("routeLookupInput");
+const routeLookupResult  = document.getElementById("routeLookupResult");
+
+let adminId = null;
+let vehicles = [];
+let routes = [];
+let allStudents = [];
+let filteredVehicles = [];
+let editingVehicleId = null;
+let assigningVehicleId = null;
+let adminMap = null;
+let liveLocationRows = [];
+let activeTripRows = [];
+let vehicleListLoading = true;
+let routeListLoading = true;
+let liveMapRefreshTimer = 0;
+
+window.SchoolixTransportLiveRefreshMs = 3000;
+
+const ICONS = {
+    search: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>',
+    users: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    edit: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+    trash: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+    route: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7H8a3 3 0 0 1 0-6h10"/><circle cx="18" cy="5" r="3"/></svg>',
+    bus: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-3.2c.1-.7.2-1.4.2-2.1V8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>',
+    play: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg>',
+    stop: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'
+};
+
+function escHtml(s) {
+    if (s == null || s === "") return "";
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function skeletonCards(count = 3) {
+    return Array.from({ length: count }, () => `
+        <div class="sx-skeleton-card" aria-hidden="true">
+            <div class="sx-skeleton-line w60"></div>
+            <div class="sx-skeleton-line w80"></div>
+            <div class="sx-skeleton-line"></div>
+        </div>
+    `).join("");
+}
+
+function setPageBusy(visible, title = "Loading transport workspace...", text = "Fetching routes, vehicles and live tracking status.") {
+    const overlay = document.getElementById("transportPageBusy");
+    if (!overlay) return;
+    document.getElementById("transportBusyTitle").textContent = title;
+    document.getElementById("transportBusyText").textContent = text;
+    overlay.classList.toggle("is-visible", Boolean(visible));
+    overlay.setAttribute("aria-hidden", String(!visible));
+}
+
+function setButtonBusy(button, busy, label = "Working...") {
+    if (!button) return;
+    if (busy) {
+        button.dataset.originalHtml = button.dataset.originalHtml || button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `<span class="sx-spinner" style="width:16px;height:16px;margin:0;border-width:2px;"></span>${escHtml(label)}`;
+    } else {
+        button.disabled = false;
+        if (button.dataset.originalHtml) {
+            button.innerHTML = button.dataset.originalHtml;
+            delete button.dataset.originalHtml;
+        }
+        if (button.id === "saveBtn" && !editingVehicleId) {
+            button.innerHTML = saveVehicleButtonHtml("Save Vehicle");
+        }
+    }
+}
+
+function saveVehicleButtonHtml(label = "Save Vehicle") {
+    return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>${escHtml(label)}`;
+}
+
+function currentActionButton() {
+    const active = document.activeElement;
+    return active?.tagName === "BUTTON" ? active : null;
+}
+
+function clearMapMissing(mapApi, vehicleIds = []) {
+    if (typeof mapApi?.clearMissing === "function") {
+        mapApi.clearMissing(vehicleIds);
+        return;
+    }
+    const keep = new Set(vehicleIds.map((id) => String(id)));
+    mapApi?.markers?.forEach?.((entry, id) => {
+        if (!keep.has(String(id))) {
+            entry?.marker?.remove?.();
+            mapApi.markers.delete(id);
+        }
+    });
+}
+
+vehicleListEl.innerHTML = skeletonCards(4);
+routeListEl.innerHTML = skeletonCards(2);
+document.getElementById("adminLiveVehicleList").innerHTML = skeletonCards(3);
+
+onAuthStateChanged(auth, async (user) => {
+    setPageBusy(true);
+    if (!user) { window.location.href = "index.html"; return; }
+    try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== "admin") {
+            alert("Access denied.");
+            window.location.href = "index.html";
+            return;
+        }
+        adminId = user.uid;
+        await loadRoutes();
+        await loadVehicles();
+        adminMap = await createVehicleMap(document.getElementById("adminLiveMap"), { zoom: 12, recenterLabel: "Show active vehicles" });
+        await loadAllStudents();
+        await refreshActiveTrips();
+        await refreshAdminLiveMap();
+        subscribeTransport("schoolix_vehicle_live_locations", `school_id=eq.${adminId}`, refreshAdminLiveMap, refreshAdminLiveMap);
+        subscribeTransport("schoolix_transport_trips", `school_id=eq.${adminId}`, refreshActiveTrips, refreshActiveTrips);
+    } finally {
+        setPageBusy(false);
+    }
+});
+
+/* Students cache */
+async function loadAllStudents() {
+    try {
+        const snap = await getDocs(collection(db, "schools", adminId, "students"));
+        allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { console.error("Load students failed:", e); }
+}
+
+/* Assign modal */
+window.openAssignModal = async (vehicleId) => {
+    assigningVehicleId = vehicleId;
+    const v = vehicles.find(x => x.id === vehicleId);
+    if (!v) return;
+
+    document.getElementById("assignModalTitle").textContent =
+        `Assign Students - ${v.vehicleNumber}`;
+    document.getElementById("assignModalSub").textContent =
+        `${v.vehicleType} - Driver: ${v.driverName} - Capacity: ${v.capacity} seats`;
+    document.getElementById("studentSearchInput").value = "";
+    document.getElementById("studentSearchResults").innerHTML =
+        `<div class="empty" style="font-size:13px;">Student dhundho upar se - naam ya ID daalo.</div>`;
+
+    document.getElementById("assignModal").classList.add("open");
+    await renderAssignedStudents(v);
+};
+
+window.closeAssignModal = () => {
+    document.getElementById("assignModal").classList.remove("open");
+    assigningVehicleId = null;
+};
+
+document.getElementById("assignModal").addEventListener("click", function(e) {
+    if (e.target === this) closeAssignModal();
+});
+
+async function renderAssignedStudents(v) {
+    const list  = document.getElementById("assignedStudentsList");
+    const count = document.getElementById("assignedCount");
+    const assigned = Array.isArray(v.assignedStudentIds) ? v.assignedStudentIds : [];
+    count.textContent = assigned.length;
+
+    if (!assigned.length) {
+        list.innerHTML = `<div class="empty" style="font-size:13px;">Abhi koi student assign nahi hai.</div>`;
+        return;
+    }
+
+    list.innerHTML = `<div class="loading-msg">Loading assigned students...</div>`;
+
+    // Get student details for assigned IDs
+    const items = assigned.map(sid => {
+        const s = allStudents.find(st => st.studentId === sid || st.id === sid);
+        return s || { studentId: sid, name: "Unknown Student", class: "-", section: "" };
+    });
+
+    // Get student tracking data
+    const studentTracking = v.studentTracking || {};
+
+    list.innerHTML = items.map(s => {
+        const sid = s.studentId || s.id;
+        const tracking = studentTracking[sid] || {};
+        
+        return `
+        <div class="assigned-item" style="flex-direction:column;align-items:flex-start;gap:12px;padding:14px;">
+            <div class="ai-info" style="width:100%;">
+                <strong>${escHtml(s.name)}</strong>
+                <span>ID: ${escHtml(sid)} - Class: ${escHtml(s.class||"-")}${s.section ? "-"+escHtml(s.section) : ""}</span>
+            </div>
+            <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:8px;padding:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;margin-bottom:6px;">Pickup Time</div>
+                    <input type="time" style="width:100%;padding:6px;border:1px solid #c4b5fd;border-radius:6px;font-size:12px;" 
+                        id="pickup_${escHtml(sid)}" value="${tracking.pickupTime || ''}" 
+                        onchange="updateStudentTracking('${escHtml(sid)}', 'pickupTime', this.value)">
+                    <div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;margin:12px 0 6px;">Pickup Place</div>
+                    <input type="text" placeholder="Enter pickup place" style="width:100%;padding:8px;border:1px solid #c4b5fd;border-radius:6px;font-size:12px;" 
+                        id="pickupPlace_${escHtml(sid)}" value="${escHtml(tracking.pickupPlace || '')}" 
+                        onchange="updateStudentTracking('${escHtml(sid)}', 'pickupPlace', this.value)">
+                </div>
+                <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:6px;">Drop-off Time</div>
+                    <input type="time" style="width:100%;padding:6px;border:1px solid #86efac;border-radius:6px;font-size:12px;" 
+                        id="dropoff_${escHtml(sid)}" value="${tracking.dropoffTime || ''}" 
+                        onchange="updateStudentTracking('${escHtml(sid)}', 'dropoffTime', this.value)">
+                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;margin:12px 0 6px;">Drop-off Place</div>
+                    <input type="text" placeholder="Enter drop-off place" style="width:100%;padding:8px;border:1px solid #86efac;border-radius:6px;font-size:12px;" 
+                        id="dropoffPlace_${escHtml(sid)}" value="${escHtml(tracking.dropoffPlace || '')}" 
+                        onchange="updateStudentTracking('${escHtml(sid)}', 'dropoffPlace', this.value)">
+                </div>
+            </div>
+            <button type="button" class="btn-danger" style="padding:6px 12px;font-size:12px;width:100%;"
+                onclick="removeStudentFromVehicle('${escHtml(sid)}')">Remove Student</button>
+        </div>
+    `;
+    }).join("");
+}
+
+window.searchStudents = async () => {
+    const q = document.getElementById("studentSearchInput").value.trim().toLowerCase();
+    const resultsEl = document.getElementById("studentSearchResults");
+
+    if (!q) {
+        resultsEl.innerHTML = `<div class="empty" style="font-size:13px;">Kuch type karo phir search karo.</div>`;
+        return;
+    }
+
+    const v = vehicles.find(x => x.id === assigningVehicleId);
+    const alreadyAssigned = v ? (Array.isArray(v.assignedStudentIds) ? v.assignedStudentIds : []) : [];
+
+    const matches = allStudents.filter(s =>
+        (s.name || "").toLowerCase().includes(q) ||
+        (s.studentId || "").toLowerCase().includes(q) ||
+        (s.id || "").toLowerCase().includes(q)
+    );
+
+    if (!matches.length) {
+        resultsEl.innerHTML = `<div class="empty" style="font-size:13px;">Koi student nahi mila "${escHtml(q)}" ke liye.</div>`;
+        return;
+    }
+
+    resultsEl.innerHTML = `<div class="student-search-result">${matches.slice(0, 10).map(s => {
+        const sid = s.studentId || s.id;
+        const isAssigned = alreadyAssigned.includes(sid);
+        return `<div class="sr-item">
+            <div class="sr-info">
+                <strong>${escHtml(s.name)}</strong>
+                <span>ID: ${escHtml(sid)} - Class: ${escHtml(s.class||"-")}${s.section?"-"+escHtml(s.section):""} - ${escHtml(s.phone||"")}</span>
+            </div>
+            ${isAssigned
+                ? `<span class="pill active" style="margin-left:0;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Assigned</span>`
+                : `<button type="button" class="btn-teal" style="padding:6px 12px;font-size:12px;white-space:nowrap;"
+                    onclick="assignStudentToVehicle('${escHtml(sid)}', '${escHtml(s.name)}')">Assign</button>`
+            }
+        </div>`;
+    }).join("")}</div>`;
+};
+
+window.assignStudentToVehicle = async (studentId, studentName) => {
+    if (!assigningVehicleId || !studentId) return;
+    try {
+        const v = vehicles.find(x => x.id === assigningVehicleId);
+        if (!v) return;
+        const vRef = doc(db, "schools", adminId, "vehicles", assigningVehicleId);
+        await updateDoc(vRef, {
+            assignedStudentIds: arrayUnion(studentId),
+            updatedAt: serverTimestamp()
+        });
+        const transportSynced = await upsertStudentTransport({
+            school_id: adminId,
+            student_id: studentId,
+            vehicle_id: assigningVehicleId,
+            route_id: v.routeId || null,
+            active: true,
+            updated_at: new Date().toISOString()
+        }).then(() => true).catch(error => {
+            console.warn("Student transport sync failed", error);
+            return false;
+        });
+
+        // Also update student doc with vehicleId for easy reverse lookup
+        const sQuery = query(collection(db, "schools", adminId, "students"),
+            where("studentId", "==", studentId));
+        const sSnap = await getDocs(sQuery);
+        if (!sSnap.empty) {
+            await updateDoc(doc(db, "schools", adminId, "students", sSnap.docs[0].id), {
+                assignedVehicleId: assigningVehicleId
+            });
+        }
+
+        showToast(
+            transportSynced ? `${studentName} assigned successfully!` : `${studentName} assigned. Live tracking sync pending.`,
+            transportSynced ? "success" : "info"
+        );
+        await loadVehicles();
+        await loadAllStudents();
+        const updatedV = vehicles.find(x => x.id === assigningVehicleId);
+        if (updatedV) {
+            await renderAssignedStudents(updatedV);
+            document.getElementById("assignedCount").textContent =
+                (updatedV.assignedStudentIds || []).length;
+        }
+        // Refresh search results
+        await searchStudents();
+    } catch(e) {
+        console.error(e);
+        showToast("Assignment failed!", "error");
+    }
+};
+
+window.updateStudentTracking = async (studentId, field, value) => {
+    if (!assigningVehicleId || !studentId) return;
+    try {
+        const v = vehicles.find(x => x.id === assigningVehicleId);
+        if (!v) return;
+        
+        const tracking = v.studentTracking || {};
+        if (!tracking[studentId]) tracking[studentId] = {};
+        tracking[studentId][field] = value;
+        
+        const vRef = doc(db, "schools", adminId, "vehicles", assigningVehicleId);
+        await updateDoc(vRef, {
+            studentTracking: tracking,
+            updatedAt: serverTimestamp()
+        });
+        
+        const fieldLabels = {
+            pickupTime: 'Pickup time',
+            dropoffTime: 'Drop-off time',
+            pickupPlace: 'Pickup place',
+            dropoffPlace: 'Drop-off place'
+        };
+        showToast(`${fieldLabels[field] || 'Update'} saved!`, "success");
+        await loadVehicles();
+    } catch(e) {
+        console.error(e);
+        showToast("Update failed!", "error");
+    }
+};
+
+window.removeStudentFromVehicle = async (studentId) => {
+    if (!assigningVehicleId || !studentId) return;
+    if (!confirm(`Remove student ${studentId} from this vehicle?`)) return;
+    try {
+        const v = vehicles.find(x => x.id === assigningVehicleId);
+        if (!v) return;
+        
+        const tracking = v.studentTracking || {};
+        delete tracking[studentId];
+        
+        const vRef = doc(db, "schools", adminId, "vehicles", assigningVehicleId);
+        await updateDoc(vRef, {
+            assignedStudentIds: arrayRemove(studentId),
+            studentTracking: tracking,
+            updatedAt: serverTimestamp()
+        });
+        await deactivateStudentTransport(adminId, studentId, assigningVehicleId)
+            .catch(error => console.warn("Student transport deactivate failed", error));
+
+        // Remove from student doc too
+        const sQuery = query(collection(db, "schools", adminId, "students"),
+            where("studentId", "==", studentId));
+        const sSnap = await getDocs(sQuery);
+        if (!sSnap.empty) {
+            await updateDoc(doc(db, "schools", adminId, "students", sSnap.docs[0].id), {
+                assignedVehicleId: ""
+            });
+        }
+
+        showToast("Student removed.", "info");
+        await loadVehicles();
+        await loadAllStudents();
+        const updatedV = vehicles.find(x => x.id === assigningVehicleId);
+        if (updatedV) await renderAssignedStudents(updatedV);
+    } catch(e) {
+        console.error(e);
+        showToast("Remove failed!", "error");
+    }
+};
+
+/* Toast */
+function showToast(msg, type="info") {
+    const t = document.createElement("div");
+    t.className = `sx-toast ${type}`;
+    t.setAttribute("role", "status");
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add("is-visible"));
+    setTimeout(() => {
+        t.classList.remove("is-visible");
+        setTimeout(()=>t.remove(), 220);
+    }, 3200);
+}
+
+/* Routes */
+async function generateRouteId() {
+    const snap = await getDocs(collection(db, "schools", adminId, "routes"));
+    const existing = new Set();
+    snap.forEach(d => { if (d.data().routeId) existing.add(String(d.data().routeId)); });
+    let id = "";
+    do { id = `RT${Math.floor(100000 + Math.random() * 900000)}`; } while (existing.has(id));
+    return id;
+}
+
+function getViaStopsFromForm() {
+    return [...document.getElementById("viaStopsContainer").querySelectorAll(".via-stop-input")]
+        .map(el => el.value.trim()).filter(Boolean);
+}
+
+window.addViaStopRow = (preset = "") => {
+    const container = document.getElementById("viaStopsContainer");
+    const row = document.createElement("div");
+    row.className = "via-row";
+    const inp = document.createElement("input");
+    inp.type = "text"; inp.className = "via-stop-input";
+    inp.placeholder = "Via stop - area / landmark";
+    if (preset) inp.value = preset;
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn-danger"; btn.innerHTML = `${ICONS.trash}Remove`;
+    btn.addEventListener("click", () => row.remove());
+    row.appendChild(inp); row.appendChild(btn);
+    container.appendChild(row); inp.focus();
+};
+
+function clearViaStopsForm() { document.getElementById("viaStopsContainer").innerHTML = ""; }
+
+routeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = routeForm.querySelector('button[type="submit"]');
+    const from = document.getElementById("routeFrom").value.trim();
+    const to   = document.getElementById("routeTo").value.trim();
+    const notes= document.getElementById("routeNotes").value.trim();
+    const via  = getViaStopsFromForm();
+    if (!from || !to) { alert("From and To are required."); return; }
+    try {
+        setButtonBusy(submitBtn, true, "Saving route...");
+        const routeId = await generateRouteId();
+        await addDoc(collection(db, "schools", adminId, "routes"), {
+            routeId, from, to, via, notes: notes||"",
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        showToast(`Route saved: ${routeId}`, "success");
+        routeForm.reset(); clearViaStopsForm();
+        await loadRoutes();
+    } catch(e) { console.error(e); alert("Failed to save route."); }
+    finally { setButtonBusy(submitBtn, false); }
+});
+
+async function loadRoutes() {
+    try {
+        if (routeListLoading) routeListEl.innerHTML = skeletonCards(2);
+        const snap = await getDocs(collection(db, "schools", adminId, "routes"));
+        routes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        routeListLoading = false;
+        document.getElementById("totalRoutes").textContent = routes.length;
+        const heroRoutes = document.getElementById("heroSavedRoutes");
+        if (heroRoutes) heroRoutes.textContent = String(routes.length);
+        populateRouteDropdown();
+        renderRouteList();
+    } catch(e) { routeListLoading = false; routeListEl.innerHTML = '<div class="empty">Failed to load routes.</div>'; }
+}
+
+function populateRouteDropdown() {
+    const current = vehicleRouteSelect.value;
+    vehicleRouteSelect.innerHTML = '<option value="">- No saved route - use manual name below</option>';
+    routes.forEach(r => {
+        const via = Array.isArray(r.via) ? r.via : [];
+        const opt = document.createElement("option");
+        opt.value = r.routeId;
+        opt.textContent = `${r.routeId}: ${r.from} - ${r.to}${via.length?" ("+via.length+" via)":""}`;
+        opt.dataset.docId = r.id;
+        vehicleRouteSelect.appendChild(opt);
+    });
+    if ([...vehicleRouteSelect.options].some(o => o.value === current)) vehicleRouteSelect.value = current;
+}
+
+function renderRouteList() {
+    routeListEl.innerHTML = "";
+    if (!routes.length) { routeListEl.innerHTML = '<div class="empty">No routes saved yet.</div>'; return; }
+    routes.forEach(r => {
+        const row = document.createElement("div");
+        row.className = "route-card";
+        const via = Array.isArray(r.via) ? r.via : [];
+        const viaBlock = via.length
+            ? `<br><strong>Via:</strong><ol class="via-stops-list">${via.map(s=>`<li>${escHtml(s)}</li>`).join("")}</ol>`
+            : "";
+        row.innerHTML = `
+            <div class="meta">
+                <strong class="route-id-badge">${escHtml(r.routeId)}</strong>
+                <span class="pill active" style="margin-left:8px;">${ICONS.route}${escHtml(r.from)} - ${escHtml(r.to)}</span>
+                ${viaBlock}
+                ${r.notes ? `<br>Notes: ${escHtml(r.notes)}` : ""}
+            </div>
+            <div class="action-col">
+                <button type="button" class="btn-success" onclick="useRouteLookup('${escHtml(r.routeId)}')">${ICONS.search}Show details</button>
+                <button type="button" class="btn-danger" onclick="deleteRoute('${escHtml(r.id)}')">${ICONS.trash}Delete</button>
+            </div>`;
+        routeListEl.appendChild(row);
+    });
+}
+
+window.fetchRouteById = async () => {
+    const raw = routeLookupInput.value.trim().toUpperCase();
+    if (!raw) { alert("Enter a Route ID."); return; }
+    const trigger = document.activeElement?.tagName === "BUTTON" ? document.activeElement : null;
+    try {
+        setButtonBusy(trigger, true, "Fetching...");
+        const q = query(collection(db, "schools", adminId, "routes"), where("routeId", "==", raw));
+        const snap = await getDocs(q);
+        if (snap.empty) { routeLookupResult.classList.remove("show"); alert("No route found."); return; }
+        const data = snap.docs[0].data();
+        document.getElementById("lookupRouteId").textContent = data.routeId || raw;
+        document.getElementById("lookupFrom").textContent   = data.from || "-";
+        document.getElementById("lookupTo").textContent     = data.to || "-";
+        document.getElementById("lookupNotes").textContent  = data.notes || "-";
+        const via = Array.isArray(data.via) ? data.via : [];
+        const viaBlock = document.getElementById("lookupViaBlock");
+        const viaList  = document.getElementById("lookupViaList");
+        viaList.innerHTML = "";
+        if (via.length) {
+            via.forEach(s => { const li = document.createElement("li"); li.textContent = s; viaList.appendChild(li); });
+            viaBlock.style.display = "block";
+        } else { viaBlock.style.display = "none"; }
+        routeLookupResult.classList.add("show");
+    } catch(e) { alert("Could not fetch route."); }
+    finally { setButtonBusy(trigger, false); }
+};
+
+window.useRouteLookup = (routeId) => {
+    routeLookupInput.value = routeId; fetchRouteById();
+    document.getElementById("routeLookupCard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+window.resetRouteForm = () => { document.getElementById("routeForm").reset(); clearViaStopsForm(); };
+
+window.deleteRoute = async (docId) => {
+    if (!confirm("Delete this route?")) return;
+    try {
+        setPageBusy(true, "Deleting route...", "Updating route list and vehicle route dropdown.");
+        await deleteDoc(doc(db, "schools", adminId, "routes", docId));
+        await loadRoutes(); await loadVehicles();
+        showToast("Route deleted.", "info");
+    } catch(e) { alert("Failed to delete."); }
+    finally { setPageBusy(false); }
+};
+
+/* Vehicles */
+function isUuid(value = "") {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+}
+
+function trackingVehiclePayload(vehicleId, v = {}) {
+    return {
+        id: vehicleId,
+        school_id: adminId,
+        vehicle_number: v.vehicleNumber || vehicleId,
+        vehicle_type: v.vehicleType || "Bus",
+        route_id: v.routeId || null,
+        driver_id: v.driverId || null,
+        status: v.status || "active",
+        data: {
+            driverName: v.driverName || "",
+            driverPhone: v.driverPhone || "",
+            driverEmail: v.driverEmail || "",
+            routeName: v.routeName || "",
+            capacity: v.capacity || 0
+        },
+        updated_at: new Date().toISOString()
+    };
+}
+
+async function findUserByEmail(email) {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+    if (!cleanEmail) return null;
+    const snap = await getDocs(query(collection(db, "users"), where("email", "==", cleanEmail)));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    const authSnap = await getDocs(query(collection(db, "users"), where("authEmail", "==", cleanEmail)));
+    if (!authSnap.empty) return { id: authSnap.docs[0].id, ...authSnap.docs[0].data() };
+    return null;
+}
+
+async function ensureDriverLogin(vehicleId, payload) {
+    const email = String(payload.driverEmail || "").trim().toLowerCase();
+    const password = document.getElementById("driverPassword").value.trim();
+    if (!email) return {};
+
+    let userProfile = await findUserByEmail(email);
+    let authUid = String(userProfile?.authUid || userProfile?.uid || userProfile?.id || "").trim();
+
+    if (!userProfile) {
+        if (!password || password.length < 6) {
+            throw new Error("New driver login ke liye email ke saath minimum 6 character password set karo.");
+        }
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        authUid = cred.user.uid;
+        userProfile = { id: authUid };
+    }
+
+    const driverId = String(userProfile.driverId || userProfile.transportDriverId || authUid || email).trim();
+    const userDocId = String(userProfile.id || authUid).trim();
+    const profilePayload = {
+        name: payload.driverName || "Driver",
+        phone: payload.driverPhone,
+        email,
+        authEmail: email,
+        role: "driver",
+        schoolId: adminId,
+        adminId,
+        access: true,
+        status: "active",
+        assignedVehicleId: vehicleId,
+        driverId,
+        transportDriverId: driverId,
+        updatedAt: serverTimestamp()
+    };
+
+    if (authUid) {
+        profilePayload.authUid = authUid;
+        profilePayload.uid = authUid;
+    }
+
+    await setDoc(doc(db, "users", userDocId), profilePayload, { merge: true });
+
+    const driverRow = {
+        id: driverId,
+        school_id: adminId,
+        auth_uid: isUuid(authUid) ? authUid : null,
+        name: payload.driverName || "Driver",
+        phone: payload.driverPhone,
+        email,
+        assigned_vehicle_id: vehicleId,
+        status: "active",
+        data: {
+            vehicleNumber: payload.vehicleNumber,
+            userDocId,
+            authUid
+        },
+        updated_at: new Date().toISOString()
+    };
+    const driverSynced = await upsertDriver(driverRow)
+        .then(() => assignDriver(driverId, vehicleId, adminId))
+        .then(() => true)
+        .catch(error => {
+            console.warn("Driver transport sync skipped:", error);
+            return false;
+        });
+    if (!driverSynced) showToast("Driver login created. Live tracking sync pending.", "info");
+
+    return { driverId, driverAuthUid: authUid, driverEmail: email };
+}
+
+async function safeUpsertTrackingVehicle(vehicleId, payload) {
+    try {
+        await upsertVehicle(trackingVehiclePayload(vehicleId, payload));
+        return true;
+    } catch (error) {
+        if (isTransportDriverReferenceMissing(error) && payload?.driverId) {
+            console.warn("Vehicle driver reference missing in transport sync; starting trip without linked driver row.", error);
+            const withoutDriver = { ...payload, driverId: null };
+            await upsertVehicle(trackingVehiclePayload(vehicleId, withoutDriver));
+            return true;
+        }
+        throw error;
+    }
+}
+
+vehicleForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("saveBtn");
+    const selectedRouteId = vehicleRouteSelect.value.trim();
+    const manualRouteName = document.getElementById("routeName").value.trim();
+    let routeName = manualRouteName || "Unassigned route", routeFrom = "", routeTo = "", routeVia = [];
+    if (selectedRouteId) {
+        const r = routes.find(x => x.routeId === selectedRouteId);
+        if (r) { routeFrom=r.from||""; routeTo=r.to||""; routeVia=Array.isArray(r.via)?r.via:[]; if (!routeName) routeName=`${r.from} - ${r.to}`; }
+    }
+
+    const payload = {
+        vehicleNumber:   document.getElementById("vehicleNumber").value.trim().toUpperCase(),
+        vehicleType:     document.getElementById("vehicleType").value,
+        vehicleModel:    document.getElementById("vehicleModel").value.trim(),
+        capacity:        Number(document.getElementById("capacity").value||0),
+        driverName:      document.getElementById("driverName").value.trim(),
+        driverPhone:     document.getElementById("driverPhone").value.trim(),
+        driverEmail:     document.getElementById("driverEmail").value.trim().toLowerCase(),
+        routeId: selectedRouteId||"", routeName, routeFrom, routeTo, routeVia,
+        permitExpiry:    document.getElementById("permitExpiry").value||"",
+        insuranceExpiry: document.getElementById("insuranceExpiry").value||"",
+        fitnessExpiry:   document.getElementById("fitnessExpiry").value||"",
+        status:          document.getElementById("vehicleStatus").value,
+        notes:           document.getElementById("notes").value.trim(),
+        updatedAt:       serverTimestamp()
+    };
+
+    if (!payload.vehicleNumber || !payload.vehicleType) {
+        alert("Vehicle number and vehicle type are required."); return;
+    }
+    if (payload.driverEmail && !payload.driverName) {
+        alert("Driver login email ke saath driver name bhi daalo."); return;
+    }
+    const dup = vehicles.find(v => v.vehicleNumber===payload.vehicleNumber && v.id!==editingVehicleId);
+    if (dup) { alert("Vehicle number already exists."); return; }
+
+    try {
+        setButtonBusy(submitBtn, true, editingVehicleId ? "Updating..." : "Saving...");
+        let vehicleId = editingVehicleId;
+        if (editingVehicleId) {
+            await updateDoc(doc(db, "schools", adminId, "vehicles", editingVehicleId), payload);
+            showToast("Vehicle updated!", "success");
+        } else {
+            const vehicleRef = await addDoc(collection(db, "schools", adminId, "vehicles"), {
+                ...payload, assignedStudentIds: [], createdAt: serverTimestamp()
+            });
+            vehicleId = vehicleRef.id;
+            showToast("Vehicle added!", "success");
+        }
+        await safeUpsertTrackingVehicle(vehicleId, payload);
+        const driverMeta = await ensureDriverLogin(vehicleId, payload);
+        if (Object.keys(driverMeta).length) {
+            await updateDoc(doc(db, "schools", adminId, "vehicles", vehicleId), {
+                ...driverMeta,
+                updatedAt: serverTimestamp()
+            });
+            await safeUpsertTrackingVehicle(vehicleId, { ...payload, ...driverMeta });
+            showToast("Driver login ready for phone app.", "success");
+        }
+        resetForm(); await loadVehicles();
+    } catch(e) { console.error(e); alert(e.message || "Failed to save vehicle."); }
+    finally { setButtonBusy(submitBtn, false); }
+});
+
+async function loadVehicles() {
+    try {
+        if (vehicleListLoading) vehicleListEl.innerHTML = skeletonCards(4);
+        const snap = await getDocs(collection(db, "schools", adminId, "vehicles"));
+        vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        vehicleListLoading = false;
+        syncVehiclesForTracking();
+        filteredVehicles = [...vehicles];
+        updateStats(); renderVehicles();
+    } catch(e) { vehicleListLoading = false; vehicleListEl.innerHTML = '<div class="empty">Failed to load records.</div>'; }
+}
+
+async function syncVehiclesForTracking() {
+    Promise.all(vehicles.map(v => upsertVehicle(trackingVehiclePayload(v.id, v))
+        .catch(error => console.warn("Vehicle tracking sync failed", v.id, error))));
+}
+
+function formatLiveAge(value) {
+    if (!value) return "-";
+    const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+    if (seconds < 60) return `${seconds}s ago`;
+    return `${Math.round(seconds / 60)}m ago`;
+}
+
+function queueLiveMapRefresh(repeats = 5, delay = 1800) {
+    window.clearTimeout(liveMapRefreshTimer);
+    const tick = async (left) => {
+        await refreshActiveTrips();
+        if (left > 1) liveMapRefreshTimer = window.setTimeout(() => tick(left - 1), delay);
+    };
+    liveMapRefreshTimer = window.setTimeout(() => tick(repeats), delay);
+}
+
+async function refreshAdminLiveMap() {
+    const activeVehicleIds = activeTripRows.map(t => t.vehicle_id).filter(Boolean);
+    const vehicleIds = activeVehicleIds.length ? activeVehicleIds : vehicles.map(v => v.id);
+    const activeSet = new Set(activeVehicleIds);
+    liveLocationRows = await liveLocations(vehicleIds).catch(() => []);
+    if (activeSet.size) liveLocationRows = liveLocationRows.filter(loc => activeSet.has(loc.vehicle_id));
+    const byVehicle = new Map(vehicles.map(v => [v.id, v]));
+    const list = document.getElementById("adminLiveVehicleList");
+    if (!list) return;
+    if (!liveLocationRows.length) {
+        if (activeSet.size) {
+            list.innerHTML = activeVehicleIds.map((vehicleId) => {
+                const v = byVehicle.get(vehicleId) || {};
+                return `<div class="live-vehicle-item is-waiting">
+                    <strong>${escHtml(v.vehicleNumber || vehicleId)}</strong>
+                    <div>Driver: ${escHtml(v.driverName || "-")}</div>
+                    <div style="font-weight:800;color:#1d4ed8">WAITING FOR FIRST GPS PING</div>
+                    <div>Driver app ko location permission ke saath logged in rakhein.</div>
+                </div>`;
+            }).join("");
+        } else {
+            list.innerHTML = '<div class="empty">No live GPS updates yet. Start tracking on a vehicle and keep the driver app logged in with location permission.</div>';
+        }
+        const heroLive = document.getElementById("heroLiveVehicles");
+        if (heroLive) heroLive.textContent = "0";
+        clearMapMissing(adminMap, []);
+        return;
+    }
+    const heroLive = document.getElementById("heroLiveVehicles");
+    if (heroLive) heroLive.textContent = String(liveLocationRows.length);
+    list.innerHTML = liveLocationRows.map(loc => {
+        const v = byVehicle.get(loc.vehicle_id) || {};
+        const status = locationStatus(loc.updated_at);
+        adminMap?.setVehicle(loc.vehicle_id, loc, v.vehicleNumber || v.vehicle_number || "Vehicle", {
+            driver: v.driverName || "",
+            route: v.routeName || "",
+            status
+        });
+        return `<div class="live-vehicle-item">
+            <strong>${escHtml(v.vehicleNumber || loc.vehicle_id)}</strong>
+            <div>Driver: ${escHtml(v.driverName || "-")}</div>
+            <div style="font-weight:800;color:${status === "live" ? "#16794f" : "#9a6700"}">${escHtml(status.toUpperCase())}</div>
+            <div>Updated: ${escHtml(formatLiveAge(loc.updated_at))}</div>
+            <div>Speed: ${escHtml(String(Math.round(calibratedSpeedKmh(loc.speed))))} km/h</div>
+            <div style="color:#64748b">${escHtml(Number(loc.latitude).toFixed(5))}, ${escHtml(Number(loc.longitude).toFixed(5))}</div>
+        </div>`;
+    }).join("");
+    clearMapMissing(adminMap, liveLocationRows.map(loc => loc.vehicle_id));
+    adminMap?.fitAll();
+}
+
+async function refreshActiveTrips() {
+    activeTripRows = await activeTrips(vehicles.map(v => v.id)).catch(() => []);
+    renderVehicles();
+    await refreshAdminLiveMap();
+}
+
+function updateStats() {
+    document.getElementById("totalVehicles").textContent     = vehicles.length;
+    document.getElementById("activeVehicles").textContent    = vehicles.filter(v=>v.status==="active").length;
+    document.getElementById("maintenanceVehicles").textContent = vehicles.filter(v=>v.status==="maintenance").length;
+    document.getElementById("inactiveVehicles").textContent  = vehicles.filter(v=>v.status==="inactive").length;
+    document.getElementById("totalRoutes").textContent       = routes.length;
+    const totalAssigned = vehicles.reduce((sum,v)=>sum+(Array.isArray(v.assignedStudentIds)?v.assignedStudentIds.length:0),0);
+    document.getElementById("totalAssigned").textContent     = totalAssigned;
+    const heroActive = document.getElementById("heroActiveVehicles");
+    const heroAssigned = document.getElementById("heroAssignedStudents");
+    const heroRoutes = document.getElementById("heroSavedRoutes");
+    if (heroActive) heroActive.textContent = String(vehicles.filter(v=>v.status==="active").length);
+    if (heroAssigned) heroAssigned.textContent = String(totalAssigned);
+    if (heroRoutes) heroRoutes.textContent = String(routes.length);
+}
+
+function statusBadge(s) {
+    if (s==="active")      return '<span class="pill active">ACTIVE</span>';
+    if (s==="maintenance") return '<span class="pill maintenance">MAINTENANCE</span>';
+    return '<span class="pill inactive">INACTIVE</span>';
+}
+
+function formatVehicleRoute(v) {
+    const idPart = v.routeId ? `<span class="route-id-badge" style="font-size:13px;">${escHtml(v.routeId)}</span> ` : "";
+    if (v.routeFrom && v.routeTo) {
+        const via = Array.isArray(v.routeVia) ? v.routeVia : [];
+        const segs = [escHtml(v.routeFrom), ...via.map(s=>escHtml(s)), escHtml(v.routeTo)];
+        const extra = v.routeName && v.routeName!==`${v.routeFrom} - ${v.routeTo}` ? ` (${escHtml(v.routeName)})` : "";
+        return `${idPart}${segs.join(" - ")}${extra}`;
+    }
+    return `${idPart}${escHtml(v.routeName||"-")}`;
+}
+
+function expiryWarning(dateStr) {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.ceil((d - now) / (1000*60*60*24));
+    const alertIco = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:4px" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    if (diff < 0) return `<span style="color:#dc2626;font-weight:700;display:inline-flex;align-items:center;">${alertIco}Expired</span>`;
+    if (diff <= 30) return `<span style="color:#d97706;font-weight:700;display:inline-flex;align-items:center;">${alertIco}Expiring in ${diff}d</span>`;
+    return "";
+}
+
+function renderVehicles() {
+    vehicleListEl.innerHTML = "";
+    if (!filteredVehicles.length) { vehicleListEl.innerHTML = '<div class="empty">No vehicles found.</div>'; return; }
+    filteredVehicles.forEach(v => {
+        const row = document.createElement("div");
+        const assigned = Array.isArray(v.assignedStudentIds) ? v.assignedStudentIds.length : 0;
+        const activeTrip = activeTripRows.find(t => t.vehicle_id === v.id);
+        const trackingOn = Boolean(activeTrip);
+        row.className = `vehicle-card ${trackingOn ? "is-tracking" : ""}`;
+        const compliance = `
+            Permit: ${escHtml(v.permitExpiry||"-")} ${expiryWarning(v.permitExpiry)}
+            &nbsp;|&nbsp; Insurance: ${escHtml(v.insuranceExpiry||"-")} ${expiryWarning(v.insuranceExpiry)}
+            &nbsp;|&nbsp; Fitness: ${escHtml(v.fitnessExpiry||"-")} ${expiryWarning(v.fitnessExpiry)}
+        `;
+        row.innerHTML = `
+            <div class="meta">
+                <div class="vehicle-title">
+                <strong>${escHtml(v.vehicleNumber || "Vehicle")}</strong>
+                ${statusBadge(v.status)}
+                <span class="pill ${trackingOn ? "active" : "inactive"}">${trackingOn ? "TRACKING ON" : "TRACKING OFF"}</span>
+                <span class="students-count-badge">${assigned} student${assigned!==1?"s":""}</span>
+                </div>
+                <div class="vehicle-meta-grid">
+                    <div class="vehicle-meta-box"><small>Vehicle</small><span>${escHtml(v.vehicleType || "-")} ${v.vehicleModel ? `- ${escHtml(v.vehicleModel)}` : ""}</span></div>
+                    <div class="vehicle-meta-box"><small>Capacity</small><span>${escHtml(String(v.capacity || 0))} seats</span></div>
+                    <div class="vehicle-meta-box"><small>Driver</small><span>${escHtml(v.driverName || "-")} ${v.driverPhone ? `- ${escHtml(v.driverPhone)}` : ""}</span></div>
+                    <div class="vehicle-meta-box"><small>Driver Login</small><span>${escHtml(v.driverEmail || "Not set")}</span></div>
+                    <div class="vehicle-meta-box" style="grid-column: span 2;"><small>Route</small><span>${formatVehicleRoute(v)}</span></div>
+                    <div class="vehicle-compliance">${compliance}</div>
+                    ${v.notes ? `<div class="vehicle-meta-box" style="grid-column:1/-1;"><small>Notes</small><span>${escHtml(v.notes)}</span></div>` : ""}
+                </div>
+            </div>
+            <div class="action-col">
+                ${trackingOn
+                    ? `<button class="btn-danger" onclick="stopVehicleTracking('${escHtml(v.id)}')">${ICONS.stop}Stop Tracking</button>`
+                    : `<button class="btn-primary" onclick="startVehicleTracking('${escHtml(v.id)}')">${ICONS.play}Start Tracking</button>`}
+                <button class="btn-purple" onclick="openAssignModal('${escHtml(v.id)}')">${ICONS.users}Assign Students</button>
+                <button class="btn-success" onclick="editVehicle('${escHtml(v.id)}')">${ICONS.edit}Edit</button>
+                <button class="btn-danger"  onclick="deleteVehicle('${escHtml(v.id)}')">${ICONS.trash}Delete</button>
+            </div>`;
+        vehicleListEl.appendChild(row);
+    });
+}
+
+window.startVehicleTracking = async (vehicleId) => {
+    const v = vehicles.find(x => x.id === vehicleId);
+    if (!v) return;
+    const actionButton = currentActionButton();
+    if (!confirm(`Start tracking for ${v.vehicleNumber || vehicleId}? Driver phone will begin sending GPS if logged in and permission is granted.`)) return;
+    try {
+        setButtonBusy(actionButton, true, "Starting...");
+        setPageBusy(true, "Starting tracking...", "Opening active trip and preparing live GPS sync.");
+        const synced = await safeUpsertTrackingVehicle(vehicleId, v);
+        if (!synced) {
+            alert("Live tracking sync complete nahi ho paaya. Vehicle save karke dobara Start Tracking try karo.");
+            return;
+        }
+        await startTrip(vehicleId);
+        showToast("Tracking started. Admin map is watching for the driver's live GPS now.", "success");
+        await refreshActiveTrips();
+        await refreshAdminLiveMap();
+        queueLiveMapRefresh();
+    } catch (error) {
+        console.error(error);
+        if (isTransportSetupMissing(error)) {
+            alert("Supabase transport migration apply nahi hui hai. Transport tables/RPC missing hain, isliye Start Tracking nahi chal sakta.");
+        } else if (isTransportAccessDenied(error)) {
+            alert("Live tracking access denied hai. Admin account se dobara login karo, phir Start Tracking try karo.");
+        } else {
+            alert(error.message || "Could not start tracking. Vehicle/driver sync check karke dobara try karo.");
+        }
+    } finally {
+        setButtonBusy(actionButton, false);
+        setPageBusy(false);
+    }
+};
+
+window.stopVehicleTracking = async (vehicleId) => {
+    const v = vehicles.find(x => x.id === vehicleId);
+    if (!v) return;
+    const actionButton = currentActionButton();
+    if (!confirm(`Stop tracking for ${v.vehicleNumber || vehicleId}?`)) return;
+    try {
+        setButtonBusy(actionButton, true, "Stopping...");
+        setPageBusy(true, "Stopping tracking...", "Closing active trip for this vehicle.");
+        await stopTrip(vehicleId);
+        showToast("Tracking stopped.", "success");
+        await refreshActiveTrips();
+        await refreshAdminLiveMap();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "Could not stop tracking.");
+    } finally {
+        setButtonBusy(actionButton, false);
+        setPageBusy(false);
+    }
+};
+
+function applyFilters() {
+    const q = searchInput.value.trim().toLowerCase();
+    const s = statusFilter.value, t = typeFilter.value;
+    filteredVehicles = vehicles.filter(v => {
+        const viaMatch = (Array.isArray(v.routeVia)?v.routeVia:[]).some(x=>(x||"").toLowerCase().includes(q));
+        const matchQ =
+            (v.vehicleNumber||"").toLowerCase().includes(q) ||
+            (v.routeName||"").toLowerCase().includes(q) ||
+            (v.routeId||"").toLowerCase().includes(q) ||
+            (v.routeFrom||"").toLowerCase().includes(q) ||
+            (v.routeTo||"").toLowerCase().includes(q) || viaMatch ||
+            (v.driverName||"").toLowerCase().includes(q) ||
+            (v.driverPhone||"").toLowerCase().includes(q) ||
+            (v.driverEmail||"").toLowerCase().includes(q);
+        return matchQ && (s==="all"||v.status===s) && (t==="all"||v.vehicleType===t);
+    });
+    renderVehicles();
+}
+searchInput.addEventListener("input", applyFilters);
+statusFilter.addEventListener("change", applyFilters);
+typeFilter.addEventListener("change", applyFilters);
+
+window.editVehicle = (id) => {
+    const v = vehicles.find(x => x.id===id); if (!v) return;
+    editingVehicleId = id;
+    document.getElementById("vehicleNumber").value   = v.vehicleNumber||"";
+    document.getElementById("vehicleType").value     = v.vehicleType||"";
+    document.getElementById("vehicleModel").value    = v.vehicleModel||"";
+    document.getElementById("capacity").value        = v.capacity||"";
+    document.getElementById("driverName").value      = v.driverName||"";
+    document.getElementById("driverPhone").value     = v.driverPhone||"";
+    document.getElementById("driverEmail").value     = v.driverEmail||"";
+    document.getElementById("driverPassword").value  = "";
+    populateRouteDropdown(); vehicleRouteSelect.value = v.routeId||"";
+    document.getElementById("routeName").value       = v.routeName||"";
+    document.getElementById("permitExpiry").value    = v.permitExpiry||"";
+    document.getElementById("insuranceExpiry").value = v.insuranceExpiry||"";
+    document.getElementById("fitnessExpiry").value   = v.fitnessExpiry||"";
+    document.getElementById("vehicleStatus").value   = v.status||"active";
+    document.getElementById("notes").value           = v.notes||"";
+    formTitleEl.textContent = "Edit Vehicle";
+    saveBtnEl.innerHTML     = saveVehicleButtonHtml("Update Vehicle");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+window.deleteVehicle = async (id) => {
+    const actionButton = currentActionButton();
+    if (!confirm("Delete this vehicle?")) return;
+    try {
+        setButtonBusy(actionButton, true, "Deleting...");
+        setPageBusy(true, "Deleting vehicle...", "Removing record and refreshing transport workspace.");
+        await deleteDoc(doc(db, "schools", adminId, "vehicles", id));
+        if (editingVehicleId===id) resetForm();
+        await loadVehicles();
+        showToast("Vehicle deleted.", "info");
+    } catch(e) { alert("Failed to delete."); }
+    finally {
+        setButtonBusy(actionButton, false);
+        setPageBusy(false);
+    }
+};
+
+window.resetForm = () => {
+    editingVehicleId = null; vehicleForm.reset();
+    document.getElementById("driverPassword").value = "";
+    document.getElementById("vehicleStatus").value = "active";
+    vehicleRouteSelect.value = ""; populateRouteDropdown();
+    formTitleEl.textContent = "Add Vehicle"; saveBtnEl.innerHTML = saveVehicleButtonHtml("Save Vehicle");
+};
+
+window.logout = async () => {
+    try { await signOut(auth); window.location.href = "index.html"; }
+    catch(e) { alert("Logout failed."); }
+};
+
+document.getElementById("studentSearchInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); searchStudents(); }
+});
+routeLookupInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); fetchRouteById(); }
+});
+</script>
+<script type="module" src="access-control.js"></script>
+  <script src="schoolix-polish.js" defer></script>
+  <script src="admin-shell.js?v=navbar-20260721" defer></script>
+</body>
+</html>

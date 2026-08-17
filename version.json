@@ -1,0 +1,33 @@
+{
+  "versionCode": 107,
+  "versionName": "5.3.7",
+  "forceUpdate": false,
+  "message": "Release 5.3.7: Fixes driver phone notifications and improves live vehicle tracking.",
+  "changelog": [
+    "Fixes driver phones receiving app notifications when Send to everyone is used.",
+    "Adds driver notification registration and a drivers-only notification audience.",
+    "Shows active vehicles on the admin map faster after Start Tracking.",
+    "Uploads the driver's current GPS immediately when tracking starts.",
+    "Adds driver login support in the Android app.",
+    "Adds location permission handling for driver vehicle tracking.",
+    "Adds foreground GPS tracking when the school admin starts a vehicle trip.",
+    "Adds MapLibre live vehicle tracking in the admin and parent transport screens.",
+    "Adds an Open Link fallback on the update popup if the in-app downloader is blocked.",
+    "Fixes driver portal fallback when transport profile sync is pending.",
+    "Fixes student assigned vehicle live location lookup.",
+    "Adds clearer admin tracking setup diagnostics.",
+    "Fixes driver GPS upload fallback and 10-second live map refresh.",
+    "Adds moving live map pin with vehicle number and driver name.",
+    "Fixes driver assignment access so active-trip GPS uploads reach the admin map.",
+    "Keeps the driver's own exact You are here pin visible on the driver map.",
+    "Prevents duplicate GPS callbacks and repeated tracking-service starts.",
+    "Completely redesigns Vehicle Management as a modern fleet operations workspace.",
+    "Refines spacing, hierarchy, data density, and responsive fleet controls.",
+    "Aligns dynamic vehicle cards, route cards, action buttons, and mobile controls.",
+    "Restores the shared admin navigation shell and AI Assistant alignment.",
+    "Makes the Android APK use the same website login layout, colors, spacing, logo, and responsive form.",
+    "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
+    "Adds pull-down-to-refresh on native app pages with a refresh indicator."
+  ],
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=107-driver-tracking"
+}
