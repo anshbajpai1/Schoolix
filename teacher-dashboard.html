@@ -2612,15 +2612,33 @@ function teacherProfileCacheKey(uid = auth.currentUser?.uid || teacherData.uid |
   return uid ? `schoolixTeacherProfile_${uid}` : "";
 }
 
+function teacherProfileEmailCacheKey(email = auth.currentUser?.email || teacherData.email || "") {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  return normalizedEmail ? `schoolixTeacherProfileEmail_${normalizedEmail}` : "";
+}
+
 function loadCachedTeacherProfile(uid = auth.currentUser?.uid || "") {
-  const key = teacherProfileCacheKey(uid);
-  if (!key) return {};
-  try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; }
+  const keys = [
+    teacherProfileCacheKey(uid),
+    teacherProfileEmailCacheKey(auth.currentUser?.email || teacherData.email)
+  ].filter(Boolean);
+  for (const key of keys) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(key) || "{}") || {};
+      if (Object.keys(cached).length) return cached;
+    } catch {}
+  }
+  return {};
 }
 
 function saveCachedTeacherProfile(profile = teacherData) {
-  const key = teacherProfileCacheKey(profile.uid || auth.currentUser?.uid || "");
-  if (!key) return;
+  const keys = [
+    teacherProfileCacheKey(profile.uid),
+    teacherProfileCacheKey(profile.authUid),
+    teacherProfileCacheKey(auth.currentUser?.uid),
+    teacherProfileEmailCacheKey(profile.email || auth.currentUser?.email)
+  ].filter(Boolean);
+  if (!keys.length) return;
   const cache = {
     uid: profile.uid || "",
     name: teacherDisplayName(profile, auth.currentUser),
@@ -2632,7 +2650,9 @@ function saveCachedTeacherProfile(profile = teacherData) {
     logoUrl: profile.logoUrl || profile.schoolLogoUrl || "",
     photoUrl: profile.photoUrl || profile.imageUrl || profile.profilePhotoUrl || profile.avatarUrl || ""
   };
-  try { localStorage.setItem(key, JSON.stringify(cache)); } catch {}
+  [...new Set(keys)].forEach((key) => {
+    try { localStorage.setItem(key, JSON.stringify(cache)); } catch {}
+  });
 }
 
 function cleanTeacherUid(value) {
@@ -3209,24 +3229,40 @@ async function resolveTeacherProfileDocument(user = auth.currentUser) {
   const directIds = [teacherData.docId, user.uid, teacherData.uid, user.supabaseUid]
     .map((value) => String(value || "").trim())
     .filter(Boolean);
-  for (const id of [...new Set(directIds)]) {
-    const snapshot = await getDoc(doc(db, "users", id));
+  const directResults = await Promise.allSettled(
+    [...new Set(directIds)].map((id) => getDoc(doc(db, "users", id)))
+  );
+  directResults.forEach((result) => {
+    if (result.status !== "fulfilled") return;
+    const snapshot = result.value;
     if (snapshot.exists() && String(snapshot.data().role || "").toLowerCase() === "teacher") {
       matches.push({ id: snapshot.id, data: snapshot.data() || {} });
     }
-  }
+  });
 
   const email = String(user.email || teacherData.email || "").trim().toLowerCase();
   const lookups = [];
-  if (user.supabaseUid) lookups.push(["authUid", String(user.supabaseUid).trim()]);
+  const signedLookupIds = [user.uid, user.supabaseUid]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+  signedLookupIds.forEach((id) => {
+    lookups.push(["authUid", id], ["uid", id], ["supabaseAuthUid", id], ["legacyUid", id], ["firebaseUid", id]);
+  });
   if (email) lookups.push(["email", email], ["authEmail", email]);
-  for (const [field, value] of lookups) {
-    const snapshot = await getDocs(query(collection(db, "users"), where(field, "==", value)));
-    snapshot.docs.forEach((item) => {
+  const uniqueLookups = [...new Map(lookups
+    .filter(([, value]) => String(value || "").trim())
+    .map(([field, value]) => [`${field}:${String(value).trim().toLowerCase()}`, [field, value]])
+  ).values()];
+  const lookupResults = await Promise.allSettled(
+    uniqueLookups.map(([field, value]) => getDocs(query(collection(db, "users"), where(field, "==", value), limit(5))))
+  );
+  lookupResults.forEach((result) => {
+    if (result.status !== "fulfilled") return;
+    result.value.docs.forEach((item) => {
       const data = item.data() || {};
       if (String(data.role || "").toLowerCase() === "teacher") matches.push({ id: item.id, data });
     });
-  }
+  });
   const uniqueMatches = [...new Map(matches.map((item) => [item.id, item])).values()];
   if (!uniqueMatches.length) return null;
   const signedIds = new Set([user.uid, user.supabaseUid].map((value) => String(value || "").trim()).filter(Boolean));
