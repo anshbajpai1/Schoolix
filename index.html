@@ -1857,6 +1857,7 @@ let nativeGoogleResolve = null;
 let nativeGoogleReject = null;
 
 const STUDENT_SESSION_KEY = "schoolixStudentSession";
+const TEACHER_SESSION_KEY = "schoolixTeacherSession";
 const SUPER_ADMIN_EMAIL = "anshbajpai4@gmail.com";
 
 function loadStudentSession() {
@@ -1867,6 +1868,49 @@ function saveStudentSession(data) {
 }
 function clearStudentSession() {
     localStorage.removeItem(STUDENT_SESSION_KEY);
+}
+
+function loadTeacherSession() {
+    try { return JSON.parse(localStorage.getItem(TEACHER_SESSION_KEY)); } catch { return null; }
+}
+function saveTeacherSession(session) {
+    if (!session) return;
+    try {
+        const json = JSON.stringify(session);
+        localStorage.setItem(TEACHER_SESSION_KEY, json);
+        localStorage.setItem("schoolixLastTeacherProfile", json);
+        if (session.uid) {
+            localStorage.setItem(`schoolixTeacherProfile_${session.uid}`, json);
+        }
+        if (session.email) {
+            localStorage.setItem(`schoolixTeacherProfileEmail_${String(session.email).trim().toLowerCase()}`, json);
+        }
+        const schoolId = session.schoolId || session.adminId || "";
+        if (schoolId) {
+            localStorage.setItem("teacherSchoolId", schoolId);
+            if (session.schoolName) {
+                localStorage.setItem(`schoolixSchoolName_${schoolId}`, session.schoolName);
+            }
+        }
+        if (session.schoolName) {
+            window.SchoolBranding?.persistSchoolName?.(session.schoolName);
+            try { localStorage.setItem("schoolix.schoolName", session.schoolName); } catch {}
+        }
+        if (session.logoUrl) {
+            window.SchoolBranding?.persistSchoolLogo?.(session.logoUrl);
+        }
+        if (session.section) {
+            localStorage.setItem("teacherSection", session.section);
+        }
+    } catch (e) {
+        console.warn("Unable to save teacher session:", e);
+    }
+}
+function clearTeacherSession() {
+    try {
+        localStorage.removeItem(TEACHER_SESSION_KEY);
+        localStorage.removeItem("schoolixLastTeacherProfile");
+    } catch {}
 }
 
 function linkedSchoolId(profile = {}, adminData = null) {
@@ -1896,6 +1940,35 @@ function buildStudentSession(user, student = {}, adminData = null, extra = {}) {
         schoolId,
         schoolName,
         role: "student",
+        loginAt: new Date().toISOString(),
+        ...extra
+    };
+}
+
+function buildTeacherSession(user, teacher = {}, adminData = null, extra = {}) {
+    const schoolId = linkedSchoolId(teacher, adminData);
+    const schoolName = teacher.schoolName || adminData?.schoolName || adminData?.instituteName || window.SchoolBranding?.getSchoolName?.() || "";
+    const logoUrl = teacher.logoUrl || teacher.schoolLogoUrl || adminData?.logoUrl || adminData?.schoolLogoUrl || "";
+    const photoUrl = teacher.photoUrl || teacher.imageUrl || teacher.profilePhotoUrl || teacher.avatarUrl || "";
+    const name = teacher.name || teacher.fullName || teacher.teacherName || teacher.displayName || user.displayName || "";
+    return {
+        uid: user.uid,
+        authUid: user.supabaseUid || user.uid,
+        supabaseAuthUid: user.supabaseUid || "",
+        docId: teacher.id || user.uid,
+        teacherId: teacher.teacherId || teacher.staffId || teacher.id || "",
+        name,
+        displayName: name,
+        email: teacher.email || teacher.authEmail || user.email || "",
+        class: teacher.class || "",
+        section: teacher.section || "",
+        assignedClasses: teacher.assignedClasses || [],
+        schoolId,
+        adminId: schoolId,
+        schoolName,
+        logoUrl,
+        photoUrl,
+        role: "teacher",
         loginAt: new Date().toISOString(),
         ...extra
     };
@@ -2288,6 +2361,7 @@ async function checkUserRoleAndRedirect(user) {
             showError("Account mismatch detected"); return;
         }
         clearStudentSession();
+        clearTeacherSession();
         const adminData = await getAdminAccessData(user.uid, data);
         const accessReason = accessErrorFor(adminData || data, role === "admin" ? "dashboard" : "");
         if (accessReason) {
@@ -2305,7 +2379,8 @@ async function checkUserRoleAndRedirect(user) {
         }
         if (role === "teacher") {
             setAuthGate("Opening teacher dashboard...");
-            localStorage.setItem("teacherSection", data.section || "");
+            const teacherSession = buildTeacherSession(user, data, adminData, { loginAs: "teacher" });
+            saveTeacherSession(teacherSession);
             window.location.href = "teacher-dashboard.html"; return;
         }
         if (role === "admin") { window.location.href = "admin-dashboard.html"; return; }

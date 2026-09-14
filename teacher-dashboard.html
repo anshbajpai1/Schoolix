@@ -116,11 +116,115 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 <meta name="theme-color" content="#080d14">
 <meta name="application-name" content="Schoolix Teacher">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Schoolix Teacher">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Teacher Dashboard — Schoolix</title>
 <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/schoolix-app-icon.svg">
+<script>
+  // Immediately paint cached teacher name, school name, photo and details before
+  // any async scripts or Firebase network operations begin.
+  (function () {
+    function getCachedTeacherIdentity() {
+      try {
+        let profile = null;
+        const sessionRaw = localStorage.getItem("schoolixTeacherSession");
+        if (sessionRaw) {
+          try { profile = JSON.parse(sessionRaw); } catch {}
+        }
+        if (!profile || (!profile.name && !profile.teacherName && !profile.displayName)) {
+          const lastRaw = localStorage.getItem("schoolixLastTeacherProfile");
+          if (lastRaw) {
+            try { profile = JSON.parse(lastRaw); } catch {}
+          }
+        }
+        if (!profile || (!profile.name && !profile.teacherName && !profile.displayName)) {
+          for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index) || "";
+            if (!key.startsWith("schoolixTeacherProfile_")) continue;
+            try {
+              const candidate = JSON.parse(localStorage.getItem(key) || "null");
+              if (candidate && (candidate.name || candidate.teacherName || candidate.displayName)) {
+                profile = candidate;
+                break;
+              }
+            } catch {}
+          }
+        }
+        return profile || {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function paintEarlyTeacherIdentity() {
+      try {
+        const profile = getCachedTeacherIdentity();
+        const adminId = profile.adminId || profile.schoolId || localStorage.getItem("teacherSchoolId") || "";
+        const schoolName = (adminId ? localStorage.getItem("schoolixSchoolName_" + adminId) : "")
+          || profile.schoolName
+          || localStorage.getItem("schoolix.schoolName")
+          || "";
+        const teacherName = profile.name || profile.fullName || profile.teacherName || profile.displayName || "";
+
+        if (teacherName) {
+          const nameEl = document.getElementById("teacherNameDisplay");
+          if (nameEl) nameEl.textContent = teacherName;
+          const topbarName = document.getElementById("topbarTeacherName");
+          if (topbarName) topbarName.textContent = teacherName;
+        }
+
+        if (schoolName && schoolName !== "Schoolix") {
+          const eyebrow = document.getElementById("schoolNameLabel");
+          if (eyebrow) eyebrow.textContent = schoolName;
+          const sidebarSchool = document.getElementById("sidebarSchoolName");
+          if (sidebarSchool) sidebarSchool.textContent = schoolName;
+        }
+
+        if (profile.teacherId) {
+          const idEl = document.getElementById("teacherIdLabel");
+          if (idEl) idEl.textContent = "ID: " + profile.teacherId;
+        }
+
+        if (profile.email) {
+          const emailEl = document.getElementById("emailLabel");
+          if (emailEl) emailEl.textContent = profile.email;
+        }
+
+        const cls = profile.class || "";
+        const sec = profile.section || localStorage.getItem("teacherSection") || "";
+        if (cls || sec) {
+          const badgeEl = document.getElementById("classSectionBadge");
+          if (badgeEl) badgeEl.textContent = cls ? (cls + " - " + (sec || "All")) : (sec ? ("Sec " + sec) : "—");
+        }
+
+        const photo = profile.photoUrl || profile.imageUrl || profile.profilePhotoUrl || profile.avatarUrl;
+        if (photo) {
+          const heroPhoto = document.getElementById("teacherHeroPhoto");
+          if (heroPhoto) heroPhoto.innerHTML = `<img src="${photo.replace(/"/g, "&quot;")}" alt="Teacher Photo">`;
+          const topbarAvatar = document.getElementById("topbarAvatar");
+          if (topbarAvatar) topbarAvatar.innerHTML = `<img src="${photo.replace(/"/g, "&quot;")}" alt="Teacher" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else if (teacherName) {
+          const initial = teacherName.trim().charAt(0).toUpperCase() || "T";
+          const heroPhoto = document.getElementById("teacherHeroPhoto");
+          if (heroPhoto && !heroPhoto.querySelector("img")) heroPhoto.textContent = initial;
+          const topbarAvatar = document.getElementById("topbarAvatar");
+          if (topbarAvatar && !topbarAvatar.querySelector("img")) topbarAvatar.textContent = initial;
+        }
+      } catch (_) {}
+    }
+
+    window.paintEarlyTeacherIdentity = paintEarlyTeacherIdentity;
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", paintEarlyTeacherIdentity, { once: true });
+    } else {
+      paintEarlyTeacherIdentity();
+    }
+    window.addEventListener("schoolix:critical-load-ready", paintEarlyTeacherIdentity, { once: true });
+  }());
+</script>
 <link rel="stylesheet" href="/schoolix-app.css?v=navbar-20260721">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2032,6 +2136,7 @@ body[data-active-tab="home"] .tabs-wrap {
       <button class="btn btn-neutral" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="logout()"><span class="ui-icon" data-icon="logout"></span>Logout</button>
     </div>
   </header>
+  <script>window.paintEarlyTeacherIdentity?.();</script>
 
   <!-- STATS ROW -->
   <div class="stats-row teacher-dashboard-summary" id="statsRow">
@@ -2336,7 +2441,7 @@ import {
 } from "./firebase-compat.js";
 import {
   getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, deleteDoc,
-  collection, query, where, orderBy, serverTimestamp, clearFirestoreReadCache
+  collection, query, where, orderBy, limit, serverTimestamp, clearFirestoreReadCache
 } from "./firebase-compat.js";
 
 const firebaseConfig = {
@@ -2389,6 +2494,8 @@ let reportTermLocks = {};
 let marksDirty = false;
 
 const ATTENDANCE_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
+const TEACHER_DATA_CACHE_TTL_MS = 30 * 60 * 1000;
+const TEACHER_SESSION_CACHE_TTL_MS = 15 * 60 * 1000;
 const CLASS_SEQUENCE = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const ROMAN_TO_NUMERIC_CLASS = {
   I: "1", II: "2", III: "3", IV: "4", V: "5", VI: "6",
@@ -2573,7 +2680,7 @@ function resetTeacherSessionDependentState() {
   const studentsList = $("studentsList");
   if (studentsList) studentsList.innerHTML = `<div class="empty-state">Select a validated school session to load students.</div>`;
   const attendanceList = $("attendanceList");
-  if (attendanceList) attendanceList.innerHTML = `<div class="empty-state">Attendance is unavailable until the school session is verified.</div>`;
+  if (attendanceList) attendanceList.innerHTML = `<div class="empty-state">Attendance data is syncing. Please try again shortly.</div>`;
   ["statTotal", "statPresent", "statAbsent"].forEach((id) => {
     const stat = $(id);
     if (stat) stat.textContent = "0";
@@ -2620,12 +2727,14 @@ function teacherProfileEmailCacheKey(email = auth.currentUser?.email || teacherD
 function loadCachedTeacherProfile(uid = auth.currentUser?.uid || "") {
   const keys = [
     teacherProfileCacheKey(uid),
-    teacherProfileEmailCacheKey(auth.currentUser?.email || teacherData.email)
+    teacherProfileEmailCacheKey(auth.currentUser?.email || teacherData.email),
+    "schoolixTeacherSession",
+    "schoolixLastTeacherProfile"
   ].filter(Boolean);
   for (const key of keys) {
     try {
       const cached = JSON.parse(localStorage.getItem(key) || "{}") || {};
-      if (Object.keys(cached).length) return cached;
+      if (Object.keys(cached).length && (cached.name || cached.displayName || cached.schoolName)) return cached;
     } catch {}
   }
   return {};
@@ -2636,16 +2745,23 @@ function saveCachedTeacherProfile(profile = teacherData) {
     teacherProfileCacheKey(profile.uid),
     teacherProfileCacheKey(profile.authUid),
     teacherProfileCacheKey(auth.currentUser?.uid),
-    teacherProfileEmailCacheKey(profile.email || auth.currentUser?.email)
+    teacherProfileEmailCacheKey(profile.email || auth.currentUser?.email),
+    "schoolixTeacherSession",
+    "schoolixLastTeacherProfile"
   ].filter(Boolean);
   if (!keys.length) return;
+  const schoolId = profile.schoolId || profile.adminId || adminId || "";
   const cache = {
     uid: profile.uid || "",
+    authUid: profile.authUid || auth.currentUser?.uid || "",
+    docId: profile.docId || "",
     name: teacherDisplayName(profile, auth.currentUser),
     email: profile.email || auth.currentUser?.email || "",
     teacherId: profile.teacherId || "",
     class: profile.class || "",
     section: profile.section || "",
+    schoolId,
+    adminId: schoolId,
     schoolName: profile.schoolName || "",
     logoUrl: profile.logoUrl || profile.schoolLogoUrl || "",
     photoUrl: profile.photoUrl || profile.imageUrl || profile.profilePhotoUrl || profile.avatarUrl || ""
@@ -2653,6 +2769,16 @@ function saveCachedTeacherProfile(profile = teacherData) {
   [...new Set(keys)].forEach((key) => {
     try { localStorage.setItem(key, JSON.stringify(cache)); } catch {}
   });
+  if (cache.schoolId) {
+    try { localStorage.setItem("teacherSchoolId", cache.schoolId); } catch {}
+    if (cache.schoolName) {
+      try { localStorage.setItem(`schoolixSchoolName_${cache.schoolId}`, cache.schoolName); } catch {}
+    }
+  }
+  if (cache.schoolName) {
+    window.SchoolBranding?.persistSchoolName?.(cache.schoolName);
+    try { localStorage.setItem("schoolix.schoolName", cache.schoolName); } catch {}
+  }
 }
 
 function cleanTeacherUid(value) {
@@ -2665,7 +2791,15 @@ function canonicalTeacherUid(data = {}, docId = "", authUser = auth.currentUser)
 
 function renderTeacherIdentity(schoolName = "", authUser = auth.currentUser) {
   const name = teacherDisplayName(teacherData, authUser);
-  const resolvedSchoolName = firstProfileText(schoolName, teacherData.schoolName, "Schoolix");
+  const targetSchoolId = adminId || teacherData.adminId || teacherData.schoolId || "";
+  const cachedSchool = targetSchoolId ? (localStorage.getItem(`schoolixSchoolName_${targetSchoolId}`) || "") : "";
+  const resolvedSchoolName = firstProfileText(
+    schoolName,
+    teacherData.schoolName,
+    cachedSchool,
+    window.SchoolBranding?.getSchoolName?.(),
+    "Schoolix"
+  );
   if ($("schoolNameLabel")) $("schoolNameLabel").textContent = resolvedSchoolName;
   if ($("sidebarSchoolName")) $("sidebarSchoolName").textContent = resolvedSchoolName;
   if ($("teacherNameDisplay")) $("teacherNameDisplay").textContent = name;
@@ -2673,6 +2807,12 @@ function renderTeacherIdentity(schoolName = "", authUser = auth.currentUser) {
   if ($("teacherIdLabel")) $("teacherIdLabel").textContent = `ID: ${teacherData.teacherId || teacherData.uid || authUser?.uid || "--"}`;
   if ($("emailLabel")) $("emailLabel").textContent = teacherData.email || authUser?.email || "";
   renderTeacherProfilePhoto();
+  if (resolvedSchoolName && resolvedSchoolName !== "Schoolix") {
+    try {
+      window.SchoolBranding?.persistSchoolName?.(resolvedSchoolName);
+      if (targetSchoolId) localStorage.setItem(`schoolixSchoolName_${targetSchoolId}`, resolvedSchoolName);
+    } catch {}
+  }
 }
 
 async function resolveTeacherSchoolBranding(schoolId) {
@@ -2681,38 +2821,26 @@ async function resolveTeacherSchoolBranding(schoolId) {
   let schoolName = firstProfileText(teacherData.schoolName, cachedName, window.SchoolBranding?.getSchoolName?.(), "Schoolix");
   let logoUrl = firstProfileText(teacherData.logoUrl, teacherData.schoolLogoUrl);
 
-  try {
-    const adminSnap = await getDoc(doc(db, "users", schoolId));
-    if (adminSnap.exists()) {
-      const adminProfile = adminSnap.data();
-      schoolName = firstProfileText(adminProfile.schoolName, adminProfile.instituteName, schoolName);
-      logoUrl = firstProfileText(adminProfile.logoUrl, adminProfile.schoolLogoUrl, logoUrl);
-      applyAttendanceAccessState(adminProfile);
-    }
-  } catch (error) {
-    console.warn("Teacher admin profile branding unavailable:", error);
+  const [adminResult, schoolResult, brandResult] = await Promise.allSettled([
+    getDoc(doc(db, "users", schoolId)),
+    getDoc(doc(db, "schools", schoolId)),
+    getDoc(doc(db, "schools", schoolId, "config", "branding"))
+  ]);
+  if (adminResult.status === "fulfilled" && adminResult.value.exists()) {
+    const adminProfile = adminResult.value.data();
+    schoolName = firstProfileText(adminProfile.schoolName, adminProfile.instituteName, schoolName);
+    logoUrl = firstProfileText(adminProfile.logoUrl, adminProfile.schoolLogoUrl, logoUrl);
+    applyAttendanceAccessState(adminProfile);
   }
-
-  try {
-    const schoolSnap = await getDoc(doc(db, "schools", schoolId));
-    if (schoolSnap.exists()) {
-      const school = schoolSnap.data();
-      schoolName = firstProfileText(school.schoolName, school.name, school.instituteName, schoolName);
-      logoUrl = firstProfileText(school.logoUrl, school.schoolLogoUrl, logoUrl);
-    }
-  } catch (error) {
-    console.warn("Teacher school branding unavailable:", error);
+  if (schoolResult.status === "fulfilled" && schoolResult.value.exists()) {
+    const school = schoolResult.value.data();
+    schoolName = firstProfileText(school.schoolName, school.name, school.instituteName, schoolName);
+    logoUrl = firstProfileText(school.logoUrl, school.schoolLogoUrl, logoUrl);
   }
-
-  try {
-    const brandSnap = await getDoc(doc(db, "schools", schoolId, "config", "branding"));
-    if (brandSnap.exists()) {
-      const brand = brandSnap.data();
-      schoolName = firstProfileText(brand.schoolName, brand.name, schoolName);
-      logoUrl = firstProfileText(brand.logoUrl, brand.schoolLogoUrl, logoUrl);
-    }
-  } catch (error) {
-    console.warn("Teacher branding config unavailable:", error);
+  if (brandResult.status === "fulfilled" && brandResult.value.exists()) {
+    const brand = brandResult.value.data();
+    schoolName = firstProfileText(brand.schoolName, brand.name, schoolName);
+    logoUrl = firstProfileText(brand.logoUrl, brand.schoolLogoUrl, logoUrl);
   }
 
   try { localStorage.setItem(`schoolixSchoolName_${schoolId}`, schoolName); } catch {}
@@ -2949,6 +3077,17 @@ function getVisibleStudentIds() {
   return new Set(allStudents.map((student) => student.studentId || student.id).filter(Boolean));
 }
 
+function normalizeStudentRecordId(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function feeBelongsToStudent(fee, studentId) {
+  const wanted = normalizeStudentRecordId(studentId);
+  if (!wanted) return false;
+  return [fee?.studentId, fee?.studentDocId, fee?.student?.studentId, fee?.student?.id]
+    .some((value) => normalizeStudentRecordId(value) === wanted);
+}
+
 function getStudentInitials(value) {
   const words = String(value || "Student").trim().split(/\s+/).filter(Boolean);
   if (!words.length) return "ST";
@@ -3074,15 +3213,13 @@ function termBelongsToActivePlacement(term) {
 function belongsToActiveSession(record) {
   // Never aggregate records when the school/session context is unverified.
   if (!sessionContextReady || !activeSessionId) return false;
-  
+  const activeId = normalizeStudentRecordId(activeSessionId);
+  const activeLabel = normalizeStudentRecordId(activeSessionLabel);
+  const recordSessions = [record?.sessionId, record?.session, record?.currentYear, record?.academicSession]
+    .map(normalizeStudentRecordId)
+    .filter(Boolean);
   // Check if record belongs to active session
-  return record.sessionId === activeSessionId ||
-    record.session === activeSessionId ||
-    record.currentYear === activeSessionId ||
-    record.academicSession === activeSessionId ||
-    record.session === activeSessionLabel ||
-    record.currentYear === activeSessionLabel ||
-    record.academicSession === activeSessionLabel;
+  return recordSessions.some((value) => value === activeId || (activeLabel && value === activeLabel));
 }
 
 function setSelectedSession(sessionId) {
@@ -3138,6 +3275,12 @@ function applySessionLockState() {
 }
 
 function showSessionLockBanner() {
+  // A missing session is handled by the disabled controls; don't cover the
+  // dashboard with a repeated warning while a slow connection revalidates.
+  if (!sessionContextReady) {
+    hideSessionLockBanner();
+    return;
+  }
   // Remove existing banner
   const old = document.getElementById("sessionLockGlobalBanner");
   if (old) old.remove();
@@ -3146,7 +3289,7 @@ function showSessionLockBanner() {
   banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:12px 20px;text-align:center;font-size:14px;font-weight:700;letter-spacing:0.02em;box-shadow:0 4px 16px rgba(0,0,0,0.3);";
   banner.innerHTML = sessionContextReady
     ? `Session <strong>${activeSessionLabel}</strong> is locked by admin. All data is <strong>view only</strong>.`
-    : `School session could not be verified. This dashboard is <strong>view only</strong> until it refreshes successfully.`;
+    : "";
   document.body.prepend(banner);
   // Push body down
   document.body.style.paddingTop = "50px";
@@ -3253,19 +3396,26 @@ async function resolveTeacherProfileDocument(user = auth.currentUser) {
     .filter(([, value]) => String(value || "").trim())
     .map(([field, value]) => [`${field}:${String(value).trim().toLowerCase()}`, [field, value]])
   ).values()];
-  const lookupResults = await Promise.allSettled(
-    uniqueLookups.map(([field, value]) => getDocs(query(collection(db, "users"), where(field, "==", value), limit(5))))
-  );
-  lookupResults.forEach((result) => {
-    if (result.status !== "fulfilled") return;
-    result.value.docs.forEach((item) => {
-      const data = item.data() || {};
-      if (String(data.role || "").toLowerCase() === "teacher") matches.push({ id: item.id, data });
+  const signedIds = new Set([user.uid, user.supabaseUid].map((value) => String(value || "").trim()).filter(Boolean));
+  const directAuthMatch = matches.some((item) => (
+    [item.id, item.data.authUid, item.data.uid, item.data.supabaseAuthUid, item.data.legacyUid, item.data.firebaseUid]
+      .map((value) => String(value || "").trim())
+      .some((value) => signedIds.has(value))
+  ));
+  if (!directAuthMatch) {
+    const lookupResults = await Promise.allSettled(
+      uniqueLookups.map(([field, value]) => getDocs(query(collection(db, "users"), where(field, "==", value), limit(5))))
+    );
+    lookupResults.forEach((result) => {
+      if (result.status !== "fulfilled") return;
+      result.value.docs.forEach((item) => {
+        const data = item.data() || {};
+        if (String(data.role || "").toLowerCase() === "teacher") matches.push({ id: item.id, data });
+      });
     });
-  });
+  }
   const uniqueMatches = [...new Map(matches.map((item) => [item.id, item])).values()];
   if (!uniqueMatches.length) return null;
-  const signedIds = new Set([user.uid, user.supabaseUid].map((value) => String(value || "").trim()).filter(Boolean));
   const authLinked = uniqueMatches.filter((item) => (
     [item.id, item.data.authUid, item.data.uid, item.data.supabaseAuthUid, item.data.legacyUid, item.data.firebaseUid]
       .map((value) => String(value || "").trim())
@@ -3325,10 +3475,16 @@ async function refreshTeacherProfileContext(user = auth.currentUser) {
     throw error;
   }
   const schoolChanged = setTeacherSchoolId(nextSchoolId);
-  let schoolName = firstProfileText(teacherData.schoolName, window.SchoolBranding?.getSchoolName?.(), "Schoolix");
+  const cachedSchool = localStorage.getItem(`schoolixSchoolName_${nextSchoolId}`) || "";
+  let schoolName = firstProfileText(teacherData.schoolName, cachedSchool, window.SchoolBranding?.getSchoolName?.(), "Schoolix");
   renderTeacherIdentity(schoolName, user);
-  schoolName = await resolveTeacherSchoolBranding(adminId);
-  renderTeacherIdentity(schoolName, user);
+
+  // Background non-blocking branding sync
+  resolveTeacherSchoolBranding(adminId).then((brandSchoolName) => {
+    if (brandSchoolName && brandSchoolName !== schoolName) {
+      renderTeacherIdentity(brandSchoolName, user);
+    }
+  }).catch((err) => console.warn("Background branding refresh:", err));
 
   const previousPlacement = getActivePlacement();
   teacherAssignedPlacements = getTeacherAssignedPlacements();
@@ -3359,13 +3515,24 @@ onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = "index.html";
     }
 
+    const cached = loadCachedTeacherProfile(user.uid);
     teacherData = {
       uid: user.uid,
-      email: user.email || "",
-      displayName: user.displayName || "",
-      ...loadCachedTeacherProfile(user.uid)
+      email: user.email || cached.email || "",
+      displayName: user.displayName || cached.name || "",
+      ...cached
     };
-    renderTeacherIdentity(firstProfileText(teacherData.schoolName, window.SchoolBranding?.getSchoolName?.(), "Schoolix"), user);
+    if (teacherData.schoolId || teacherData.adminId) {
+      setTeacherSchoolId(teacherData.schoolId || teacherData.adminId);
+    }
+    const initialSchoolName = firstProfileText(
+      teacherData.schoolName,
+      adminId ? localStorage.getItem(`schoolixSchoolName_${adminId}`) : "",
+      window.SchoolBranding?.getSchoolName?.(),
+      "Schoolix"
+    );
+    renderTeacherIdentity(initialSchoolName, user);
+    updateAssignmentLabels();
     await refreshTeacherProfileContext(user);
     if (teacherData.removedFromPanel === true || teacherData.panelStatus === "removed" || teacherData.active === false) {
       alert("Your teacher access has been removed by the school admin.");
@@ -3379,14 +3546,14 @@ onAuthStateChanged(auth, async user => {
     $("teacherAttendanceMonth").value = currentMonth();
     $("statTodayDate").textContent = new Date().toLocaleDateString("en-IN", {day:"numeric",month:"short"});
 
+    const requestedTab = decodeURIComponent(window.location.hash.replace(/^#/, ""));
     const sessionResult = await loadSessions();
     if (sessionResult.error || !sessionContextReady) {
-      toast(teacherSessionLoadError || "School session could not be loaded.", "error");
+      toast("Dashboard refresh pending. Please try again shortly.", "info");
       return;
     }
-    await loadEverything();
+    await loadEverything({ includeSecondary: requestedTab === "report" });
     teacherResumeRefreshAt = Date.now();
-    const requestedTab = decodeURIComponent(window.location.hash.replace(/^#/, ""));
     if (["home", "students", "timetable", "qrCheckin", "myAttendance", "attendance", "report", "notices"].includes(requestedTab)) {
       window.switchTab(requestedTab);
     }
@@ -3405,6 +3572,24 @@ async function loadSessions({ force = false } = {}) {
   const previousContextReady = sessionContextReady && sessionsLoadedForSchool === schoolIdAtStart;
   try {
     if (!schoolIdAtStart) throw new Error("Teacher profile is not linked to a school.");
+    if (!force && !allSessions.length) {
+      let cached = null;
+      try { cached = JSON.parse(localStorage.getItem(`schoolixTeacherSessions_${schoolIdAtStart}`) || "null"); } catch {}
+      if (cached?.savedAt && Date.now() - cached.savedAt < TEACHER_SESSION_CACHE_TTL_MS && Array.isArray(cached.sessions) && cached.sessions.length) {
+        allSessions = cached.sessions;
+        schoolActiveSessionId = findTeacherSessionByValue(cached.schoolActiveSessionId)?.id || "";
+        const cachedSession = findTeacherSessionByValue(cached.activeSessionId) || sortSessions(allSessions).find((session) => session.locked !== true) || allSessions[0];
+        if (cachedSession) setSelectedSession(cachedSession.id);
+        sessionsLoadedForSchool = schoolIdAtStart;
+        sessionContextReady = Boolean(activeSessionId);
+        populateSessionSelector();
+        populateHeaderSessionSelector();
+        updateSessionBadge();
+        applySessionLockState();
+        setTimeout(() => loadSessions({ force: true }).catch(() => {}), 0);
+        return { selectionChanged: previousSelectedId !== activeSessionId, sessionsChanged: false, fromCache: true, error: null };
+      }
+    }
     if (force) clearFirestoreReadCache();
     teacherSessionLoadError = "";
     sessionContextReady = false;
@@ -3477,6 +3662,14 @@ async function loadSessions({ force = false } = {}) {
     populateHeaderSessionSelector();
     updateSessionBadge();
     applySessionLockState();
+    try {
+      localStorage.setItem(`schoolixTeacherSessions_${schoolIdAtStart}`, JSON.stringify({
+        savedAt: Date.now(),
+        sessions: allSessions,
+        activeSessionId,
+        schoolActiveSessionId
+      }));
+    } catch {}
     return {
       selectionChanged,
       sessionsChanged: previousSessionIds !== allSessions.map((session) => session.id).sort().join("|"),
@@ -3640,11 +3833,11 @@ function enableAllEditControls() {
   renderAttendanceList();
 }
 
-async function loadEverything() {
+async function loadEverything({ includeSecondary = false } = {}) {
   if (!sessionContextReady || !adminId || !activeSessionId) {
-    showPanelError("studentsList", teacherSessionLoadError || "School session could not be verified.");
-    showPanelError("attendanceList", "Attendance is unavailable until the school session is verified.");
-    showPanelError("reportContent", "Report cards are unavailable until the school session is verified.");
+    showPanelError("studentsList", "Dashboard data is syncing. Please try again shortly.");
+    showPanelError("attendanceList", "Attendance data is syncing. Please try again shortly.");
+    showPanelError("reportContent", "Report card data is syncing. Please try again shortly.");
     applySessionLockState();
     return { error: new Error(teacherSessionLoadError || "Session context unavailable") };
   }
@@ -3656,6 +3849,11 @@ async function loadEverything() {
     showPanelError("studentsList", "Students load nahi ho pa rahe.");
   }
 
+  // Paint the roster immediately. Attendance and fees can continue loading
+  // without keeping the first useful dashboard view blank.
+  renderStudents();
+  updateTodayStats();
+
   await Promise.all([
     loadAllAttendance().catch((error) => {
       console.error("Attendance loading failed:", error);
@@ -3666,27 +3864,49 @@ async function loadEverything() {
       console.error("Fee loading failed:", error);
       allFees = [];
     }),
-    loadTerms().catch((error) => {
-      console.error("Report term loading failed:", error);
-      showPanelError("reportContent", "Report card terms load nahi ho pa rahe.");
-    }),
-    loadSalaryData().catch((error) => {
-      console.error("Salary loading failed:", error);
-    })
   ]);
 
   updateTodayStats();
-
-  renderStudents();
   renderAttendanceList();
+
+  const loadSecondaryData = () => Promise.allSettled([
+    loadSalaryData(),
+    loadTerms()
+  ]).then((results) => {
+    const termsResult = results[1];
+    if (termsResult.status === "rejected") {
+      console.error("Report term loading failed:", termsResult.reason);
+      showPanelError("reportContent", "Report card terms load nahi ho pa rahe.");
+    }
+    const salaryResult = results[0];
+    if (salaryResult.status === "rejected") {
+      console.error("Salary loading failed:", salaryResult.reason);
+    }
+  });
+  if (includeSecondary) await loadSecondaryData();
+  else setTimeout(() => loadSecondaryData().catch(() => {}), 0);
 }
 
 // ── STUDENTS ───────────────────────────────────────────────────────
-async function loadStudents() {
+async function loadStudents({ force = false } = {}) {
   if (!sessionContextReady || !adminId || !activeSessionId) {
     throw new Error("Teacher school session is not verified.");
   }
 
+  const cacheKey = `schoolixTeacherStudents_${adminId}_${activeSessionId}_${teacherData.docId || teacherData.uid || "teacher"}`;
+  if (!force) {
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(cacheKey) || "null"); } catch {}
+    if (cached?.savedAt && Date.now() - cached.savedAt < TEACHER_DATA_CACHE_TTL_MS && Array.isArray(cached.students)) {
+      allStudents = cached.students;
+      activeClassSection = cached.activeClassSection || { class: "", section: "" };
+      studentScopeMode = cached.studentScopeMode || "direct";
+      $("statTotal").textContent = allStudents.length;
+      updateAssignmentLabels();
+      setTimeout(() => loadStudents({ force: true }).catch(() => {}), 0);
+      return { fromCache: true };
+    }
+  }
   const snap = await getDocs(collection(db, "schools", adminId, "students"));
   const schoolStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const resolved = resolveTeacherStudentScope(schoolStudents);
@@ -3695,6 +3915,14 @@ async function loadStudents() {
   studentScopeMode = resolved.mode;
   $("statTotal").textContent = allStudents.length;
   updateAssignmentLabels();
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({
+      savedAt: Date.now(),
+      students: allStudents,
+      activeClassSection,
+      studentScopeMode
+    }));
+  } catch {}
 }
 
 async function loadFees() {
@@ -3703,7 +3931,7 @@ async function loadFees() {
   const snap = await getDocs(collection(db, "schools", adminId, "fees"));
   allFees = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .filter((entry) => visibleStudentIds.has(entry.studentId) && belongsToActiveSession(entry));
+    .filter((entry) => [...visibleStudentIds].some((studentId) => feeBelongsToStudent(entry, studentId)) && belongsToActiveSession(entry));
 }
 
 async function loadAllAttendance() {
@@ -3733,14 +3961,17 @@ function updateTodayStats() {
 }
 
 function getFeeStatus(studentId) {
-  const fees = allFees.filter(f => f.studentId === studentId);
+  const fees = allFees.filter((fee) => feeBelongsToStudent(fee, studentId));
   if (!fees.length) return { label: "No Record", cls: "badge-pending" };
-  const latest = fees.sort((a,b) => (b.updatedAt?.seconds||0) - (a.updatedAt?.seconds||0))[0];
-  const paid = Number(latest.totalPaidAmount || latest.paidAmount || 0);
-  const total = Number(latest.originalAmount || latest.amount || 0);
-  if (paid >= total && total > 0) return { label: "Paid", cls: "badge-paid" };
-  if (paid > 0) return { label: `Due ₹${(total-paid).toLocaleString("en-IN")}`, cls: "badge-pending" };
-  return { label: `Due ₹${total.toLocaleString("en-IN")}`, cls: "badge-due" };
+  const total = fees.reduce((sum, fee) => sum + moneyValue(fee.originalAmount ?? fee.amount ?? 0), 0);
+  const paid = fees.reduce((sum, fee) => sum + moneyValue(fee.totalPaidAmount ?? fee.paidAmount ?? 0), 0);
+  const due = fees.reduce((sum, fee) => {
+    if (fee.remainingAmount !== undefined && fee.remainingAmount !== null) return sum + moneyValue(fee.remainingAmount);
+    return sum + Math.max(0, moneyValue(fee.originalAmount ?? fee.amount ?? 0) - moneyValue(fee.totalPaidAmount ?? fee.paidAmount ?? 0));
+  }, 0);
+  if (total > 0 && due <= 0) return { label: "Paid", cls: "badge-paid" };
+  if (paid > 0) return { label: `Due ₹${due.toLocaleString("en-IN")}`, cls: "badge-pending" };
+  return { label: `Due ₹${due.toLocaleString("en-IN")}`, cls: "badge-due" };
 }
 
 function rollSortValue(student = {}) {
@@ -3783,7 +4014,7 @@ function getAttendanceBelowThreshold() {
 
 function getFeeDueAmount(studentId) {
   return allFees
-    .filter(fee => fee.studentId === studentId)
+    .filter((fee) => feeBelongsToStudent(fee, studentId))
     .reduce((sum, fee) => {
       const total = moneyValue(fee.originalAmount ?? fee.amount ?? 0);
       const paid = moneyValue(fee.totalPaidAmount ?? fee.paidAmount ?? 0) + moneyValue(fee.extraPaidAmount ?? fee.totalExtraPaidAmount ?? 0);
@@ -4970,7 +5201,7 @@ window.refreshTeacherDashboard = async function() {
     }
     const sessionResult = await loadSessions({ force: true });
     if (sessionResult.error || !sessionContextReady) {
-      toast(teacherSessionLoadError || "School session could not be loaded.", "error");
+      toast("Dashboard refresh pending. Please try again shortly.", "info");
       return;
     }
     await loadEverything();
@@ -5015,6 +5246,10 @@ window.addEventListener("schoolix:app-resume", refreshTeacherContextAfterResume)
 
 // ── LOGOUT ─────────────────────────────────────────────────────────
 window.logout = async function() {
+  try {
+    localStorage.removeItem("schoolixTeacherSession");
+    localStorage.removeItem("schoolixLastTeacherProfile");
+  } catch {}
   await signOut(auth);
   window.location.href = "index.html";
 };

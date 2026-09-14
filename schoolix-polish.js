@@ -100,6 +100,189 @@
   });
   if (window.SchoolixAccountantShellReady) pageLoaderState.readySignals.add("accountant-shell-ready");
 
+  function rectsOverlap(r1, r2, tolerancePx = 6) {
+    return !(
+      r1.right <= r2.left + tolerancePx ||
+      r1.left >= r2.right - tolerancePx ||
+      r1.bottom <= r2.top + tolerancePx ||
+      r1.top >= r2.bottom - tolerancePx
+    );
+  }
+
+  function isActuallyVisibleInViewport(el) {
+    if (!el || el.hidden) return false;
+    const style = window.getComputedStyle(el);
+    if (style.display === "none" || (style.visibility === "hidden" && !document.documentElement.classList.contains("sx-page-loading"))) return false;
+    if (style.opacity === "0") return false;
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 28 || rect.height < 14) return false;
+    // Reject off-canvas sidebars (e.g. mobile drawer with left: -280px) and off-screen modals
+    if (rect.left < -15 || rect.top < -15) return false;
+    if (rect.left >= window.innerWidth - 15 || rect.top >= window.innerHeight - 15) return false;
+    if (rect.right <= 25 || rect.bottom <= 25) return false;
+    // Skip full viewport outer containers
+    const viewportArea = window.innerWidth * window.innerHeight;
+    if (rect.width * rect.height > viewportArea * 0.94) return false;
+    return true;
+  }
+
+  function renderLayoutSkeleton(loader) {
+    const container = loader?.querySelector(".skeleton-container, .dots-container");
+    if (!container) return;
+
+    // Structural block selectors prioritized by major semantic level.
+    // Major components (cards, headers, toolbars) are evaluated so that
+    // internal sub-elements (labels, inputs, buttons) do NOT create overlapping rectangles.
+    const blockSelectors = [
+      // Topbar
+      ".topbar", ".top-bar", ".app-header",
+      // Sidebar (desktop only, when visible on screen)
+      "aside:not(.closed)", ".sidebar:not(.closed)", ".teacher-sidebar", ".admin-sidebar",
+      // Hero & Headers
+      ".header.teacher-dashboard-summary", ".profile-hero", ".overview-header", ".header", ".hero", ".page-header",
+      // Stat cards
+      ".stat-card", ".card.teacher", ".stat", ".account-stat", ".kpi-card",
+      // Distinct Rows
+      ".att-row", ".stu-card", ".record-row", ".notice-card", ".timetable-card",
+      // Sections & Cards
+      ".section-card", ".glass-card", ".card", ".panel", ".table-card", "table", "form",
+      // Toolbars
+      ".att-toolbar", ".search-section", ".filter-bar", ".controls"
+    ];
+
+    const candidateElements = [];
+    const seenElements = new Set();
+
+    blockSelectors.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((el) => {
+        if (seenElements.has(el) || el.closest("#sxPageLoader") || !isActuallyVisibleInViewport(el)) return;
+        // Ignore full-width shell wrappers that wrap cards
+        if (el.classList.contains("shell") || el.classList.contains("main-area") ||
+            el.classList.contains("page-content") || el.classList.contains("stats-row") ||
+            el.classList.contains("stats-grid") || el.classList.contains("cards-grid") ||
+            el.classList.contains("table-responsive")) {
+          return;
+        }
+        seenElements.add(el);
+        candidateElements.push(el);
+      });
+    });
+
+    const acceptedBlocks = [];
+
+    candidateElements.forEach((el) => {
+      const bRect = el.getBoundingClientRect();
+      const rect = {
+        left: Math.max(0, bRect.left),
+        top: Math.max(0, bRect.top),
+        right: Math.min(window.innerWidth, bRect.right),
+        bottom: Math.min(window.innerHeight, bRect.bottom),
+        width: 0,
+        height: 0,
+        element: el
+      };
+      rect.width = rect.right - rect.left;
+      rect.height = rect.bottom - rect.top;
+
+      if (rect.width < 28 || rect.height < 14) return;
+
+      // Check collision with ANY accepted block
+      const collides = acceptedBlocks.some((accepted) => {
+        // Ancestor / descendant collision
+        if (accepted.element.contains(el) || el.contains(accepted.element)) return true;
+        // Geometric boundary overlap collision
+        return rectsOverlap(rect, accepted);
+      });
+
+      if (!collides) {
+        acceptedBlocks.push(rect);
+      }
+    });
+
+    container.replaceChildren();
+
+    // If page is just starting and has very few or no blocks, provide a clean fallback layout
+    if (acceptedBlocks.length < 2) {
+      renderFallbackSkeleton(container);
+      return;
+    }
+
+    acceptedBlocks.forEach((item, index) => {
+      const el = item.element;
+      const placeholder = document.createElement("span");
+      let typeClass = "";
+      if (el.matches(".topbar, .top-bar, .app-header")) typeClass = " is-topbar";
+      else if (el.matches("aside, .sidebar, .teacher-sidebar, .admin-sidebar")) typeClass = " is-sidebar";
+      else if (el.matches(".header, .profile-hero, .hero, .overview-header")) typeClass = " is-hero";
+      else if (el.matches(".stat-card, .stat, .account-stat, .kpi-card")) typeClass = " is-stat";
+      else if (el.matches(".att-row, .stu-card, .record-row, .notice-card, .timetable-card")) typeClass = " is-row";
+      else if (el.matches("table, .table-card")) typeClass = " is-table";
+      else typeClass = " is-card";
+
+      placeholder.className = `sx-skeleton-item${typeClass}`;
+      placeholder.style.left = `${Math.round(item.left)}px`;
+      placeholder.style.top = `${Math.round(item.top)}px`;
+      placeholder.style.width = `${Math.round(item.width)}px`;
+      placeholder.style.height = `${Math.round(item.height)}px`;
+      placeholder.style.animationDelay = `${(index % 6) * 90}ms`;
+      container.appendChild(placeholder);
+    });
+  }
+
+  function renderFallbackSkeleton(container) {
+    container.replaceChildren();
+    const w = window.innerWidth;
+    const isMobile = w < 768;
+    const pad = isMobile ? 16 : 24;
+    const contentW = Math.min(w - pad * 2, 1200);
+    const startX = Math.max(pad, (w - contentW) / 2);
+
+    // 1. Topbar
+    const topbar = document.createElement("span");
+    topbar.className = "sx-skeleton-item is-topbar";
+    topbar.style.left = `${startX}px`;
+    topbar.style.top = `${pad}px`;
+    topbar.style.width = `${contentW}px`;
+    topbar.style.height = "56px";
+    container.appendChild(topbar);
+
+    // 2. Hero banner
+    const hero = document.createElement("span");
+    hero.className = "sx-skeleton-item is-hero";
+    hero.style.left = `${startX}px`;
+    hero.style.top = `${pad + 68}px`;
+    hero.style.width = `${contentW}px`;
+    hero.style.height = isMobile ? "120px" : "136px";
+    container.appendChild(hero);
+
+    // 3. Stat cards row
+    const statY = pad + 68 + (isMobile ? 120 : 136) + 16;
+    const statCount = isMobile ? 2 : 4;
+    const gap = 14;
+    const statW = (contentW - gap * (statCount - 1)) / statCount;
+    for (let i = 0; i < statCount; i++) {
+      const stat = document.createElement("span");
+      stat.className = "sx-skeleton-item is-stat";
+      stat.style.left = `${startX + i * (statW + gap)}px`;
+      stat.style.top = `${statY}px`;
+      stat.style.width = `${statW}px`;
+      stat.style.height = "86px";
+      stat.style.animationDelay = `${(i + 1) * 90}ms`;
+      container.appendChild(stat);
+    }
+
+    // 4. Large main content card
+    const cardY = statY + 86 + 18;
+    const card = document.createElement("span");
+    card.className = "sx-skeleton-item is-card";
+    card.style.left = `${startX}px`;
+    card.style.top = `${cardY}px`;
+    card.style.width = `${contentW}px`;
+    card.style.height = `${Math.max(180, window.innerHeight - cardY - pad)}px`;
+    card.style.animationDelay = "360ms";
+    container.appendChild(card);
+  }
+
   function ensurePageLoader() {
     if (PAGE_LOADER_DISABLED) {
       document.documentElement.classList.remove("sx-page-loading");
@@ -113,6 +296,8 @@
       existing.style.removeProperty("display");
       existing.style.removeProperty("visibility");
       existing.style.removeProperty("opacity");
+      renderLayoutSkeleton(existing);
+      window.addEventListener("resize", () => renderLayoutSkeleton(existing), { passive: true });
       return;
     }
     const loader = document.createElement("div");
@@ -121,15 +306,12 @@
     loader.setAttribute("role", "status");
     loader.setAttribute("aria-live", "polite");
     loader.innerHTML = [
-      '<section class="dots-container" aria-label="Loading page">',
-      '<div class="dot"></div>',
-      '<div class="dot"></div>',
-      '<div class="dot"></div>',
-      '<div class="dot"></div>',
-      '<div class="dot"></div>',
+      '<section class="dots-container skeleton-container" aria-label="Loading page">',
       "</section>"
     ].join("");
     document.body.prepend(loader);
+    renderLayoutSkeleton(loader);
+    window.addEventListener("resize", () => renderLayoutSkeleton(loader), { passive: true });
   }
 
   function hidePageLoader() {

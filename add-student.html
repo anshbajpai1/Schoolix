@@ -1206,8 +1206,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       <div class="layout-two">
         <div>
-          <div class="subnote">Section allocation is automatic. Enter the maximum number of students per section and the
-            system will place the student in the lightest available section.</div>
+          <div class="subnote">Section is optional. Enter it manually when needed; leave it blank and Schoolix will
+            automatically assign the least-filled section for the selected class.</div>
           <div class="form-grid">
             <div class="field"><label for="name">Student name</label><input id="name" placeholder="Enter full name">
             </div>
@@ -1218,7 +1218,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               </select>
             </div>
             <div class="field">
-              <label for="maxPerSection">Max students per section</label>
+              <label for="section">Section (optional)</label>
+              <input id="section" placeholder="Example: A (leave blank for auto-assign)">
+            </div>
+            <div class="field">
+              <label for="maxPerSection">Max students per section (optional)</label>
               <input id="maxPerSection" type="number" min="1" placeholder="Example: 40">
 
               <!-- NEW BUTTON -->
@@ -2073,29 +2077,23 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         async function assignAutoSection(studentClass, maxPerSection) {
           try {
-            const snap = await getDocs(query(
-              collection(db, "schools", currentUser.uid, "students"),
-              where("class", "==", studentClass)
-            ));
+            const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
 
             const counts = {};
-            snap.forEach(d => {
-              const s = d.data().section || "A";
-              counts[s] = (counts[s] || 0) + 1;
+            snap.forEach((d) => {
+              const student = d.data();
+              if (normalizeClassValue(student.class) !== normalizeClassValue(studentClass)) return;
+              const section = normalizeSectionValue(student.section || "A") || "A";
+              counts[section] = (counts[section] || 0) + 1;
             });
 
-            // 👉 FIX: sequential fill (A → B → C)
-            for (let c = 65; c <= 90; c++) {
-              const section = String.fromCharCode(c);
-              const count = counts[section] || 0;
-
-              if (count < maxPerSection) {
-                return section; // first available section
-              }
-            }
-
-            // fallback
-            return "A";
+            const capacity = Math.max(1, Number(maxPerSection) || Number(savedMaxPerSection) || 40);
+            const sections = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
+            const available = sections.filter((section) => (counts[section] || 0) < capacity);
+            const candidates = available.length ? available : sections;
+            return candidates.sort((a, b) =>
+              (counts[a] || 0) - (counts[b] || 0) || a.localeCompare(b)
+            )[0] || "A";
 
           } catch (e) {
             return "A";
@@ -2193,7 +2191,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
 
         function resetStudentForm() {
-          ["name", "yearOfAdmission", "studentId", "srNumber", "gender", "category", "aadharNumber", "bloodGroup", "religion", "previousSchool", "studentEmail", "parentEmail", "studentPassword", "father", "fatherPhone", "mother", "motherPhone", "phone", "address", "documentList", "dob", "dateOfAdmission"].forEach(id => { const el=$(id); if(el) el.value=""; }); const cls=$("class"); if(cls) cls.value="";
+          ["name", "section", "yearOfAdmission", "studentId", "srNumber", "gender", "category", "aadharNumber", "bloodGroup", "religion", "previousSchool", "studentEmail", "parentEmail", "studentPassword", "father", "fatherPhone", "mother", "motherPhone", "phone", "address", "documentList", "dob", "dateOfAdmission"].forEach(id => { const el=$(id); if(el) el.value=""; }); const cls=$("class"); if(cls) cls.value="";
           const status = $("studentStatus");
           if (status) status.value = "Active";
           const photoInput = $("studentPhoto");
@@ -2216,6 +2214,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           return {
             name: $("name").value.trim(),
             studentClass: $("class").value,
+            section: $("section").value.trim(),
             maxPerSection: parseInt($("maxPerSection").value, 10) || 0,
             yearOfAdmission: $("yearOfAdmission").value.trim(),
             currentYear: $("currentYear").value.trim(),
@@ -2245,7 +2244,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
 
         function validateStudentPayload(payload, label = "Student") {
-          if (!payload.name || !payload.studentClass || (!payload.section && !payload.maxPerSection) || !payload.yearOfAdmission || !payload.currentYear || !payload.father || !payload.fatherPhone || !payload.mother || !payload.motherPhone || !payload.dateOfAdmission) {
+          if (!payload.name || !payload.studentClass || !payload.yearOfAdmission || !payload.currentYear || !payload.father || !payload.fatherPhone || !payload.mother || !payload.motherPhone || !payload.dateOfAdmission) {
             throw new Error(`${label}: required fields missing.`);
           }
           if (payload.aadharNumber && !/^\d{12}$/.test(payload.aadharNumber)) {
@@ -2326,7 +2325,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             name: String(rawPayload.name || "").trim(),
             studentClass: normalizeClassValue(rawPayload.studentClass || rawPayload.class),
             section: normalizeSectionValue(rawPayload.section),
-            maxPerSection: parseInt(rawPayload.maxPerSection, 10) || 0,
+            maxPerSection: parseInt(rawPayload.maxPerSection, 10) || parseInt(savedMaxPerSection, 10) || 40,
             yearOfAdmission: String(rawPayload.yearOfAdmission || "").trim(),
             currentYear: String(rawPayload.currentYear || "").trim(),
             studentId: String(rawPayload.studentId || "").trim(),

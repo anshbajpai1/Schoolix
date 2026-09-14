@@ -130,6 +130,131 @@ html.sx-page-loading .sx-page-loader {
   animation-delay: 0.1s;
 }
 
+/* Layout-aware first-paint skeleton. Clean, distinct structural blocks
+   with silky smooth shimmer wave animation and zero overlapping rectangles. */
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+}
+
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sx-page-loader .dots-container {
+  position: fixed;
+  inset: 0;
+  display: block !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #f8fafc;
+  transform: none !important;
+  pointer-events: none;
+}
+
+.sx-page-loader .dots-container::before,
+.sx-page-loader .dots-container::after,
+.sx-page-loader .dot { display: none !important; }
+
+.sx-skeleton-item {
+  position: fixed;
+  display: block;
+  box-sizing: border-box;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    #e2e8f0 0%,
+    #edf2f7 20%,
+    #f8fafc 40%,
+    #edf2f7 60%,
+    #e2e8f0 100%
+  );
+  background-size: 250% 100%;
+  border: 1px solid rgba(203, 213, 225, 0.55);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  animation: sx-skeleton-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: background-position;
+}
+
+@keyframes sx-skeleton-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+.sx-skeleton-item.is-hero,
+.sx-skeleton-item.is-header-banner {
+  border-radius: 18px;
+  background: linear-gradient(
+    90deg,
+    #3b52c4 0%,
+    #4f68d9 22%,
+    #6980e8 45%,
+    #4f68d9 68%,
+    #3b52c4 100%
+  );
+  background-size: 250% 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(61, 90, 241, 0.16);
+  animation: sx-skeleton-hero-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes sx-skeleton-hero-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+.sx-skeleton-item.is-sidebar {
+  border-radius: 0 18px 18px 0;
+  border-left: 0;
+  border-right: 1px solid rgba(203, 213, 225, 0.7);
+  background: linear-gradient(
+    90deg,
+    #edf2f7 0%,
+    #f8fafc 40%,
+    #edf2f7 100%
+  );
+  background-size: 250% 100%;
+}
+
+.sx-skeleton-item.is-card {
+  border-radius: 16px;
+}
+
+.sx-skeleton-item.is-stat {
+  border-radius: 14px;
+}
+
+.sx-skeleton-item.is-table,
+.sx-skeleton-item.is-row {
+  border-radius: 10px;
+}
+
+.sx-skeleton-item.is-topbar {
+  border-radius: 12px;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(0.8);

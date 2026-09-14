@@ -1,9 +1,14 @@
 {
-  "versionCode": 107,
-  "versionName": "5.3.7",
+  "versionCode": 108,
+  "versionName": "5.3.8",
   "forceUpdate": false,
-  "message": "Release 5.3.7: Fixes driver phone notifications and improves live vehicle tracking.",
+  "message": "Release 5.3.8: Fixes student dashboard marks and terms fetching with full support for subject-wise report cards.",
   "changelog": [
+    "Fixes student dashboard terms dropdown and subject marks fetching.",
+    "Synchronizes terms dynamically from terms collection, report cards, and saved marks.",
+    "Ensures results display reliably across all session structures and student ID formats.",
+    "Optimizes teacher dashboard load time with synchronous teacher identity and school branding cache.",
+    "Completely redesigns skeleton loaders across all panels with modern shimmer wave animations and collision prevention.",
     "Fixes driver phones receiving app notifications when Send to everyone is used.",
     "Adds driver notification registration and a drivers-only notification audience.",
     "Shows active vehicles on the admin map faster after Start Tracking.",
@@ -29,5 +34,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=107-driver-tracking"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=108"
 }

@@ -2171,7 +2171,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     body .filter-card .form-group {
-      grid-template-columns: minmax(260px, 1.4fr) repeat(4, minmax(130px, 0.8fr)) repeat(2, auto);
+      grid-template-columns: minmax(260px, 1.4fr) repeat(5, minmax(130px, 0.8fr)) repeat(2, auto);
       align-items: stretch;
     }
 
@@ -2318,6 +2318,94 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       body .top-bar h1 {
         font-size: 30px;
+      }
+    }
+
+    @media print {
+      @page { size: landscape; margin: 8mm; }
+
+      body {
+        padding: 0;
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      body > *:not(.container) {
+        display: none !important;
+      }
+
+      .container {
+        max-width: none;
+        width: 100%;
+        margin: 0;
+      }
+
+      .top-bar,
+      .fee-ops-grid,
+      .stats-grid,
+      .sx-chart-grid,
+      .filter-card,
+      .report-actions,
+      .pagination,
+      .report-card > .card-head p,
+      .report-print-hidden {
+        display: none !important;
+      }
+
+      .report-card {
+        display: block !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+
+      .report-card > .card-head {
+        display: block !important;
+        padding: 0 0 6px !important;
+        margin: 0 !important;
+      }
+
+      #reportsTable {
+        overflow: visible !important;
+        border: 0 !important;
+      }
+
+      #reportsTable table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+        margin: 0 !important;
+        border: 1px solid #333 !important;
+        box-shadow: none !important;
+        font-size: 8px !important;
+      }
+
+      #reportsTable thead { display: table-header-group; }
+      #reportsTable tr { break-inside: avoid; page-break-inside: avoid; }
+      #reportsTable th,
+      #reportsTable td {
+        padding: 3px 4px !important;
+        color: #000 !important;
+        border: 1px solid #999 !important;
+        vertical-align: top;
+        white-space: normal !important;
+        word-break: break-word;
+      }
+
+      #reportsTable th { position: static !important; background: #eee !important; }
+      #reportsTable th:nth-child(1),
+      #reportsTable td:nth-child(1),
+      #reportsTable th:nth-child(12),
+      #reportsTable td:nth-child(12) { display: none !important; }
+      #reportsTable .status-paid,
+      #reportsTable .status-partial,
+      #reportsTable .status-pending,
+      #reportsTable .status-unpaid,
+      #reportsTable .status-imposed {
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: #000 !important;
       }
     }
   </style>
@@ -2531,6 +2619,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <input id="searchStudent" placeholder="Search Student, ID, Payment ID">
         <select id="filterClass">
           <option value="">All Classes</option>
+        </select>
+        <select id="filterSection" disabled>
+          <option value="">All Sections</option>
         </select>
         <select id="filterStatus">
           <option value="">All Status</option>
@@ -4137,6 +4228,33 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       classList.forEach(c => {
         classSelect.innerHTML += `<option value="${c}">${c}</option>`;
       });
+      classSelect.addEventListener("change", populateReportSections);
+      populateReportSections();
+    }
+
+    function populateReportSections() {
+      const classSelect = document.getElementById("filterClass");
+      const sectionSelect = document.getElementById("filterSection");
+      if (!classSelect || !sectionSelect) return;
+
+      const selectedClass = classSelect.value;
+      const previousSection = sectionSelect.value;
+      const sections = new Set();
+      allFees.forEach((fee) => {
+        const feeClass = fee.class || fee.currentClass || fee.finalClass || "";
+        const section = String(fee.section || "").trim();
+        if ((!selectedClass || normalizeClassValue(feeClass) === normalizeClassValue(selectedClass)) && section) {
+          sections.add(section);
+        }
+      });
+
+      sectionSelect.innerHTML = `<option value="">All Sections</option>` +
+        [...sections]
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+          .map((section) => `<option value="${esc(section)}">Section ${esc(section)}</option>`)
+          .join("");
+      sectionSelect.disabled = sections.size === 0;
+      if (sections.has(previousSection)) sectionSelect.value = previousSection;
     }
 
     function showToast(message, type = 'success') {
@@ -4206,7 +4324,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         html += `
       <tr class="${isSelected ? 'selected' : ''}" ondblclick="viewStudentHistory('${fee.studentId || ''}')">
-        <td><input type="checkbox" class="row-checkbox" data-id="${feeId}" ${isSelected ? 'checked' : ''} onchange="toggleRowSelection('${feeId}')"></td>
+        <td class="report-print-hidden"><input type="checkbox" class="row-checkbox" data-id="${feeId}" ${isSelected ? 'checked' : ''} onchange="toggleRowSelection('${feeId}')"></td>
         <td><strong>${fee.studentId || 'N/A'}</strong></td>
         <td ondblclick="viewStudentHistory('${fee.studentId || ''}')">${fee.studentName || 'N/A'}</td>
         <td>${fee.class || ''}${fee.section ? `-${fee.section}` : ''}</td>
@@ -4217,7 +4335,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <td style="font-size:12px;color:#475569;max-width:220px;white-space:normal;">${esc(fee.entryRemark || fee.remarks || fee.impositionRemark || fee.lastFineReason || '-')}</td>
         <td style="min-width: 150px;">${statusHtml}</td>
         <td>${dateStr}</td>
-        <td>
+        <td class="report-print-hidden">
           <div class="action-buttons">
             <button class="btn btn-sm btn-info" onclick="viewStudentHistoryByFee('${feeId}')" title="View History">History</button>
             <button class="btn btn-sm btn-partial" onclick="showPartialDetailsById('${feeId}')" title="Add Payment">Add Payment</button>
@@ -4533,6 +4651,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         await loadActiveSession();
         const { snapshot, cleanupResult } = await fetchCleanFeeSnapshot({ silent: true });
         hydrateAllFeesFromSnapshot(snapshot);
+        populateReportSections();
         filteredFees = buildReportEntries(allFees);
         currentPage = 1;
         displayReports();
@@ -4618,6 +4737,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     window.loadReports = () => {
       const searchTerm = document.getElementById("searchStudent").value.toLowerCase();
       const selectedClass = document.getElementById("filterClass").value;
+      const selectedSection = document.getElementById("filterSection").value;
       const selectedStatus = document.getElementById("filterStatus").value;
       const selectedMonth = document.getElementById("filterMonth").value;
 
@@ -4629,12 +4749,13 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           feeMatchesPaymentSearch(fee, searchTerm);
 
         const matchesClass = !selectedClass || normalizeClassValue(fee.class || fee.currentClass || fee.finalClass) === normalizeClassValue(selectedClass);
+        const matchesSection = !selectedSection || String(fee.section || "").trim().toLowerCase() === selectedSection.toLowerCase();
         const matchesStatus = !selectedStatus ||
           correctStatus === selectedStatus ||
           (selectedStatus === "Unpaid" && correctStatus === "Imposed");
         const matchesMonth = !selectedMonth || String(fee.month || "").toLowerCase() === String(selectedMonth).toLowerCase();
 
-        return matchesSearch && matchesClass && matchesStatus && matchesMonth;
+        return matchesSearch && matchesClass && matchesSection && matchesStatus && matchesMonth;
       });
 
       currentPage = 1;
@@ -4717,6 +4838,20 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     };
 
     window.printReport = () => {
+      const previousPage = currentPage;
+      const rowsSelect = document.getElementById("rowsPerPage");
+      const previousRows = rowsSelect?.value || "10";
+      currentPage = 1;
+      if (rowsSelect) rowsSelect.value = "9999";
+      displayReports();
+
+      const restoreReport = () => {
+        window.removeEventListener("afterprint", restoreReport);
+        currentPage = previousPage;
+        if (rowsSelect) rowsSelect.value = previousRows;
+        displayReports();
+      };
+      window.addEventListener("afterprint", restoreReport);
       window.print();
     };
 

@@ -107,7 +107,7 @@ assertIncludes(edge, "selectUnambiguousProfile", "Backend authorization must sha
 assertIncludes(legacyLogin, "app_metadata", "Legacy login must synchronize both metadata stores");
 assertIncludes(appShell, "registration.unregister()", "Native builds must remove stale service workers");
 assertIncludes(mainActivity, "new CustomEvent('schoolix:app-resume')", "Android resume must notify both dashboards");
-assertIncludes(serviceWorker, "school-session-sync-20260810-v15b", "The service-worker import must be cache-busted for existing installs");
+assertIncludes(serviceWorker, "pull-refresh-20260813-v27", "The service-worker import must be cache-busted for existing installs");
 
 const update = JSON.parse(updateText);
 const version = JSON.parse(versionText);

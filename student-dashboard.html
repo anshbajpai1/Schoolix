@@ -3556,8 +3556,23 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     return rows.sort((a,b)=>(toDate(b.date)||0)-(toDate(a.date)||0));
   }
 
+  function parseTimestampMillis(val) {
+    if (!val) return 0;
+    if (typeof val?.toMillis === "function") return val.toMillis();
+    if (typeof val?.toDate === "function") return val.toDate().getTime();
+    if (val?.seconds) return val.seconds * 1000;
+    if (val instanceof Date) return val.getTime();
+    if (typeof val === "number") return val;
+    if (typeof val === "string") {
+      const parsed = Date.parse(val);
+      if (!isNaN(parsed)) return parsed;
+    }
+    return 0;
+  }
+
   function latestReport(r) {
-    return [...r].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))[0]||null;
+    if (!Array.isArray(r) || !r.length) return null;
+    return [...r].sort((a,b)=>(parseTimestampMillis(b.createdAt || b.updatedAt) - parseTimestampMillis(a.createdAt || a.updatedAt)))[0]||null;
   }
 
   /* --- SCHOOL NAME (Permanent, from Firestore) --- */
@@ -3667,6 +3682,37 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     return String(t||"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
   }
 
+  function cleanTermToken(t) {
+    return String(t || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function termKeysMatch(k1, k2) {
+    if (!k1 || !k2) return false;
+    const s1 = cleanTermToken(k1);
+    const s2 = cleanTermToken(k2);
+    return s1.length > 0 && s1 === s2;
+  }
+
+  function getReportRemarks(obtained, maxMarks) {
+    if (obtained == null || isNaN(obtained)) return "Not evaluated";
+    const max = Number(maxMarks || 100);
+    const pct = max ? (Number(obtained) / max) * 100 : 0;
+    if (pct >= 85) return "Excellent";
+    if (pct >= 70) return "Very Good";
+    if (pct >= 50) return "Good";
+    if (pct >= 33) return "Satisfactory";
+    return "Needs Improvement";
+  }
+
+  function getReportGrade(pct) {
+    const p = Number(pct || 0);
+    if (p >= 90) return "A+";
+    if (p >= 80) return "A";
+    if (p >= 60) return "B";
+    if (p >= 33) return "C";
+    return "F";
+  }
+
   function getReportTermKey(report = {}) {
     return report.termKey || termKey(report.termLabel || report.term || "");
   }
@@ -3678,7 +3724,30 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   }
 
   function isResultTermLive(termKeyValue) {
-    return state.resultVisibility?.[getResultVisibilityKey(termKeyValue)]?.live === true;
+    if (!termKeyValue) return true;
+    const visibilityMap = state.resultVisibility;
+    if (!visibilityMap || typeof visibilityMap !== "object" || Object.keys(visibilityMap).length === 0) {
+      return true;
+    }
+
+    const directKey = getResultVisibilityKey(termKeyValue);
+    const bareKey = termKeyValue;
+    const normKey = cleanTermToken(termKeyValue);
+
+    let entry = visibilityMap[directKey] || visibilityMap[bareKey];
+    if (!entry) {
+      entry = Object.values(visibilityMap).find(v => {
+        if (!v) return false;
+        const candidateKey = cleanTermToken(v.termKey || v.termLabel || v.term || "");
+        return candidateKey && candidateKey === normKey;
+      });
+    }
+
+    if (entry && typeof entry === "object") {
+      return entry.live !== false;
+    }
+
+    return true;
   }
 
   function filterLiveReportsForStudent(reports = []) {
@@ -3904,6 +3973,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   /* --- RENDER: TERM DROPDOWN --- */
   function renderTermDropdown(terms) {
     const sel = $("studentTermSelect");
+    if (!sel) return;
     if (isResultLocked()) {
       sel.innerHTML = `<option value="">Results locked until dues are cleared</option>`;
       sel.disabled = true;
@@ -3915,11 +3985,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     const seen = new Set();
     terms.forEach(t => {
       const key = t.termKey || termKey(t.label||t.term||"");
-      if (!key || seen.has(key)) return;
-      seen.add(key);
+      if (!key || seen.has(cleanTermToken(key))) return;
+      seen.add(cleanTermToken(key));
       uniqueTerms.push({ ...t, termKey: key });
     });
-    if (!uniqueTerms.length) { sel.innerHTML = `<option value="">- No terms available -</option>`; return; }
+    if (!uniqueTerms.length) {
+      sel.innerHTML = `<option value="">- No terms available -</option>`;
+      $("resultPanel").innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>No terms or report cards available for this session.</div>`;
+      return;
+    }
     sel.innerHTML = `<option value="">- Select a term -</option>`;
     uniqueTerms.forEach(t => {
       const opt = document.createElement("option");
@@ -3927,6 +4001,14 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       opt.textContent = t.label||t.term||t.termKey||"Unknown Term";
       sel.appendChild(opt);
     });
+  }
+
+  function findReportForTermKey(tk) {
+    if (!tk) return null;
+    return state.reports.find(r =>
+      termKeysMatch(r.termKey, tk) ||
+      termKeysMatch(r.termLabel || r.term || "", tk)
+    ) || null;
   }
 
   window.onStudentTermChange = function() {
@@ -3948,9 +4030,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       renderResultLockedPanel();
       return;
     }
-    const report = state.reports.find(r=>(r.termKey||termKey(r.termLabel||r.term||""))===tk);
+    const report = findReportForTermKey(tk);
     if (!report) {
-      $("resultPanel").innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>No report card generated for this term yet.</div>`;
+      $("resultPanel").innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>No marks or report card recorded for this term yet.</div>`;
       return;
     }
     renderReportPanel(report);
@@ -3993,7 +4075,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               <div>Subject</div><div>Obtained</div><div>Max Marks</div><div>Remarks</div>
             </div>
             ${subjects.map(sub => {
-              const ob = sub.obtained===""?"":Number(sub.obtained??0);
+              const ob = (sub.obtained != null && sub.obtained !== "" && !isNaN(sub.obtained)) ? Number(sub.obtained) : "";
               const max = Number(sub.maxMarks??sub.max??100);
               const sp = max ? Math.round((ob!==""?ob:0)/max*100) : 0;
               const col = sp>=75?"var(--green)":sp>=40?"var(--amber)":"var(--rose)";
@@ -4404,14 +4486,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   }
 
   function belongsToSelectedSession(entry) {
-    if (!state.activeSessionId && !state.activeSessionLabel) return false;
+    if (!entry) return false;
+    if (!state.activeSessionId && !state.activeSessionLabel) return true;
+    if (entry.id && String(entry.id).startsWith(`${state.activeSessionId}__`)) return true;
     if (!entry.sessionId && !entry.session && !entry.currentYear && !entry.academicSession) {
-      // Legacy untagged records belong only to the school's active session;
-      // showing them in every historical session mixes academic years.
-      return Boolean(
-        state.schoolActiveSessionId &&
-        state.activeSessionId === state.schoolActiveSessionId
-      );
+      return true;
     }
     return entry.sessionId === state.activeSessionId ||
       entry.session === state.activeSessionId ||
@@ -4423,24 +4502,32 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   }
 
   function normalizeTermClass(value) {
-    const raw = String(value || "").trim().toUpperCase().replace(/^CLASS\s+/, "");
+    let raw = String(value || "").trim().toUpperCase();
+    raw = raw.replace(/^CLASS\s+/, "").replace(/^GRADE\s+/, "");
+    raw = raw.replace(/(\d+)(ST|ND|RD|TH)\b/g, "$1");
     if (/^\d+$/.test(raw)) return String(Number(raw));
-    return raw;
+    return raw.trim();
   }
 
   function normalizeTermSection(value) {
-    return String(value || "").trim().toUpperCase().replace(/[^A-Z]/g, "").slice(0, 1);
+    let raw = String(value || "").trim().toUpperCase();
+    if (["ALL", "ALL SECTIONS", "ALL SECTION", "ANY", "*", ""].includes(raw)) return "";
+    return raw.replace(/[^A-Z]/g, "").slice(0, 1);
   }
 
   function termMatchesStudentPlacement(term) {
     if (!term?.class && !term?.section) return true;
+    const rawTermClass = String(term.class || "").trim().toUpperCase();
+    if (["ALL", "ALL CLASSES", "ALL CLASS", "ANY", "*", ""].includes(rawTermClass)) return true;
+
     const termClass = normalizeTermClass(term.class);
     const termSection = normalizeTermSection(term.section);
-    const studentClass = normalizeTermClass(getClassForSession());
-    const studentSection = normalizeTermSection(getSectionForSession());
-    if (!termClass) return true;
-    if (termClass !== studentClass) return false;
-    return !termSection || termSection === studentSection;
+    const studentClass = normalizeTermClass(getClassForSession() || state.profile?.class);
+    const studentSection = normalizeTermSection(getSectionForSession() || state.profile?.section);
+
+    if (termClass && studentClass && termClass !== studentClass) return false;
+    if (termSection && studentSection && termSection !== studentSection) return false;
+    return true;
   }
 
   async function loadStudentSessions({ force = false } = {}) {
@@ -4672,6 +4759,18 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         authUid: state.profile.authUid || state.session?.uid || ""
       });
 
+      const candidateStudentIds = Array.from(new Set([
+        recordStudentId,
+        state.profile?.studentId,
+        state.profile?.id,
+        state.profile?.studentDocId,
+        sk,
+        state.session?.studentId,
+        state.session?.uid,
+        state.profile?.authUid,
+        state.profile?.srNumber
+      ].map(s => String(s || "").trim()).filter(Boolean)));
+
       if (state.isArchived) {
         const archivedRecords = state.profile.records || {};
         state.attendance = latestByRecent(normalizeArchivedArray(archivedRecords.attendance).filter(belongsToSelectedSession));
@@ -4680,36 +4779,77 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         state.transactions = [];
         state.libraryIssues = [];
       } else {
-        const [aSnap, fSnap] = await Promise.all([
-          safeGetDocs(query(collection(db,"schools",state.schoolId,"attendance"),where("studentId","==",recordStudentId))),
-          safeGetDocs(query(collection(db,"schools",state.schoolId,"fees"),where("studentId","==",recordStudentId)))
+        const [aSnaps, fSnaps] = await Promise.all([
+          Promise.all(candidateStudentIds.map(sid => safeGetDocs(query(collection(db,"schools",state.schoolId,"attendance"),where("studentId","==",sid))))),
+          Promise.all(candidateStudentIds.map(sid => safeGetDocs(query(collection(db,"schools",state.schoolId,"fees"),where("studentId","==",sid)))))
         ]);
-        state.attendance = latestByRecent(aSnap.docs.map(d=>({id:d.id,...d.data()})).filter(belongsToSelectedSession));
-        state.fees = latestByRecent(fSnap.docs.map(d=>({id:d.id,...d.data()})).filter(belongsToSelectedSession));
+        const attendanceMap = new Map();
+        aSnaps.forEach(snap => snap?.docs?.forEach(d => attendanceMap.set(d.id, { id: d.id, ...d.data() })));
+        const feeMap = new Map();
+        fSnaps.forEach(snap => snap?.docs?.forEach(d => feeMap.set(d.id, { id: d.id, ...d.data() })));
+        state.attendance = latestByRecent(Array.from(attendanceMap.values()).filter(belongsToSelectedSession));
+        state.fees = latestByRecent(Array.from(feeMap.values()).filter(belongsToSelectedSession));
       }
 
-      const [txRows, libraryRows, reportRows, termRows, transportData, visibilityData] = await Promise.all([
+      const [txRows, libraryRows, reportRows, marksData, termRows, transportData, visibilityData] = await Promise.all([
         (async () => {
           if (state.isArchived) return [];
-          const txSnap = await safeGetDocs(query(collection(db,"schools",state.schoolId,"onlineFeeTransactions"),where("studentId","==",recordStudentId)));
-          return txSnap.docs.map(d=>({id:d.id,...d.data()})).filter(belongsToSelectedSession);
+          const txSnaps = await Promise.all(candidateStudentIds.map(sid =>
+            safeGetDocs(query(collection(db,"schools",state.schoolId,"onlineFeeTransactions"),where("studentId","==",sid)))
+          ));
+          const txMap = new Map();
+          txSnaps.forEach(snap => snap?.docs?.forEach(d => txMap.set(d.id, { id: d.id, ...d.data() })));
+          return Array.from(txMap.values()).filter(belongsToSelectedSession);
         })(),
         (async () => {
           if (state.isArchived) return [];
-          const lSnap = await safeGetDocs(query(collection(db,"schools",state.schoolId,"library_issues"),where("studentId","==",recordStudentId)));
-          return lSnap.docs.map(d=>({id:d.id,...d.data()}));
+          const lSnaps = await Promise.all(candidateStudentIds.map(sid =>
+            safeGetDocs(query(collection(db,"schools",state.schoolId,"library_issues"),where("studentId","==",sid)))
+          ));
+          const lMap = new Map();
+          lSnaps.forEach(snap => snap?.docs?.forEach(d => lMap.set(d.id, { id: d.id, ...d.data() })));
+          return Array.from(lMap.values());
         })(),
         (async () => {
           if (state.isArchived) return state.reports;
-          const [rSnap, r2] = await Promise.all([
-            safeGetDocs(query(collection(db,"schools",state.schoolId,"reportCards"),where("student.studentId","==",recordStudentId))),
-            safeGetDocs(query(collection(db,"schools",state.schoolId,"reportCards"),where("studentId","==",recordStudentId)))
-          ]);
+          const reportQueries = [];
+          candidateStudentIds.forEach((sid) => {
+            reportQueries.push(
+              safeGetDocs(query(collection(db,"schools",state.schoolId,"reportCards"),where("student.studentId","==",sid))),
+              safeGetDocs(query(collection(db,"schools",state.schoolId,"reportCards"),where("studentId","==",sid))),
+              safeGetDocs(query(collection(db,"schools",state.schoolId,"reportCards"),where("student.id","==",sid)))
+            );
+          });
+          const querySnaps = await Promise.all(reportQueries);
           const reportsById = new Map();
-          [...rSnap.docs, ...r2.docs].forEach((reportDoc) => {
-            reportsById.set(reportDoc.id, { id: reportDoc.id, ...reportDoc.data() });
+          querySnaps.forEach((snap) => {
+            if (snap?.docs) {
+              snap.docs.forEach((reportDoc) => {
+                reportsById.set(reportDoc.id, { id: reportDoc.id, ...reportDoc.data() });
+              });
+            }
           });
           return [...reportsById.values()].filter(belongsToSelectedSession);
+        })(),
+        (async () => {
+          if (state.isArchived) return {};
+          const marksPromises = candidateStudentIds.map(sid =>
+            safeGetDoc(doc(db, "schools", state.schoolId, "marks", sid))
+          );
+          const marksSnaps = await Promise.all(marksPromises);
+          const combinedTerms = {};
+          marksSnaps.forEach(snap => {
+            if (snap?.exists?.()) {
+              const data = snap.data() || {};
+              const terms = data.terms || {};
+              Object.entries(terms).forEach(([k, v]) => {
+                if (v && typeof v === "object") {
+                  combinedTerms[k] = { ...(combinedTerms[k] || {}), ...v };
+                }
+              });
+            }
+          });
+          return combinedTerms;
         })(),
         (async () => {
           const tSnap = await safeGetDocs(collection(db,"schools",state.schoolId,"terms"));
@@ -4729,11 +4869,117 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         })()
       ]);
 
+      // Merge marks into report rows
+      const studentMarksTerms = marksData || {};
+      const finalReports = [...reportRows];
+
+      Object.entries(studentMarksTerms).forEach(([rawKey, subjectMarks]) => {
+        if (!subjectMarks || typeof subjectMarks !== "object" || Object.keys(subjectMarks).length === 0) return;
+
+        let tKey = rawKey;
+        if (rawKey.includes("__")) {
+          const [sessKey, ...rest] = rawKey.split("__");
+          if (state.activeSessionId && sessKey !== state.activeSessionId && sessKey !== state.activeSessionLabel) {
+            return;
+          }
+          tKey = rest.join("__");
+        }
+
+        const canonicalTermKey = termKey(tKey);
+        const subArr = Object.entries(subjectMarks).map(([subName, entry]) => {
+          const obtained = (entry?.obtained != null && entry?.obtained !== "" && !isNaN(entry?.obtained)) ? Number(entry.obtained) : null;
+          const maxMarks = Number(entry?.maxMarks || entry?.max || 100);
+          return {
+            name: subName,
+            obtained,
+            maxMarks,
+            remarks: getReportRemarks(obtained, maxMarks)
+          };
+        }).filter(s => s.name);
+
+        let total = 0, totalMax = 0, hasScored = false;
+        subArr.forEach(s => {
+          if (s.obtained != null) {
+            total += s.obtained;
+            hasScored = true;
+          }
+          totalMax += s.maxMarks;
+        });
+
+        const pct = totalMax ? Math.round((total / totalMax) * 100) : 0;
+        const grade = hasScored ? getReportGrade(pct) : "-";
+
+        const existingReport = finalReports.find(r =>
+          termKeysMatch(r.termKey || termKey(r.termLabel || r.term || ""), canonicalTermKey)
+        );
+
+        if (existingReport) {
+          if (!existingReport.subjects || !existingReport.subjects.length) {
+            existingReport.subjects = subArr;
+            existingReport.totalMarks = total;
+            existingReport.totalMaxMarks = totalMax;
+            existingReport.percentage = pct;
+            existingReport.grade = grade;
+          }
+        } else {
+          const prettyTerm = tKey.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+          finalReports.push({
+            id: `marks_${recordStudentId}_${canonicalTermKey}`,
+            term: prettyTerm,
+            termKey: canonicalTermKey,
+            termLabel: prettyTerm,
+            sessionId: state.activeSessionId || "",
+            session: state.activeSessionLabel || "",
+            student: {
+              name: state.profile?.name || "",
+              studentId: recordStudentId,
+              class: getClassForSession() || state.profile?.class || "",
+              section: getSectionForSession() || state.profile?.section || "",
+              roll: getRollForSession() || state.profile?.roll || ""
+            },
+            subjects: subArr,
+            totalMarks: total,
+            totalMaxMarks: totalMax,
+            percentage: pct,
+            grade,
+            createdAt: new Date(),
+            fromMarks: true
+          });
+        }
+      });
+
+      // Build unique terms from terms collection, report cards, and marks
+      const uniqueTerms = new Map();
+      function registerTerm(rawKey, label, meta = {}) {
+        const k = termKey(rawKey || label || "");
+        if (!k) return;
+        if (!uniqueTerms.has(k)) {
+          uniqueTerms.set(k, {
+            ...meta,
+            termKey: k,
+            label: label || meta.label || meta.term || meta.name || k.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+            id: meta.id || k
+          });
+        }
+      }
+
+      termRows.forEach(t => registerTerm(t.termKey || t.id, t.label || t.term || t.name, t));
+      finalReports.forEach(r => registerTerm(r.termKey, r.termLabel || r.term, r));
+      Object.keys(studentMarksTerms).forEach(rawKey => {
+        let tKey = rawKey;
+        if (rawKey.includes("__")) {
+          const [sessKey, ...rest] = rawKey.split("__");
+          if (state.activeSessionId && sessKey !== state.activeSessionId && sessKey !== state.activeSessionLabel) return;
+          tKey = rest.join("__");
+        }
+        registerTerm(tKey);
+      });
+
       state.transactions = txRows;
       state.libraryIssues = libraryRows;
       state.resultVisibility = visibilityData || {};
-      state.reports = filterLiveReportsForStudent(reportRows);
-      state.terms = filterLiveTermsForStudent(termRows);
+      state.reports = filterLiveReportsForStudent(finalReports);
+      state.terms = Array.from(uniqueTerms.values()).filter(t => isResultTermLive(t.termKey));
       state.transport = transportData;
 
       state.reports.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
@@ -4752,18 +4998,26 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         timetable.innerHTML = `<div class="empty-state">Open this tab to load your timetable.</div>`;
       }
 
-      let allTerms = [...state.terms];
-      state.reports.forEach(r => {
-        const rk = r.termKey||termKey(r.termLabel||r.term||"");
-        if (rk && !allTerms.some(t=>(t.termKey||termKey(t.label||""))===rk))
-          allTerms.push({termKey:rk,label:r.termLabel||r.term||rk,id:rk});
-      });
-      renderTermDropdown(allTerms);
+      renderTermDropdown(state.terms);
 
-      const rep = latestReport(state.reports);
-      if (allTerms.length>0 && rep) {
-        const lk = rep.termKey||termKey(rep.termLabel||rep.term||"");
-        if (lk) { $("studentTermSelect").value=lk; renderReportForTerm(lk); }
+      if (state.terms.length > 0) {
+        const rep = latestReport(state.reports) || state.reports[0];
+        let selectedKey = "";
+        if (rep) {
+          const target = rep.termKey || termKey(rep.termLabel || rep.term || "");
+          const matchingTerm = state.terms.find(t => termKeysMatch(t.termKey, target));
+          if (matchingTerm) selectedKey = matchingTerm.termKey;
+        }
+        if (!selectedKey && state.terms[0]) {
+          selectedKey = state.terms[0].termKey;
+        }
+        if (selectedKey) {
+          const termSelect = $("studentTermSelect");
+          if (termSelect) {
+            termSelect.value = selectedKey;
+            renderReportForTerm(selectedKey);
+          }
+        }
       }
 
       $("globalStatus").innerHTML = state.sessionLoadError
