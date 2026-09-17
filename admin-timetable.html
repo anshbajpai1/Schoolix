@@ -44,7 +44,7 @@
 html.sx-page-loading,
 html.sx-page-loading body {
   min-height: 100%;
-  background: #ffffff !important;
+  background: #f8fafc !important;
 }
 html.sx-page-loading body::before,
 html.sx-page-loading body::after {
@@ -58,69 +58,32 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   inset: 0;
   z-index: 2147482500;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background:
-    radial-gradient(circle at 50% 34%, rgba(59, 158, 255, 0.14), transparent 34%),
-    linear-gradient(180deg, #f7fbff 0%, #ffffff 62%);
-  transition: opacity 0.26s ease, visibility 0.26s ease;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #f8fafc;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s ease;
+  overflow: hidden;
 }
 .sx-page-loader.is-hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
-.sx-page-loader .sx-loader-card {
-  width: min(340px, 88vw);
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-  padding: 28px 26px;
-  border: 1px solid rgba(59, 158, 255, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 22px 70px rgba(21, 43, 75, 0.14);
-}
-.sx-page-loader .sx-loader-mark {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  border: 4px solid rgba(59, 158, 255, 0.14);
-  border-top-color: #1f7eea;
-  border-right-color: #f0b429;
-  animation: sxLoaderSpin 0.72s linear infinite;
-}
-.sx-page-loader .sx-loader-title {
-  font: 800 1rem/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #172033;
-}
-.sx-page-loader .sx-loader-subtitle {
-  font: 500 0.82rem/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #627084;
-  text-align: center;
-}
-.sx-page-loader .sx-loader-bar {
-  position: relative;
-  width: min(220px, 68vw);
-  height: 4px;
+.sx-page-loader .dots-container {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
-  border-radius: 999px;
-  background: rgba(59, 158, 255, 0.12);
+  background: #f8fafc;
 }
-.sx-page-loader .sx-loader-bar::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 42%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #1f7eea, #f0b429);
-  animation: sxLoaderBar 1s ease-in-out infinite;
-}
-@keyframes sxLoaderSpin { to { transform: rotate(360deg); } }
-@keyframes sxLoaderBar {
-  0% { transform: translateX(-110%); }
-  100% { transform: translateX(260%); }
+.sx-page-loader .dots-container::before,
+.sx-page-loader .dots-container::after,
+.sx-page-loader .dot {
+  display: none !important;
 }
 </style>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>

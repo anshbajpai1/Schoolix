@@ -100,187 +100,142 @@
   });
   if (window.SchoolixAccountantShellReady) pageLoaderState.readySignals.add("accountant-shell-ready");
 
-  function rectsOverlap(r1, r2, tolerancePx = 6) {
-    return !(
-      r1.right <= r2.left + tolerancePx ||
-      r1.left >= r2.right - tolerancePx ||
-      r1.bottom <= r2.top + tolerancePx ||
-      r1.top >= r2.bottom - tolerancePx
-    );
-  }
-
-  function isActuallyVisibleInViewport(el) {
-    if (!el || el.hidden) return false;
-    const style = window.getComputedStyle(el);
-    if (style.display === "none" || (style.visibility === "hidden" && !document.documentElement.classList.contains("sx-page-loading"))) return false;
-    if (style.opacity === "0") return false;
-    const rect = el.getBoundingClientRect();
-    if (rect.width < 28 || rect.height < 14) return false;
-    // Reject off-canvas sidebars (e.g. mobile drawer with left: -280px) and off-screen modals
-    if (rect.left < -15 || rect.top < -15) return false;
-    if (rect.left >= window.innerWidth - 15 || rect.top >= window.innerHeight - 15) return false;
-    if (rect.right <= 25 || rect.bottom <= 25) return false;
-    // Skip full viewport outer containers
-    const viewportArea = window.innerWidth * window.innerHeight;
-    if (rect.width * rect.height > viewportArea * 0.94) return false;
-    return true;
+  function isAuthPage() {
+    const p = (window.location.pathname || "").toLowerCase();
+    if (
+      p.endsWith("index.html") ||
+      p.endsWith("login.html") ||
+      p.endsWith("admin-signup.html") ||
+      p.endsWith("reset-password.html") ||
+      p === "/" ||
+      p === ""
+    ) {
+      return true;
+    }
+    return !!document.querySelector(".login-container, .auth-card, #loginForm, .signup-card");
   }
 
   function renderLayoutSkeleton(loader) {
     const container = loader?.querySelector(".skeleton-container, .dots-container");
     if (!container) return;
-
-    // Structural block selectors prioritized by major semantic level.
-    // Major components (cards, headers, toolbars) are evaluated so that
-    // internal sub-elements (labels, inputs, buttons) do NOT create overlapping rectangles.
-    const blockSelectors = [
-      // Topbar
-      ".topbar", ".top-bar", ".app-header",
-      // Sidebar (desktop only, when visible on screen)
-      "aside:not(.closed)", ".sidebar:not(.closed)", ".teacher-sidebar", ".admin-sidebar",
-      // Hero & Headers
-      ".header.teacher-dashboard-summary", ".profile-hero", ".overview-header", ".header", ".hero", ".page-header",
-      // Stat cards
-      ".stat-card", ".card.teacher", ".stat", ".account-stat", ".kpi-card",
-      // Distinct Rows
-      ".att-row", ".stu-card", ".record-row", ".notice-card", ".timetable-card",
-      // Sections & Cards
-      ".section-card", ".glass-card", ".card", ".panel", ".table-card", "table", "form",
-      // Toolbars
-      ".att-toolbar", ".search-section", ".filter-bar", ".controls"
-    ];
-
-    const candidateElements = [];
-    const seenElements = new Set();
-
-    blockSelectors.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((el) => {
-        if (seenElements.has(el) || el.closest("#sxPageLoader") || !isActuallyVisibleInViewport(el)) return;
-        // Ignore full-width shell wrappers that wrap cards
-        if (el.classList.contains("shell") || el.classList.contains("main-area") ||
-            el.classList.contains("page-content") || el.classList.contains("stats-row") ||
-            el.classList.contains("stats-grid") || el.classList.contains("cards-grid") ||
-            el.classList.contains("table-responsive")) {
-          return;
-        }
-        seenElements.add(el);
-        candidateElements.push(el);
-      });
-    });
-
-    const acceptedBlocks = [];
-
-    candidateElements.forEach((el) => {
-      const bRect = el.getBoundingClientRect();
-      const rect = {
-        left: Math.max(0, bRect.left),
-        top: Math.max(0, bRect.top),
-        right: Math.min(window.innerWidth, bRect.right),
-        bottom: Math.min(window.innerHeight, bRect.bottom),
-        width: 0,
-        height: 0,
-        element: el
-      };
-      rect.width = rect.right - rect.left;
-      rect.height = rect.bottom - rect.top;
-
-      if (rect.width < 28 || rect.height < 14) return;
-
-      // Check collision with ANY accepted block
-      const collides = acceptedBlocks.some((accepted) => {
-        // Ancestor / descendant collision
-        if (accepted.element.contains(el) || el.contains(accepted.element)) return true;
-        // Geometric boundary overlap collision
-        return rectsOverlap(rect, accepted);
-      });
-
-      if (!collides) {
-        acceptedBlocks.push(rect);
-      }
-    });
-
+    if (container.dataset.skeletonRendered === "true") return;
+    container.dataset.skeletonRendered = "true";
     container.replaceChildren();
 
-    // If page is just starting and has very few or no blocks, provide a clean fallback layout
-    if (acceptedBlocks.length < 2) {
-      renderFallbackSkeleton(container);
+    if (isAuthPage()) {
+      const authWrap = document.createElement("div");
+      authWrap.className = "sx-sk-auth-wrap";
+      authWrap.innerHTML = [
+        '<div class="sx-sk-auth-card">',
+        '  <div class="sx-sk-block sx-sk-auth-logo"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-title"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-sub"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-input"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-input"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-btn"></div>',
+        '  <div class="sx-sk-block sx-sk-auth-link"></div>',
+        '</div>'
+      ].join("");
+      container.appendChild(authWrap);
       return;
     }
 
-    acceptedBlocks.forEach((item, index) => {
-      const el = item.element;
-      const placeholder = document.createElement("span");
-      let typeClass = "";
-      if (el.matches(".topbar, .top-bar, .app-header")) typeClass = " is-topbar";
-      else if (el.matches("aside, .sidebar, .teacher-sidebar, .admin-sidebar")) typeClass = " is-sidebar";
-      else if (el.matches(".header, .profile-hero, .hero, .overview-header")) typeClass = " is-hero";
-      else if (el.matches(".stat-card, .stat, .account-stat, .kpi-card")) typeClass = " is-stat";
-      else if (el.matches(".att-row, .stu-card, .record-row, .notice-card, .timetable-card")) typeClass = " is-row";
-      else if (el.matches("table, .table-card")) typeClass = " is-table";
-      else typeClass = " is-card";
-
-      placeholder.className = `sx-skeleton-item${typeClass}`;
-      placeholder.style.left = `${Math.round(item.left)}px`;
-      placeholder.style.top = `${Math.round(item.top)}px`;
-      placeholder.style.width = `${Math.round(item.width)}px`;
-      placeholder.style.height = `${Math.round(item.height)}px`;
-      placeholder.style.animationDelay = `${(index % 6) * 90}ms`;
-      container.appendChild(placeholder);
-    });
-  }
-
-  function renderFallbackSkeleton(container) {
-    container.replaceChildren();
-    const w = window.innerWidth;
-    const isMobile = w < 768;
-    const pad = isMobile ? 16 : 24;
-    const contentW = Math.min(w - pad * 2, 1200);
-    const startX = Math.max(pad, (w - contentW) / 2);
-
-    // 1. Topbar
-    const topbar = document.createElement("span");
-    topbar.className = "sx-skeleton-item is-topbar";
-    topbar.style.left = `${startX}px`;
-    topbar.style.top = `${pad}px`;
-    topbar.style.width = `${contentW}px`;
-    topbar.style.height = "56px";
-    container.appendChild(topbar);
-
-    // 2. Hero banner
-    const hero = document.createElement("span");
-    hero.className = "sx-skeleton-item is-hero";
-    hero.style.left = `${startX}px`;
-    hero.style.top = `${pad + 68}px`;
-    hero.style.width = `${contentW}px`;
-    hero.style.height = isMobile ? "120px" : "136px";
-    container.appendChild(hero);
-
-    // 3. Stat cards row
-    const statY = pad + 68 + (isMobile ? 120 : 136) + 16;
-    const statCount = isMobile ? 2 : 4;
-    const gap = 14;
-    const statW = (contentW - gap * (statCount - 1)) / statCount;
-    for (let i = 0; i < statCount; i++) {
-      const stat = document.createElement("span");
-      stat.className = "sx-skeleton-item is-stat";
-      stat.style.left = `${startX + i * (statW + gap)}px`;
-      stat.style.top = `${statY}px`;
-      stat.style.width = `${statW}px`;
-      stat.style.height = "86px";
-      stat.style.animationDelay = `${(i + 1) * 90}ms`;
-      container.appendChild(stat);
-    }
-
-    // 4. Large main content card
-    const cardY = statY + 86 + 18;
-    const card = document.createElement("span");
-    card.className = "sx-skeleton-item is-card";
-    card.style.left = `${startX}px`;
-    card.style.top = `${cardY}px`;
-    card.style.width = `${contentW}px`;
-    card.style.height = `${Math.max(180, window.innerHeight - cardY - pad)}px`;
-    card.style.animationDelay = "360ms";
-    container.appendChild(card);
+    const appWrap = document.createElement("div");
+    appWrap.className = "sx-sk-app-wrap";
+    appWrap.innerHTML = [
+      '<header class="sx-sk-topbar">',
+      '  <div class="sx-sk-topbar-left">',
+      '    <div class="sx-sk-block sx-sk-top-logo"></div>',
+      '    <div class="sx-sk-block sx-sk-top-brand"></div>',
+      '  </div>',
+      '  <div class="sx-sk-topbar-right">',
+      '    <div class="sx-sk-block sx-sk-search-pill"></div>',
+      '    <div class="sx-sk-block sx-sk-icon-btn"></div>',
+      '    <div class="sx-sk-block sx-sk-avatar"></div>',
+      '  </div>',
+      '</header>',
+      '<div class="sx-sk-body">',
+      '  <aside class="sx-sk-sidebar">',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 72%;"></div></div>',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 84%;"></div></div>',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 65%;"></div></div>',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 88%;"></div></div>',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 68%;"></div></div>',
+      '    <div class="sx-sk-sidebar-item"><div class="sx-sk-block sx-sk-menu-icon"></div><div class="sx-sk-block sx-sk-menu-text" style="width: 78%;"></div></div>',
+      '  </aside>',
+      '  <main class="sx-sk-main">',
+      '    <div class="sx-sk-page-head">',
+      '      <div class="sx-sk-page-title-group">',
+      '        <div class="sx-sk-block sx-sk-head-title"></div>',
+      '        <div class="sx-sk-block sx-sk-head-sub"></div>',
+      '      </div>',
+      '      <div class="sx-sk-block sx-sk-head-action"></div>',
+      '    </div>',
+      '    <div class="sx-sk-stats-grid">',
+      '      <div class="sx-sk-stat-card">',
+      '        <div class="sx-sk-stat-row"><div class="sx-sk-block sx-sk-line" style="width: 54%; height: 11px;"></div><div class="sx-sk-block sx-sk-circle-sm"></div></div>',
+      '        <div class="sx-sk-block sx-sk-line" style="width: 38%; height: 24px; margin-top: 8px;"></div>',
+      '      </div>',
+      '      <div class="sx-sk-stat-card">',
+      '        <div class="sx-sk-stat-row"><div class="sx-sk-block sx-sk-line" style="width: 48%; height: 11px;"></div><div class="sx-sk-block sx-sk-circle-sm"></div></div>',
+      '        <div class="sx-sk-block sx-sk-line" style="width: 44%; height: 24px; margin-top: 8px;"></div>',
+      '      </div>',
+      '      <div class="sx-sk-stat-card">',
+      '        <div class="sx-sk-stat-row"><div class="sx-sk-block sx-sk-line" style="width: 60%; height: 11px;"></div><div class="sx-sk-block sx-sk-circle-sm"></div></div>',
+      '        <div class="sx-sk-block sx-sk-line" style="width: 36%; height: 24px; margin-top: 8px;"></div>',
+      '      </div>',
+      '      <div class="sx-sk-stat-card">',
+      '        <div class="sx-sk-stat-row"><div class="sx-sk-block sx-sk-line" style="width: 50%; height: 11px;"></div><div class="sx-sk-block sx-sk-circle-sm"></div></div>',
+      '        <div class="sx-sk-block sx-sk-line" style="width: 40%; height: 24px; margin-top: 8px;"></div>',
+      '      </div>',
+      '    </div>',
+      '    <div class="sx-sk-card">',
+      '      <div class="sx-sk-card-toolbar">',
+      '        <div class="sx-sk-block sx-sk-search-input"></div>',
+      '        <div class="sx-sk-toolbar-actions">',
+      '          <div class="sx-sk-block sx-sk-filter-pill"></div>',
+      '          <div class="sx-sk-block sx-sk-filter-pill"></div>',
+      '        </div>',
+      '      </div>',
+      '      <div class="sx-sk-table-rows">',
+      '        <div class="sx-sk-table-row">',
+      '          <div class="sx-sk-block sx-sk-row-avatar"></div>',
+      '          <div class="sx-sk-row-content">',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 34%; height: 13px;"></div>',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 20%; height: 10px;"></div>',
+      '          </div>',
+      '          <div class="sx-sk-block sx-sk-status-badge"></div>',
+      '        </div>',
+      '        <div class="sx-sk-table-row">',
+      '          <div class="sx-sk-block sx-sk-row-avatar"></div>',
+      '          <div class="sx-sk-row-content">',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 42%; height: 13px;"></div>',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 25%; height: 10px;"></div>',
+      '          </div>',
+      '          <div class="sx-sk-block sx-sk-status-badge"></div>',
+      '        </div>',
+      '        <div class="sx-sk-table-row">',
+      '          <div class="sx-sk-block sx-sk-row-avatar"></div>',
+      '          <div class="sx-sk-row-content">',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 28%; height: 13px;"></div>',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 18%; height: 10px;"></div>',
+      '          </div>',
+      '          <div class="sx-sk-block sx-sk-status-badge"></div>',
+      '        </div>',
+      '        <div class="sx-sk-table-row">',
+      '          <div class="sx-sk-block sx-sk-row-avatar"></div>',
+      '          <div class="sx-sk-row-content">',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 38%; height: 13px;"></div>',
+      '            <div class="sx-sk-block sx-sk-line" style="width: 22%; height: 10px;"></div>',
+      '          </div>',
+      '          <div class="sx-sk-block sx-sk-status-badge"></div>',
+      '        </div>',
+      '      </div>',
+      '    </div>',
+      '  </main>',
+      '</div>'
+    ].join("");
+    container.appendChild(appWrap);
   }
 
   function ensurePageLoader() {

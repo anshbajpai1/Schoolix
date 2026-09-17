@@ -44,54 +44,46 @@
 html.sx-page-loading,
 html.sx-page-loading body {
   min-height: 100%;
-  background: #f5f7fb !important;
-  overflow: hidden;
+  background: #f8fafc !important;
 }
 html.sx-page-loading body::before,
-html.sx-page-loading body::after { visibility: hidden !important; }
-html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) { visibility: hidden !important; }
-
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
 .sx-page-loader {
   position: fixed;
   inset: 0;
   z-index: 2147482500;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(700px 420px at 50% 38%, #ffffff 0%, #f1f5f9 100%);
-  transition: opacity 0.28s ease, visibility 0.28s ease;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #f8fafc;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s ease;
+  overflow: hidden;
 }
-.sx-page-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .sx-page-loader .dots-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(200px, 56vw);
-  height: 72px;
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #f8fafc;
 }
+.sx-page-loader .dots-container::before,
+.sx-page-loader .dots-container::after,
 .sx-page-loader .dot {
-  height: clamp(11px, 3.6vw, 16px);
-  width: clamp(11px, 3.6vw, 16px);
-  margin-right: clamp(8px, 2.4vw, 12px);
-  border-radius: 50%;
-  background: #2563eb;
-  animation: sxLoaderPulse 1.5s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
-}
-.sx-page-loader .dot:last-child { margin-right: 0; }
-.sx-page-loader .dot:nth-child(1) { animation-delay: -0.3s; }
-.sx-page-loader .dot:nth-child(2) { animation-delay: -0.1s; }
-.sx-page-loader .dot:nth-child(3) { animation-delay: 0.1s; }
-.sx-page-loader .dot:nth-child(4) { animation-delay: 0.3s; }
-.sx-page-loader .dot:nth-child(5) { animation-delay: 0.5s; }
-
-@keyframes sxLoaderPulse {
-  0% { transform: scale(0.8); background-color: #93b4fc; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
-  50% { transform: scale(1.2); background-color: #2563eb; box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
-  100% { transform: scale(0.8); background-color: #93b4fc; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sx-page-loader .dot { animation-duration: 0.001ms; }
+  display: none !important;
 }
 </style>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
