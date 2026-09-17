@@ -12,6 +12,7 @@ import {
     getDoc,
     getDocs,
     collection,
+    addDoc,
     deleteDoc,
     serverTimestamp,
     query,
@@ -59,6 +60,10 @@ let teacherDirectoryView = "active";
 let draftTeacherAssignments = [];
 let draftEditTeacherAssignments = [];
 let draftClassOnlyAssignments = [];
+
+let schoolSubjects = [];
+let draftTeacherSubjects = [];
+let draftEditTeacherSubjects = [];
 
 // ─── NEW: No-deduction leave policy (days per month) ───
 let noDeductionLeaveDays = 0;
@@ -219,6 +224,174 @@ window.addEditTeacherAssignment = () => addAssignmentFromSelect(draftEditTeacher
 window.removeEditTeacherAssignment = (index) => {
     draftEditTeacherAssignments.splice(index, 1);
     renderAssignmentList("editTeacherAssignmentsList", draftEditTeacherAssignments, "removeEditTeacherAssignment");
+};
+
+function dedupeSubjects(subjects = []) {
+    const seen = new Set();
+    const result = [];
+    (subjects || []).forEach((s) => {
+        const clean = String(s || "").trim();
+        const lower = clean.toLowerCase();
+        if (clean && !seen.has(lower)) {
+            seen.add(lower);
+            result.push(clean);
+        }
+    });
+    return result;
+}
+
+function renderSubjectChips(targetId, subjects = [], removeHandlerName) {
+    const target = $(targetId);
+    if (!target) return;
+    const list = dedupeSubjects(subjects);
+    if (!list.length) {
+        target.innerHTML = `<span class="helper-text">No subjects assigned yet.</span>`;
+        return;
+    }
+    target.innerHTML = list.map((subject, index) => `
+        <span class="assignment-chip" style="border-color: rgba(37, 99, 235, 0.25); background: #eff6ff; color: #1e40af;">
+            ${escapeHtml(subject)}
+            <button type="button" onclick="${removeHandlerName}(${index})" aria-label="Remove ${escapeHtml(subject)}">&times;</button>
+        </span>
+    `).join("");
+}
+
+function populateSubjectDropdowns() {
+    const options = [`<option value="">Select subject</option>`];
+    schoolSubjects.forEach((s) => {
+        options.push(`<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`);
+    });
+    const addSelect = $("teacherSubjectSelect");
+    if (addSelect) addSelect.innerHTML = options.join("");
+    const editSelect = $("editTeacherSubjectSelect");
+    if (editSelect) editSelect.innerHTML = options.join("");
+}
+
+window.addDraftTeacherSubject = () => {
+    const select = $("teacherSubjectSelect");
+    const val = select?.value?.trim();
+    if (!val) return showToast("Select a subject first.", "info");
+    if (draftTeacherSubjects.some((s) => s.toLowerCase() === val.toLowerCase())) {
+        return showToast("Subject already assigned to this teacher.", "info");
+    }
+    draftTeacherSubjects.push(val);
+    renderSubjectChips("teacherSubjectsList", draftTeacherSubjects, "removeDraftTeacherSubject");
+    if (select) select.value = "";
+};
+
+window.removeDraftTeacherSubject = (index) => {
+    draftTeacherSubjects.splice(index, 1);
+    renderSubjectChips("teacherSubjectsList", draftTeacherSubjects, "removeDraftTeacherSubject");
+};
+
+window.addEditTeacherSubject = () => {
+    const select = $("editTeacherSubjectSelect");
+    const val = select?.value?.trim();
+    if (!val) return showToast("Select a subject first.", "info");
+    if (draftEditTeacherSubjects.some((s) => s.toLowerCase() === val.toLowerCase())) {
+        return showToast("Subject already assigned to this teacher.", "info");
+    }
+    draftEditTeacherSubjects.push(val);
+    renderSubjectChips("editTeacherSubjectsList", draftEditTeacherSubjects, "removeEditTeacherSubject");
+    if (select) select.value = "";
+};
+
+window.removeEditTeacherSubject = (index) => {
+    draftEditTeacherSubjects.splice(index, 1);
+    renderSubjectChips("editTeacherSubjectsList", draftEditTeacherSubjects, "removeEditTeacherSubject");
+};
+
+function renderSchoolSubjectsModalList() {
+    const listEl = $("schoolSubjectsList");
+    if (!listEl) return;
+    if (!schoolSubjects.length) {
+        listEl.innerHTML = `<div class="empty-state" style="padding:1.5rem; text-align:center; color:#666;">No subjects added yet. Type a subject name above and click "Add Subject".</div>`;
+        return;
+    }
+    listEl.innerHTML = schoolSubjects.map((s) => {
+        const teacherCount = teachers.filter((t) => {
+            const list = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
+            return list.some((sub) => sub.toLowerCase() === s.name.toLowerCase());
+        }).length;
+        return `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid var(--line); border-radius:8px; margin-bottom:8px;">
+                <div>
+                    <strong style="font-size:0.95rem; color:#111;">${escapeHtml(s.name)}</strong>
+                    <div style="font-size:0.8rem; color:#666; margin-top:2px;">${teacherCount} teacher${teacherCount === 1 ? "" : "s"} assigned</div>
+                </div>
+                <button type="button" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;" onclick="deleteSchoolSubject('${escapeHtml(s.id)}', '${escapeHtml(s.name)}')">Delete</button>
+            </div>
+        `;
+    }).join("");
+}
+
+async function loadSchoolSubjects() {
+    if (!adminUID) return;
+    try {
+        const snap = await getDocs(collection(db, "schools", adminUID, "subjects"));
+        const list = [];
+        snap.forEach((d) => {
+            const data = d.data() || {};
+            const name = String(data.name || "").trim();
+            if (name) {
+                list.push({ id: d.id, name, ...data });
+            }
+        });
+        list.sort((a, b) => a.name.localeCompare(b.name));
+        schoolSubjects = list;
+        populateSubjectDropdowns();
+        renderSchoolSubjectsModalList();
+    } catch (err) {
+        console.error("Error loading subjects:", err);
+    }
+}
+
+window.openManageSubjectsModal = () => {
+    renderSchoolSubjectsModalList();
+    openModalElement("manageSubjectsModal");
+    setTimeout(() => $("newSubjectNameInput")?.focus(), 50);
+};
+
+window.closeManageSubjectsModal = () => {
+    closeModalElement("manageSubjectsModal");
+};
+
+window.addNewSchoolSubject = async () => {
+    const input = $("newSubjectNameInput");
+    const name = input?.value?.trim();
+    if (!name) return showToast("Enter a subject name.", "error");
+    if (schoolSubjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
+        return showToast("This subject already exists.", "info");
+    }
+    const addBtn = $("addSubjectBtn");
+    try {
+        if (addBtn) addBtn.disabled = true;
+        await addDoc(collection(db, "schools", adminUID, "subjects"), {
+            name,
+            createdAt: serverTimestamp(),
+            createdBy: auth.currentUser?.email || "Admin"
+        });
+        if (input) input.value = "";
+        await loadSchoolSubjects();
+        showToast(`Subject "${name}" added.`);
+    } catch (err) {
+        console.error(err);
+        showToast(err.message || "Unable to add subject.", "error");
+    } finally {
+        if (addBtn) addBtn.disabled = false;
+    }
+};
+
+window.deleteSchoolSubject = async (subjectId, subjectName) => {
+    if (!confirm(`Are you sure you want to delete "${subjectName}"?`)) return;
+    try {
+        await deleteDoc(doc(db, "schools", adminUID, "subjects", subjectId));
+        await loadSchoolSubjects();
+        showToast(`Subject "${subjectName}" removed.`);
+    } catch (err) {
+        console.error(err);
+        showToast(err.message || "Unable to delete subject.", "error");
+    }
 };
 
 window.openPhotoPreview = (photoUrl, title = "Photo") => {
@@ -469,6 +642,10 @@ window.saveLeavePolicy = async () => {
 
 function buildTeacherCard(teacher) {
     const assignments = getTeacherAssignments(teacher);
+    const teacherSubjects = Array.isArray(teacher.subjects) ? teacher.subjects : (teacher.subject ? [teacher.subject] : []);
+    const subjectsBadges = teacherSubjects.length
+        ? teacherSubjects.map((s) => `<span class="pill" style="font-size:0.75rem; padding:2px 8px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:12px; font-weight:600;">${escapeHtml(s)}</span>`).join(" ")
+        : `<span style="color:var(--muted); font-size:0.82rem;">None assigned</span>`;
     const attendanceActions = attendanceAccessEnabled ? `
                         <button type="button" class="btn btn-warning" onclick="generateTeacherAttendanceQr('${teacher.uid}')">Generate QR</button>` : "";
     return `
@@ -481,7 +658,8 @@ function buildTeacherCard(teacher) {
                         <div class="teacher-meta">
                             ${escapeHtml(teacher.email || "No email")}<br>
                             Teacher ID: ${escapeHtml(teacher.teacherId || "N/A")}<br>
-                            Class Responsibility: ${escapeHtml(formatAssignments(assignments))}
+                            Class Responsibility: ${escapeHtml(formatAssignments(assignments))}<br>
+                            Teaching Subjects: ${subjectsBadges}
                         </div>
                     </div>
                 </div>
@@ -494,6 +672,7 @@ function buildTeacherCard(teacher) {
                     <label>Quick Actions</label>
                     <div class="teacher-actions">
                         ${attendanceActions}
+                        <button type="button" class="btn btn-primary" onclick="openEditTeacherModal('${teacher.uid}')">Edit Details / Subjects</button>
                         <button type="button" class="btn btn-light" onclick="window.location.href='teacher-profile.html?id=${encodeURIComponent(teacher.uid)}'">View Profile</button>
                         <button type="button" class="btn btn-secondary" onclick="openEditTeacherClassesModal('${teacher.uid}')">Edit Class</button>
                         <button type="button" class="btn btn-danger" onclick="deleteTeacher('${teacher.uid}')">Remove Teacher</button>
@@ -517,6 +696,10 @@ function buildRemovedTeacherCard(teacher) {
     const removedAt = teacher.removedAt || teacher.deletedAt || teacher.updatedAt || "";
     const summary = getTeacherSalarySummary(teacher.uid);
     const assignments = getTeacherAssignments(teacher);
+    const teacherSubjects = Array.isArray(teacher.subjects) ? teacher.subjects : (teacher.subject ? [teacher.subject] : []);
+    const subjectsBadges = teacherSubjects.length
+        ? teacherSubjects.map((s) => `<span class="pill" style="font-size:0.75rem; padding:2px 8px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:12px; font-weight:600;">${escapeHtml(s)}</span>`).join(" ")
+        : `<span style="color:var(--muted); font-size:0.82rem;">None assigned</span>`;
     return `
         <article class="teacher-card removed-teacher-card">
             <div class="teacher-head">
@@ -528,6 +711,7 @@ function buildRemovedTeacherCard(teacher) {
                             ${escapeHtml(teacher.email || "No email")}<br>
                             Teacher ID: ${escapeHtml(teacher.teacherId || "N/A")}<br>
                             Class Responsibility: ${escapeHtml(formatAssignments(assignments))}<br>
+                            Teaching Subjects: ${subjectsBadges}<br>
                             Removed: ${escapeHtml(formatDateLabel(removedAt))}
                         </div>
                     </div>
@@ -553,12 +737,14 @@ function buildRemovedTeacherCard(teacher) {
 function teacherMatchesSearch(teacher, search) {
     if (!search) return true;
     const summary = getTeacherSalarySummary(teacher.uid);
+    const subjectsText = Array.isArray(teacher.subjects) ? teacher.subjects.join(" ") : (teacher.subject || "");
     return [
         teacher.name,
         teacher.email,
         teacher.teacherId,
         teacher.class,
         teacher.section,
+        subjectsText,
         teacher.status,
         teacher.panelStatus,
         teacher.removedBy,
@@ -938,7 +1124,7 @@ async function loadTeacherAttendanceForDate() {
 window.loadTeacherAttendanceForDate = loadTeacherAttendanceForDate;
 
 async function refreshEverything() {
-    await Promise.all([loadTeachers(), loadSalaryRecords(), loadTeacherAttendanceForDate(), loadLeavePolicy()]);
+    await Promise.all([loadTeachers(), loadSalaryRecords(), loadTeacherAttendanceForDate(), loadLeavePolicy(), loadSchoolSubjects()]);
     updateTopStats();
 }
 
@@ -1299,6 +1485,10 @@ window.openEditTeacherModal = (teacherUid) => {
         ? `<img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(teacher.name || "Teacher")} photo">`
         : escapeHtml(getInitials(teacher.name || teacher.teacherId, "T"));
     draftEditTeacherAssignments = getTeacherAssignments(teacher);
+    const rawSubjects = Array.isArray(teacher.subjects) ? teacher.subjects : (teacher.subject ? [teacher.subject] : []);
+    draftEditTeacherSubjects = dedupeSubjects(rawSubjects);
+    renderSubjectChips("editTeacherSubjectsList", draftEditTeacherSubjects, "removeEditTeacherSubject");
+    populateSubjectDropdowns();
 
     // Populate edit class select
     const editClassSelect = $("editClassSelect");
@@ -1381,6 +1571,7 @@ window.saveEditedTeacher = async () => {
     }
     draftEditTeacherAssignments = dedupeAssignments(draftEditTeacherAssignments);
     const primary = primaryAssignment(draftEditTeacherAssignments);
+    const savedSubjects = dedupeSubjects(draftEditTeacherSubjects);
 
     if (!teacherUid || !name || !email || !primary.class || !primary.section) {
         return showToast("Fill all fields before saving.", "error");
@@ -1401,6 +1592,7 @@ window.saveEditedTeacher = async () => {
             class: primary.class,
             section: primary.section,
             assignedClasses: draftEditTeacherAssignments,
+            subjects: savedSubjects,
             ...photoFields,
             updatedAt: serverTimestamp()
         }, { merge: true });
@@ -1412,6 +1604,7 @@ window.saveEditedTeacher = async () => {
             class: primary.class,
             section: primary.section,
             assignedClasses: draftEditTeacherAssignments,
+            subjects: savedSubjects,
             ...photoFields,
             updatedAt: serverTimestamp()
         }, { merge: true });
@@ -1424,6 +1617,7 @@ window.saveEditedTeacher = async () => {
             teacher.class   = primary.class;
             teacher.section = primary.section;
             teacher.assignedClasses = [...draftEditTeacherAssignments];
+            teacher.subjects = [...savedSubjects];
             if (photoUpload || removePhoto) {
                 teacher.photoUrl = photoFields.photoUrl || "";
                 teacher.photoPublicId = photoFields.photoPublicId || "";
@@ -1965,6 +2159,7 @@ addTeacherForm.addEventListener("submit", async (event) => {
         const teacherUid = userCred.user.uid;
         const teacherId = await generateTeacherId();
         const photoUpload = teacherPhotoFile ? await uploadCloudinaryPhoto(teacherPhotoFile, "teachers", teacherUid) : { photoUrl: "", photoPublicId: "" };
+        const savedSubjects = dedupeSubjects(draftTeacherSubjects);
         await setDoc(doc(db, "users", teacherUid), {
             name,
             email,
@@ -1973,6 +2168,7 @@ addTeacherForm.addEventListener("submit", async (event) => {
             class: primary.class,
             section: primary.section,
             assignedClasses: draftTeacherAssignments,
+            subjects: savedSubjects,
             monthlySalary,
             adminId: adminUID,
             schoolId: adminUID,
@@ -1993,6 +2189,7 @@ addTeacherForm.addEventListener("submit", async (event) => {
             class: primary.class,
             section: primary.section,
             assignedClasses: draftTeacherAssignments,
+            subjects: savedSubjects,
             monthlySalary,
             photoUrl: photoUpload.photoUrl,
             photoPublicId: photoUpload.photoPublicId,
@@ -2003,7 +2200,9 @@ addTeacherForm.addEventListener("submit", async (event) => {
         });
         addTeacherForm.reset();
         draftTeacherAssignments = [];
+        draftTeacherSubjects = [];
         renderAssignmentList("teacherAssignmentsList", draftTeacherAssignments, "removeTeacherAssignment");
+        renderSubjectChips("teacherSubjectsList", draftTeacherSubjects, "removeDraftTeacherSubject");
         window.updateSections();
         await loadTeachers();
         await loadSalaryRecords();
@@ -2047,6 +2246,7 @@ CLASS_LIST.forEach((className) => {
 });
 window.updateSections();
 renderAssignmentList("teacherAssignmentsList", draftTeacherAssignments, "removeTeacherAssignment");
+renderSubjectChips("teacherSubjectsList", draftTeacherSubjects, "removeDraftTeacherSubject");
 wireEditTeacherModalClose();
 attendanceDateEl.value = todayISO();
 salaryMonthEl.value = currentMonthValue();

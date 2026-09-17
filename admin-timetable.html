@@ -955,38 +955,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   <span id="toastMsg"></span>
 </div>
 
-<div class="subjects-modal" id="subjectsModal" aria-hidden="true">
-  <div class="subjects-panel" role="dialog" aria-modal="true" aria-labelledby="subjectsModalTitle">
-    <div class="subjects-panel-head">
-      <div>
-        <div class="subjects-title" id="subjectsModalTitle">Class Subjects</div>
-        <div class="subjects-meta" id="subjectsModalMeta">Load a class to manage subjects.</div>
-      </div>
-      <button class="btn btn-secondary subject-delete-btn" onclick="closeSubjectsModal()" aria-label="Close subjects">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="subjects-body">
-      <div class="subjects-add-row">
-        <input id="subjectNameInput" type="text" placeholder="Subject name" onkeydown="if(event.key==='Enter') addClassSubject()">
-        <button class="btn btn-primary" onclick="addClassSubject()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-          </svg>
-          Add
-        </button>
-      </div>
-      <div class="subjects-list" id="subjectsList"></div>
-    </div>
-    <div class="subjects-panel-actions">
-      <button class="btn btn-secondary" onclick="closeSubjectsModal()">Done</button>
-      <button class="btn btn-success" onclick="saveClassSubjects()">Save Subjects</button>
-    </div>
-  </div>
-</div>
-
 <div class="subjects-modal" id="syncTimeModal" aria-hidden="true">
   <div class="subjects-panel" role="dialog" aria-modal="true" aria-labelledby="syncTimeModalTitle">
     <div class="subjects-panel-head">
@@ -1081,12 +1049,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
         </svg>
         Add Period
-      </button>
-      <button class="btn btn-secondary" onclick="openSubjectsModal()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-        Subjects
       </button>
       <button class="btn btn-secondary" onclick="openSyncTimeModal()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1349,7 +1311,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     const q    = query(collection(db, "users"), where("role","==","teacher"), where("adminId","==",currentUser.uid));
     const snap = await getDocs(q);
     snap.forEach(d => {
-      const data = d.data();
+      const data = d.data() || {};
+      const rawSubjects = data.subjects || (data.subject ? [data.subject] : []);
+      const subjectsList = Array.isArray(rawSubjects) ? rawSubjects : [rawSubjects];
       nextTeachers.push({
         uid: d.id,
         docId: d.id,
@@ -1357,6 +1321,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         email: cleanText(data.email || ""),
         authEmail: cleanText(data.authEmail || ""),
         name: cleanText(data.name || "Teacher"),
+        subjects: subjectsList.map(s => String(s).trim()).filter(Boolean),
         legacyUid: data.legacyUid || "",
         firebaseUid: data.firebaseUid || "",
         panelStatus: data.panelStatus || "",
@@ -1592,77 +1557,145 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     return timetableCachePromise;
   }
 
-  async function loadClassSubjects(className) {
-    const subjectSnap = await getDoc(classSubjectsRef(className));
-    if (subjectSnap.exists()) {
-      const data = subjectSnap.data() || {};
-      return mergeSubjects(data.subjects || []);
-    }
+  let schoolSubjects = [];
 
-    const lists = [];
-    allTimetables.forEach(timetable => {
-      const data = timetable || {};
-      const docClass = data.class || String(data.id || "").split("-")[0] || "";
-      if (String(docClass) !== String(className)) return;
-      lists.push(data.classSubjects || []);
-      lists.push(collectSubjectsFromSchedule(data.schedule || {}));
-    });
-    return mergeSubjects(...lists);
+  async function loadSchoolSubjects() {
+    if (!currentUser) return [];
+    try {
+      const snap = await getDocs(collection(db, "schools", currentUser.uid, "subjects"));
+      const list = [];
+      snap.forEach(d => {
+        const data = d.data() || {};
+        const name = normalizeSubjectName(data.name || "");
+        if (name) list.push(name);
+      });
+      schoolSubjects = mergeSubjects(list);
+    } catch (e) {
+      console.warn("Failed to load school subjects from Firestore:", e);
+    }
+    return schoolSubjects;
   }
 
   function subjectOptions(selected = "") {
     const selectedName = normalizeSubjectName(selected);
-    const subjects = currentClassSubjects;
+    const subjects = mergeSubjects(schoolSubjects, selectedName ? [selectedName] : []);
     const options = [`<option value="">Select subject</option>`];
     subjects.forEach(subject => {
       const isSelected = subject.toLowerCase() === selectedName.toLowerCase() ? " selected" : "";
       options.push(`<option value="${escHtml(subject)}"${isSelected}>${escHtml(subject)}</option>`);
     });
-    if (!subjects.length) options.push(`<option value="" disabled>No saved subjects</option>`);
+    if (!subjects.length) options.push(`<option value="" disabled>No school subjects found</option>`);
     return options.join("");
   }
 
-  window.updateSubjectFromSelect = function (day, period, select) {
-    updateSlot(day, period, "subject", select.value || "");
-  };
-
-  function renderSubjectsModal() {
-    const list = document.getElementById("subjectsList");
-    const meta = document.getElementById("subjectsModalMeta");
-    if (meta) {
-      const cls = currentTimetable?.class || document.getElementById("classSelect").value || "-";
-      meta.textContent = `Class ${cls} subjects`;
-    }
-    if (!list) return;
-    if (!currentClassSubjects.length) {
-      list.innerHTML = `<div class="subjects-empty">No subjects saved yet. Add subjects here, then use them in the timetable dropdown.</div>`;
-      return;
-    }
-    list.innerHTML = currentClassSubjects.map((subject, index) => `
-      <div class="subject-row">
-        <span class="subject-name">${escHtml(subject)}</span>
-        <button class="btn btn-danger subject-delete-btn" onclick="deleteClassSubject(${index})" aria-label="Delete ${escHtml(subject)}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
-          </svg>
-        </button>
-      </div>
-    `).join("");
+  function getTeachersForSubject(subject) {
+    if (!subject) return teachers;
+    const target = String(subject).trim().toLowerCase();
+    return teachers.filter(t => {
+      const subList = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
+      return subList.some(s => String(s).trim().toLowerCase() === target);
+    });
   }
 
-  window.openSubjectsModal = function () {
-    if (!currentTimetable) { toast("Load a timetable first", "error"); return; }
-    renderSubjectsModal();
-    const modal = document.getElementById("subjectsModal");
-    modal.classList.add("show");
-    modal.setAttribute("aria-hidden", "false");
-    setTimeout(() => document.getElementById("subjectNameInput")?.focus(), 50);
+  function teacherSelectOptions(subject = "", selectedTeacherUid = "", day = "", period = "") {
+    const cleanSubj = String(subject || "").trim();
+    const matching = getTeachersForSubject(cleanSubj);
+    const options = [`<option value="">Select teacher</option>`];
+    const isTeacherSelected = (t) => {
+      if (!selectedTeacherUid) return false;
+      const target = String(selectedTeacherUid).toLowerCase();
+      return (t.uid && t.uid.toLowerCase() === target) ||
+             (t.teacherId && t.teacherId.toLowerCase() === target) ||
+             (t.name && t.name.toLowerCase() === target);
+    };
+
+    if (cleanSubj && matching.length > 0) {
+      matching.forEach(t => {
+        const isSelected = isTeacherSelected(t);
+        const conflict = (day && period) ? findTeacherConflict(t, day, period) : null;
+        options.push(`<option value="${t.uid}"${isSelected ? " selected" : ""}>${escHtml(t.name)} (${escHtml(t.teacherId || t.uid)})${conflict ? " [Busy]" : ""}</option>`);
+      });
+      const otherTeachers = teachers.filter(t => !matching.some(m => m.uid === t.uid));
+      if (otherTeachers.length > 0) {
+        options.push(`<optgroup label="Other Teachers">`);
+        otherTeachers.forEach(t => {
+          const isSelected = isTeacherSelected(t);
+          const conflict = (day && period) ? findTeacherConflict(t, day, period) : null;
+          options.push(`<option value="${t.uid}"${isSelected ? " selected" : ""}>${escHtml(t.name)} (${escHtml(t.teacherId || t.uid)})${conflict ? " [Busy]" : ""}</option>`);
+        });
+        options.push(`</optgroup>`);
+      }
+    } else if (cleanSubj && matching.length === 0) {
+      options.push(`<option value="" disabled>-- No teacher assigned for "${escHtml(cleanSubj)}" --</option>`);
+      if (teachers.length > 0) {
+        options.push(`<optgroup label="All Teachers">`);
+        teachers.forEach(t => {
+          const isSelected = isTeacherSelected(t);
+          const conflict = (day && period) ? findTeacherConflict(t, day, period) : null;
+          options.push(`<option value="${t.uid}"${isSelected ? " selected" : ""}>${escHtml(t.name)} (${escHtml(t.teacherId || t.uid)})${conflict ? " [Busy]" : ""}</option>`);
+        });
+        options.push(`</optgroup>`);
+      }
+    } else {
+      teachers.forEach(t => {
+        const isSelected = isTeacherSelected(t);
+        const conflict = (day && period) ? findTeacherConflict(t, day, period) : null;
+        options.push(`<option value="${t.uid}"${isSelected ? " selected" : ""}>${escHtml(t.name)} (${escHtml(t.teacherId || t.uid)})${conflict ? " [Busy]" : ""}</option>`);
+      });
+    }
+    return options.join("");
+  }
+
+  window.onSlotSubjectChange = function (day, period, select) {
+    const subject = select.value || "";
+    updateSlot(day, period, "subject", subject);
+    const slotKey = `${day}-${period.replace(/ /g, "_")}`;
+    const teacherSel = document.getElementById(`tsel-${slotKey}`);
+    if (teacherSel) {
+      const currentSlot = currentTimetable.schedule?.[day]?.[period] || {};
+      const currentTeacherUid = currentSlot.teacherUid || currentSlot.teacherId || currentSlot.teacherName || "";
+      teacherSel.innerHTML = teacherSelectOptions(subject, currentTeacherUid, day, period);
+      
+      const matching = getTeachersForSubject(subject);
+      const stillMatches = currentTeacherUid && matching.some(t => t.uid === currentTeacherUid || t.teacherId === currentTeacherUid || t.name === currentTeacherUid);
+      if (!stillMatches && currentTeacherUid && subject) {
+        updateSlot(day, period, "teacherUid", "");
+        updateSlot(day, period, "teacherId", "");
+        updateSlot(day, period, "teacherName", "");
+        updateSlot(day, period, "teacherEmail", "");
+        teacherSel.value = "";
+        const badge = document.getElementById(`tid-${slotKey}`);
+        if (badge) badge.textContent = "—";
+      }
+    }
   };
 
-  window.closeSubjectsModal = function () {
-    const modal = document.getElementById("subjectsModal");
-    modal.classList.remove("show");
-    modal.setAttribute("aria-hidden", "true");
+  window.onSlotTeacherChange = function (day, period, select) {
+    const teacherUid = select.value;
+    const slotKey = `${day}-${period.replace(/ /g, "_")}`;
+    if (!teacherUid) {
+      updateSlot(day, period, "teacherUid", "");
+      updateSlot(day, period, "teacherId", "");
+      updateSlot(day, period, "teacherName", "");
+      updateSlot(day, period, "teacherEmail", "");
+      const badge = document.getElementById(`tid-${slotKey}`);
+      if (badge) badge.textContent = "—";
+      return;
+    }
+    const teacher = teachers.find(t => t.uid === teacherUid);
+    if (!teacher) return;
+    const conflict = findTeacherConflict(teacher, day, period);
+    if (conflict) {
+      toast(conflictMessage(teacher, conflict, day, period), "error");
+      select.value = currentTimetable.schedule?.[day]?.[period]?.teacherUid || "";
+      return;
+    }
+    updateSlot(day, period, "teacherUid", teacher.uid);
+    updateSlot(day, period, "teacherId", teacher.teacherId || teacher.uid);
+    updateSlot(day, period, "teacherName", teacher.name);
+    updateSlot(day, period, "teacherEmail", teacher.email || "");
+    const badge = document.getElementById(`tid-${slotKey}`);
+    if (badge) badge.textContent = teacher.teacherId || teacher.uid;
   };
 
   function getClassOptions() {
@@ -1879,19 +1912,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     try {
       await nextPaint();
       const ref  = doc(db, "schools", currentUser.uid, "timetables", `${cls}-${sec}`);
-      const [snap, classSubjects] = await Promise.all([getDoc(ref), loadClassSubjects(cls)]);
-      currentClassSubjects = classSubjects;
+      const [snap] = await Promise.all([getDoc(ref), loadSchoolSubjects()]);
       if (snap.exists()) {
         currentTimetable = snap.data();
         currentTimetable.class = currentTimetable.class || cls;
         currentTimetable.section = currentTimetable.section || sec;
         normalizeTimetablePeriods();
         clearInactiveTeacherSlots();
-        currentClassSubjects = mergeSubjects(currentClassSubjects, currentTimetable.classSubjects || []);
-        currentTimetable.classSubjects = currentClassSubjects;
-        clearSubjectsNotInClassList();
       } else {
-        currentTimetable = { class: cls, section: sec, schedule: createEmptySchedule(), periodTimes: createEmptyPeriodTimes(), classSubjects: currentClassSubjects };
+        currentTimetable = { class: cls, section: sec, schedule: createEmptySchedule(), periodTimes: createEmptyPeriodTimes() };
         syncPeriodTimesToSlots();
       }
       renderTimetable();
@@ -2399,8 +2428,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       html += `<tr><td><strong>${escHtml(day)}</strong></td>`;
       periods.forEach(period => {
         const slot = currentTimetable.schedule[day]?.[period] || {};
-        const slotKey = `${day}-${period.replace(" ", "_")}`;
-        html += `<td><div class="slot-cell"><div class="field-label-small">Subject</div><select class="slot-input subject-input" onchange="updateSubjectFromSelect('${day}','${period}',this)">${subjectOptions(slot.subject || "")}</select><div class="field-label-small" style="margin-top:2px">Teacher</div><div class="teacher-search-wrap"><input class="slot-input" type="text" placeholder="Search teacher..." value="${escHtml(slot.teacherName || "")}" oninput="updateSlot('${day}','${period}','teacherName',this.value); searchTeacher(this,'${day}','${period}')"><div class="teacher-results" id="tr-${slotKey}"></div></div><div class="teacher-id-badge"><span id="tid-${slotKey}">${escHtml(getTeacherReadableId(slot))}</span></div></div></td>`;
+        const slotKey = `${day}-${period.replace(/ /g, "_")}`;
+        const teacherUid = slot.teacherUid || slot.teacherId || "";
+        html += `<td><div class="slot-cell">
+          <div class="field-label-small">Subject</div>
+          <select class="slot-input subject-input" onchange="onSlotSubjectChange('${day}','${period}',this)">${subjectOptions(slot.subject || "")}</select>
+          <div class="field-label-small" style="margin-top:2px">Teacher</div>
+          <select class="slot-input teacher-select" id="tsel-${slotKey}" onchange="onSlotTeacherChange('${day}','${period}',this)">${teacherSelectOptions(slot.subject || "", teacherUid, day, period)}</select>
+          <div class="teacher-id-badge"><span id="tid-${slotKey}">${escHtml(getTeacherReadableId(slot))}</span></div>
+        </div></td>`;
       });
       html += `</tr>`;
     });
@@ -2444,14 +2480,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         showLoading(false);
         return;
       }
-      currentClassSubjects = mergeSubjects(currentClassSubjects);
-      currentTimetable.classSubjects = currentClassSubjects;
-      await setDoc(classSubjectsRef(), {
-        type: "timetableClassSubjects",
-        className: currentTimetable.class,
-        subjects: currentClassSubjects,
-        updatedAt: serverTimestamp()
-      });
       const ref = doc(db, "schools", currentUser.uid, "timetables",
         `${currentTimetable.class}-${currentTimetable.section}`);
       await setDoc(ref, { ...currentTimetable, updatedAt: serverTimestamp() });
@@ -2473,6 +2501,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     showLoading(true, "Preparing admin timetable...");
     await nextPaint();
     await loadTeachers();
+    await loadSchoolSubjects();
     await loadClasses();
     showLoading(false);
     refreshTimetableCache().catch(console.error);

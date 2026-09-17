@@ -1948,15 +1948,42 @@ vehicleForm.addEventListener("submit", async (e) => {
             vehicleId = vehicleRef.id;
             showToast("Vehicle added!", "success");
         }
-        await safeUpsertTrackingVehicle(vehicleId, payload);
-        const driverMeta = await ensureDriverLogin(vehicleId, payload);
-        if (Object.keys(driverMeta).length) {
-            await updateDoc(doc(db, "schools", adminId, "vehicles", vehicleId), {
-                ...driverMeta,
-                updatedAt: serverTimestamp()
-            });
-            await safeUpsertTrackingVehicle(vehicleId, { ...payload, ...driverMeta });
-            showToast("Driver login ready for phone app.", "success");
+        // A vehicle record belongs to Firestore. Live tracking is an optional
+        // Supabase integration, so an unavailable migration/RLS policy must not
+        // make a successfully saved vehicle look like it failed to save.
+        let trackingPending = false;
+        try {
+            await safeUpsertTrackingVehicle(vehicleId, payload);
+        } catch (error) {
+            trackingPending = true;
+            console.warn("Vehicle saved, but tracking sync is pending:", error);
+        }
+
+        if (payload.driverEmail) {
+            try {
+                const driverMeta = await ensureDriverLogin(vehicleId, payload);
+                if (Object.keys(driverMeta).length) {
+                    await updateDoc(doc(db, "schools", adminId, "vehicles", vehicleId), {
+                        ...driverMeta,
+                        updatedAt: serverTimestamp()
+                    });
+                    try {
+                        await safeUpsertTrackingVehicle(vehicleId, { ...payload, ...driverMeta });
+                    } catch (error) {
+                        trackingPending = true;
+                        console.warn("Vehicle saved, but driver tracking sync is pending:", error);
+                    }
+                    showToast("Driver login ready for phone app.", "success");
+                }
+            } catch (error) {
+                // The vehicle is already saved. Keep the failure scoped to the
+                // optional driver-login setup instead of reporting a save error.
+                console.error("Driver login setup failed:", error);
+                showToast(`Vehicle saved. Driver login setup pending: ${error.message || "please try again."}`, "info");
+            }
+        }
+        if (trackingPending) {
+            showToast("Vehicle saved. Live tracking sync pending.", "info");
         }
         resetForm(); await loadVehicles();
     } catch(e) { console.error(e); alert(e.message || "Failed to save vehicle."); }

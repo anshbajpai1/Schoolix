@@ -191,7 +191,7 @@
             </div>
         </section>
 
-        <section class="panel tabs-panel">
+        <section class="panel tabs-panel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div class="tabs">
                 <button type="button" class="tab-btn active" data-tab="directory"
                     onclick="switchTab('directory')">Teacher Accounts</button>
@@ -199,6 +199,12 @@
                     Attendance</button>
                 <button type="button" class="tab-btn" data-tab="salary" onclick="switchTab('salary')">Salary
                     Desk</button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-secondary" onclick="openManageSubjectsModal()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Manage School Subjects
+                </button>
             </div>
         </section>
 
@@ -251,6 +257,20 @@
                                 </div>
                                 <div class="helper-text">Add one or more class-section responsibilities. Teacher will
                                     see only these classes in their panel.</div>
+                            </div>
+                            <div class="field full">
+                                <label>Assigned Subjects for Teaching</label>
+                                <div class="assignment-picker">
+                                    <div style="display:flex; gap:8px; width:100%;">
+                                        <select id="teacherSubjectSelect" style="flex:1;">
+                                            <option value="">Select subject</option>
+                                        </select>
+                                        <button type="button" class="btn btn-secondary" onclick="addDraftTeacherSubject()">Add Subject</button>
+                                        <button type="button" class="btn btn-light" onclick="openManageSubjectsModal()" title="Add new school subject">+ New</button>
+                                    </div>
+                                    <div id="teacherSubjectsList" class="assignment-list" style="margin-top:8px;"></div>
+                                </div>
+                                <div class="helper-text">Assign one or multiple subjects for this teacher. These subjects will link to this teacher in timetable slots.</div>
                             </div>
                             <div class="field full">
                                 <label for="teacherPhoto">Teacher Photo</label>
@@ -673,6 +693,20 @@
                     </div>
                 </div>
                 <div class="field full">
+                    <label>Assigned Subjects for Teaching</label>
+                    <div class="assignment-picker">
+                        <div style="display:flex; gap:8px; width:100%;">
+                            <select id="editTeacherSubjectSelect" style="flex:1;">
+                                <option value="">Select subject</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="addEditTeacherSubject()">Add Subject</button>
+                            <button type="button" class="btn btn-light" onclick="openManageSubjectsModal()" title="Add new school subject">+ New</button>
+                        </div>
+                        <div id="editTeacherSubjectsList" class="assignment-list" style="margin-top:8px;"></div>
+                    </div>
+                    <div class="helper-text">Assign one or multiple subjects taught by this teacher.</div>
+                </div>
+                <div class="field full">
                     <div class="edit-teacher-actions">
                         <button type="button" class="btn btn-light" id="editTeacherCancelBtn">Cancel</button>
                         <button type="button" class="btn btn-success" id="saveEditTeacherBtn"
@@ -682,6 +716,34 @@
             </div>
             <div class="helper-text top-gap">Note: Changing email here updates the Firestore profile only. Firebase Auth
                 email is not changed automatically.</div>
+        </div>
+    </div>
+
+    <div id="manageSubjectsModal" class="modal-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="manageSubjectsModalTitle">
+        <div class="modal-box" style="max-width:520px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="manageSubjectsModalTitle">School Subjects</h2>
+                    <p>Add and manage subjects offered in your school.</p>
+                </div>
+                <button type="button" class="teacher-dialog-close" onclick="closeManageSubjectsModal()"
+                    aria-label="Close dialog" title="Close">&times;</button>
+            </div>
+            <div style="margin-top:18px;">
+                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                    <input type="text" id="newSubjectNameInput" placeholder="Enter subject name (e.g. Mathematics)"
+                        style="flex:1; padding:10px 14px; border:1px solid var(--line); border-radius:8px; font-size:14px;"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault(); addNewSchoolSubject();}">
+                    <button type="button" class="btn btn-primary" id="addSubjectBtn" onclick="addNewSchoolSubject()">Add Subject</button>
+                </div>
+                <div style="max-height:340px; overflow-y:auto; padding-right:4px;" id="schoolSubjectsList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            <div style="margin-top:20px; text-align:right;">
+                <button type="button" class="btn btn-secondary" onclick="closeManageSubjectsModal()">Done</button>
+            </div>
         </div>
     </div>
 

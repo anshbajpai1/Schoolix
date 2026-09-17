@@ -2,6 +2,8 @@ const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID") || "schoolix-48107";
 const FIREBASE_WEB_API_KEY = Deno.env.get("FIREBASE_WEB_API_KEY") || "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash-lite";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://ezkmeedcqetztkeppxil.supabase.co";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("ANON_KEY") || "";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,6 +81,35 @@ async function getGoogleAccessToken() {
   const data = await response.json();
   if (!response.ok || !data.access_token) throw new Error("Unable to authorize Firestore reader");
   return String(data.access_token);
+}
+
+async function verifySupabaseUser(accessToken: string) {
+  if (!SUPABASE_ANON_KEY) throw new Error("Supabase auth secrets are not configured");
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${accessToken}`,
+    },
+  });
+  const user = await response.json().catch(() => ({}));
+  if (!response.ok || !user?.id) throw new Error("Your admin session is invalid or expired");
+  const metadata = { ...(user.user_metadata || {}), ...(user.app_metadata || {}) };
+  const legacyUid = cleanText(metadata.firebaseUid || metadata.legacyUid || metadata.uid || user.id);
+  return { uid: legacyUid, email: String(user.email || "") };
+}
+
+async function verifySignedInUser(token: string) {
+  try {
+    return await verifyFirebaseUser(token);
+  } catch (firebaseError) {
+    try {
+      return await verifySupabaseUser(token);
+    } catch {
+      throw firebaseError instanceof Error
+        ? firebaseError
+        : new Error("Your admin session is invalid or expired");
+    }
+  }
 }
 
 async function verifyFirebaseUser(idToken: string) {
@@ -360,6 +391,8 @@ async function loadTeachers(accessToken: string, schoolId: string) {
   });
   const seen = new Set<string>();
   return [...byAdmin, ...bySchool].filter((teacher) => {
+    const belongs = cleanText(teacher.adminId) === schoolId || cleanText(teacher.schoolId) === schoolId;
+    if (!belongs) return false;
     const key = cleanText(teacher.id || teacher.uid || teacher.email || teacher.name);
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -383,6 +416,8 @@ async function loadStaffUsers(accessToken: string, schoolId: string) {
   ]);
   const seen = new Set<string>();
   return [...byAdmin, ...bySchool].filter((user) => {
+    const belongs = cleanText(user.adminId) === schoolId || cleanText(user.schoolId) === schoolId;
+    if (!belongs) return false;
     const key = cleanText(user.id || user.uid || user.email || user.name);
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -945,9 +980,18 @@ Deno.serve(async (req) => {
     if (message.length < 2) return jsonResponse({ error: "Please enter a question for the assistant" }, 400);
     if (message.length > 1000) return jsonResponse({ error: "Question is too long. Please keep it under 1000 characters." }, 400);
 
-    const firebaseUser = await verifyFirebaseUser(idToken);
+    const firebaseUser = await verifySignedInUser(idToken);
     const accessToken = await getGoogleAccessToken();
-    const profile = await getDocument(accessToken, `users/${encodeURIComponent(firebaseUser.uid)}`);
+    let profile = await getDocument(accessToken, `users/${encodeURIComponent(firebaseUser.uid)}`);
+    if (!profile && firebaseUser.email) {
+      try {
+        const queryMatches = await runQuery(accessToken, "users", {
+          where: fieldEquals("email", firebaseUser.email.toLowerCase()),
+          limit: 1,
+        });
+        if (queryMatches.length) profile = queryMatches[0];
+      } catch (_) {}
+    }
     if (!profile) return jsonResponse({ error: "Admin profile was not found" }, 403);
     const role = cleanText(profile.role).toLowerCase();
     if (role !== "admin" && role !== "superadmin" && profile.superAdmin !== true) {
@@ -959,6 +1003,7 @@ Deno.serve(async (req) => {
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
     const systemPrompt = [
       "You are Schoolix AI School Assistant for an Indian school admin panel.",
+      `CRITICAL SECURITY & DATA SCOPE RULE: You only have access to and MUST ONLY return data for this specific logged-in school (school ID: ${schoolId}). Under NO circumstances should you mention, summarize, or mix data from any other school. All students, teachers, classes, fees, and attendance queries must strictly belong to this school.`, 
       "Answer naturally in the same language style as the admin, including Hindi/Hinglish when used.",
       "Use only the provided function tools for school data. Never claim access to raw Firestore.",
       "When the admin asks for any student's details by student ID, admission number, roll number, email, or name, call getStudentDetails.",

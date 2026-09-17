@@ -307,6 +307,18 @@
     const value = normalize(input?.value || "");
     if (!value) return;
     if (!assistantState.authUser) {
+      try {
+        const compat = await import("./firebase-compat.js");
+        const currentUser = compat?.getAuth?.()?.currentUser || compat?.authState?.user;
+        if (currentUser) {
+          assistantState.authUser = currentUser;
+          if (!assistantState.schoolId) {
+            assistantState.schoolId = currentUser.uid;
+          }
+        }
+      } catch (_) {}
+    }
+    if (!assistantState.authUser) {
       showAssistantToast("Please wait for admin login to finish.", "error");
       return;
     }
@@ -649,9 +661,9 @@
   async function loadFirebaseContext() {
     try {
       const [{ initializeApp, getApps }, { getAuth, onAuthStateChanged, signOut }, { getFirestore, doc, getDoc, collection, getDocs }] = await Promise.all([
-        import("./firebase-compat.js?v=staff-loaders-20260806"),
-        import("./firebase-compat.js?v=staff-loaders-20260806"),
-        import("./firebase-compat.js?v=staff-loaders-20260806")
+        import("./firebase-compat.js"),
+        import("./firebase-compat.js"),
+        import("./firebase-compat.js")
       ]);
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
       const auth = getAuth(app);
