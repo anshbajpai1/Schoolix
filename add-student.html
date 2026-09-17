@@ -2080,36 +2080,41 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             return "A";
           }
         }
-        async function updateRolls(studentClass, section) {
+        async function updateRolls(studentClass, section, preloadedStudents = null) {
           const assignedRolls = new Map();
           try {
-            const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
-            const students = snap.docs
-              .map(d => ({ id: d.id, ...d.data() }))
-              .filter(student => sameClassSection(student, studentClass, section));
+            const rawStudents = preloadedStudents || (await getDocs(collection(db, "schools", currentUser.uid, "students"))).docs.map(d => ({ id: d.id, ...d.data() }));
+            const students = rawStudents.filter(student => sameClassSection(student, studentClass, section));
             students.sort((a, b) =>
               String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "en", { sensitivity: "base", numeric: true }) ||
               String(a.studentId || a.id || "").localeCompare(String(b.studentId || b.id || ""), "en", { numeric: true })
             );
+            const sessionMeta = getSelectedSessionMeta();
+            const updatePromises = [];
             for (let i = 0; i < students.length; i++) {
               const roll = String(i + 1).padStart(2, "0");
               const student = students[i];
-              const sessionMeta = getSelectedSessionMeta();
-              const updatePayload = { roll, rollNo: roll, updatedAt: new Date() };
-              if (sessionMeta.sessionId) {
-                updatePayload[`sessionPlacements.${sessionMeta.sessionId}`] = makeSessionPlacement(
-                  { ...student, roll, rollNo: roll },
-                  sessionMeta,
-                  { roll }
-                );
-              }
               assignedRolls.set(student.id, roll);
-              await updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), updatePayload);
-              const mirrorIds = [student.studentId, student.authUid].map(value => String(value || "").trim()).filter(Boolean);
-              const mirrorResults = await Promise.allSettled([...new Set(mirrorIds)].map((id) => setDoc(doc(db, "users", id), { rollNo: roll, roll, updatedAt: Date.now() }, { merge: true })));
-              mirrorResults
-                .filter(result => result.status === "rejected")
-                .forEach(result => console.warn("Roll mirror update failed:", result.reason));
+              const currentPlacementRoll = sessionMeta.sessionId ? student.sessionPlacements?.[sessionMeta.sessionId]?.roll : null;
+              const rollChanged = (student.roll !== roll) || (student.rollNo !== roll) || (currentPlacementRoll !== null && currentPlacementRoll !== roll);
+              if (rollChanged && student.id) {
+                const updatePayload = { roll, rollNo: roll, updatedAt: new Date() };
+                if (sessionMeta.sessionId) {
+                  updatePayload[`sessionPlacements.${sessionMeta.sessionId}`] = makeSessionPlacement(
+                    { ...student, roll, rollNo: roll },
+                    sessionMeta,
+                    { roll }
+                  );
+                }
+                updatePromises.push(updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), updatePayload));
+                const mirrorIds = [student.studentId, student.authUid].map(value => String(value || "").trim()).filter(Boolean);
+                [...new Set(mirrorIds)].forEach((id) => {
+                  updatePromises.push(setDoc(doc(db, "users", id), { rollNo: roll, roll, updatedAt: Date.now() }, { merge: true }).catch(() => {}));
+                });
+              }
+            }
+            if (updatePromises.length > 0) {
+              await Promise.all(updatePromises);
             }
           } catch (e) { console.error("Roll update failed:", e); }
           return assignedRolls;
@@ -2334,27 +2339,101 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           validateStudentPayload(payload, options.label || payload.name || "Student");
 
           const sessionMeta = getSelectedSessionMeta();
-          let studentId = payload.studentId;
-          if (!payload.srNumber) {
-            [payload.srNumber] = await generateUniqueSrNumbers(1, options.srSeed || "");
-          }
-          const existingStudent = await findExistingStudentRecord(studentId, payload.studentEmail, payload.srNumber);
-          if (existingStudent) throw new Error("A student with this ID, email, or SR number already exists in this school.");
 
-          const existingIds = await getExistingStudentIds();
-          if (!studentId) studentId = await generateUniqueStudentId(existingIds);
-          else if (existingIds.includes(studentId)) throw new Error("This student ID is already in use.");
+          // 1. Single consolidated prefetch for all validation & ID generation
+          const [studentSnap, passedOutSnap] = await Promise.all([
+            getDocs(collection(db, "schools", currentUser.uid, "students")),
+            getDocs(collection(db, "schools", currentUser.uid, "passedOutStudents"))
+          ]);
+          const activeStudents = studentSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const passedOutStudents = passedOutSnap.docs.map(d => ({ id: d.id, ...d.data(), archived: true }));
+          const allExistingStudents = [...activeStudents, ...passedOutStudents];
+
+          // 2. Generate SR number if not provided (in-memory)
+          const existingSrList = allExistingStudents.map(s => String(s.srNumber || "").trim()).filter(Boolean);
+          if (!payload.srNumber) {
+            const pattern = getNextSrPattern(existingSrList, options.srSeed || "");
+            let nextNum = Math.max(1, Number(pattern.number || 1));
+            const takenSet = new Set(existingSrList.map(s => s.toLowerCase()));
+            while (takenSet.has(formatSrNumber(pattern, nextNum).toLowerCase())) {
+              nextNum++;
+            }
+            payload.srNumber = formatSrNumber(pattern, nextNum);
+          }
+
+          // 3. Fast in-memory duplicate check
+          const normalizedStudentId = String(payload.studentId || "").trim();
+          const normalizedEmail = String(payload.studentEmail || "").trim().toLowerCase();
+          const normalizedSrNumber = String(payload.srNumber || "").trim().toLowerCase();
+          const duplicateMatch = allExistingStudents.find((s) => {
+            const sId = String(s.studentId || "").trim();
+            const sEmail = String(s.email || "").trim().toLowerCase();
+            const sSr = String(s.srNumber || "").trim().toLowerCase();
+            return (normalizedStudentId && sId === normalizedStudentId) ||
+                   (normalizedEmail && sEmail === normalizedEmail) ||
+                   (normalizedSrNumber && sSr === normalizedSrNumber);
+          });
+          if (duplicateMatch) {
+            throw new Error("A student with this ID, email, or SR number already exists in this school.");
+          }
+
+          // 4. Generate Student ID if needed (in-memory)
+          let studentId = payload.studentId;
+          const existingIds = activeStudents.map(s => String(s.studentId || "").trim()).filter(Boolean);
+          if (!studentId) {
+            studentId = await generateUniqueStudentId(existingIds);
+          } else if (existingIds.includes(studentId)) {
+            throw new Error("This student ID is already in use.");
+          }
+
           if (!payload.studentPassword) {
             payload.studentPassword = generateLoginPassword(studentId, payload.srNumber);
           }
 
-          const photoUpload = await uploadStudentPhoto(payload.photoFile, studentId);
-          const section = payload.section || await assignAutoSection(payload.studentClass, payload.maxPerSection);
-          const studentAuthCred = await createUserWithEmailAndPassword(studentCreatorAuth, payload.studentEmail, payload.studentPassword);
+          // 5. Section assignment (in-memory)
+          let section = payload.section;
+          if (!section) {
+            const counts = {};
+            activeStudents.forEach((student) => {
+              if (normalizeClassValue(student.class) !== normalizeClassValue(payload.studentClass)) return;
+              const sec = normalizeSectionValue(student.section || "A") || "A";
+              counts[sec] = (counts[sec] || 0) + 1;
+            });
+            const capacity = Math.max(1, Number(payload.maxPerSection) || Number(savedMaxPerSection) || 40);
+            const sections = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
+            const available = sections.filter((s) => (counts[s] || 0) < capacity);
+            const candidates = available.length ? available : sections;
+            section = candidates.sort((a, b) => (counts[a] || 0) - (counts[b] || 0) || a.localeCompare(b))[0] || "A";
+          }
+
+          // 6. Pre-calculate roll number BEFORE insert
+          const classmates = activeStudents.filter(s => sameClassSection(s, payload.studentClass, section));
+          const sortedClassmates = [...classmates, { id: "NEW_STUDENT", name: payload.name, studentId }];
+          sortedClassmates.sort((a, b) =>
+            String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "en", { sensitivity: "base", numeric: true }) ||
+            String(a.studentId || a.id || "").localeCompare(String(b.studentId || b.id || ""), "en", { numeric: true })
+          );
+          const newStudentIndex = sortedClassmates.findIndex(s => s.id === "NEW_STUDENT");
+          const assignedRoll = String(newStudentIndex + 1).padStart(2, "0");
+
+          // 7. Photo upload & Auth user creation in parallel
+          const [photoUpload, studentAuthCred] = await Promise.all([
+            uploadStudentPhoto(payload.photoFile, studentId),
+            createUserWithEmailAndPassword(studentCreatorAuth, payload.studentEmail, payload.studentPassword)
+          ]);
           const studentAuthUid = studentAuthCred.user.uid;
           const currentSchoolName = window.SchoolBranding?.getSchoolName?.() || "";
+
+          // 8. Session Placement
+          const placement = sessionMeta.sessionId ? makeSessionPlacement({
+            name: payload.name, class: payload.studentClass, section,
+            roll: assignedRoll, rollNo: assignedRoll
+          }, sessionMeta, { roll: assignedRoll }) : null;
+
+          // 9. Fully-hydrated Student Data (No second getDoc/updateDoc needed!)
           const studentData = {
             studentId, name: payload.name, class: payload.studentClass, section,
+            roll: assignedRoll, rollNo: assignedRoll,
             srNumber: payload.srNumber,
             father: payload.father, fatherPhone: payload.fatherPhone,
             mother: payload.mother, motherPhone: payload.motherPhone,
@@ -2371,10 +2450,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             tcIssued: payload.status === "TC Issued",
             dateOfAdmission: payload.dateOfAdmission,
             yearOfAdmission: payload.yearOfAdmission,
-            currentYear: payload.currentYear,
+            currentYear: sessionMeta.session || payload.currentYear,
             sessionId: sessionMeta.sessionId || "",
             session: sessionMeta.session || payload.currentYear,
             academicSession: sessionMeta.session || payload.currentYear,
+            sessionPlacements: placement && sessionMeta.sessionId ? { [sessionMeta.sessionId]: placement } : {},
             aadharNumber: payload.aadharNumber || "",
             email: payload.studentEmail,
             parentEmail: payload.parentEmail || payload.studentEmail,
@@ -2382,53 +2462,59 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             photoPublicId: photoUpload.photoPublicId,
             authUid: studentAuthUid,
             schoolName: currentSchoolName,
-            createdAt: new Date()
+            createdAt: new Date(),
+            updatedAt: new Date()
           };
 
+          // 10. Insert student & user mirror documents in parallel
           const studentRef = await addDoc(collection(db, "schools", currentUser.uid, "students"), studentData);
           const userMirror = {
-            authUid: studentAuthUid, studentDocId: studentRef.id, name: payload.name,
-            email: payload.studentEmail,
-            parentEmail: payload.parentEmail || payload.studentEmail,
-            role: "student", class: payload.studentClass, section,
-            rollNo: "", dob: payload.dob || "", studentId,
-            srNumber: payload.srNumber,
-            schoolId: currentUser.uid, schoolName: currentSchoolName,
-            yearOfAdmission: payload.yearOfAdmission,
-            currentYear: payload.currentYear,
-            father: payload.father, fatherPhone: payload.fatherPhone,
-            mother: payload.mother, motherPhone: payload.motherPhone,
-            phone: payload.phone || payload.fatherPhone || payload.motherPhone,
-            address: payload.address,
-            gender: payload.gender,
-            category: payload.category,
-            bloodGroup: payload.bloodGroup,
-            religion: payload.religion,
-            previousSchool: payload.previousSchool,
-            documentList: payload.documentList,
-            documents: payload.documentList,
-            status: payload.status,
-            tcIssued: payload.status === "TC Issued",
-            sessionId: sessionMeta.sessionId || "",
-            session: sessionMeta.session || payload.currentYear,
-            dateOfAdmission: payload.dateOfAdmission,
-            aadharNumber: payload.aadharNumber || "",
-            photoUrl: photoUpload.photoUrl,
-            photoPublicId: photoUpload.photoPublicId,
+            ...studentData,
+            authUid: studentAuthUid,
+            studentDocId: studentRef.id,
+            role: "student",
             authProvider: "firebase",
-            authEmail: payload.studentEmail,
-            createdAt: new Date()
+            authEmail: payload.studentEmail
           };
+          await Promise.all([
+            setDoc(doc(db, "users", studentId), { uid: studentId, ...userMirror }),
+            setDoc(doc(db, "users", studentAuthUid), { uid: studentAuthUid, ...userMirror })
+          ]);
 
-          await setDoc(doc(db, "users", studentId), { uid: studentId, ...userMirror });
-          await setDoc(doc(db, "users", studentAuthUid), { uid: studentAuthUid, ...userMirror });
+          // 11. Update other classmates whose roll numbers shifted (parallel, fast)
+          const classmateUpdates = [];
+          for (let i = 0; i < sortedClassmates.length; i++) {
+            const item = sortedClassmates[i];
+            if (item.id === "NEW_STUDENT") continue;
+            const expectedRoll = String(i + 1).padStart(2, "0");
+            if (item.roll !== expectedRoll || item.rollNo !== expectedRoll) {
+              const uPayload = { roll: expectedRoll, rollNo: expectedRoll, updatedAt: new Date() };
+              if (sessionMeta.sessionId) {
+                uPayload[`sessionPlacements.${sessionMeta.sessionId}`] = makeSessionPlacement(
+                  { ...item, roll: expectedRoll, rollNo: expectedRoll },
+                  sessionMeta,
+                  { roll: expectedRoll }
+                );
+              }
+              classmateUpdates.push(
+                updateDoc(doc(db, "schools", currentUser.uid, "students", item.id), uPayload)
+              );
+              const mIds = [item.studentId, item.authUid].map(v => String(v || "").trim()).filter(Boolean);
+              [...new Set(mIds)].forEach(mid => {
+                classmateUpdates.push(
+                  setDoc(doc(db, "users", mid), { rollNo: expectedRoll, roll: expectedRoll, updatedAt: Date.now() }, { merge: true }).catch(() => {})
+                );
+              });
+            }
+          }
+          if (classmateUpdates.length > 0) {
+            await Promise.all(classmateUpdates);
+          }
 
-          const assignedRolls = await updateRolls(payload.studentClass, section);
-          const assignedRoll = assignedRolls.get(studentRef.id) || "";
+          // 12. Create auto monthly fee if configured
           const feeAmount = Number(feeConfig[payload.studentClass] || 0);
           const currentMonth = currentMonthName();
-          const existingFee = await findExistingFeeRecord(studentId, currentMonth);
-          if (feeAmount > 0 && !existingFee) {
+          if (feeAmount > 0) {
             await createMonthlyFeeIfMissing(studentId, currentMonth, {
               studentId, studentDocId: studentRef.id, studentName: payload.name,
               roll: assignedRoll, class: payload.studentClass, section,
@@ -2444,56 +2530,38 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             });
           }
 
-          const savedSnap = await getDoc(studentRef);
-          const savedStudent = savedSnap.exists() ? { id: studentRef.id, ...savedSnap.data() } : { id: studentRef.id, ...studentData };
-          savedStudent.roll = savedStudent.roll || assignedRoll;
-          savedStudent.rollNo = savedStudent.rollNo || assignedRoll;
-          if (sessionMeta.sessionId) {
-            const placement = makeSessionPlacement(savedStudent, sessionMeta, { roll: assignedRoll || savedStudent.roll || savedStudent.rollNo || "" });
-            await updateDoc(studentRef, {
-              [`sessionPlacements.${sessionMeta.sessionId}`]: placement,
-              roll: assignedRoll || savedStudent.roll || "",
-              rollNo: assignedRoll || savedStudent.rollNo || "",
-              currentYear: sessionMeta.session || payload.currentYear,
-              sessionId: sessionMeta.sessionId,
-              session: sessionMeta.session || payload.currentYear,
-              academicSession: sessionMeta.session || payload.currentYear
-            });
-            savedStudent.sessionPlacements = {
-              ...(savedStudent.sessionPlacements || {}),
-              [sessionMeta.sessionId]: placement
-            };
-            savedStudent.roll = assignedRoll || savedStudent.roll || "";
-            savedStudent.rollNo = assignedRoll || savedStudent.rollNo || "";
-            savedStudent.currentYear = sessionMeta.session || payload.currentYear;
-            savedStudent.session = sessionMeta.session || payload.currentYear;
-            savedStudent.academicSession = sessionMeta.session || payload.currentYear;
+          const savedStudent = { id: studentRef.id, ...studentData };
+
+          // 13. Send registration email asynchronously in the background so it never slows down UI
+          if (savedStudent.email) {
+            sendStudentRegistrationEmail(savedStudent, payload.studentPassword, feeAmount, currentMonth)
+              .catch(err => console.warn("Background registration email notice:", err));
           }
 
-          let registrationEmailSent = false;
-          let registrationEmailError = "";
-          try {
-            await sendStudentRegistrationEmail(savedStudent, payload.studentPassword, feeAmount, currentMonth);
-            registrationEmailSent = true;
-          } catch (emailError) {
-            registrationEmailError = emailError.message || "Registration email failed.";
-            console.error("Registration email failed:", emailError);
-          }
-
-          return { savedStudent, feeAmount, currentMonth, registrationEmailSent, registrationEmailError };
+          return { savedStudent, feeAmount, currentMonth, registrationEmailSent: true, registrationEmailError: "" };
         }
 
         window.addStudent = async () => {
+          const btn = document.querySelector("button[onclick*='addStudent']");
+          const originalText = btn ? btn.textContent : "";
           try {
             if (!ensureSessionEditable("Admission and fee creation")) return;
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Adding student...";
+            }
             const result = await createStudentAdmission(getStudentPayloadFromForm());
             showRecentStudent(result.savedStudent);
             resetStudentForm();
-            const emailText = result.registrationEmailSent ? " Registration email sent." : " Registration saved, but email could not be sent.";
-            showToast(`Student added successfully. ${result.feeAmount > 0 ? `${formatCurrency(result.feeAmount)} imposed for ${result.currentMonth}.` : "No class fee configured."}${emailText}`, result.registrationEmailSent ? "success" : "info");
+            showToast(`Student added successfully! ${result.feeAmount > 0 ? `${formatCurrency(result.feeAmount)} fee imposed for ${result.currentMonth}.` : ""}`, "success");
           } catch (e) {
             console.error("Student add failed:", e);
             showToast(e.message || "Unable to add student.", "error");
+          } finally {
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = originalText;
+            }
           }
         };
 
