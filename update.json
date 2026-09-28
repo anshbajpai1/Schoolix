@@ -1,12 +1,9 @@
 {
-  "versionCode": 110,
-  "versionName": "5.4.0",
+  "versionCode": 109,
+  "versionName": "5.3.9",
   "forceUpdate": false,
-  "message": "Release 5.4.0: Reliable admin announcements, visible Schoolix branding, and improved phone notification delivery.",
+  "message": "Release 5.3.9: Native app polish with shared skeleton loading and protected text interaction.",
   "changelog": [
-    "Fixes migrated admin accounts being rejected while sending notifications.",
-    "Restores the default Schoolix logo in React sidebars until a school logo is configured.",
-    "Improves delivery of school announcements to the Android notification bar.",
     "Fixes student dashboard terms dropdown and subject marks fetching.",
     "Synchronizes terms dynamically from terms collection, report cards, and saved marks.",
     "Ensures results display reliably across all session structures and student ID formats.",
@@ -37,5 +34,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=110"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=109"
 }

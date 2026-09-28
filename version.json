@@ -1,6 +1,6 @@
 {
-  "versionCode": 110,
-  "versionName": "5.4.0",
+  "versionCode": 109,
+  "versionName": "5.3.9",
   "forceUpdate": false,
   "message": "Release 5.3.9: Native app polish with shared skeleton loading and protected text interaction.",
   "changelog": [
