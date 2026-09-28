@@ -431,7 +431,7 @@ $("notificationForm").addEventListener("submit", async (event) => {
         "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
         "x-firebase-token": idToken,
       },
-      body: JSON.stringify({ title, message, audience }),
+      body: JSON.stringify({ title, message, audience, schoolId }),
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.success) throw new Error(result.error || "Unable to send notification");

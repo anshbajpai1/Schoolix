@@ -1,8 +1,8 @@
 {
-  "versionCode": 108,
-  "versionName": "5.3.8",
+  "versionCode": 110,
+  "versionName": "5.4.0",
   "forceUpdate": false,
-  "message": "Release 5.3.8: Fixes student dashboard marks and terms fetching with full support for subject-wise report cards.",
+  "message": "Release 5.3.9: Native app polish with shared skeleton loading and protected text interaction.",
   "changelog": [
     "Fixes student dashboard terms dropdown and subject marks fetching.",
     "Synchronizes terms dynamically from terms collection, report cards, and saved marks.",
@@ -34,5 +34,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=108"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=109"
 }

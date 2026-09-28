@@ -2423,6 +2423,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           ]);
           const studentAuthUid = studentAuthCred.user.uid;
           const currentSchoolName = window.SchoolBranding?.getSchoolName?.() || "";
+          const schoolId = String(currentUser.uid || "").trim();
 
           // 8. Session Placement
           const placement = sessionMeta.sessionId ? makeSessionPlacement({
@@ -2461,6 +2462,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             photoUrl: photoUpload.photoUrl,
             photoPublicId: photoUpload.photoPublicId,
             authUid: studentAuthUid,
+            schoolId,
+            adminId: schoolId,
             schoolName: currentSchoolName,
             createdAt: new Date(),
             updatedAt: new Date()

@@ -85,11 +85,15 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activeInstance = this;
+        WebView webView = bridge.getWebView();
+        webView.setLongClickable(false);
+        webView.setHapticFeedbackEnabled(false);
+        webView.setOnLongClickListener(view -> true);
         configureGoogleSignIn();
         createNotificationChannel();
         subscribeToAppUpdateTopic();
         askNotificationPermission();
-        bridge.getWebView().addJavascriptInterface(new NativePrintBridge(), "SchoolixNativePrint");
+        webView.addJavascriptInterface(new NativePrintBridge(), "SchoolixNativePrint");
         bridge.getWebView().addJavascriptInterface(new NativeNotificationBridge(), "SchoolixNativeNotifications");
         bridge.getWebView().addJavascriptInterface(new NativeAuthBridge(), "SchoolixNativeAuth");
         bridge.getWebView().addJavascriptInterface(new NativeUpdateBridge(), "SchoolixNativeUpdate");

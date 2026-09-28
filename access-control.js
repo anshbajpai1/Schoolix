@@ -588,5 +588,9 @@ onAuthStateChanged(auth, async (user) => {
     try { await window.SchoolixNotificationRegistration?.registerToken?.(); } catch (e) { console.warn("Pending phone notification registration failed:", e); }
     return;
   }
+  if (currentPage() !== "index.html") {
+    redirectToLogin("Please sign in to continue.");
+    return;
+  }
   try { await guardStudentSession(); } catch (e) { console.error("Student access guard failed:", e); }
 });

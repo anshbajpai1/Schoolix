@@ -47,6 +47,16 @@ app.get('/dist/Schoolix.apk', (req, res, next) => {
   next();
 });
 
+app.get(['/', '/react', '/react/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'react-dist', 'react.html'));
+});
+
+app.use('/react', express.static(path.join(__dirname, 'react-dist'), {
+  dotfiles: "deny",
+  fallthrough: true,
+  setHeaders(res) { res.setHeader("Cache-Control", "no-store"); }
+}));
+
 app.use(express.static(__dirname, {
   dotfiles: "deny",
   fallthrough: false,

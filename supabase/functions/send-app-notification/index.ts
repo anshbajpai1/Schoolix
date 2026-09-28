@@ -153,14 +153,43 @@ function toFirestoreFields(data: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(data).map(([key, value]) => [key, toFirestoreValue(value)]));
 }
 
-async function getUserProfile(accessToken: string, uid: string) {
+async function getUserProfile(accessToken: string, uid: string, email = "") {
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${encodeURIComponent(uid)}`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
   );
-  const data = await response.json();
-  if (!response.ok) return null;
-  return readFirestoreFields(data.fields || {});
+  const data = await response.json().catch(() => ({}));
+  if (response.ok) return readFirestoreFields(data.fields || {});
+
+  // Supabase-migrated logins can carry a new Auth UUID while the admin
+  // document is still keyed by their legacy Firebase UID. Resolve that safe,
+  // verified identity through the email stored in the Firebase token instead
+  // of rejecting a real administrator as "profile not found".
+  const verifiedEmail = cleanText(email).toLowerCase();
+  if (!verifiedEmail) return null;
+  const queryResponse = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: "users" }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: "email" },
+              op: "EQUAL",
+              value: { stringValue: verifiedEmail },
+            },
+          },
+          limit: 1,
+        },
+      }),
+    },
+  );
+  const rows = await queryResponse.json().catch(() => []);
+  const match = Array.isArray(rows) ? rows.find((row) => row?.document?.fields) : null;
+  return match ? readFirestoreFields(match.document.fields || {}) : null;
 }
 
 function registrationRole(profileRole: string, payloadRole: string, loginAs: string) {
@@ -443,7 +472,7 @@ Deno.serve(async (req) => {
 
     const firebaseUser = await verifySignedInUser(idToken);
     const accessToken = await getGoogleAccessToken();
-    const profile = await getUserProfile(accessToken, firebaseUser.uid);
+    const profile = await getUserProfile(accessToken, firebaseUser.uid, firebaseUser.email);
 
     if (action === "register-device") {
       const token = cleanText(payload.token);
