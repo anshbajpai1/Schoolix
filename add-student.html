@@ -2695,8 +2695,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         function isTestBulkStudent(row) {
           const studentId = String(row?.studentId || "").trim();
-          const studentEmail = String(row?.studentEmail || "").trim().toLowerCase();
-          return /^TEST\d+$/i.test(studentId) && studentEmail.endsWith("@example.invalid");
+          return /^TEST\d+$/i.test(studentId);
         }
 
         async function assignBulkSrNumbers(rows) {

@@ -5153,7 +5153,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         if (!user) return window.location.href = "index.html";
         currentUser = user;
         await loadAllData();
-        await repackTestStudents({ skipConfirm: true, silent: true });
         setupRealtimeSync();
       });
 
@@ -5865,8 +5864,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       function isTestStudentRecord(student = {}) {
         const studentId = String(student.studentId || '').trim();
-        const email = String(student.email || '').trim().toLowerCase();
-        return /^TEST\d+$/i.test(studentId) && email.endsWith('@example.invalid');
+        return /^TEST\d+$/i.test(studentId);
       }
 
       window.repackTestStudents = async ({ skipConfirm = false, silent = false } = {}) => {
