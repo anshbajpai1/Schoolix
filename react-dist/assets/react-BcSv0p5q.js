@@ -7332,6 +7332,15 @@ window.deleteSession = async function(id, locked) {\r
             <i class="fas fa-chevron-right card-arrow"></i>\r
         </a>\r
 \r
+        <a href="subjects.html" class="card reports" title="Manage school subjects">\r
+            <div class="card-icon"><i class="fas fa-book-open"></i></div>\r
+            <div class="card-text">\r
+                <div class="card-title">Manage Subjects</div>\r
+                <div class="card-subtitle">School subject catalogue</div>\r
+            </div>\r
+            <i class="fas fa-chevron-right card-arrow"></i>\r
+        </a>\r
+\r
         <a href="#/staff-management.html" class="card staff" title="Manage all staff accounts">\r
             <div class="card-icon"><i class="fas fa-users-gear"></i></div>\r
             <div class="card-text">\r
@@ -25013,6 +25022,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <button class="btn btn-danger" onclick="openPassOutModal()">Pass Out Students</button>\r
           <button class="btn btn-warning" onclick="togglePromotionBanner()">Promote</button>\r
           <button class="btn btn-success" onclick="promoteSelected()">Promote Selected</button>\r
+          <button class="btn btn-danger" onclick="deleteAllStudents()">Delete All Students</button>\r
         </div>\r
 \r
         <div class="shuffle-tools">\r
@@ -29481,6 +29491,56 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }\r
       };\r
 \r
+      window.deleteAllStudents = async () => {\r
+        const students = [...allStudents];\r
+        if (!students.length) return showToast("No student records to delete.", "info");\r
+        if (!window.confirm(\`Delete ALL \${students.length} student records?\\n\\nThis permanently removes every active student and their linked attendance, fees, report cards, and profile records for this school.\`)) return;\r
+\r
+        const actionButton = document.querySelector('button[onclick="deleteAllStudents()"]');\r
+        const originalText = actionButton?.textContent || "Delete All Students";\r
+        try {\r
+          if (actionButton) {\r
+            actionButton.disabled = true;\r
+            actionButton.textContent = "Deleting students...";\r
+          }\r
+\r
+          const studentIds = new Set(students.map((student) => String(student.studentId || student.id || "").trim()).filter(Boolean));\r
+          const documentIds = new Set(students.map((student) => String(student.id || "").trim()).filter(Boolean));\r
+          const userIds = new Set(students.flatMap((student) => [student.studentId, student.authUid]).map((id) => String(id || "").trim()).filter(Boolean));\r
+          const attendanceToDelete = allAttendance.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));\r
+          const feesToDelete = allFees.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));\r
+          const reportsToDelete = allReports.filter((entry) => studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));\r
+\r
+          const deletions = [\r
+            ...students.map((student) => deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id))),\r
+            ...attendanceToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "attendance", entry.id))),\r
+            ...feesToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "fees", entry.id))),\r
+            ...reportsToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "reportCards", entry.id))),\r
+            ...[...userIds].map((id) => deleteDoc(doc(db, "users", id)).catch(() => {}))\r
+          ];\r
+          await Promise.all(deletions);\r
+\r
+          allStudents = allStudents.filter((student) => !documentIds.has(String(student.id || "").trim()));\r
+          allAttendance = allAttendance.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));\r
+          allFees = allFees.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));\r
+          allReports = allReports.filter((entry) => !studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));\r
+          selectedStudentIds.clear();\r
+          rebuildDataIndexes();\r
+          populateFilters();\r
+          loadData(false);\r
+          if (currentStudentId && documentIds.has(String(currentStudentId))) closeAttendanceModal();\r
+          showToast(\`\${students.length} student record(s) deleted successfully.\`, "success");\r
+        } catch (error) {\r
+          console.error("Bulk student deletion failed:", error);\r
+          showToast(error?.message || "Unable to delete all student records.", "error");\r
+        } finally {\r
+          if (actionButton) {\r
+            actionButton.disabled = false;\r
+            actionButton.textContent = originalText;\r
+          }\r
+        }\r
+      };\r
+\r
       function updateModalAttendance() {\r
         const student = allStudents.find(s => s.id === currentStudentId);\r
         if (!student) return;\r
@@ -30209,7 +30269,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             </div>\r
         </section>\r
 \r
-        <section class="panel tabs-panel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">\r
+        <section class="panel tabs-panel">\r
             <div class="tabs">\r
                 <button type="button" class="tab-btn active" data-tab="directory"\r
                     onclick="switchTab('directory')">Teacher Accounts</button>\r
@@ -30217,12 +30277,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                     Attendance</button>\r
                 <button type="button" class="tab-btn" data-tab="salary" onclick="switchTab('salary')">Salary\r
                     Desk</button>\r
-            </div>\r
-            <div>\r
-                <button type="button" class="btn btn-secondary" onclick="openManageSubjectsModal()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">\r
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>\r
-                    Manage School Subjects\r
-                </button>\r
             </div>\r
         </section>\r
 \r
@@ -30284,7 +30338,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                                             <option value="">Select subject</option>\r
                                         </select>\r
                                         <button type="button" class="btn btn-secondary" onclick="addDraftTeacherSubject()">Add Subject</button>\r
-                                        <button type="button" class="btn btn-light" onclick="openManageSubjectsModal()" title="Add new school subject">+ New</button>\r
                                     </div>\r
                                     <div id="teacherSubjectsList" class="assignment-list" style="margin-top:8px;"></div>\r
                                 </div>\r
@@ -30718,7 +30771,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                                 <option value="">Select subject</option>\r
                             </select>\r
                             <button type="button" class="btn btn-secondary" onclick="addEditTeacherSubject()">Add Subject</button>\r
-                            <button type="button" class="btn btn-light" onclick="openManageSubjectsModal()" title="Add new school subject">+ New</button>\r
                         </div>\r
                         <div id="editTeacherSubjectsList" class="assignment-list" style="margin-top:8px;"></div>\r
                     </div>\r
@@ -30734,34 +30786,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             </div>\r
             <div class="helper-text top-gap">Note: Changing email here updates the Firestore profile only. Firebase Auth\r
                 email is not changed automatically.</div>\r
-        </div>\r
-    </div>\r
-\r
-    <div id="manageSubjectsModal" class="modal-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true"\r
-        aria-labelledby="manageSubjectsModalTitle">\r
-        <div class="modal-box" style="max-width:520px;">\r
-            <div class="modal-header">\r
-                <div>\r
-                    <h2 id="manageSubjectsModalTitle">School Subjects</h2>\r
-                    <p>Add and manage subjects offered in your school.</p>\r
-                </div>\r
-                <button type="button" class="teacher-dialog-close" onclick="closeManageSubjectsModal()"\r
-                    aria-label="Close dialog" title="Close">&times;</button>\r
-            </div>\r
-            <div style="margin-top:18px;">\r
-                <div style="display:flex; gap:10px; margin-bottom:16px;">\r
-                    <input type="text" id="newSubjectNameInput" placeholder="Enter subject name (e.g. Mathematics)"\r
-                        style="flex:1; padding:10px 14px; border:1px solid var(--line); border-radius:8px; font-size:14px;"\r
-                        onkeydown="if(event.key==='Enter'){event.preventDefault(); addNewSchoolSubject();}">\r
-                    <button type="button" class="btn btn-primary" id="addSubjectBtn" onclick="addNewSchoolSubject()">Add Subject</button>\r
-                </div>\r
-                <div style="max-height:340px; overflow-y:auto; padding-right:4px;" id="schoolSubjectsList">\r
-                    <!-- Populated dynamically -->\r
-                </div>\r
-            </div>\r
-            <div style="margin-top:20px; text-align:right;">\r
-                <button type="button" class="btn btn-secondary" onclick="closeManageSubjectsModal()">Done</button>\r
-            </div>\r
         </div>\r
     </div>\r
 \r

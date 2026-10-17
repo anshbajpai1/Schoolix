@@ -301,30 +301,6 @@ window.removeEditTeacherSubject = (index) => {
     renderSubjectChips("editTeacherSubjectsList", draftEditTeacherSubjects, "removeEditTeacherSubject");
 };
 
-function renderSchoolSubjectsModalList() {
-    const listEl = $("schoolSubjectsList");
-    if (!listEl) return;
-    if (!schoolSubjects.length) {
-        listEl.innerHTML = `<div class="empty-state" style="padding:1.5rem; text-align:center; color:#666;">No subjects added yet. Type a subject name above and click "Add Subject".</div>`;
-        return;
-    }
-    listEl.innerHTML = schoolSubjects.map((s) => {
-        const teacherCount = teachers.filter((t) => {
-            const list = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
-            return list.some((sub) => sub.toLowerCase() === s.name.toLowerCase());
-        }).length;
-        return `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid var(--line); border-radius:8px; margin-bottom:8px;">
-                <div>
-                    <strong style="font-size:0.95rem; color:#111;">${escapeHtml(s.name)}</strong>
-                    <div style="font-size:0.8rem; color:#666; margin-top:2px;">${teacherCount} teacher${teacherCount === 1 ? "" : "s"} assigned</div>
-                </div>
-                <button type="button" class="btn btn-danger" style="padding:5px 12px; font-size:0.8rem;" onclick="deleteSchoolSubject('${escapeHtml(s.id)}', '${escapeHtml(s.name)}')">Delete</button>
-            </div>
-        `;
-    }).join("");
-}
-
 async function loadSchoolSubjects() {
     if (!adminUID) return;
     try {
@@ -340,59 +316,10 @@ async function loadSchoolSubjects() {
         list.sort((a, b) => a.name.localeCompare(b.name));
         schoolSubjects = list;
         populateSubjectDropdowns();
-        renderSchoolSubjectsModalList();
     } catch (err) {
         console.error("Error loading subjects:", err);
     }
 }
-
-window.openManageSubjectsModal = () => {
-    renderSchoolSubjectsModalList();
-    openModalElement("manageSubjectsModal");
-    setTimeout(() => $("newSubjectNameInput")?.focus(), 50);
-};
-
-window.closeManageSubjectsModal = () => {
-    closeModalElement("manageSubjectsModal");
-};
-
-window.addNewSchoolSubject = async () => {
-    const input = $("newSubjectNameInput");
-    const name = input?.value?.trim();
-    if (!name) return showToast("Enter a subject name.", "error");
-    if (schoolSubjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
-        return showToast("This subject already exists.", "info");
-    }
-    const addBtn = $("addSubjectBtn");
-    try {
-        if (addBtn) addBtn.disabled = true;
-        await addDoc(collection(db, "schools", adminUID, "subjects"), {
-            name,
-            createdAt: serverTimestamp(),
-            createdBy: auth.currentUser?.email || "Admin"
-        });
-        if (input) input.value = "";
-        await loadSchoolSubjects();
-        showToast(`Subject "${name}" added.`);
-    } catch (err) {
-        console.error(err);
-        showToast(err.message || "Unable to add subject.", "error");
-    } finally {
-        if (addBtn) addBtn.disabled = false;
-    }
-};
-
-window.deleteSchoolSubject = async (subjectId, subjectName) => {
-    if (!confirm(`Are you sure you want to delete "${subjectName}"?`)) return;
-    try {
-        await deleteDoc(doc(db, "schools", adminUID, "subjects", subjectId));
-        await loadSchoolSubjects();
-        showToast(`Subject "${subjectName}" removed.`);
-    } catch (err) {
-        console.error(err);
-        showToast(err.message || "Unable to delete subject.", "error");
-    }
-};
 
 window.openPhotoPreview = (photoUrl, title = "Photo") => {
     if (!photoUrl) return showToast("Photo is not available yet.", "info");

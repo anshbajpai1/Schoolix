@@ -28,6 +28,9 @@ const files = [
   "fees-report.html",
   "students.html",
   "teachers.html",
+  "subjects.html",
+  "subjects.css",
+  "subjects-ops.js",
   "teacher-profile.html",
   "teacher-profile.css",
   "teacher-profile.js",
@@ -86,7 +89,7 @@ const files = [
   "teachers-ops.css",
   "teachers-ops.js",
   "style.css"
-].filter((file) => !file.endsWith(".html"));
+].filter((file) => !file.endsWith(".html") || file === "subjects.html");
 
 const optionalAssets = new Set([
   "orders.html"

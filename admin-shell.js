@@ -32,6 +32,7 @@
     graduate: `<svg ${svgAttrs}><path d="M22 10 12 5 2 10l10 5 10-5Z"></path><path d="M6 12v5c3 2 9 2 12 0v-5"></path><path d="M22 10v6"></path></svg>`,
     certificate: `<svg ${svgAttrs}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h3"></path></svg>`,
     teachers: `<svg ${svgAttrs}><path d="M3 5h18"></path><path d="M4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5"></path><path d="M8 9h8"></path><path d="M8 13h5"></path><path d="M12 19v3"></path></svg>`,
+    subjects: `<svg ${svgAttrs}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"></path><path d="M8 7h8"></path><path d="M8 11h8"></path></svg>`,
     staff: `<svg ${svgAttrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M19 8v4"></path><path d="M21 10h-4"></path></svg>`,
     timetable: `<svg ${svgAttrs}><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path></svg>`,
     reportCards: `<svg ${svgAttrs}><path d="M4 19.5V4a2 2 0 0 1 2-2h12v20H6a2 2 0 0 1-2-2.5Z"></path><path d="M8 7h6"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>`,
@@ -74,6 +75,7 @@
       label: "Academics",
       items: [
         { href: "teachers.html", label: "Teachers", icon: "teachers" },
+        { href: "subjects.html", label: "Subjects", icon: "subjects" },
         { href: "staff-management.html", label: "Staff Management", icon: "staff" },
         { href: "admin-timetable.html", label: "Timetable", icon: "timetable" },
         { href: "reportcards.html", label: "Report Cards", icon: "reportCards" },
