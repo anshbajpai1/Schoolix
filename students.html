@@ -5153,6 +5153,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         if (!user) return window.location.href = "index.html";
         currentUser = user;
         await loadAllData();
+        await repackTestStudents({ skipConfirm: true, silent: true });
         setupRealtimeSync();
       });
 
@@ -5868,14 +5869,18 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         return /^TEST\d+$/i.test(studentId) && email.endsWith('@example.invalid');
       }
 
-      window.repackTestStudents = async () => {
+      window.repackTestStudents = async ({ skipConfirm = false, silent = false } = {}) => {
         const selectedSession = getSelectedSession();
         if (selectedSession?.locked || selectedSession?.classesLocked) {
-          return showToast('This session is locked — test data cannot be repacked.', 'error');
+          if (!silent) showToast('This session is locked — test data cannot be repacked.', 'error');
+          return;
         }
 
         const testStudents = getStudentsForSelectedSession().filter(isTestStudentRecord);
-        if (!testStudents.length) return showToast('No test students found in this session.', 'info');
+        if (!testStudents.length) {
+          if (!silent) showToast('No test students found in this session.', 'info');
+          return;
+        }
 
         const byClass = new Map();
         testStudents.forEach((student) => {
@@ -5906,8 +5911,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             });
         });
 
-        if (!plan.length) return showToast('Test students are already packed into 20-seat sections.', 'info');
-        if (!confirm(`Repack ${plan.length} test student(s) into sections of 20? Real students will not be changed.`)) return;
+        if (!plan.length) {
+          if (!silent) showToast('Test students are already packed into 20-seat sections.', 'info');
+          return;
+        }
+        if (!skipConfirm && !confirm(`Repack ${plan.length} test student(s) into sections of 20? Real students will not be changed.`)) return;
 
         try {
           await Promise.all(plan.map(({ student, classValue, newSection }) => {
@@ -5928,10 +5936,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           ]));
           await reassignRollNumbersForPlacements(...affectedPlacements);
           await loadAllData();
-          showToast(`${plan.length} test student(s) repacked into 20-seat sections.`, 'success');
+          if (!silent) showToast(`${plan.length} test student(s) repacked into 20-seat sections.`, 'success');
         } catch (error) {
           console.error('Test data repack error:', error);
-          showToast('Unable to repack test data.', 'error');
+          if (!silent) showToast('Unable to repack test data.', 'error');
         }
       };
 
