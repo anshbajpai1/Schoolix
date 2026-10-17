@@ -4297,6 +4297,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <button class="btn btn-danger" onclick="openPassOutModal()">Pass Out Students</button>
           <button class="btn btn-warning" onclick="togglePromotionBanner()">Promote</button>
           <button class="btn btn-success" onclick="promoteSelected()">Promote Selected</button>
+          <button class="btn btn-secondary" onclick="repackTestStudents()">Repack Test Data</button>
           <button class="btn btn-danger" onclick="deleteAllStudents()">Delete All Students</button>
         </div>
 
@@ -5860,6 +5861,79 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           newSection: targetSections[index % sectionCount]
         }));
       }
+
+      function isTestStudentRecord(student = {}) {
+        const studentId = String(student.studentId || '').trim();
+        const email = String(student.email || '').trim().toLowerCase();
+        return /^TEST\d+$/i.test(studentId) && email.endsWith('@example.invalid');
+      }
+
+      window.repackTestStudents = async () => {
+        const selectedSession = getSelectedSession();
+        if (selectedSession?.locked || selectedSession?.classesLocked) {
+          return showToast('This session is locked — test data cannot be repacked.', 'error');
+        }
+
+        const testStudents = getStudentsForSelectedSession().filter(isTestStudentRecord);
+        if (!testStudents.length) return showToast('No test students found in this session.', 'info');
+
+        const byClass = new Map();
+        testStudents.forEach((student) => {
+          const classValue = String(student.class || '').trim();
+          if (!classValue) return;
+          const classStudents = byClass.get(classValue) || [];
+          classStudents.push(student);
+          byClass.set(classValue, classStudents);
+        });
+
+        const plan = [];
+        byClass.forEach((classStudents, classValue) => {
+          const sectionCounts = {};
+          getStudentsForSelectedSession()
+            .filter((student) => String(student.class || '').trim() === classValue && !isTestStudentRecord(student))
+            .forEach((student) => {
+              const section = String(student.section || 'A').trim() || 'A';
+              sectionCounts[section] = (sectionCounts[section] || 0) + 1;
+            });
+
+          classStudents
+            .sort((left, right) => String(left.studentId || left.id).localeCompare(String(right.studentId || right.id), undefined, { numeric: true }))
+            .forEach((student) => {
+              const sections = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
+              const newSection = sections.find((section) => (sectionCounts[section] || 0) < 20) || sections[sections.length - 1];
+              sectionCounts[newSection] = (sectionCounts[newSection] || 0) + 1;
+              if (student.section !== newSection) plan.push({ student, classValue, newSection });
+            });
+        });
+
+        if (!plan.length) return showToast('Test students are already packed into 20-seat sections.', 'info');
+        if (!confirm(`Repack ${plan.length} test student(s) into sections of 20? Real students will not be changed.`)) return;
+
+        try {
+          await Promise.all(plan.map(({ student, classValue, newSection }) => {
+            const updatePayload = { section: newSection, updatedAt: serverTimestamp() };
+            if (selectedSession?.id) {
+              updatePayload[`sessionPlacements.${selectedSession.id}`] = makeSessionPlacement({
+                ...student,
+                class: classValue,
+                section: newSection
+              }, selectedSession);
+            }
+            return updateDoc(doc(db, 'schools', currentUser.uid, 'students', student.id), updatePayload);
+          }));
+
+          const affectedPlacements = plan.flatMap(({ student, classValue, newSection }) => ([
+            { class: classValue, section: student.section || 'A' },
+            { class: classValue, section: newSection }
+          ]));
+          await reassignRollNumbersForPlacements(...affectedPlacements);
+          await loadAllData();
+          showToast(`${plan.length} test student(s) repacked into 20-seat sections.`, 'success');
+        } catch (error) {
+          console.error('Test data repack error:', error);
+          showToast('Unable to repack test data.', 'error');
+        }
+      };
 
       window.previewSectionShuffle = () => {
         const classValue = document.getElementById('shuffleClassSelect')?.value;
