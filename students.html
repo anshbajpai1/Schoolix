@@ -4220,6 +4220,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <button class="btn btn-danger" onclick="openPassOutModal()">Pass Out Students</button>
           <button class="btn btn-warning" onclick="togglePromotionBanner()">Promote</button>
           <button class="btn btn-success" onclick="promoteSelected()">Promote Selected</button>
+          <button class="btn btn-danger" onclick="deleteAllStudents()">Delete All Students</button>
         </div>
 
         <div class="shuffle-tools">
@@ -6911,6 +6912,56 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         } catch (error) {
           console.error("Error deleting student:", error);
           showToast("Unable to delete student", "error");
+        }
+      };
+
+      window.deleteAllStudents = async () => {
+        const students = [...allStudents];
+        if (!students.length) return showToast("No student records to delete.", "info");
+        if (!window.confirm(`Delete ALL ${students.length} student records?\n\nThis permanently removes every active student and their linked attendance, fees, report cards, and profile records for this school.`)) return;
+
+        const actionButton = document.querySelector('button[onclick="deleteAllStudents()"]');
+        const originalText = actionButton?.textContent || "Delete All Students";
+        try {
+          if (actionButton) {
+            actionButton.disabled = true;
+            actionButton.textContent = "Deleting students...";
+          }
+
+          const studentIds = new Set(students.map((student) => String(student.studentId || student.id || "").trim()).filter(Boolean));
+          const documentIds = new Set(students.map((student) => String(student.id || "").trim()).filter(Boolean));
+          const userIds = new Set(students.flatMap((student) => [student.studentId, student.authUid]).map((id) => String(id || "").trim()).filter(Boolean));
+          const attendanceToDelete = allAttendance.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));
+          const feesToDelete = allFees.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));
+          const reportsToDelete = allReports.filter((entry) => studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));
+
+          const deletions = [
+            ...students.map((student) => deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id))),
+            ...attendanceToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "attendance", entry.id))),
+            ...feesToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "fees", entry.id))),
+            ...reportsToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "reportCards", entry.id))),
+            ...[...userIds].map((id) => deleteDoc(doc(db, "users", id)).catch(() => {}))
+          ];
+          await Promise.all(deletions);
+
+          allStudents = allStudents.filter((student) => !documentIds.has(String(student.id || "").trim()));
+          allAttendance = allAttendance.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));
+          allFees = allFees.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));
+          allReports = allReports.filter((entry) => !studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));
+          selectedStudentIds.clear();
+          rebuildDataIndexes();
+          populateFilters();
+          loadData(false);
+          if (currentStudentId && documentIds.has(String(currentStudentId))) closeAttendanceModal();
+          showToast(`${students.length} student record(s) deleted successfully.`, "success");
+        } catch (error) {
+          console.error("Bulk student deletion failed:", error);
+          showToast(error?.message || "Unable to delete all student records.", "error");
+        } finally {
+          if (actionButton) {
+            actionButton.disabled = false;
+            actionButton.textContent = originalText;
+          }
         }
       };
 
