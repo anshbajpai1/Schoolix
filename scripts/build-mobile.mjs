@@ -89,7 +89,7 @@ const files = [
   "teachers-ops.css",
   "teachers-ops.js",
   "style.css"
-].filter((file) => !file.endsWith(".html") || file === "subjects.html");
+];
 
 const optionalAssets = new Set([
   "orders.html"
@@ -187,7 +187,6 @@ await execFileAsync(process.execPath, [path.join(root, "scripts", "generate-reac
 await execFileAsync(process.execPath, [path.join(root, "node_modules", "vite", "bin", "vite.js"), "build"], { cwd: root });
 await cp(path.join(root, "react-dist"), path.join(out, "react"), { recursive: true });
 await copyFile(path.join(root, "react-dist", "react.html"), path.join(out, "react", "index.html"));
-await copyFile(path.join(root, "react-dist", "react.html"), path.join(out, "index.html"));
 
 if (!args.includes("--skip-apk")) {
   const apkSource = path.join(root, "dist", "Schoolix-download");
