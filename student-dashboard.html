@@ -4468,7 +4468,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
   function belongsToSelectedSession(entry) {
     if (!entry) return false;
-    if (!state.activeSessionId && !state.activeSessionLabel) return true;
+    // A session has to be resolved before records can be displayed. Returning
+    // true here would expose records from every academic session while the
+    // dashboard is still loading or when the school has no active session.
+    if (!state.activeSessionId && !state.activeSessionLabel) return false;
     if (entry.id && String(entry.id).startsWith(`${state.activeSessionId}__`)) return true;
     if (!entry.sessionId && !entry.session && !entry.currentYear && !entry.academicSession) {
       return true;
