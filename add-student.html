@@ -2399,11 +2399,20 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               const sec = normalizeSectionValue(student.section || "A") || "A";
               counts[sec] = (counts[sec] || 0) + 1;
             });
-            const capacity = Math.max(1, Number(payload.maxPerSection) || Number(savedMaxPerSection) || 40);
+            // Test imports intentionally fill a section to 20 before opening the next one.
+            // Regular admissions continue to use the administrator's configured limit.
+            const capacity = options.isTestBulkImport
+              ? 20
+              : Math.max(1, Number(payload.maxPerSection) || Number(savedMaxPerSection) || 40);
             const sections = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
             const available = sections.filter((s) => (counts[s] || 0) < capacity);
-            const candidates = available.length ? available : sections;
-            section = candidates.sort((a, b) => (counts[a] || 0) - (counts[b] || 0) || a.localeCompare(b))[0] || "A";
+            if (options.isTestBulkImport) {
+              // Keep test rows together rather than spreading them across sections.
+              section = available[0] || sections[sections.length - 1] || "A";
+            } else {
+              const candidates = available.length ? available : sections;
+              section = candidates.sort((a, b) => (counts[a] || 0) - (counts[b] || 0) || a.localeCompare(b))[0] || "A";
+            }
           }
 
           // 6. Pre-calculate roll number BEFORE insert
@@ -2684,6 +2693,12 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           };
         }
 
+        function isTestBulkStudent(row) {
+          const studentId = String(row?.studentId || "").trim();
+          const studentEmail = String(row?.studentEmail || "").trim().toLowerCase();
+          return /^TEST\d+$/i.test(studentId) && studentEmail.endsWith("@example.invalid");
+        }
+
         async function assignBulkSrNumbers(rows) {
           const normalizedRows = rows.map((row) => ({ ...row, srNumber: String(row.srNumber || "").trim() }));
           const fileTaken = new Set();
@@ -2772,7 +2787,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               const rowNumber = index + 2;
               const row = rows[index];
               try {
-                const result = await createStudentAdmission(row, { label: `Row ${rowNumber}` });
+                const result = await createStudentAdmission(row, {
+                  label: `Row ${rowNumber}`,
+                  isTestBulkImport: isTestBulkStudent(row)
+                });
                 results.push({ ok: true, row: rowNumber, name: result.savedStudent.name, studentId: result.savedStudent.studentId });
               } catch (error) {
                 console.error("Bulk student import row failed:", rowNumber, error);
