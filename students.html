@@ -3289,6 +3289,56 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       gap: 16px;
     }
 
+    .insight-head-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .insight-toggle {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-soft);
+      color: var(--primary-dark);
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .insight-toggle:hover {
+      background: var(--primary-soft);
+      border-color: rgba(49, 94, 251, 0.28);
+    }
+
+    .insight-toggle:focus-visible {
+      outline: 3px solid rgba(49, 94, 251, 0.22);
+      outline-offset: 2px;
+    }
+
+    .insight-toggle svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 180ms ease;
+    }
+
+    .insight-toggle[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+
+    body.sx-admin-app .class-mix-card.is-collapsed {
+      min-height: 0;
+    }
+
+    .class-mix-card.is-collapsed #classMixChart {
+      display: none;
+    }
+
     body.sx-admin-app .hero-metrics {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4284,13 +4334,18 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           </div>
           <div id="resultBandChart"></div>
         </section>
-        <section class="insight-card">
+        <section class="insight-card class-mix-card is-collapsed">
           <div class="insight-head">
             <div>
               <span class="insight-kicker">Structure</span>
               <h3>Class Mix</h3>
             </div>
-            <p class="insight-note" id="classInsightNote">Visible roster by class and section</p>
+            <div class="insight-head-actions">
+              <p class="insight-note" id="classInsightNote">Visible roster by class and section</p>
+              <button class="insight-toggle" type="button" aria-expanded="false" aria-controls="classMixChart" aria-label="Show class mix chart" title="Show class mix chart" onclick="toggleClassMixChart(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
           </div>
           <div id="classMixChart"></div>
         </section>
@@ -6047,6 +6102,16 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         </div>
       `;
       }
+
+      window.toggleClassMixChart = (button) => {
+        const card = button?.closest('.class-mix-card');
+        if (!card) return;
+        const isCollapsed = card.classList.toggle('is-collapsed');
+        button.setAttribute('aria-expanded', String(!isCollapsed));
+        const action = isCollapsed ? 'Show' : 'Hide';
+        button.setAttribute('aria-label', `${action} class mix chart`);
+        button.setAttribute('title', `${action} class mix chart`);
+      };
 
       function renderFeeHealthChart(students) {
         const target = document.getElementById('feeHealthChart');
