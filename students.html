@@ -3336,6 +3336,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     .class-mix-card.is-collapsed #classMixChart {
+      display: block;
+    }
+
+    .class-mix-card.is-collapsed #classMixChart .bar-row.is-extra {
       display: none;
     }
 
@@ -6082,14 +6086,17 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const classMix = buildClassMix(students);
         const strongest = classMix[0];
         const maxCount = Math.max(...classMix.map(item => item.count), 1);
-        document.getElementById('classInsightNote').textContent = strongest
-          ? `${strongest.label} has the highest visible strength with ${strongest.count} students.`
-          : 'Visible roster class split.';
+        const previewCount = Math.min(3, classMix.length);
+        target.dataset.total = String(classMix.length);
+        target.dataset.previewCount = String(previewCount);
+        document.getElementById('classInsightNote').textContent = classMix.length > previewCount
+          ? `Showing ${previewCount} of ${classMix.length} class sections.`
+          : (strongest ? `${strongest.label} has the highest visible strength with ${strongest.count} students.` : 'Visible roster class split.');
 
         target.innerHTML = `
         <div class="bar-list">
-          ${classMix.map(item => `
-            <div class="bar-row">
+          ${classMix.map((item, index) => `
+            <div class="bar-row ${index >= previewCount ? 'is-extra' : ''}">
               <div class="bar-row-head">
                 <span>${item.label}</span>
                 <span>${item.count} students</span>
@@ -6107,10 +6114,19 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const card = button?.closest('.class-mix-card');
         if (!card) return;
         const isCollapsed = card.classList.toggle('is-collapsed');
+        const chart = card.querySelector('#classMixChart');
+        const note = card.querySelector('#classInsightNote');
+        const total = Number(chart?.dataset.total || 0);
+        const previewCount = Number(chart?.dataset.previewCount || 0);
         button.setAttribute('aria-expanded', String(!isCollapsed));
         const action = isCollapsed ? 'Show' : 'Hide';
         button.setAttribute('aria-label', `${action} class mix chart`);
         button.setAttribute('title', `${action} class mix chart`);
+        if (note && total > previewCount) {
+          note.textContent = isCollapsed
+            ? `Showing ${previewCount} of ${total} class sections.`
+            : `Showing all ${total} class sections.`;
+        }
       };
 
       function renderFeeHealthChart(students) {
