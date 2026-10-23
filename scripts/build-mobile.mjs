@@ -11,6 +11,7 @@ const out = path.join(root, outArg ? outArg.slice("--out=".length) : "www");
 const keepWebLoader = args.includes("--web-loader");
 
 const files = [
+  "404.html",
   "index.html",
   "add-student.html",
   "additional-settings.html",

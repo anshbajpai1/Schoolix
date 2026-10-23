@@ -326,6 +326,62 @@ html.is-native-app #downloadAndroidApp {
   display: none !important;
 }
 
+.schoolix-connection-notice {
+  position: fixed;
+  z-index: 2147482000;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  max-width: min(420px, calc(100vw - 36px));
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 206, 112, .38);
+  border-radius: 14px;
+  color: #fff5d8;
+  background: rgba(83, 45, 4, .95);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, .25);
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.schoolix-connection-notice.is-visible { opacity: 1; transform: translateY(0); }
+.schoolix-connection-notice svg { width: 20px; flex: 0 0 20px; }
+.schoolix-connection-notice strong { font-weight: 800; }
+
+.schoolix-unexpected-error {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 15, 35, .74);
+  backdrop-filter: blur(6px);
+}
+
+.schoolix-unexpected-error-card {
+  width: min(430px, 100%);
+  padding: 30px;
+  border: 1px solid rgba(175, 204, 255, .25);
+  border-radius: 20px;
+  color: #eaf2ff;
+  background: #0f1f40;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .35);
+  text-align: center;
+}
+
+.schoolix-error-symbol { display: grid; width: 42px; height: 42px; place-items: center; margin: 0 auto 15px; border-radius: 50%; color: #fff; background: #e35d6a; font-size: 25px; font-weight: 900; }
+.schoolix-unexpected-error h2 { margin: 0 0 8px; font-size: 22px; }
+.schoolix-unexpected-error p { margin: 0; color: #b9cae8; line-height: 1.55; }
+.schoolix-error-actions { display: flex; gap: 10px; margin-top: 24px; }
+.schoolix-error-actions button { flex: 1; min-height: 43px; border: 1px solid rgba(175, 204, 255, .25); border-radius: 10px; color: #eaf2ff; background: rgba(255, 255, 255, .06); font: inherit; font-weight: 750; cursor: pointer; }
+.schoolix-error-actions button:first-child { border-color: transparent; background: #4f8dff; }
+
 @keyframes appPageProgress {
   0% { transform: scaleX(0.08); }
   55% { transform: scaleX(0.72); }
@@ -354,4 +410,7 @@ html.is-native-app #downloadAndroidApp {
     width: auto;
     max-height: calc(100vh - 86px);
   }
+
+  .schoolix-connection-notice { right: 12px; bottom: 12px; max-width: calc(100vw - 24px); }
+  .schoolix-error-actions { flex-direction: column; }
 }

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07152e">
+  <title>Page not found · Schoolix</title>
+  <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; min-height: 100vh; min-height: 100dvh; margin: 0; overflow: hidden; color: #eef5ff; background: #07152e; }
+    .page { position: relative; isolation: isolate; display: grid; min-height: inherit; place-items: center; padding: 24px; background: radial-gradient(circle at 16% 10%, rgba(70, 130, 255, .29), transparent 30rem), radial-gradient(circle at 84% 86%, rgba(80, 210, 180, .16), transparent 26rem), #07152e; }
+    .page::before { content: ""; position: fixed; z-index: -1; inset: 0; opacity: .32; background-image: linear-gradient(rgba(155, 185, 255, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(155, 185, 255, .08) 1px, transparent 1px); background-size: 38px 38px; mask-image: linear-gradient(to bottom, black, transparent); }
+    .card { width: min(640px, 100%); padding: clamp(28px, 6vw, 52px); text-align: center; background: rgba(11, 31, 65, .72); border: 1px solid rgba(174, 204, 255, .18); border-radius: 28px; box-shadow: 0 30px 70px rgba(0, 0, 0, .28); backdrop-filter: blur(18px); }
+    .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; color: #cddcff; font-size: 15px; font-weight: 800; letter-spacing: .02em; }
+    .brand img { width: 32px; height: 32px; border-radius: 10px; }
+    .code { margin: 0; font-size: clamp(82px, 18vw, 148px); font-weight: 900; line-height: .86; letter-spacing: -.09em; color: #fff; text-shadow: 0 12px 40px rgba(79, 144, 255, .3); }
+    h1 { margin: 25px 0 10px; font-size: clamp(26px, 5vw, 36px); letter-spacing: -.035em; }
+    p { max-width: 470px; margin: 0 auto; color: #aabddb; line-height: 1.65; font-size: 16px; }
+    .path { display: none; max-width: 100%; margin: 20px auto 0; padding: 10px 13px; overflow: hidden; border: 1px solid rgba(174, 204, 255, .13); border-radius: 10px; color: #9bb7e7; background: rgba(2, 12, 30, .42); font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+    .button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; border: 1px solid transparent; border-radius: 13px; color: inherit; font: inherit; font-weight: 750; text-decoration: none; cursor: pointer; transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button:focus-visible { outline: 3px solid #9ec4ff; outline-offset: 3px; }
+    .primary { background: linear-gradient(135deg, #4f8dff, #735cff); box-shadow: 0 10px 25px rgba(79, 141, 255, .25); }
+    .secondary { border-color: rgba(181, 207, 255, .23); background: rgba(255, 255, 255, .065); }
+    .hint { margin-top: 25px; color: #7794c2; font-size: 13px; }
+    @media (max-width: 440px) { .card { border-radius: 22px; } .actions { flex-direction: column; } .button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="card" aria-labelledby="title">
+      <div class="brand"><img src="/schoolix-app-icon.svg" alt="">Schoolix</div>
+      <div class="code" aria-label="Error 404">404</div>
+      <h1 id="title">This page took the wrong turn.</h1>
+      <p>The link may be old, incomplete, or the page may have moved. Your account and school data are safe.</p>
+      <div id="path" class="path" aria-label="Requested address"></div>
+      <div class="actions">
+        <a class="button primary" href="/index.html">Go to sign in</a>
+        <button class="button secondary" type="button" id="goBack">Go back</button>
+      </div>
+      <div class="hint">Need help? Check the link and try again.</div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var path = document.getElementById("path");
+      var requested = window.location.pathname + window.location.search;
+      if (requested && requested !== "/404.html") { path.textContent = requested; path.style.display = "block"; }
+      document.getElementById("goBack").addEventListener("click", function () {
+        if (history.length > 1) history.back(); else window.location.assign("/index.html");
+      });
+    }());
+  </script>
+</body>
+</html>

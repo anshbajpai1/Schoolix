@@ -95,7 +95,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#080d14">
-  <title>Schoolix Offline</title>
+  <title>Connection lost · Schoolix</title>
   <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
   <style>
     * { box-sizing: border-box; }
@@ -110,13 +110,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background: #080d14;
       color: #e4ecff;
     }
-    .offline-panel {
-      width: min(460px, 100%);
-      background: #0f1a2e;
-      border: 1px solid rgba(148,180,255,0.14);
-      border-radius: 16px;
-      padding: 28px;
-    }
+    .offline-panel { width: min(500px, 100%); padding: clamp(28px, 7vw, 46px); text-align: center; background: linear-gradient(145deg, rgba(20, 44, 82, .96), rgba(11, 28, 59, .96)); border: 1px solid rgba(148,180,255,.2); border-radius: 24px; box-shadow: 0 28px 65px rgba(0,0,0,.26); }
     .mark {
       width: 52px;
       height: 52px;
@@ -124,11 +118,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background: linear-gradient(145deg, #2a5cff, #4f90ff);
       display: grid;
       place-items: center;
-      margin-bottom: 18px;
+      margin: 0 auto 20px;
     }
     .mark img { width: 34px; height: 34px; }
-    h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0; }
-    p { margin: 0 0 22px; color: #8fa8cc; line-height: 1.6; }
+    h1 { margin: 0 0 8px; font-size: clamp(26px, 6vw, 34px); letter-spacing: -.03em; }
+    p { margin: 0 0 22px; color: #aec1e0; line-height: 1.65; }
+    .connection-state { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 8px 11px; border: 1px solid rgba(248, 185, 64, .24); border-radius: 100px; color: #ffe3a3; background: rgba(136, 81, 5, .26); font-size: 13px; font-weight: 750; }
+    .connection-dot { width: 8px; height: 8px; border-radius: 50%; background: #f7ba47; box-shadow: 0 0 0 4px rgba(247,186,71,.12); }
+    .connection-state.is-online { border-color: rgba(79, 210, 152, .25); color: #b8f6d9; background: rgba(16, 125, 76, .22); }
+    .connection-state.is-online .connection-dot { background: #4fd298; box-shadow: 0 0 0 4px rgba(79,210,152,.12); }
     button {
       width: 100%;
       border: 0;
@@ -140,6 +138,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-weight: 800;
       cursor: pointer;
     }
+    .helper { margin: 16px 0 0; color: #7f9bc3; font-size: 13px; }
   </style>
   <link rel="stylesheet" href="schoolix-polish.css">
 </head>
@@ -155,10 +154,35 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 </div>
   <main class="offline-panel">
     <div class="mark"><img src="/schoolix-app-icon.svg" alt=""></div>
-    <h1>You're offline</h1>
-    <p>Schoolix is installed, but live records need an internet connection. Reconnect and retry.</p>
-    <button type="button" onclick="location.reload()">Retry</button>
+    <div class="connection-state" id="connectionState"><span class="connection-dot"></span><span id="connectionLabel">No internet connection</span></div>
+    <h1 id="offlineTitle">You’re currently offline</h1>
+    <p id="offlineMessage">Schoolix can open saved pages, but live records, attendance, and updates need an internet connection. Reconnect and try again.</p>
+    <button type="button" id="retryButton">Try again</button>
+    <p class="helper" id="helperText">We’ll automatically let you know when you’re back online.</p>
   </main>
+  <script>
+    (function () {
+      var state = document.getElementById("connectionState");
+      var label = document.getElementById("connectionLabel");
+      var title = document.getElementById("offlineTitle");
+      var message = document.getElementById("offlineMessage");
+      var button = document.getElementById("retryButton");
+      var helper = document.getElementById("helperText");
+      function refreshState() {
+        var online = navigator.onLine;
+        state.classList.toggle("is-online", online);
+        label.textContent = online ? "Connection restored" : "No internet connection";
+        title.textContent = online ? "You’re back online" : "You’re currently offline";
+        message.textContent = online ? "Your connection is back. Reload this page to continue with Schoolix." : "Schoolix can open saved pages, but live records, attendance, and updates need an internet connection. Reconnect and try again.";
+        button.textContent = online ? "Continue" : "Try again";
+        helper.textContent = online ? "Ready when you are." : "We’ll automatically let you know when you’re back online.";
+      }
+      button.addEventListener("click", function () { window.location.reload(); });
+      window.addEventListener("online", refreshState);
+      window.addEventListener("offline", refreshState);
+      refreshState();
+    }());
+  </script>
   <script src="schoolix-polish.js" defer></script>
 </body>
 </html>

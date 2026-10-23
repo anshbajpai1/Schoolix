@@ -1,6 +1,6 @@
 const IS_SERVICE_WORKER = typeof self !== "undefined" && self.ServiceWorkerGlobalScope && self instanceof self.ServiceWorkerGlobalScope;
 const IS_WINDOW = typeof window !== "undefined" && typeof document !== "undefined";
-const APP_CACHE = "schoolix-shell-v27-pull-refresh-20260813";
+const APP_CACHE = "schoolix-shell-v28-error-recovery-20261023";
 const APP_CACHE_PREFIX = "schoolix-shell-";
 const NETWORK_FIRST_ASSETS = new Set([
   "/index.html",
@@ -17,6 +17,7 @@ const NETWORK_FIRST_ASSETS = new Set([
 const CORE_ASSETS = [
   "/",
   "/index.html",
+  "/404.html",
   "/offline.html",
   "/schoolix-app.css",
   "/schoolix-erp.css",
@@ -213,6 +214,47 @@ function ensureNetworkChip() {
 function updateNetworkChip() {
   ensureNetworkChip();
   document.getElementById("appNetworkChip")?.classList.toggle("offline", !navigator.onLine);
+}
+
+function ensureConnectionNotice() {
+  if (!IS_WINDOW || isLoginPage() || document.getElementById("schoolixConnectionNotice")) return;
+  const notice = document.createElement("div");
+  notice.id = "schoolixConnectionNotice";
+  notice.className = "schoolix-connection-notice";
+  notice.setAttribute("role", "status");
+  notice.setAttribute("aria-live", "polite");
+  document.body.appendChild(notice);
+  return notice;
+}
+
+function updateConnectionNotice() {
+  const notice = ensureConnectionNotice();
+  if (!notice) return;
+  const offline = !navigator.onLine;
+  notice.classList.toggle("is-visible", offline);
+  notice.innerHTML = offline
+    ? `${iconWifiOff()}<span><strong>You’re offline.</strong> Changes may not sync until your connection returns.</span>`
+    : "";
+}
+
+function showUnexpectedError(event) {
+  if (!IS_WINDOW || document.getElementById("schoolixUnexpectedError")) return;
+  if (event?.type === "error" && !event.error) return;
+  const error = event?.reason || event?.error;
+  const message = navigator.onLine
+    ? "Something unexpected interrupted this page. You can safely reload and try again."
+    : "Your internet connection appears to be unavailable. Reconnect, then retry.";
+  const panel = document.createElement("section");
+  panel.id = "schoolixUnexpectedError";
+  panel.className = "schoolix-unexpected-error";
+  panel.setAttribute("role", "alertdialog");
+  panel.setAttribute("aria-modal", "true");
+  panel.setAttribute("aria-label", "Something went wrong");
+  panel.innerHTML = `<div class="schoolix-unexpected-error-card"><div class="schoolix-error-symbol">!</div><h2>Something went wrong</h2><p>${message}</p><div class="schoolix-error-actions"><button type="button" data-error-retry>Reload page</button><button type="button" data-error-home>Go to sign in</button></div></div>`;
+  panel.querySelector("[data-error-retry]").addEventListener("click", () => window.location.reload());
+  panel.querySelector("[data-error-home]").addEventListener("click", () => window.location.assign("/index.html"));
+  document.body.appendChild(panel);
+  if (error) console.error("Unhandled Schoolix page error:", error);
 }
 
 function iconBell() {
@@ -779,6 +821,10 @@ if (IS_WINDOW) {
 
   window.addEventListener("online", updateNetworkChip);
   window.addEventListener("offline", updateNetworkChip);
+  window.addEventListener("online", updateConnectionNotice);
+  window.addEventListener("offline", updateConnectionNotice);
+  window.addEventListener("error", showUnexpectedError);
+  window.addEventListener("unhandledrejection", showUnexpectedError);
   window.addEventListener("beforeunload", showPageProgress);
   window.addEventListener("pageshow", hidePageProgress);
   window.addEventListener("schoolix:student-session-ready", (event) => {
@@ -797,6 +843,7 @@ if (IS_WINDOW) {
     ensureNativePullToRefresh();
     ensurePageProgress();
     updateNetworkChip();
+    updateConnectionNotice();
     ensureNotificationBell();
     repositionNotificationBell();
     loadNotificationInbox(false);

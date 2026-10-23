@@ -6,7 +6,8 @@ import "./react-shell.css";
 
 function resolvePage(pathname) {
   const page = decodeURIComponent(pathname.replace(/^\/+/, ""));
-  return !page || page === "index" || page === "index.html" || !pageNames.has(page) ? "index.html" : page;
+  if (!page || page === "index" || page === "index.html") return "index.html";
+  return pageNames.has(page) ? page : null;
 }
 
 function toUrl(value) {
@@ -68,6 +69,18 @@ function ReactScreen({ page }) {
   return <main className={`schoolix-page${ready ? " is-ready" : ""}`} dangerouslySetInnerHTML={{ __html: screen.body }} />;
 }
 
+function NotFoundScreen() {
+  return <main className="schoolix-react-not-found">
+    <section>
+      <img src="/schoolix-app-icon.svg" alt="Schoolix" />
+      <div className="schoolix-react-not-found-code">404</div>
+      <h1>Page not found</h1>
+      <p>The page you requested is unavailable or may have moved.</p>
+      <a href="#/index.html">Go to sign in</a>
+    </section>
+  </main>;
+}
+
 function AppRouter() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -88,7 +101,7 @@ function AppRouter() {
     return () => document.removeEventListener("click", onClick);
   }, [navigate]);
 
-  return <ReactScreen page={page} />;
+  return page ? <ReactScreen page={page} /> : <NotFoundScreen />;
 }
 
 createRoot(document.getElementById("root")).render(<HashRouter><AppRouter /></HashRouter>);
