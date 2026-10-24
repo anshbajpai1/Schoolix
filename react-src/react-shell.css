@@ -1,5 +1,6 @@
 :root, body, #root { width: 100%; min-width: 0; min-height: 100%; margin: 0; }
 .schoolix-page { min-height: 100%; }
+.schoolix-react-loading { position: fixed; z-index: 2147483647; right: 20px; bottom: 20px; padding: 10px 14px; border-radius: 999px; color: #fff; background: #10294f; box-shadow: 0 8px 24px rgba(7,21,46,.28); font: 650 14px Inter, system-ui, sans-serif; }
 .schoolix-react-error { display: grid; min-height: 100vh; place-items: center; padding: 24px; color: #991b1b; font: 600 16px Inter, system-ui, sans-serif; }
 .schoolix-react-not-found { display: grid; min-height: 100vh; place-items: center; padding: 24px; color: #eef5ff; background: radial-gradient(circle at 18% 12%, #315ea9 0, transparent 34%), #07152e; font-family: Inter, system-ui, sans-serif; text-align: center; }
 .schoolix-react-not-found section { width: min(460px, 100%); padding: 42px 28px; border: 1px solid rgba(174,204,255,.2); border-radius: 24px; background: rgba(11,31,65,.8); box-shadow: 0 28px 64px rgba(0,0,0,.28); }

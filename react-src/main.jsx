@@ -57,7 +57,10 @@ function ReactScreen({ page }) {
     return () => { disposed = true; additions.forEach((element) => element.remove()); };
   }, [page, screen]);
 
-  return <main className={`schoolix-page${ready ? " is-ready" : ""}`} dangerouslySetInnerHTML={{ __html: screen.body }} />;
+  return <main className={`schoolix-page${ready ? " is-ready" : ""}`} aria-busy={!ready}>
+    {!ready && <div className="schoolix-react-loading" role="status">Loading Schoolix workspace…</div>}
+    <div dangerouslySetInnerHTML={{ __html: screen.body }} />
+  </main>;
 }
 
 function NotFoundScreen() {
