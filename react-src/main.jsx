@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, useLocation, useNavigate } from "react-router-dom";
 import { pageNames, pages } from "./generated/pages.js";
-import { resolvePage, toAssetUrl } from "./router-utils.js";
+import { isInternalPageLink, resolvePage, toAssetUrl } from "./router-utils.js";
 import "./react-shell.css";
 
 function addAttributes(element, attributes = {}) {
@@ -80,13 +80,12 @@ function AppRouter() {
   useEffect(() => {
     const onClick = (event) => {
       const anchor = event.target.closest("a[href]");
-      if (!anchor || event.defaultPrevented || anchor.target || event.metaKey || event.ctrlKey) return;
+      if (!anchor || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!isInternalPageLink(anchor, pageNames)) return;
       const destination = new URL(anchor.href, window.location.href);
       const next = destination.pathname.split("/").pop();
-      if (destination.origin === window.location.origin && pageNames.has(next)) {
-        event.preventDefault();
-        navigate(`/${next}${destination.search}`);
-      }
+      event.preventDefault();
+      navigate(`/${next}${destination.search}${destination.hash}`);
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
