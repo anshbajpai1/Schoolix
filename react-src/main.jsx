@@ -2,20 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, useLocation, useNavigate } from "react-router-dom";
 import { pageNames, pages } from "./generated/pages.js";
+import { resolvePage, toAssetUrl } from "./router-utils.js";
 import "./react-shell.css";
 
-function resolvePage(pathname) {
-  const page = decodeURIComponent(pathname.replace(/^\/+/, ""));
-  if (!page || page === "index" || page === "index.html") return "index.html";
-  return pageNames.has(page) ? page : null;
-}
-
-function toUrl(value) {
-  try { return new URL(value, window.location.origin).href; } catch { return value; }
-}
-
 function addAttributes(element, attributes = {}) {
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, name === "src" || name === "href" ? toUrl(value) : value);
+  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, name === "src" || name === "href" ? toAssetUrl(value) : value);
 }
 
 function ReactScreen({ page }) {
