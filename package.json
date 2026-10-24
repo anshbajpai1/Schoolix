@@ -11,6 +11,7 @@
     "build:react": "npm run generate:react-pages && vite build",
     "build:mobile": "node scripts/build-mobile.mjs",
     "build:hosting": "node scripts/build-mobile.mjs --web-loader --out=hosting",
+    "test:react-router": "node scripts/verify-react-router.mjs",
     "test:session-sync": "node --experimental-vm-modules scripts/verify-session-sync.mjs",
     "migrate:firestore": "node scripts/migrate-firestore-to-supabase.mjs",
     "migrate:auth": "node scripts/migrate-firebase-auth-to-supabase.mjs",
