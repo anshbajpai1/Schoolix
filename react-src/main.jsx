@@ -79,6 +79,24 @@ function NotFoundScreen() {
   </main>;
 }
 
+class RouteErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() { return { failed: true }; }
+
+  componentDidCatch(error) { console.error("Schoolix React route failed:", error); }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return <main className="schoolix-react-error" role="alert">
+      <section><h1>Unable to open this page</h1><p>Please refresh the page and try again.</p><a href="#/index.html">Return to sign in</a></section>
+    </main>;
+  }
+}
+
 function AppRouter() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -103,4 +121,9 @@ function AppRouter() {
   return page ? <ReactScreen page={page} /> : <NotFoundScreen />;
 }
 
-createRoot(document.getElementById("root")).render(<HashRouter><AppRouter /></HashRouter>);
+function App() {
+  const location = useLocation();
+  return <RouteErrorBoundary key={location.pathname}><AppRouter /></RouteErrorBoundary>;
+}
+
+createRoot(document.getElementById("root")).render(<HashRouter><App /></HashRouter>);
