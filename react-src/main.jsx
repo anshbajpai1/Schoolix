@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, useLocation, useNavigate } from "react-router-dom";
 import { pageNames, pages } from "./generated/pages.js";
@@ -12,6 +12,7 @@ function addAttributes(element, attributes = {}) {
 function ReactScreen({ page }) {
   const screen = pages[page];
   const [ready, setReady] = useState(false);
+  const pageRoot = useRef(null);
 
   useEffect(() => {
     let disposed = false;
@@ -50,14 +51,17 @@ function ReactScreen({ page }) {
       // mark is always visible until a school-specific logo replaces it.
       window.SchoolBranding?.applyDefaultSchoolixLogo?.();
       window.SchoolBranding?.applySchoolBranding?.();
-      if (!disposed) setReady(true);
+      if (!disposed) {
+        setReady(true);
+        requestAnimationFrame(() => pageRoot.current?.focus({ preventScroll: true }));
+      }
     }
     setReady(false);
     run();
     return () => { disposed = true; additions.forEach((element) => element.remove()); };
   }, [page, screen]);
 
-  return <main className={`schoolix-page${ready ? " is-ready" : ""}`} aria-busy={!ready}>
+  return <main ref={pageRoot} className={`schoolix-page${ready ? " is-ready" : ""}`} aria-busy={!ready} tabIndex="-1">
     {!ready && <div className="schoolix-react-loading" role="status">Loading Schoolix workspace…</div>}
     <div dangerouslySetInnerHTML={{ __html: screen.body }} />
   </main>;
@@ -79,6 +83,8 @@ function AppRouter() {
   const location = useLocation();
   const navigate = useNavigate();
   const page = useMemo(() => resolvePage(location.pathname), [location.pathname]);
+
+  useEffect(() => { window.scrollTo({ top: 0, left: 0 }); }, [page]);
 
   useEffect(() => {
     const onClick = (event) => {
