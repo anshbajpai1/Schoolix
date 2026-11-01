@@ -4150,6 +4150,31 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     /* Final roster refinements: keep the working dashboard calm and easy to scan. */
+    body.sx-admin-app .attendance-filter {
+      width: 100%;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: transform var(--ease), border-color var(--ease), background var(--ease), box-shadow var(--ease);
+    }
+
+    body.sx-admin-app .attendance-filter:hover {
+      border-color: rgba(36, 87, 255, .35);
+      background: #f8faff;
+      transform: translateY(-1px);
+    }
+
+    body.sx-admin-app .attendance-filter.is-active {
+      border-color: #2457ff;
+      background: #eff4ff;
+      box-shadow: 0 0 0 3px rgba(36, 87, 255, .12);
+    }
+
+    body.sx-admin-app .attendance-filter:focus-visible {
+      outline: 3px solid rgba(36, 87, 255, .22);
+      outline-offset: 2px;
+    }
+
     body.sx-admin-app .students-grid {
       overflow-x: auto;
       overflow-y: hidden;
@@ -4770,6 +4795,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       let latestReportByStudent = new Map();
       let latestReportBySessionStudent = new Map();
       let studentRefreshTimer = 0;
+      let todayStatusFilter = "";
 
       function getHeaderViewSessionId() {
         try {
@@ -5525,6 +5551,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           { label: '80%+', count: 0, color: 'linear-gradient(180deg, rgba(15, 159, 98, 0.95), rgba(15, 159, 98, 0.35))' },
           { label: '65-79%', count: 0, color: 'linear-gradient(180deg, rgba(49, 94, 251, 0.95), rgba(49, 94, 251, 0.35))' },
           { label: '50-64%', count: 0, color: 'linear-gradient(180deg, rgba(192, 118, 22, 0.95), rgba(192, 118, 22, 0.35))' },
+        if (todayStatusFilter) parts.push(`Today: ${todayStatusFilter}`);
           { label: 'Below 50%', count: 0, color: 'linear-gradient(180deg, rgba(209, 67, 67, 0.95), rgba(209, 67, 67, 0.35))' },
           { label: 'No Report', count: 0, color: 'linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(148, 163, 184, 0.35))' }
         ];
@@ -6005,6 +6032,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           promoteBtn.style.opacity = disabled ? '0.55' : '1';
         }
         if (promoteSelectedBtn) {
+      window.filterByTodayStatus = (status) => {
+        todayStatusFilter = todayStatusFilter === status ? "" : status;
+        loadData();
+      };
+
           promoteSelectedBtn.disabled = disabled;
           promoteSelectedBtn.style.opacity = disabled ? '0.55' : '1';
         }
@@ -6054,7 +6086,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           const belowMatch = Number.isNaN(below) || percentage <= below;
           const attendanceBelowMatch = Number.isNaN(attendanceBelow) || attendancePercentage < attendanceBelow;
 
-          return matchesSearch && matchesPhone && matchesClass && matchesSection && aboveMatch && belowMatch && attendanceBelowMatch;
+          return matchesSearch && matchesPhone && matchesClass && matchesSection && aboveMatch && belowMatch && attendanceBelowMatch && todayStatusMatch;
         });
       }
 
@@ -6089,6 +6121,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         testStudents.forEach((student) => {
           const classValue = String(student.class || '').trim();
           if (!classValue) return;
+          const todayStatusMatch = !todayStatusFilter || getTodayStatus(studentId) === todayStatusFilter;
           const classStudents = byClass.get(classValue) || [];
           classStudents.push(student);
           byClass.set(classValue, classStudents);
@@ -6316,16 +6349,16 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div class="legend-item">
               <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Present</span></div>
               <strong>${metrics.present}</strong>
-            </div>
-            <div class="legend-item">
+            </button>
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Absent' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Absent')" aria-pressed="${todayStatusFilter === 'Absent'}" title="Show students marked Absent today">
               <div class="legend-left"><span class="legend-dot" style="background:#d97706;"></span><span>Half Day</span></div>
               <strong>${metrics.half}</strong>
-            </div>
-            <div class="legend-item">
+            </button>
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Half Day' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Half Day')" aria-pressed="${todayStatusFilter === 'Half Day'}" title="Show students marked Half Day today">
               <div class="legend-left"><span class="legend-dot" style="background:#dc2626;"></span><span>Absent</span></div>
               <strong>${metrics.absent}</strong>
             </div>
-            <div class="legend-item">
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Present' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Present')" aria-pressed="${todayStatusFilter === 'Present'}" title="Show students marked Present today">
               <div class="legend-left"><span class="legend-dot" style="background:#94a3b8;"></span><span>Not Marked</span></div>
               <strong>${metrics.missing}</strong>
             </div>
@@ -6354,7 +6387,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               <div class="chart-column-value">${band.count} students</div>
               <div class="chart-column-bar" style="height:${Math.max(26, (band.count / maxCount) * 170)}px; background:${band.color};"></div>
               <div class="chart-column-label">${band.label}</div>
-            </div>
+            </button>
           `).join('')}
         </div>
       `;
@@ -6447,8 +6480,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div class="legend-item">
               <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Collected</span></div>
               <strong>${formatCurrency(metrics.paid)}</strong>
-            </div>
-            <div class="legend-item">
+            </button>
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Not Marked' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Not Marked')" aria-pressed="${todayStatusFilter === 'Not Marked'}" title="Show students whose attendance is not marked today">
               <div class="legend-left"><span class="legend-dot" style="background:#ef4444;"></span><span>Outstanding</span></div>
               <strong>${formatCurrency(metrics.due)}</strong>
             </div>
