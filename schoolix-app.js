@@ -1,6 +1,6 @@
 const IS_SERVICE_WORKER = typeof self !== "undefined" && self.ServiceWorkerGlobalScope && self instanceof self.ServiceWorkerGlobalScope;
 const IS_WINDOW = typeof window !== "undefined" && typeof document !== "undefined";
-const APP_CACHE = "schoolix-shell-v28-error-recovery-20261023";
+const APP_CACHE = "schoolix-shell-v32-performance-20261101";
 const APP_CACHE_PREFIX = "schoolix-shell-";
 const NETWORK_FIRST_ASSETS = new Set([
   "/index.html",
@@ -31,7 +31,9 @@ const CORE_ASSETS = [
   "/schoolix-theme.css",
   "/schoolix-app-icon.svg",
   "/school-branding.js",
-  "/access-control.js"
+  "/access-control.js",
+  "/admin-shell.css",
+  "/admin-shell.js"
 ];
 const PANEL_ASSETS = [
   "/add-student.html",
@@ -760,7 +762,13 @@ async function registerServiceWorker() {
     const constrained = connection?.saveData === true || /(^|-)2g$/i.test(String(connection?.effectiveType || ""));
     if (!constrained || isNativeApp()) {
       const readyRegistration = await navigator.serviceWorker.ready;
-      readyRegistration.active?.postMessage({ type: "SCHOOLIX_WARM_PANELS" });
+      // Cache the page the user is actually visiting. Downloading every admin
+      // screen here made first-load navigation compete with a large background
+      // batch, especially on school Wi-Fi and lower-end devices.
+      readyRegistration.active?.postMessage({
+        type: "SCHOOLIX_WARM_ROUTE",
+        path: window.location.pathname || "/index.html"
+      });
     }
   } catch (error) {
     console.warn("Schoolix service worker registration failed", error);
@@ -874,9 +882,20 @@ if (IS_WINDOW) {
 if (IS_SERVICE_WORKER) {
   async function cacheAssets(cacheName, assets) {
     const cache = await caches.open(cacheName);
-    await Promise.allSettled(assets.map(async (asset) => {
-      const response = await fetch(asset, { cache: "reload" });
-      if (response.ok) await cache.put(asset, response);
+    // Keep install work predictable. A small concurrency cap avoids competing
+    // with the initial page and API requests on slow connections.
+    const queue = [...new Set(assets)];
+    const workerCount = Math.min(3, queue.length);
+    await Promise.all(Array.from({ length: workerCount }, async () => {
+      while (queue.length) {
+        const asset = queue.shift();
+        try {
+          const response = await fetch(asset, { cache: "reload" });
+          if (response.ok) await cache.put(asset, response);
+        } catch (_) {
+          // Individual optional assets should not prevent the app shell from installing.
+        }
+      }
     }));
   }
 
@@ -949,8 +968,10 @@ if (IS_SERVICE_WORKER) {
   });
 
   self.addEventListener("message", (event) => {
-    if (event.data?.type !== "SCHOOLIX_WARM_PANELS") return;
-    event.waitUntil(cacheAssets(APP_CACHE, PANEL_ASSETS));
+    if (event.data?.type !== "SCHOOLIX_WARM_ROUTE") return;
+    const path = String(event.data.path || "");
+    if (!path.startsWith("/") || path.includes("//") || !PANEL_ASSETS.includes(path)) return;
+    event.waitUntil(cacheAssets(APP_CACHE, [path]));
   });
 
   self.addEventListener("fetch", (event) => {

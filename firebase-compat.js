@@ -788,7 +788,19 @@ export async function deleteDoc(ref) {
 export function onSnapshot(ref, callback, errorCallback = console.error) {
   let active = true;
   let last = "";
+  let timer = 0;
+  const visiblePollMs = 15000;
+  const hiddenPollMs = 60000;
+  const isHidden = () => typeof document !== "undefined" && document.visibilityState === "hidden";
+
+  const schedule = (delay) => {
+    clearTimeout(timer);
+    if (!active) return;
+    timer = setTimeout(load, delay);
+  };
+
   const load = async () => {
+    if (!active) return;
     try {
       const snap = ref.type === "doc" ? await getDoc(ref) : await getDocs(ref);
       const key = JSON.stringify(ref.type === "doc" ? snap.data() : snap.docs.map((item) => [item.id, item.data()]));
@@ -798,13 +810,32 @@ export function onSnapshot(ref, callback, errorCallback = console.error) {
       }
     } catch (error) {
       if (active) errorCallback(error);
+    } finally {
+      schedule(isHidden() ? hiddenPollMs : visiblePollMs);
     }
   };
+
+  const onVisibilityChange = () => {
+    if (!active) return;
+    if (isHidden()) {
+      schedule(hiddenPollMs);
+    } else {
+      // Refresh promptly when the user returns, rather than keeping a stale
+      // dashboard alive while the tab was in the background.
+      schedule(0);
+    }
+  };
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", onVisibilityChange);
+  }
   load();
-  const timer = setInterval(load, 2500);
   return () => {
     active = false;
-    clearInterval(timer);
+    clearTimeout(timer);
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    }
   };
 }
 

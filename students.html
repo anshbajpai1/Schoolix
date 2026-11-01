@@ -4148,6 +4148,192 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         transition-duration: 1ms !important;
       }
     }
+
+    /* Final roster refinements: keep the working dashboard calm and easy to scan. */
+    body.sx-admin-app .students-grid {
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: #fff;
+    }
+
+    body.sx-admin-app .students-summary {
+      padding: 20px 24px;
+      align-items: center;
+    }
+
+    body.sx-admin-app .students-header {
+      position: static;
+      min-width: 1240px;
+      padding: 13px 24px;
+      background: #f8fafc;
+      color: #475467;
+      border-top: 1px solid #eaecf0;
+      border-bottom: 1px solid #eaecf0;
+      font-size: 11px;
+      letter-spacing: .055em;
+    }
+
+    body.sx-admin-app #studentsList,
+    body.sx-admin-app .student-row {
+      min-width: 1240px;
+    }
+
+    body.sx-admin-app .student-row {
+      padding: 16px 24px;
+      border-bottom-color: #eaecf0;
+      background: #fff;
+    }
+
+    body.sx-admin-app .student-row:nth-child(even) {
+      background: #fcfcfd;
+    }
+
+    body.sx-admin-app .student-row:hover {
+      background: #f8faff;
+      box-shadow: inset 3px 0 0 #2457ff;
+      transform: none;
+    }
+
+    body.sx-admin-app .student-primary > span:first-child {
+      font-size: 14px;
+    }
+
+    body.sx-admin-app .student-info {
+      font-size: 13px;
+    }
+
+    body.sx-admin-app .pagination {
+      min-height: 76px;
+      margin-top: 20px;
+      padding: 14px 20px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, .07);
+    }
+
+    body.sx-admin-app .pagination-info {
+      color: #475467;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    body.sx-admin-app .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    body.sx-admin-app .page-btn {
+      display: inline-grid;
+      width: auto;
+      min-width: 38px;
+      height: 38px;
+      padding: 0 10px;
+      place-items: center;
+      border: 1px solid #d0d5dd;
+      border-radius: 9px;
+      background: #fff;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+    }
+
+    body.sx-admin-app .page-btn--wide {
+      min-width: 78px;
+    }
+
+    body.sx-admin-app .page-btn--icon {
+      padding: 0;
+    }
+
+    body.sx-admin-app .page-btn--ellipsis {
+      min-width: 24px;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    body.sx-admin-app .page-btn:hover:not(:disabled):not(.page-btn--ellipsis) {
+      border-color: #a4bcfd;
+      background: #eff4ff;
+      color: #1d4ed8;
+    }
+
+    body.sx-admin-app .page-btn.active {
+      border-color: #2457ff;
+      background: #2457ff;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(36, 87, 255, .2);
+    }
+
+    body.sx-admin-app .page-btn:disabled {
+      border-color: #eaecf0;
+      background: #f9fafb;
+      color: #98a2b3;
+      opacity: 1;
+    }
+
+    @media (max-width: 1180px) {
+      body.sx-admin-app .students-grid {
+        overflow: visible;
+      }
+
+      body.sx-admin-app .students-header {
+        display: none;
+      }
+
+      body.sx-admin-app #studentsList,
+      body.sx-admin-app .student-row {
+        min-width: 0;
+      }
+
+      body.sx-admin-app .student-row {
+        margin: 0;
+        padding: 18px 20px;
+        gap: 12px;
+        background: #fff;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body.sx-admin-app .students-summary {
+        align-items: flex-start;
+        padding: 18px;
+      }
+
+      body.sx-admin-app .pagination {
+        align-items: stretch;
+        padding: 14px;
+      }
+
+      body.sx-admin-app .pagination-controls {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      body.sx-admin-app .page-btn {
+        flex: 0 0 auto;
+      }
+
+      body.sx-admin-app .page-btn--wide {
+        min-width: 42px;
+        font-size: 0;
+      }
+
+      body.sx-admin-app .page-btn--wide::after {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      body.sx-admin-app .page-btn--first::after { content: "«"; }
+      body.sx-admin-app .page-btn--previous::after { content: "‹"; }
+      body.sx-admin-app .page-btn--next::after { content: "›"; }
+      body.sx-admin-app .page-btn--last::after { content: "»"; }
+    }
   </style>
   <link rel="stylesheet" href="schoolix-polish.css">
   <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
@@ -4241,36 +4427,36 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <div class="search-row control-search-row">
           <label class="filter-field">
             <span>Name / ID / Roll</span>
-            <input id="searchName" placeholder="Search student..." oninput="loadData()">
+            <input id="searchName" placeholder="Search student..." oninput="queueStudentRefresh()">
           </label>
           <label class="filter-field">
             <span>Phone</span>
-            <input id="searchPhone" placeholder="Search phone number..." oninput="loadData()">
+            <input id="searchPhone" placeholder="Search phone number..." oninput="queueStudentRefresh()">
           </label>
         </div>
 
         <div class="filter-row student-filter-row">
           <label class="filter-field compact">
             <span>Result Above</span>
-            <input type="number" id="percentAbove" min="0" max="100" step="1" placeholder="%" oninput="loadData()">
+            <input type="number" id="percentAbove" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
           </label>
           <label class="filter-field compact">
             <span>Result Below</span>
-            <input type="number" id="percentBelow" min="0" max="100" step="1" placeholder="%" oninput="loadData()">
+            <input type="number" id="percentBelow" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
           </label>
           <label class="filter-field compact">
             <span>Attendance Below</span>
-            <input type="number" id="attendanceBelow" min="0" max="100" step="1" placeholder="%" oninput="loadData()">
+            <input type="number" id="attendanceBelow" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
           </label>
           <label class="filter-field">
             <span>Session</span>
-            <select id="filterSession" onchange="loadData()">
+            <select id="filterSession" onchange="loadData(true, true)">
               <option value="">All Sessions</option>
             </select>
           </label>
           <label class="filter-field compact">
             <span>Class</span>
-            <select id="filterClass" onchange="loadData()">
+            <select id="filterClass" onchange="loadData(true, true)">
               <option value="">All Classes</option>
             </select>
           </label>
@@ -4582,6 +4768,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       let attendanceRecordsByStudent = new Map();
       let feeRecordsByStudent = new Map();
       let latestReportByStudent = new Map();
+      let latestReportBySessionStudent = new Map();
+      let studentRefreshTimer = 0;
 
       function getHeaderViewSessionId() {
         try {
@@ -5048,6 +5236,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             toMillis(previous.timestamp)
           ) : 0;
 
+        latestReportBySessionStudent = new Map();
           if (!previous || currentStamp >= previousStamp) {
             latestReportByStudent.set(key, report);
           }
@@ -5227,7 +5416,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'fees') {
             updateFeeHistory();
           }
-          loadData();
+          loadData(false);
         });
       }
 
@@ -5236,8 +5425,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           .filter((report) => (report.student?.studentId || report.studentId) === studentId)
           .filter(entryBelongsToSession);
 
-        if (!reports.length) return null;
-        return reports.reduce((latest, report) => {
+        if (!reports.length) {
+          latestReportBySessionStudent.set(cacheKey, null);
+          return null;
+        }
+        const latest = reports.reduce((latest, report) => {
           const currentStamp = Math.max(
             toMillis(report.updatedAt),
             toMillis(report.generatedAt),
@@ -5268,6 +5460,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       function getPercentageClass(percentage) {
         if (percentage >= 80) return 'percentage-excellent';
+        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
+        if (latestReportBySessionStudent.has(cacheKey)) {
+          return latestReportBySessionStudent.get(cacheKey);
+        }
         if (percentage >= 65) return 'percentage-good';
         if (percentage >= 50) return 'percentage-average';
         return 'percentage-poor';
@@ -5288,6 +5484,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
         if (classFilter) parts.push(`Class ${classFilter}`);
         if (sectionFilter) parts.push(`Section ${sectionFilter}`);
+        latestReportBySessionStudent.set(cacheKey, latest);
+        return latest;
         if (hasSearch) parts.push('Search filtered');
         if (hasPerformanceFilter) parts.push('Performance filtered');
         if (hasAttendanceFilter) parts.push('Attendance filtered');
@@ -5766,11 +5964,18 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
       }
 
-      window.loadData = (resetPage = true) => {
+      window.queueStudentRefresh = () => {
+        clearTimeout(studentRefreshTimer);
+        studentRefreshTimer = window.setTimeout(() => loadData(), 180);
+      };
+
+      window.loadData = (resetPage = true, refreshFilters = false) => {
         pageSize = Number(document.getElementById("pageSize").value) || 25;
         if (resetPage) currentPage = 1;
-        populateFilters();
-        populatePromotionResultControls();
+        if (refreshFilters) {
+          populateFilters();
+          populatePromotionResultControls();
+        }
 
         const filteredStudents = getFilteredStudents().sort(sortStudentsByClassSectionRollName);
         const activeIds = new Set(allStudents.map((student) => student.id));
@@ -6544,34 +6749,27 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const pagination = document.getElementById("pagination");
         if (!totalCount) { pagination.innerHTML = ''; return; }
         if (totalPages <= 1) {
-          pagination.innerHTML = `<div class="pagination-info">Showing all ${totalCount} students in the current view</div>`;
+          pagination.innerHTML = `<div class="pagination-info" role="status">Showing all ${totalCount} students in the current view</div>`;
           return;
         }
 
         const startItem = (currentPage - 1) * pageSize + 1;
         const endItem = Math.min(currentPage * pageSize, totalCount);
-
-        let html = `
-    <div class="pagination-info">Showing ${startItem}-${endItem} of ${totalCount} students</div>
-    <div class="pagination-controls">
-      <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>
-  `;
-
-        const maxVisible = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-        if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        const pages = new Set([1, totalPages]);
+        for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
+          if (page > 0 && page <= totalPages) pages.add(page);
         }
 
-        html += `
-      <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
-    </div>
-  `;
-
-        pagination.innerHTML = html;
+        pagination.innerHTML = `
+          <div class="pagination-info" role="status">Showing <strong>${startItem}–${endItem}</strong> of <strong>${totalCount}</strong> students <span aria-hidden="true">·</span> Page ${currentPage} of ${totalPages}</div>
+          <nav class="pagination-controls" aria-label="Students pagination">
+            <button class="page-btn page-btn--wide page-btn--first" type="button" onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''} aria-label="First page">First</button>
+            <button class="page-btn page-btn--wide page-btn--previous" type="button" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">Previous</button>
+            ${pageButtons.join('')}
+            <button class="page-btn page-btn--wide page-btn--next" type="button" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">Next</button>
+            <button class="page-btn page-btn--wide page-btn--last" type="button" onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Last page">Last</button>
+          </nav>
+        `;
       }
 
       window.changePage = (page) => {
@@ -6601,6 +6799,19 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const motherPhone = getMotherPhone(student);
         const photoUrl = getStudentPhotoUrl(student);
         const currentStatus = student.status || (student.tcIssued ? "TC Issued" : "Active");
+        if (currentPage <= 3) [2, 3, 4].forEach((page) => page <= totalPages && pages.add(page));
+        if (currentPage >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach((page) => page > 0 && pages.add(page));
+
+        const pageList = Array.from(pages).sort((a, b) => a - b);
+        const pageButtons = [];
+        let previousPage = 0;
+        pageList.forEach((page) => {
+          if (page - previousPage > 1) {
+            pageButtons.push('<span class="page-btn page-btn--ellipsis" aria-hidden="true">…</span>');
+          }
+          pageButtons.push(`<button class="page-btn ${page === currentPage ? 'active' : ''}" type="button" onclick="changePage(${page})" ${page === currentPage ? 'aria-current="page"' : ''} aria-label="Go to page ${page}">${page}</button>`);
+          previousPage = page;
+        });
         const photoPreview = photoUrl
           ? `<img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(student.name || "Student")} photo">`
           : escapeHtml(getStudentInitials(student.name || student.studentId || student.id));
@@ -6615,6 +6826,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       Transfer Certificate issued for this student. Attendance and fee changes are disabled.
     </div>` : sessionLocked ? `<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
       This session is locked. Editing is disabled for all users.
+          document.getElementById("studentsList")?.scrollIntoView({ behavior: "smooth", block: "start" });
     </div>` : ''}
     ${sessionPlacementNote}
     <div style="background:#f8fafc;padding:20px;border-radius:12px;margin-bottom:20px;">
