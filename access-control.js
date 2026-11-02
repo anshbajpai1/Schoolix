@@ -584,9 +584,19 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   if (user) {
-    try { await guardUser(user.uid); } catch (e) { console.error("Access guard failed:", e); }
+    try {
+      await guardUser(user.uid);
+    } catch (e) {
+      console.error("Access guard failed:", e);
+      window.SchoolixErrors?.show(e, { fallback: "We could not confirm your account access. Please refresh and try again." });
+    }
     try { await window.SchoolixNotificationRegistration?.registerToken?.(); } catch (e) { console.warn("Pending phone notification registration failed:", e); }
     return;
   }
-  try { await guardStudentSession(); } catch (e) { console.error("Student access guard failed:", e); }
+  try {
+    await guardStudentSession();
+  } catch (e) {
+    console.error("Student access guard failed:", e);
+    window.SchoolixErrors?.show(e, { fallback: "We could not restore your account access. Please refresh and try again." });
+  }
 });
