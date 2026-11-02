@@ -1910,6 +1910,40 @@ function userFacingAuthError(error, fallback = "Login failed. Please try again."
     return messages[code] || window.SchoolixErrors?.message?.(error, fallback) || fallback;
 }
 
+async function requestPasswordResetEmail(email) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    try {
+        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+                email,
+                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"
+            }),
+            signal: controller.signal
+        });
+        if (!response.ok) {
+            const error = new Error("Password reset email could not be sent.");
+            error.code = response.status === 429 ? "resource-exhausted" : response.status >= 500 ? "unavailable" : "unknown";
+            throw error;
+        }
+    } catch (error) {
+        if (error.name === "AbortError") {
+            const timeoutError = new Error("Password reset request timed out.");
+            timeoutError.code = "deadline-exceeded";
+            throw timeoutError;
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
 function linkedSchoolId(profile = {}, adminData = null) {
     return String(
         profile.schoolId || profile.schoolID || profile.schoolUid || profile.schoolUID || profile.schoolDocId || profile.schoolDocID ||
@@ -2503,25 +2537,10 @@ window.resetPassword = async () => {
                 return;
             }
         }
-        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "apikey": SUPABASE_ANON_KEY,
-                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-                email: emailToReset,
-                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"
-            })
-        });
-        if (!response.ok) {
-            const details = await response.text();
-            throw new Error(details || "Password reset email failed");
-        }
+        await requestPasswordResetEmail(emailToReset);
         showError('Password reset email sent to your registered address');
     } catch (e) {
-        showError(e.message || "Password reset email failed. Contact admin.");
+        showError(userFacingAuthError(e, "Password reset email failed. Contact admin."));
     } finally { showLoading(false); }
 };
 
