@@ -642,6 +642,59 @@
     });
   }
 
+  const errorMessages = {
+    "permission-denied": "You do not have permission to complete that action.",
+    "unauthenticated": "Your sign-in session has expired. Please sign in again.",
+    "not-found": "The requested record is no longer available.",
+    "network-request-failed": "Network connection failed. Check your internet and try again.",
+    "auth/invalid-credentials": "The email or password is incorrect.",
+    "auth/invalid-login-credentials": "The email or password is incorrect.",
+    "auth/user-not-found": "The email or password is incorrect.",
+    "auth/wrong-password": "The email or password is incorrect.",
+    "auth/too-many-requests": "Too many attempts. Please wait a moment and try again."
+  };
+
+  function friendlyError(error, fallback = "Something went wrong. Please try again.") {
+    const code = String(error?.code || "").toLowerCase();
+    if (errorMessages[code]) return errorMessages[code];
+    if (!navigator.onLine || error?.name === "TypeError") return errorMessages["network-request-failed"];
+    const message = String(error?.message || "").trim();
+    return message && message.length <= 180 ? message : fallback;
+  }
+
+  function showGlobalError(error, options = {}) {
+    const message = friendlyError(error, options.fallback);
+    const existing = document.querySelector(".sx-runtime-error");
+    if (existing?.dataset.message === message) return;
+    existing?.remove();
+    const notice = document.createElement("div");
+    notice.className = "sx-runtime-error";
+    notice.dataset.message = message;
+    notice.setAttribute("role", "alert");
+    notice.innerHTML = `<span>${message}</span><button type="button" aria-label="Dismiss error">Dismiss</button>`;
+    notice.querySelector("button").addEventListener("click", () => notice.remove());
+    document.body.append(notice);
+    window.setTimeout(() => notice.remove(), options.duration || 7000);
+  }
+
+  window.SchoolixErrors = Object.assign(window.SchoolixErrors || {}, {
+    message: friendlyError,
+    show: showGlobalError
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const error = event.reason;
+    if (error?.name === "AbortError") return;
+    console.error("Unhandled Schoolix request failure:", error);
+    showGlobalError(error);
+  });
+
+  window.addEventListener("error", (event) => {
+    if (!event.error) return;
+    console.error("Unhandled Schoolix runtime failure:", event.error);
+    showGlobalError(event.error);
+  });
+
   ready(() => {
     ensurePageLoader();
     optimizeMedia();

@@ -719,3 +719,34 @@ tbody > tr[hidden] {
     padding-bottom: 2px;
   }
 }
+/* Shared, accessible fallback for unexpected runtime and network failures. */
+.sx-runtime-error {
+  position: fixed;
+  z-index: 2147483000;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(460px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #991b1b;
+  box-shadow: 0 12px 28px rgba(127, 29, 29, .16);
+  font: 600 14px/1.4 system-ui, sans-serif;
+}
+
+.sx-runtime-error button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 9px;
+  background: #991b1b;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
