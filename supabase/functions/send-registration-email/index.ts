@@ -312,8 +312,7 @@ ${schoolName}`;
     if (!brevoResponse.ok) {
       console.error("Brevo Error:", brevoData);
       return jsonResponse({
-        error: "Failed to send registration email",
-        details: brevoData,
+        error: "Registration email could not be sent. Please try again shortly.",
       }, 500);
     }
 
@@ -325,7 +324,7 @@ ${schoolName}`;
   } catch (error) {
     console.error("Function Error:", error);
     return jsonResponse({
-      error: error instanceof Error ? error.message : "Internal server error",
+      error: "Registration email could not be sent. Please try again shortly.",
     }, 500);
   }
 });
