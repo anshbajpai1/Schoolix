@@ -137,11 +137,13 @@ Deno.serve(async (req) => {
     });
     const updateData = await updateResponse.json();
     if (!updateResponse.ok) {
-      return jsonResponse({ error: "Failed to update password", details: updateData }, 500);
+      console.error("Firebase password update failed", updateData);
+      return jsonResponse({ error: "Password could not be updated. Please try again shortly." }, 500);
     }
 
     return jsonResponse({ success: true, message: "Password updated successfully" });
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : "Internal server error" }, 500);
+    console.error("Password reset request failed", error);
+    return jsonResponse({ error: "Password reset could not be completed. Request a new link and try again." }, 500);
   }
 });
