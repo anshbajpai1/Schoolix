@@ -1894,6 +1894,22 @@ function clearTeacherSession() {
     } catch {}
 }
 
+function userFacingAuthError(error, fallback = "Login failed. Please try again.") {
+    const code = String(error?.code || "").toLowerCase();
+    const messages = {
+        "auth/user-not-found": "The email or password is incorrect.",
+        "auth/wrong-password": "The email or password is incorrect.",
+        "auth/invalid-credential": "The email or password is incorrect.",
+        "auth/invalid-credentials": "The email or password is incorrect.",
+        "auth/invalid-email": "Enter a valid email address.",
+        "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",
+        "network-request-failed": "Network connection failed. Check your internet and try again.",
+        "deadline-exceeded": "The request took too long. Check your connection and try again.",
+        "unavailable": "Schoolix is temporarily unavailable. Please try again shortly."
+    };
+    return messages[code] || window.SchoolixErrors?.message?.(error, fallback) || fallback;
+}
+
 function linkedSchoolId(profile = {}, adminData = null) {
     return String(
         profile.schoolId || profile.schoolID || profile.schoolUid || profile.schoolUID || profile.schoolDocId || profile.schoolDocID ||
@@ -2416,17 +2432,9 @@ loginForm.addEventListener('submit', async (e) => {
         }
 
         const authError = directAuthError || new Error(studentLogin.reason || "Login failed");
-        let msg = "Login failed";
-        switch (authError.code) {
-            case 'auth/user-not-found': msg = 'User not found'; break;
-            case 'auth/wrong-password': msg = 'Wrong password'; break;
-            case 'auth/invalid-credential': msg = 'Invalid login credentials'; break;
-            case 'auth/invalid-email': msg = 'Invalid email'; break;
-            default: msg = authError.message;
-        }
-        showError(studentLogin.reason || msg);
+        showError(studentLogin.reason || userFacingAuthError(authError));
     } catch (authError) {
-        showError(authError.message || "Login failed");
+        showError(userFacingAuthError(authError));
     } finally { showLoading(false); }
 });
 
@@ -2451,7 +2459,7 @@ async function handleGoogleRedirectResult() {
         }
     } catch (error) {
         hideAuthGate();
-        showError(error.message || "Google login failed. Please try again.");
+        showError(userFacingAuthError(error, "Google login failed. Please try again."));
     }
 }
 
@@ -2472,10 +2480,10 @@ window.loginWithGoogle = async () => {
                 await signInWithRedirect(auth, googleProvider);
                 return;
             } catch (redirectError) {
-                showError(redirectError.message || "Google login failed. Please try again.");
+                showError(userFacingAuthError(redirectError, "Google login failed. Please try again."));
             }
         } else {
-            showError(e.message || "Google login failed. Please try again.");
+            showError(userFacingAuthError(e, "Google login failed. Please try again."));
         }
     } finally { showLoading(false); }
 };
