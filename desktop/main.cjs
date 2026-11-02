@@ -35,6 +35,13 @@ function createLocalServer() {
     next();
   });
   localApp.use(express.static(files, { index: "index.html", fallthrough: false }));
+  localApp.use((error, req, res, next) => {
+    if (res.headersSent) return next(error);
+    const status = Number(error?.status || error?.statusCode || 500);
+    if (status === 404) return res.status(404).type("text/plain").send("Schoolix page not found.");
+    console.error("Local Schoolix server error:", error);
+    return res.status(500).type("text/plain").send("Schoolix could not load this page. Please try again.");
+  });
   return localApp;
 }
 
