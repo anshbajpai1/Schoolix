@@ -33,6 +33,46 @@ function authHeaders(token = SUPABASE_ANON_KEY) {
   };
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (cause) {
+    const error = new Error(cause?.name === "AbortError"
+      ? "The request took too long. Please check your connection and try again."
+      : "Unable to connect to Schoolix. Check your internet connection and try again.");
+    error.code = cause?.name === "AbortError" ? "deadline-exceeded" : "network-request-failed";
+    error.cause = cause;
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function requestError(response, data = {}, fallback = "Request failed") {
+  const status = Number(response?.status || 0);
+  const messages = {
+    400: "The request could not be completed. Please check the information and try again.",
+    401: "Your sign-in session has expired. Please sign in again.",
+    403: "You do not have permission to complete that action.",
+    404: "The requested record is no longer available.",
+    409: "This record was updated elsewhere. Refresh and try again.",
+    429: "Too many requests. Please wait a moment and try again.",
+    500: "Schoolix is temporarily unavailable. Please try again shortly.",
+    502: "Schoolix is temporarily unavailable. Please try again shortly.",
+    503: "Schoolix is temporarily unavailable. Please try again shortly."
+  };
+  const error = new Error(messages[status] || data.error_description || data.msg || data.message || data.error || fallback);
+  error.code = status === 401 ? "unauthenticated"
+    : status === 403 ? "permission-denied"
+      : status === 404 ? "not-found"
+        : status === 429 ? "resource-exhausted"
+          : status >= 500 ? "unavailable" : "unknown";
+  error.status = status;
+  return error;
+}
+
 function readStoredSession() {
   try {
     return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || "null");
@@ -73,15 +113,15 @@ function withTimeout(promise, ms, fallback, label = "Async operation") {
 }
 
 async function authFetch(path, body, token = SUPABASE_ANON_KEY) {
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+  const response = await fetchWithTimeout(`${SUPABASE_URL}/auth/v1/${path}`, {
     method: "POST",
     headers: authHeaders(token),
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.error_description || data.msg || data.message || data.error || "Authentication failed");
-    error.code = data.error_code || data.error || "auth/error";
+    const error = requestError(response, data, "Authentication failed");
+    error.code = data.error_code || data.error || error.code || "auth/error";
     throw error;
   }
   return data;
@@ -310,7 +350,7 @@ async function authToken() {
 
 async function executeFirestoreRpc(payload) {
   const token = await authToken();
-  const response = await fetch(FIRESTORE_FUNCTION_URL, {
+  const response = await fetchWithTimeout(FIRESTORE_FUNCTION_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -321,9 +361,7 @@ async function executeFirestoreRpc(payload) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.error || "Database request failed");
-    error.code = response.status === 403 ? "permission-denied" : response.status === 404 ? "not-found" : "unknown";
-    throw error;
+    throw requestError(response, data, "Database request failed");
   }
   return data;
 }
