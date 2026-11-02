@@ -677,7 +677,7 @@
     notice.innerHTML = `<span>${message}</span><button type="button" aria-label="Dismiss error">Dismiss</button>`;
     notice.querySelector("button").addEventListener("click", () => notice.remove());
     document.body.append(notice);
-    window.setTimeout(() => notice.remove(), options.duration || 7000);
+    if (options.duration !== 0) window.setTimeout(() => notice.remove(), options.duration ?? 7000);
   }
 
   window.SchoolixErrors = Object.assign(window.SchoolixErrors || {}, {
@@ -696,6 +696,15 @@
     if (!event.error) return;
     console.error("Unhandled Schoolix runtime failure:", event.error);
     showGlobalError(event.error);
+  });
+
+  window.addEventListener("offline", () => {
+    showGlobalError({ code: "network-request-failed" }, { duration: 0 });
+  });
+
+  window.addEventListener("online", () => {
+    const notice = document.querySelector(".sx-runtime-error");
+    if (notice?.dataset.message === errorMessages["network-request-failed"]) notice.remove();
   });
 
   ready(() => {
