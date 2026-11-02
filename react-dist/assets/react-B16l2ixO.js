@@ -378,6 +378,56 @@ function clearTeacherSession() {\r
     } catch {}\r
 }\r
 \r
+function userFacingAuthError(error, fallback = "Login failed. Please try again.") {\r
+    const code = String(error?.code || "").toLowerCase();\r
+    const messages = {\r
+        "auth/user-not-found": "The email or password is incorrect.",\r
+        "auth/wrong-password": "The email or password is incorrect.",\r
+        "auth/invalid-credential": "The email or password is incorrect.",\r
+        "auth/invalid-credentials": "The email or password is incorrect.",\r
+        "auth/invalid-email": "Enter a valid email address.",\r
+        "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",\r
+        "network-request-failed": "Network connection failed. Check your internet and try again.",\r
+        "deadline-exceeded": "The request took too long. Check your connection and try again.",\r
+        "unavailable": "Schoolix is temporarily unavailable. Please try again shortly."\r
+    };\r
+    return messages[code] || window.SchoolixErrors?.message?.(error, fallback) || fallback;\r
+}\r
+\r
+async function requestPasswordResetEmail(email) {\r
+    const controller = new AbortController();\r
+    const timeoutId = setTimeout(() => controller.abort(), 20000);\r
+    try {\r
+        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {\r
+            method: "POST",\r
+            headers: {\r
+                "Content-Type": "application/json",\r
+                "apikey": SUPABASE_ANON_KEY,\r
+                "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`\r
+            },\r
+            body: JSON.stringify({\r
+                email,\r
+                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"\r
+            }),\r
+            signal: controller.signal\r
+        });\r
+        if (!response.ok) {\r
+            const error = new Error("Password reset email could not be sent.");\r
+            error.code = response.status === 429 ? "resource-exhausted" : response.status >= 500 ? "unavailable" : "unknown";\r
+            throw error;\r
+        }\r
+    } catch (error) {\r
+        if (error.name === "AbortError") {\r
+            const timeoutError = new Error("Password reset request timed out.");\r
+            timeoutError.code = "deadline-exceeded";\r
+            throw timeoutError;\r
+        }\r
+        throw error;\r
+    } finally {\r
+        clearTimeout(timeoutId);\r
+    }\r
+}\r
+\r
 function linkedSchoolId(profile = {}, adminData = null) {\r
     return String(\r
         profile.schoolId || profile.schoolID || profile.schoolUid || profile.schoolUID || profile.schoolDocId || profile.schoolDocID ||\r
@@ -900,17 +950,9 @@ loginForm.addEventListener('submit', async (e) => {\r
         }\r
 \r
         const authError = directAuthError || new Error(studentLogin.reason || "Login failed");\r
-        let msg = "Login failed";\r
-        switch (authError.code) {\r
-            case 'auth/user-not-found': msg = 'User not found'; break;\r
-            case 'auth/wrong-password': msg = 'Wrong password'; break;\r
-            case 'auth/invalid-credential': msg = 'Invalid login credentials'; break;\r
-            case 'auth/invalid-email': msg = 'Invalid email'; break;\r
-            default: msg = authError.message;\r
-        }\r
-        showError(studentLogin.reason || msg);\r
+        showError(studentLogin.reason || userFacingAuthError(authError));\r
     } catch (authError) {\r
-        showError(authError.message || "Login failed");\r
+        showError(userFacingAuthError(authError));\r
     } finally { showLoading(false); }\r
 });\r
 \r
@@ -935,7 +977,7 @@ async function handleGoogleRedirectResult() {\r
         }\r
     } catch (error) {\r
         hideAuthGate();\r
-        showError(error.message || "Google login failed. Please try again.");\r
+        showError(userFacingAuthError(error, "Google login failed. Please try again."));\r
     }\r
 }\r
 \r
@@ -956,10 +998,10 @@ window.loginWithGoogle = async () => {\r
                 await signInWithRedirect(auth, googleProvider);\r
                 return;\r
             } catch (redirectError) {\r
-                showError(redirectError.message || "Google login failed. Please try again.");\r
+                showError(userFacingAuthError(redirectError, "Google login failed. Please try again."));\r
             }\r
         } else {\r
-            showError(e.message || "Google login failed. Please try again.");\r
+            showError(userFacingAuthError(e, "Google login failed. Please try again."));\r
         }\r
     } finally { showLoading(false); }\r
 };\r
@@ -979,25 +1021,10 @@ window.resetPassword = async () => {\r
                 return;\r
             }\r
         }\r
-        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {\r
-            method: "POST",\r
-            headers: {\r
-                "Content-Type": "application/json",\r
-                "apikey": SUPABASE_ANON_KEY,\r
-                "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`\r
-            },\r
-            body: JSON.stringify({\r
-                email: emailToReset,\r
-                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"\r
-            })\r
-        });\r
-        if (!response.ok) {\r
-            const details = await response.text();\r
-            throw new Error(details || "Password reset email failed");\r
-        }\r
+        await requestPasswordResetEmail(emailToReset);\r
         showError('Password reset email sent to your registered address');\r
     } catch (e) {\r
-        showError(e.message || "Password reset email failed. Contact admin.");\r
+        showError(userFacingAuthError(e, "Password reset email failed. Contact admin."));\r
     } finally { showLoading(false); }\r
 };\r
 \r
@@ -1213,6 +1240,56 @@ function clearTeacherSession() {\r
     } catch {}\r
 }\r
 \r
+function userFacingAuthError(error, fallback = "Login failed. Please try again.") {\r
+    const code = String(error?.code || "").toLowerCase();\r
+    const messages = {\r
+        "auth/user-not-found": "The email or password is incorrect.",\r
+        "auth/wrong-password": "The email or password is incorrect.",\r
+        "auth/invalid-credential": "The email or password is incorrect.",\r
+        "auth/invalid-credentials": "The email or password is incorrect.",\r
+        "auth/invalid-email": "Enter a valid email address.",\r
+        "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",\r
+        "network-request-failed": "Network connection failed. Check your internet and try again.",\r
+        "deadline-exceeded": "The request took too long. Check your connection and try again.",\r
+        "unavailable": "Schoolix is temporarily unavailable. Please try again shortly."\r
+    };\r
+    return messages[code] || window.SchoolixErrors?.message?.(error, fallback) || fallback;\r
+}\r
+\r
+async function requestPasswordResetEmail(email) {\r
+    const controller = new AbortController();\r
+    const timeoutId = setTimeout(() => controller.abort(), 20000);\r
+    try {\r
+        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {\r
+            method: "POST",\r
+            headers: {\r
+                "Content-Type": "application/json",\r
+                "apikey": SUPABASE_ANON_KEY,\r
+                "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`\r
+            },\r
+            body: JSON.stringify({\r
+                email,\r
+                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"\r
+            }),\r
+            signal: controller.signal\r
+        });\r
+        if (!response.ok) {\r
+            const error = new Error("Password reset email could not be sent.");\r
+            error.code = response.status === 429 ? "resource-exhausted" : response.status >= 500 ? "unavailable" : "unknown";\r
+            throw error;\r
+        }\r
+    } catch (error) {\r
+        if (error.name === "AbortError") {\r
+            const timeoutError = new Error("Password reset request timed out.");\r
+            timeoutError.code = "deadline-exceeded";\r
+            throw timeoutError;\r
+        }\r
+        throw error;\r
+    } finally {\r
+        clearTimeout(timeoutId);\r
+    }\r
+}\r
+\r
 function linkedSchoolId(profile = {}, adminData = null) {\r
     return String(\r
         profile.schoolId || profile.schoolID || profile.schoolUid || profile.schoolUID || profile.schoolDocId || profile.schoolDocID ||\r
@@ -1735,17 +1812,9 @@ loginForm.addEventListener('submit', async (e) => {\r
         }\r
 \r
         const authError = directAuthError || new Error(studentLogin.reason || "Login failed");\r
-        let msg = "Login failed";\r
-        switch (authError.code) {\r
-            case 'auth/user-not-found': msg = 'User not found'; break;\r
-            case 'auth/wrong-password': msg = 'Wrong password'; break;\r
-            case 'auth/invalid-credential': msg = 'Invalid login credentials'; break;\r
-            case 'auth/invalid-email': msg = 'Invalid email'; break;\r
-            default: msg = authError.message;\r
-        }\r
-        showError(studentLogin.reason || msg);\r
+        showError(studentLogin.reason || userFacingAuthError(authError));\r
     } catch (authError) {\r
-        showError(authError.message || "Login failed");\r
+        showError(userFacingAuthError(authError));\r
     } finally { showLoading(false); }\r
 });\r
 \r
@@ -1770,7 +1839,7 @@ async function handleGoogleRedirectResult() {\r
         }\r
     } catch (error) {\r
         hideAuthGate();\r
-        showError(error.message || "Google login failed. Please try again.");\r
+        showError(userFacingAuthError(error, "Google login failed. Please try again."));\r
     }\r
 }\r
 \r
@@ -1791,10 +1860,10 @@ window.loginWithGoogle = async () => {\r
                 await signInWithRedirect(auth, googleProvider);\r
                 return;\r
             } catch (redirectError) {\r
-                showError(redirectError.message || "Google login failed. Please try again.");\r
+                showError(userFacingAuthError(redirectError, "Google login failed. Please try again."));\r
             }\r
         } else {\r
-            showError(e.message || "Google login failed. Please try again.");\r
+            showError(userFacingAuthError(e, "Google login failed. Please try again."));\r
         }\r
     } finally { showLoading(false); }\r
 };\r
@@ -1814,25 +1883,10 @@ window.resetPassword = async () => {\r
                 return;\r
             }\r
         }\r
-        const response = await fetch(PASSWORD_RESET_FUNCTION_URL, {\r
-            method: "POST",\r
-            headers: {\r
-                "Content-Type": "application/json",\r
-                "apikey": SUPABASE_ANON_KEY,\r
-                "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`\r
-            },\r
-            body: JSON.stringify({\r
-                email: emailToReset,\r
-                schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"\r
-            })\r
-        });\r
-        if (!response.ok) {\r
-            const details = await response.text();\r
-            throw new Error(details || "Password reset email failed");\r
-        }\r
+        await requestPasswordResetEmail(emailToReset);\r
         showError('Password reset email sent to your registered address');\r
     } catch (e) {\r
-        showError(e.message || "Password reset email failed. Contact admin.");\r
+        showError(userFacingAuthError(e, "Password reset email failed. Contact admin."));\r
     } finally { showLoading(false); }\r
 };\r
 \r

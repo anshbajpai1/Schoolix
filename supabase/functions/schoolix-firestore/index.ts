@@ -355,6 +355,11 @@ Deno.serve(async (req) => {
     console.error("schoolix-firestore error", error);
     const message = error instanceof Error ? error.message : "Request failed";
     const status = /login|session/i.test(message) ? 401 : /permission|Only admins/i.test(message) ? 403 : 500;
-    return jsonResponse({ error: message }, status);
+    const clientMessage = status === 401
+      ? "Your sign-in session has expired. Please sign in again."
+      : status === 403
+        ? "You do not have permission to complete that action."
+        : "Schoolix could not complete the request. Please try again shortly.";
+    return jsonResponse({ error: clientMessage }, status);
   }
 });
