@@ -65,7 +65,13 @@ app.whenReady().then(async () => {
       instance.on("error", reject);
     });
     localUrl = `http://127.0.0.1:${port}/`;
-    createTray();
+    try {
+      createTray();
+    } catch (error) {
+      // The local server and browser experience remain usable if Windows
+      // cannot create a tray icon on a particular device.
+      console.warn("Schoolix tray could not be created:", error);
+    }
     await openSchoolix();
   } catch (error) {
     await dialog.showMessageBox({
