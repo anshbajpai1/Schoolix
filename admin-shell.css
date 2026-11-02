@@ -1301,6 +1301,26 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   }
 }
 
+/* Backdrop blurs force expensive full-screen repaints on lower-end phones. */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .sx-admin-header,
+  .sx-admin-overlay {
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-admin-sidebar,
+  .sx-admin-menu-btn,
+  .sx-admin-brand,
+  .sx-admin-nav,
+  .sx-admin-nav-link,
+  .sx-ai-typing span {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @media print {
   .sx-admin-sidebar,
   .sx-admin-menu-btn,

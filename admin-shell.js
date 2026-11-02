@@ -643,12 +643,24 @@
     if (document.body.dataset.sxAdminFloatingGuard === "true") return;
     document.body.dataset.sxAdminFloatingGuard = "true";
     scanFloatingLayers();
+    let pendingRoots = new Set();
+    let scanFrame = 0;
+    const queueScan = (root) => {
+      if (root?.nodeType === Node.ELEMENT_NODE) pendingRoots.add(root);
+      if (scanFrame) return;
+      scanFrame = requestAnimationFrame(() => {
+        const roots = pendingRoots;
+        pendingRoots = new Set();
+        scanFrame = 0;
+        roots.forEach((entry) => scanFloatingLayers(entry));
+      });
+    };
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === "childList") {
-          mutation.addedNodes.forEach((node) => scanFloatingLayers(node));
+          mutation.addedNodes.forEach(queueScan);
         } else if (mutation.type === "attributes") {
-          scanFloatingLayers(mutation.target);
+          queueScan(mutation.target);
         }
       });
     });

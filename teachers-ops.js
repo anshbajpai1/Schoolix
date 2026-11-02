@@ -33,8 +33,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const teacherCreatorApp = initializeApp(firebaseConfig, "teacherCreatorApp");
-const teacherCreatorAuth = getAuth(teacherCreatorApp);
 
 const CLASS_LIST = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const ALL_SECTIONS = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
@@ -2082,7 +2080,9 @@ addTeacherForm.addEventListener("submit", async (event) => {
     }
     try {
         setButtonLoading(createTeacherBtn, "Creating Teacher...", true);
-        const userCred = await createUserWithEmailAndPassword(teacherCreatorAuth, email, password);
+        // Account creation is handled by the privileged backend while keeping
+        // this browser's admin authentication session intact.
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
         const teacherUid = userCred.user.uid;
         const teacherId = await generateTeacherId();
         const photoUpload = teacherPhotoFile ? await uploadCloudinaryPhoto(teacherPhotoFile, "teachers", teacherUid) : { photoUrl: "", photoPublicId: "" };
@@ -2140,7 +2140,6 @@ addTeacherForm.addEventListener("submit", async (event) => {
         console.error(error);
         showToast(error.message || "Unable to create teacher account.", "error");
     } finally {
-        await signOut(teacherCreatorAuth).catch(() => {});
         setButtonLoading(createTeacherBtn, "Creating Teacher...", false);
     }
 });

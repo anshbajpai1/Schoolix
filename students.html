@@ -4508,7 +4508,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <button class="btn btn-danger" onclick="openPassOutModal()">Pass Out Students</button>
           <button class="btn btn-warning" onclick="togglePromotionBanner()">Promote</button>
           <button class="btn btn-success" onclick="promoteSelected()">Promote Selected</button>
-          <button class="btn btn-secondary" onclick="repackTestStudents()">Repack Test Data</button>
           <button class="btn btn-danger" onclick="deleteAllStudents()">Delete All Students</button>
         </div>
 
@@ -4925,19 +4924,29 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         if (!normalizedClass || !normalizedSection || !currentUser?.uid) return;
 
         const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+        const selectedSession = getSelectedSession();
         const students = snap.docs
           .map((studentDoc) => ({ id: studentDoc.id, ...studentDoc.data() }))
           .filter((student) => {
-            const placement = extractClassSection(student.class, student.section);
+            const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+            const placement = extractClassSection(
+              sessionPlacement?.class || student.class,
+              sessionPlacement?.section || student.section
+            );
             return placement.class === normalizedClass && placement.section === normalizedSection;
           })
           .sort(sortStudentsForRollNumber);
 
-        const selectedSession = getSelectedSession();
+        let changed = false;
         await Promise.all(students.map(async (student, index) => {
           const roll = String(index + 1).padStart(2, "0");
-          const payload = { roll, rollNo: roll, updatedAt: serverTimestamp() };
           const placement = selectedSession?.id ? getStudentPlacementForSelectedSession(student) : null;
+          const rootRollMatches = String(student.roll || "") === roll && String(student.rollNo || "") === roll;
+          const placementRollMatches = !placement || String(placement.roll || "") === roll;
+          if (rootRollMatches && placementRollMatches) return;
+
+          changed = true;
+          const payload = { roll, rollNo: roll, updatedAt: serverTimestamp() };
           if (
             selectedSession?.id &&
             placement &&
@@ -4953,6 +4962,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             .filter((result) => result.status === "rejected")
             .forEach((result) => console.warn("Roll mirror update failed:", result.reason));
         }));
+        return changed;
       }
 
       async function reassignRollNumbersForPlacements(...placements) {
@@ -4965,6 +4975,27 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         for (const placement of unique.values()) {
           await reassignRollNumbersForClassSection(placement.class, placement.section);
         }
+      }
+
+      async function reconcileAllRollNumbers() {
+        const groups = new Map();
+        const selectedSession = getSelectedSession();
+        allStudents.forEach((student) => {
+          if (student.tcIssued || String(student.status || "").toLowerCase() === "passed out") return;
+          const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+          const placement = extractClassSection(
+            sessionPlacement?.class || student.class,
+            sessionPlacement?.section || student.section
+          );
+          if (!placement.class || !placement.section) return;
+          groups.set(getClassSectionKey(placement.class, placement.section), placement);
+        });
+
+        let changed = false;
+        for (const placement of groups.values()) {
+          changed = (await reassignRollNumbersForClassSection(placement.class, placement.section)) || changed;
+        }
+        return changed;
       }
 
       function getStudentIdentity(student = {}) {
@@ -5230,6 +5261,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         attendanceRecordsByStudent = new Map();
         feeRecordsByStudent = new Map();
         latestReportByStudent = new Map();
+        latestReportBySessionStudent = new Map();
 
         allAttendance.forEach((record) => {
           const key = record.studentId;
@@ -5262,7 +5294,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             toMillis(previous.timestamp)
           ) : 0;
 
-        latestReportBySessionStudent = new Map();
           if (!previous || currentStamp >= previousStamp) {
             latestReportByStudent.set(key, report);
           }
@@ -5407,6 +5438,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           allFees = feesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
           allReports = reportSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+          // Existing records are corrected automatically once per load. A
+          // second load only happens when at least one roll actually changed.
+          if (await reconcileAllRollNumbers()) return loadAllData();
+
           rebuildDataIndexes();
           populateFilters();
           populateSessionSelector();
@@ -5447,6 +5482,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       }
 
       function getLatestReportForStudent(studentId) {
+        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
+        if (latestReportBySessionStudent.has(cacheKey)) {
+          return latestReportBySessionStudent.get(cacheKey);
+        }
         const reports = allReports
           .filter((report) => (report.student?.studentId || report.studentId) === studentId)
           .filter(entryBelongsToSession);
@@ -5470,6 +5509,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           );
           return currentStamp >= previousStamp ? report : latest;
         });
+        latestReportBySessionStudent.set(cacheKey, latest);
+        return latest;
       }
 
       function getStudentPercentage(studentId) {
@@ -5486,10 +5527,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       function getPercentageClass(percentage) {
         if (percentage >= 80) return 'percentage-excellent';
-        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
-        if (latestReportBySessionStudent.has(cacheKey)) {
-          return latestReportBySessionStudent.get(cacheKey);
-        }
         if (percentage >= 65) return 'percentage-good';
         if (percentage >= 50) return 'percentage-average';
         return 'percentage-poor';
@@ -5510,11 +5547,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
         if (classFilter) parts.push(`Class ${classFilter}`);
         if (sectionFilter) parts.push(`Section ${sectionFilter}`);
-        latestReportBySessionStudent.set(cacheKey, latest);
-        return latest;
         if (hasSearch) parts.push('Search filtered');
         if (hasPerformanceFilter) parts.push('Performance filtered');
         if (hasAttendanceFilter) parts.push('Attendance filtered');
+        if (todayStatusFilter) parts.push(`Today: ${todayStatusFilter}`);
 
         if (parts.length) return parts.join(' • ');
         if (!students.length) return 'No students in current view';
@@ -5551,7 +5587,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           { label: '80%+', count: 0, color: 'linear-gradient(180deg, rgba(15, 159, 98, 0.95), rgba(15, 159, 98, 0.35))' },
           { label: '65-79%', count: 0, color: 'linear-gradient(180deg, rgba(49, 94, 251, 0.95), rgba(49, 94, 251, 0.35))' },
           { label: '50-64%', count: 0, color: 'linear-gradient(180deg, rgba(192, 118, 22, 0.95), rgba(192, 118, 22, 0.35))' },
-        if (todayStatusFilter) parts.push(`Today: ${todayStatusFilter}`);
           { label: 'Below 50%', count: 0, color: 'linear-gradient(180deg, rgba(209, 67, 67, 0.95), rgba(209, 67, 67, 0.35))' },
           { label: 'No Report', count: 0, color: 'linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(148, 163, 184, 0.35))' }
         ];
@@ -5996,6 +6031,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         studentRefreshTimer = window.setTimeout(() => loadData(), 180);
       };
 
+      window.filterByTodayStatus = (status) => {
+        todayStatusFilter = todayStatusFilter === status ? "" : status;
+        loadData();
+      };
+
       window.loadData = (resetPage = true, refreshFilters = false) => {
         pageSize = Number(document.getElementById("pageSize").value) || 25;
         if (resetPage) currentPage = 1;
@@ -6032,11 +6072,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           promoteBtn.style.opacity = disabled ? '0.55' : '1';
         }
         if (promoteSelectedBtn) {
-      window.filterByTodayStatus = (status) => {
-        todayStatusFilter = todayStatusFilter === status ? "" : status;
-        loadData();
-      };
-
           promoteSelectedBtn.disabled = disabled;
           promoteSelectedBtn.style.opacity = disabled ? '0.55' : '1';
         }
@@ -6085,6 +6120,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           const aboveMatch = Number.isNaN(above) || percentage >= above;
           const belowMatch = Number.isNaN(below) || percentage <= below;
           const attendanceBelowMatch = Number.isNaN(attendanceBelow) || attendancePercentage < attendanceBelow;
+          const todayStatusMatch = !todayStatusFilter || getTodayStatus(studentId) === todayStatusFilter;
 
           return matchesSearch && matchesPhone && matchesClass && matchesSection && aboveMatch && belowMatch && attendanceBelowMatch && todayStatusMatch;
         });
@@ -6098,86 +6134,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           newSection: targetSections[index % sectionCount]
         }));
       }
-
-      function isTestStudentRecord(student = {}) {
-        const studentId = String(student.studentId || '').trim();
-        return /^TEST\d+$/i.test(studentId);
-      }
-
-      window.repackTestStudents = async ({ skipConfirm = false, silent = false } = {}) => {
-        const selectedSession = getSelectedSession();
-        if (selectedSession?.locked || selectedSession?.classesLocked) {
-          if (!silent) showToast('This session is locked — test data cannot be repacked.', 'error');
-          return;
-        }
-
-        const testStudents = getStudentsForSelectedSession().filter(isTestStudentRecord);
-        if (!testStudents.length) {
-          if (!silent) showToast('No test students found in this session.', 'info');
-          return;
-        }
-
-        const byClass = new Map();
-        testStudents.forEach((student) => {
-          const classValue = String(student.class || '').trim();
-          if (!classValue) return;
-          const todayStatusMatch = !todayStatusFilter || getTodayStatus(studentId) === todayStatusFilter;
-          const classStudents = byClass.get(classValue) || [];
-          classStudents.push(student);
-          byClass.set(classValue, classStudents);
-        });
-
-        const plan = [];
-        byClass.forEach((classStudents, classValue) => {
-          const sectionCounts = {};
-          getStudentsForSelectedSession()
-            .filter((student) => String(student.class || '').trim() === classValue && !isTestStudentRecord(student))
-            .forEach((student) => {
-              const section = String(student.section || 'A').trim() || 'A';
-              sectionCounts[section] = (sectionCounts[section] || 0) + 1;
-            });
-
-          classStudents
-            .sort((left, right) => String(left.studentId || left.id).localeCompare(String(right.studentId || right.id), undefined, { numeric: true }))
-            .forEach((student) => {
-              const sections = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
-              const newSection = sections.find((section) => (sectionCounts[section] || 0) < 20) || sections[sections.length - 1];
-              sectionCounts[newSection] = (sectionCounts[newSection] || 0) + 1;
-              if (student.section !== newSection) plan.push({ student, classValue, newSection });
-            });
-        });
-
-        if (!plan.length) {
-          if (!silent) showToast('Test students are already packed into 20-seat sections.', 'info');
-          return;
-        }
-        if (!skipConfirm && !confirm(`Repack ${plan.length} test student(s) into sections of 20? Real students will not be changed.`)) return;
-
-        try {
-          await Promise.all(plan.map(({ student, classValue, newSection }) => {
-            const updatePayload = { section: newSection, updatedAt: serverTimestamp() };
-            if (selectedSession?.id) {
-              updatePayload[`sessionPlacements.${selectedSession.id}`] = makeSessionPlacement({
-                ...student,
-                class: classValue,
-                section: newSection
-              }, selectedSession);
-            }
-            return updateDoc(doc(db, 'schools', currentUser.uid, 'students', student.id), updatePayload);
-          }));
-
-          const affectedPlacements = plan.flatMap(({ student, classValue, newSection }) => ([
-            { class: classValue, section: student.section || 'A' },
-            { class: classValue, section: newSection }
-          ]));
-          await reassignRollNumbersForPlacements(...affectedPlacements);
-          await loadAllData();
-          if (!silent) showToast(`${plan.length} test student(s) repacked into 20-seat sections.`, 'success');
-        } catch (error) {
-          console.error('Test data repack error:', error);
-          if (!silent) showToast('Unable to repack test data.', 'error');
-        }
-      };
 
       window.previewSectionShuffle = () => {
         const classValue = document.getElementById('shuffleClassSelect')?.value;
@@ -6346,22 +6302,22 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <span class="missing" style="width:${(metrics.missing / total) * 100}%"></span>
           </div>
           <div class="attendance-legend">
-            <div class="legend-item">
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Present' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Present')" aria-pressed="${todayStatusFilter === 'Present'}" title="Show students marked Present today">
               <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Present</span></div>
               <strong>${metrics.present}</strong>
             </button>
-            <button class="legend-item attendance-filter ${todayStatusFilter === 'Absent' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Absent')" aria-pressed="${todayStatusFilter === 'Absent'}" title="Show students marked Absent today">
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Half Day' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Half Day')" aria-pressed="${todayStatusFilter === 'Half Day'}" title="Show students marked Half Day today">
               <div class="legend-left"><span class="legend-dot" style="background:#d97706;"></span><span>Half Day</span></div>
               <strong>${metrics.half}</strong>
             </button>
-            <button class="legend-item attendance-filter ${todayStatusFilter === 'Half Day' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Half Day')" aria-pressed="${todayStatusFilter === 'Half Day'}" title="Show students marked Half Day today">
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Absent' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Absent')" aria-pressed="${todayStatusFilter === 'Absent'}" title="Show students marked Absent today">
               <div class="legend-left"><span class="legend-dot" style="background:#dc2626;"></span><span>Absent</span></div>
               <strong>${metrics.absent}</strong>
-            </div>
-            <button class="legend-item attendance-filter ${todayStatusFilter === 'Present' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Present')" aria-pressed="${todayStatusFilter === 'Present'}" title="Show students marked Present today">
+            </button>
+            <button class="legend-item attendance-filter ${todayStatusFilter === 'Not Marked' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Not Marked')" aria-pressed="${todayStatusFilter === 'Not Marked'}" title="Show students whose attendance is not marked today">
               <div class="legend-left"><span class="legend-dot" style="background:#94a3b8;"></span><span>Not Marked</span></div>
               <strong>${metrics.missing}</strong>
-            </div>
+            </button>
           </div>
         </div>
       `;
@@ -6387,7 +6343,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               <div class="chart-column-value">${band.count} students</div>
               <div class="chart-column-bar" style="height:${Math.max(26, (band.count / maxCount) * 170)}px; background:${band.color};"></div>
               <div class="chart-column-label">${band.label}</div>
-            </button>
+            </div>
           `).join('')}
         </div>
       `;
@@ -6480,8 +6436,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div class="legend-item">
               <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Collected</span></div>
               <strong>${formatCurrency(metrics.paid)}</strong>
-            </button>
-            <button class="legend-item attendance-filter ${todayStatusFilter === 'Not Marked' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Not Marked')" aria-pressed="${todayStatusFilter === 'Not Marked'}" title="Show students whose attendance is not marked today">
+            </div>
+            <div class="legend-item">
               <div class="legend-left"><span class="legend-dot" style="background:#ef4444;"></span><span>Outstanding</span></div>
               <strong>${formatCurrency(metrics.due)}</strong>
             </div>
@@ -6792,6 +6748,19 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
           if (page > 0 && page <= totalPages) pages.add(page);
         }
+        if (currentPage <= 3) [2, 3, 4].forEach((page) => page <= totalPages && pages.add(page));
+        if (currentPage >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach((page) => page > 0 && pages.add(page));
+
+        const pageList = Array.from(pages).sort((a, b) => a - b);
+        const pageButtons = [];
+        let previousPage = 0;
+        pageList.forEach((page) => {
+          if (page - previousPage > 1) {
+            pageButtons.push('<span class="page-btn page-btn--ellipsis" aria-hidden="true">…</span>');
+          }
+          pageButtons.push(`<button class="page-btn ${page === currentPage ? 'active' : ''}" type="button" onclick="changePage(${page})" ${page === currentPage ? 'aria-current="page"' : ''} aria-label="Go to page ${page}">${page}</button>`);
+          previousPage = page;
+        });
 
         pagination.innerHTML = `
           <div class="pagination-info" role="status">Showing <strong>${startItem}–${endItem}</strong> of <strong>${totalCount}</strong> students <span aria-hidden="true">·</span> Page ${currentPage} of ${totalPages}</div>
@@ -6810,6 +6779,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         if (page >= 1 && page <= totalPages) {
           currentPage = page;
           loadData(false);
+          document.getElementById("studentsList")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       };
 
@@ -6832,19 +6802,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const motherPhone = getMotherPhone(student);
         const photoUrl = getStudentPhotoUrl(student);
         const currentStatus = student.status || (student.tcIssued ? "TC Issued" : "Active");
-        if (currentPage <= 3) [2, 3, 4].forEach((page) => page <= totalPages && pages.add(page));
-        if (currentPage >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach((page) => page > 0 && pages.add(page));
-
-        const pageList = Array.from(pages).sort((a, b) => a - b);
-        const pageButtons = [];
-        let previousPage = 0;
-        pageList.forEach((page) => {
-          if (page - previousPage > 1) {
-            pageButtons.push('<span class="page-btn page-btn--ellipsis" aria-hidden="true">…</span>');
-          }
-          pageButtons.push(`<button class="page-btn ${page === currentPage ? 'active' : ''}" type="button" onclick="changePage(${page})" ${page === currentPage ? 'aria-current="page"' : ''} aria-label="Go to page ${page}">${page}</button>`);
-          previousPage = page;
-        });
         const photoPreview = photoUrl
           ? `<img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(student.name || "Student")} photo">`
           : escapeHtml(getStudentInitials(student.name || student.studentId || student.id));
@@ -6859,7 +6816,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       Transfer Certificate issued for this student. Attendance and fee changes are disabled.
     </div>` : sessionLocked ? `<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
       This session is locked. Editing is disabled for all users.
-          document.getElementById("studentsList")?.scrollIntoView({ behavior: "smooth", block: "start" });
     </div>` : ''}
     ${sessionPlacementNote}
     <div style="background:#f8fafc;padding:20px;border-radius:12px;margin-bottom:20px;">

@@ -2523,6 +2523,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             await Promise.all(classmateUpdates);
           }
 
+          // Re-read this class-section after the insert. This keeps rolls correct
+          // even when another admission was saved at nearly the same time.
+          // Example: Ansh (01), Dhruv (02), Shreshth (03).
+          await updateRolls(payload.studentClass, section);
+
           // 12. Create auto monthly fee if configured
           const feeAmount = Number(feeConfig[payload.studentClass] || 0);
           const currentMonth = currentMonthName();

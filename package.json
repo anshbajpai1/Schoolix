@@ -2,17 +2,17 @@
   "name": "schoolix",
   "version": "1.0.0",
   "description": "School management system",
-  "main": "app.js",
+  "main": "desktop/main.cjs",
   "type": "module",
   "scripts": {
     "start": "node app.js",
+    "start:desktop": "electron desktop/main.cjs",
+    "build:desktop": "npm run build:mobile -- --skip-apk && electron-builder --win dir",
     "generate:react-pages": "node scripts/generate-react-pages.mjs",
     "dev:react": "npm run generate:react-pages && vite --host 0.0.0.0",
     "build:react": "npm run generate:react-pages && vite build",
     "build:mobile": "node scripts/build-mobile.mjs",
     "build:hosting": "node scripts/build-mobile.mjs --web-loader --out=hosting",
-    "test:react-router": "node scripts/verify-react-router.mjs",
-    "test:session-sync": "node --experimental-vm-modules scripts/verify-session-sync.mjs",
     "migrate:firestore": "node scripts/migrate-firestore-to-supabase.mjs",
     "migrate:auth": "node scripts/migrate-firebase-auth-to-supabase.mjs",
     "android:sync": "npm run build:mobile -- --skip-apk && npx cap sync android",
@@ -32,6 +32,32 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.3",
+    "electron": "^37.4.0",
+    "electron-builder": "^26.0.12",
     "vite": "^5.4.10"
+  },
+  "build": {
+    "appId": "com.schoolix.desktop",
+    "productName": "Schoolix Local",
+    "artifactName": "Schoolix-Local-${version}-Setup.${ext}",
+    "directories": {
+      "output": "desktop-local",
+      "buildResources": "desktop/resources"
+    },
+    "files": [
+      "desktop/main.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "www",
+        "to": "www"
+      }
+    ],
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "win": {
+      "target": "dir"
+    }
   }
 }

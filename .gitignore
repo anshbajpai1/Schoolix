@@ -2,6 +2,10 @@ node_modules/
 dist/
 hosting/
 www/
+desktop-dist/
+desktop-local/
+desktop-package/
+desktop-release/
 
 .env
 .env.*
@@ -19,6 +23,7 @@ supabase/.temp/
 
 *.apk
 *.aab
+Schoolix-Local-*-Setup.exe
 android/app/build/
 android/.gradle/
 android/build/

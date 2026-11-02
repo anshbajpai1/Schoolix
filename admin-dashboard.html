@@ -87,6 +87,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 }
 </style>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
@@ -870,7 +872,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     </style>
     <link rel="stylesheet" href="schoolix-erp.css">
   <link rel="stylesheet" href="schoolix-polish.css">
-  <link rel="stylesheet" href="admin-shell.css?v=navbar-20260721">
+  <link rel="stylesheet" href="admin-shell.css?v=admin-performance-20261024">
 </head>
 <body class="sx-admin-app" data-sx-title="Admin dashboard">
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
@@ -1206,6 +1208,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const firstSetupForm = document.getElementById('firstSetupForm');
         const firstSetupStatus = document.getElementById('firstSetupStatus');
         const firstSetupSaveBtn = document.getElementById('firstSetupSaveBtn');
+        const dashboardStatsCachePrefix = 'schoolix.dashboardStats.v1.';
+        const dashboardStatsCacheTtl = 5 * 60 * 1000;
         let onboardingUser = null;
         let onboardingProfile = null;
 
@@ -1369,8 +1373,12 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             if (user) {
                 userWelcome.classList.add('show');
                 loginSection.style.display = 'none';
-                const adminProfile = await loadAdminProfile(user);
-                await refreshDashboardStats(user.uid);
+                renderCachedDashboardStats(user.uid);
+                const adminProfilePromise = loadAdminProfile(user);
+                // Keep the first interactive paint free of large collection reads.
+                // Fresh totals are loaded immediately after the browser gets a frame.
+                requestAnimationFrame(() => requestAnimationFrame(() => refreshDashboardStats(user.uid)));
+                const adminProfile = await adminProfilePromise;
                 await runFirstLoginOnboarding(user, adminProfile);
             } else {
                 userWelcome.classList.remove('show');
@@ -1405,6 +1413,28 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             }
         };
 
+        function applyDashboardStats(stats) {
+            document.getElementById('totalStudents').textContent = Number(stats.students || 0).toLocaleString();
+            document.getElementById('totalClasses').textContent = Number(stats.classes || 0).toLocaleString();
+            document.getElementById('totalTeachers').textContent = Number(stats.teachers || 0).toLocaleString();
+            document.getElementById('totalFees').textContent = formatCurrency(stats.fees || 0);
+        }
+
+        function renderCachedDashboardStats(adminId) {
+            try {
+                const cached = JSON.parse(sessionStorage.getItem(dashboardStatsCachePrefix + adminId) || 'null');
+                if (cached && Date.now() - cached.savedAt < dashboardStatsCacheTtl) applyDashboardStats(cached);
+            } catch (_) {
+                // Stats cache is only an instant visual fallback.
+            }
+        }
+
+        function cacheDashboardStats(adminId, stats) {
+            try {
+                sessionStorage.setItem(dashboardStatsCachePrefix + adminId, JSON.stringify({ ...stats, savedAt: Date.now() }));
+            } catch (_) {}
+        }
+
         async function refreshDashboardStats(adminId) {
             try {
                 const [studentSnap, teacherSnap, feeSnap] = await Promise.all([
@@ -1425,16 +1455,20 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                     collectedFees += Number(fee.totalCollectedAmount || fee.totalPaidAmount || fee.paidAmount || 0);
                 });
 
-                document.getElementById('totalStudents').textContent = studentSnap.size.toLocaleString();
-                document.getElementById('totalClasses').textContent = sections.size.toLocaleString();
-                document.getElementById('totalTeachers').textContent = teacherSnap.size.toLocaleString();
-                document.getElementById('totalFees').textContent = formatCurrency(collectedFees);
+                const stats = {
+                    students: studentSnap.size,
+                    classes: sections.size,
+                    teachers: teacherSnap.size,
+                    fees: collectedFees
+                };
+                applyDashboardStats(stats);
+                cacheDashboardStats(adminId, stats);
             } catch (error) {
                 console.error('Dashboard stats refresh error:', error);
             }
         }
     </script>
-    <script type="module" src="admin-shell.js?v=navbar-20260721"></script>
+    <script type="module" src="admin-shell.js?v=admin-performance-20261024"></script>
     <script type="module" src="access-control.js"></script>
   <script src="schoolix-polish.js" defer></script>
 </body>
