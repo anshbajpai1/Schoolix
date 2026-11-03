@@ -1244,12 +1244,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             width: 100%;
             max-width: 420px;
             margin: 0 auto;
-            padding: 0;
-            border: 0;
-            border-radius: 0;
-            background: transparent;
-            box-shadow: none;
-            backdrop-filter: none;
+            padding: 28px 24px 24px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
         }
 
         body.is-native-app .form-header { margin-bottom: 32px; }
@@ -1346,6 +1345,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             body.is-native-app .panel-right {
                 align-items: flex-start;
                 padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+            }
+            body.is-native-app .form-card {
+                padding: 24px 18px 20px;
+                border-radius: 18px;
             }
             body.is-native-app .form-title { font-size: 1.55rem; }
             body.is-native-app .field-input { height: 48px; }
@@ -1571,6 +1574,244 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         @keyframes gateSweep {
             0% { transform: translateX(-110%); }
             100% { transform: translateX(260%); }
+        }
+        /* ── Login visual refresh ──────────────────────── */
+        body.sx-login-app {
+            background: #edf3ff;
+        }
+
+        body.sx-login-app .shell {
+            min-height: 100dvh;
+            background: #edf3ff;
+        }
+
+        body.sx-login-app .panel-left {
+            padding: 42px clamp(38px, 5vw, 76px);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(96, 165, 250, .28), transparent 30%),
+                radial-gradient(circle at 88% 86%, rgba(45, 212, 191, .18), transparent 32%),
+                linear-gradient(145deg, #0b1d42 0%, #123e7a 55%, #0a2855 100%);
+        }
+
+        body.sx-login-app .panel-left::before {
+            background:
+                linear-gradient(120deg, rgba(255,255,255,.05) 1px, transparent 1px),
+                linear-gradient(30deg, rgba(255,255,255,.035) 1px, transparent 1px);
+            background-size: 42px 42px;
+            opacity: .8;
+        }
+
+        body.sx-login-app .brand-logo,
+        body.sx-login-app .hero-heading,
+        body.sx-login-app .stat-num {
+            color: #ffffff;
+        }
+
+        body.sx-login-app .hero-desc {
+            color: #cbd9ef;
+            max-width: 390px;
+        }
+
+        body.sx-login-app .stat-label {
+            color: #a9c0de;
+        }
+
+        body.sx-login-app .stat-divider {
+            background: rgba(255,255,255,.16);
+        }
+
+        body.sx-login-app .hero-tag {
+            color: #cfe4ff;
+            background: rgba(147, 197, 253, .12);
+            border-color: rgba(191, 219, 254, .24);
+        }
+
+        body.sx-login-app .hero-tag-dot {
+            background: #7dd3fc;
+            box-shadow: 0 0 0 4px rgba(125, 211, 252, .12);
+        }
+
+        body.sx-login-app .panel-right {
+            width: min(46vw, 560px);
+            padding: 40px;
+            border: 0;
+            background: #f7faff;
+        }
+
+        body.sx-login-app .panel-right::before {
+            display: none;
+        }
+
+        body.sx-login-app .form-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 34px 32px 30px;
+            border: 1px solid rgba(148, 163, 184, .22);
+            border-radius: 24px;
+            background: #ffffff;
+            box-shadow: 0 22px 54px rgba(15, 42, 88, .12);
+        }
+
+        body.sx-login-app .form-header {
+            margin-bottom: 26px;
+        }
+
+        body.sx-login-app .form-welcome {
+            margin-bottom: 8px;
+            color: #2563eb;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: .12em;
+        }
+
+        body.sx-login-app .form-title {
+            margin-bottom: 9px;
+            color: #122044;
+            font-size: clamp(1.8rem, 2.4vw, 2.2rem);
+            letter-spacing: -.035em;
+        }
+
+        body.sx-login-app .form-subtitle {
+            color: #667085;
+            line-height: 1.55;
+        }
+
+        body.sx-login-app .form-hint {
+            gap: 10px;
+            margin: 18px 0 0;
+            padding: 11px 12px;
+            border-color: #dbeafe;
+            border-radius: 14px;
+            background: #f0f6ff;
+        }
+
+        body.sx-login-app .form-hint p,
+        body.sx-login-app .form-hint p strong {
+            color: #285187 !important;
+        }
+
+        body.sx-login-app .form-hint-icon svg {
+            fill: #2563eb;
+        }
+
+        body.sx-login-app .field {
+            margin-bottom: 17px;
+        }
+
+        body.sx-login-app .field-label {
+            color: #344054;
+            font-size: 12.5px;
+            font-weight: 650;
+        }
+
+        body.sx-login-app .field-input {
+            height: 52px;
+            border-color: #d9e2f0;
+            border-radius: 14px;
+            background: #fbfdff;
+        }
+
+        body.sx-login-app .field-input:hover {
+            border-color: #b7c8e1;
+        }
+
+        body.sx-login-app .field-input:focus {
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+        }
+
+        body.sx-login-app .forgot-row {
+            margin-top: -4px;
+            margin-bottom: 22px;
+        }
+
+        body.sx-login-app .btn-primary {
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #1478d4);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, .22);
+        }
+
+        body.sx-login-app .btn-primary:hover {
+            box-shadow: 0 14px 26px rgba(37, 99, 235, .28);
+        }
+
+        body.sx-login-app .btn-google {
+            height: 52px;
+            border-color: #d9e2f0;
+            border-radius: 14px;
+            background: #ffffff;
+            color: #344054;
+        }
+
+        body.sx-login-app .btn-google:hover {
+            border-color: #b7c8e1;
+            background: #f8fbff;
+        }
+
+        @media (max-width: 900px) {
+            body.sx-login-app .panel-right {
+                width: 100%;
+                min-height: 100dvh;
+                padding: 36px 22px;
+                background: linear-gradient(160deg, #edf4ff 0%, #f8fbff 72%);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body.sx-login-app .panel-right {
+                align-items: flex-start;
+                padding: 22px 16px 28px;
+            }
+
+            body.sx-login-app .form-card {
+                padding: 26px 20px 22px;
+                border-radius: 20px;
+                box-shadow: 0 14px 32px rgba(15, 42, 88, .1);
+            }
+
+            body.sx-login-app .form-hint {
+                padding: 10px;
+            }
+        }
+
+        /* The sign-in screen is a self-contained view, not a scrolling page. */
+        body.sx-login-app {
+            overflow: hidden;
+        }
+
+        body.sx-login-app .shell,
+        body.sx-login-app .panel-left,
+        body.sx-login-app .panel-right {
+            height: 100dvh;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        @media (max-height: 760px) {
+            body.sx-login-app .panel-right {
+                padding-top: 18px;
+                padding-bottom: 18px;
+            }
+
+            body.sx-login-app .form-card {
+                padding-top: 24px;
+                padding-bottom: 20px;
+            }
+
+            body.sx-login-app .form-header {
+                margin-bottom: 18px;
+            }
+
+            body.sx-login-app .form-hint {
+                margin-top: 12px;
+            }
+
+            body.sx-login-app .btn-apk,
+            body.sx-login-app .download-meta {
+                display: none;
+            }
         }
     </style>
     <link rel="preload" href="/schoolix-erp.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
