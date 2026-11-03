@@ -1,11 +1,9 @@
 {
-  "versionCode": 111,
-  "versionName": "5.4.1",
+  "versionCode": 110,
+  "versionName": "5.4.0",
   "forceUpdate": false,
-  "message": "Release 5.4.1: Full website update with the refreshed Schoolix experience.",
+  "message": "Release 5.4.0: Student records stay isolated until an academic session is verified.",
   "changelog": [
-    "Brings the latest full Schoolix website experience into the Android app.",
-    "Refreshes the sign-in screen with a cleaner, responsive design.",
     "Prevents student records from appearing before an academic session is verified.",
     "Fixes student dashboard terms dropdown and subject marks fetching.",
     "Synchronizes terms dynamically from terms collection, report cards, and saved marks.",
@@ -37,5 +35,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=111"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=110"
 }
