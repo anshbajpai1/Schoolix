@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from "./firebase-compat.js?v=accountant-guard-20260806-2";
 import { getAuth, onAuthStateChanged, signOut } from "./firebase-compat.js?v=accountant-guard-20260806-2";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, limit } from "./firebase-compat.js?v=accountant-guard-20260806-3";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, limit, onSnapshot } from "./firebase-compat.js?v=accountant-guard-20260806-3";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
@@ -13,6 +13,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let schoolAccessUnsubscribe = null;
+let subscriptionExpiryTimer = null;
 
 const SELF_MANAGED_SESSION_PAGES = new Set([
   "student-dashboard.html",
@@ -107,7 +109,26 @@ function featureEnabled(adminData, featureKey) {
   return (adminData.features || {})[featureKey] !== false;
 }
 
+function subscriptionAccessReason(adminData) {
+  const subscription = adminData?.subscription || {};
+  const status = String(subscription.status || "active").toLowerCase();
+  const expiresAt = subscription.expiresAt || adminData?.subscriptionExpiresAt;
+  const expiry = expiresAt ? new Date(`${String(expiresAt).slice(0, 10)}T23:59:59`) : null;
+  if (["suspended", "cancelled"].includes(status)) {
+    return "Your school's subscription has been suspended by the Super Admin. Please contact support.";
+  }
+  if (expiry && !Number.isNaN(expiry.getTime()) && expiry.getTime() < Date.now()) {
+    return "Your school's Schoolix subscription has expired. Please contact your school administrator or support for renewal.";
+  }
+  return "";
+}
+
 function blockReason(adminData, featureKey) {
+  const role = String(adminData?.role || "").toLowerCase();
+  if (role !== "superadmin" && adminData?.superAdmin !== true) {
+    const subscriptionReason = subscriptionAccessReason(adminData);
+    if (subscriptionReason) return subscriptionReason;
+  }
   if (!adminData || adminData.access === false) {
     return "Your school's platform access has been disabled by the Super Admin. Please contact support.";
   }
@@ -116,6 +137,29 @@ function blockReason(adminData, featureKey) {
     return `${label} access has been disabled for your school by the Super Admin.`;
   }
   return "";
+}
+
+function beginLiveSchoolAccessGuard(adminId, requiredFeature) {
+  if (!adminId || !auth.currentUser) return;
+  if (schoolAccessUnsubscribe) schoolAccessUnsubscribe();
+  if (subscriptionExpiryTimer) window.clearTimeout(subscriptionExpiryTimer);
+  const enforce = async (data) => {
+    const reason = blockReason(data, requiredFeature);
+    if (!reason) return;
+    try { if (auth.currentUser) await signOut(auth); } catch {}
+    redirectToLogin(reason);
+  };
+  schoolAccessUnsubscribe = onSnapshot(doc(db, "users", adminId), (snap) => {
+    if (!snap.exists()) return;
+    const data = { id: snap.id, ...snap.data() };
+    enforce(data);
+    const expiryValue = data?.subscription?.expiresAt || data?.subscriptionExpiresAt;
+    const expiry = expiryValue ? new Date(`${String(expiryValue).slice(0, 10)}T23:59:59`).getTime() : 0;
+    if (expiry > Date.now()) {
+      const delay = Math.min(expiry - Date.now() + 50, 2147483647);
+      subscriptionExpiryTimer = window.setTimeout(() => enforce(data), delay);
+    }
+  }, (error) => console.warn("Unable to watch school subscription access", error));
 }
 
 function linkedSchoolId(data = {}) {
@@ -233,6 +277,9 @@ async function guardUser(userId) {
     redirectToLogin(reason);
     return null;
   }
+
+  const adminId = linkedSchoolId(adminData || {}) || adminData?.id || linkedSchoolId(userData) || userId;
+  if (role !== "superadmin" && adminData?.superAdmin !== true) beginLiveSchoolAccessGuard(adminId, requiredFeature);
 
   if (page === "admin-dashboard.html") applyDashboardAccess(adminData || userData);
   syncNativeNotificationSchool(

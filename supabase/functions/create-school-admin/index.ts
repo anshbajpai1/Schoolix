@@ -131,12 +131,20 @@ Deno.serve(async (req) => {
     const schoolLogoUrl = cleanText(payload.schoolLogoUrl || logoUrl);
     const logoPublicId = cleanText(payload.logoPublicId);
     const features = payload.features && typeof payload.features === "object" ? payload.features : {};
+    const rawSubscription = payload.subscription && typeof payload.subscription === "object" ? payload.subscription as Record<string, unknown> : {};
+    const expiresAt = cleanText(rawSubscription.expiresAt);
+    const subscription = {
+      plan: cleanText(rawSubscription.plan) || "Growth",
+      status: "active",
+      expiresAt,
+    };
 
     if (!schoolName || !adminName || !email || !password) {
       return jsonResponse({ error: "Please fill all fields" }, 400);
     }
     if (!isEmail(email)) return jsonResponse({ error: "Enter a valid admin email" }, 400);
     if (password.length < 6) return jsonResponse({ error: "Password must be at least 6 characters" }, 400);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(expiresAt)) return jsonResponse({ error: "A valid licence expiry date is required" }, 400);
 
     const authUser = await createAuthUser(email, password, adminName, schoolName);
     const uid = authUser.id;
@@ -154,6 +162,7 @@ Deno.serve(async (req) => {
       schoolId: uid,
       access: true,
       features,
+      subscription,
       onboardingRequired: true,
       onboardingCompleted: false,
       onboardingVersion: 1,
@@ -173,6 +182,7 @@ Deno.serve(async (req) => {
       logoPublicId,
       access: true,
       features,
+      subscription,
       onboardingRequired: true,
       onboardingCompleted: false,
       onboardingVersion: 1,

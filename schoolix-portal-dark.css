@@ -1,0 +1,123 @@
+/* Teacher and student portals intentionally retain their focused dark workspace. */
+:root { color-scheme: dark; }
+
+body.sx-dark-portal {
+  --bg: #080d14;
+  --bg2: #0d1420;
+  --bg3: #111a2c;
+  --panel: #0f1a2e;
+  --panel2: #14203a;
+  --surface: #0f1a2e;
+  --surface2: #14203a;
+  --text: #e4ecff;
+  --text2: #9bb0d2;
+  --muted: #9bb0d2;
+  --border: rgba(148, 180, 255, .15);
+  --line: rgba(148, 180, 255, .15);
+  --line-strong: rgba(148, 180, 255, .25);
+  background: #080d14 !important;
+  color: #e4ecff !important;
+}
+
+body.sx-dark-portal .app,
+body.sx-dark-portal .app-shell,
+body.sx-dark-portal .shell,
+body.sx-dark-portal .dashboard,
+body.sx-dark-portal .main-content,
+body.sx-dark-portal .content-area {
+  background: #080d14 !important;
+  color: #e4ecff !important;
+}
+
+body.sx-dark-portal .card,
+body.sx-dark-portal .panel,
+body.sx-dark-portal .content-card,
+body.sx-dark-portal .stat-card,
+body.sx-dark-portal .summary-card,
+body.sx-dark-portal .metric-card,
+body.sx-dark-portal .section-card,
+body.sx-dark-portal .widget,
+body.sx-dark-portal .dashboard-card,
+body.sx-dark-portal .table-wrapper,
+body.sx-dark-portal .modal-content,
+body.sx-dark-portal .modal-box {
+  background: #0f1a2e !important;
+  border-color: rgba(148, 180, 255, .15) !important;
+  color: #e4ecff !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .18) !important;
+}
+
+body.sx-dark-portal .sidebar,
+body.sx-dark-portal .side-nav,
+body.sx-dark-portal .navbar,
+body.sx-dark-portal .topbar,
+body.sx-dark-portal .top-bar,
+body.sx-dark-portal .header,
+body.sx-dark-portal .app-header,
+body.sx-dark-portal .nav-panel {
+  background: #0d1420 !important;
+  border-color: rgba(148, 180, 255, .15) !important;
+  color: #e4ecff !important;
+}
+
+body.sx-dark-portal h1,
+body.sx-dark-portal h2,
+body.sx-dark-portal h3,
+body.sx-dark-portal h4,
+body.sx-dark-portal strong,
+body.sx-dark-portal .title,
+body.sx-dark-portal .card-title {
+  color: #f5f8ff !important;
+}
+
+body.sx-dark-portal p,
+body.sx-dark-portal .muted,
+body.sx-dark-portal .subtitle,
+body.sx-dark-portal small,
+body.sx-dark-portal .meta {
+  color: #9bb0d2 !important;
+}
+
+body.sx-dark-portal input,
+body.sx-dark-portal select,
+body.sx-dark-portal textarea,
+body.sx-dark-portal .form-control,
+body.sx-dark-portal .search-input,
+body.sx-dark-portal .filter-select {
+  background: #111a2c !important;
+  border-color: rgba(148, 180, 255, .23) !important;
+  color: #e4ecff !important;
+}
+body.sx-dark-portal input::placeholder,
+body.sx-dark-portal textarea::placeholder { color: #627a9f !important; }
+
+body.sx-dark-portal table,
+body.sx-dark-portal .table { background: #0f1a2e !important; color: #dce8ff !important; }
+body.sx-dark-portal th { background: #111a2c !important; color: #aebfda !important; }
+body.sx-dark-portal th,
+body.sx-dark-portal td { border-color: rgba(148, 180, 255, .13) !important; }
+body.sx-dark-portal tr:hover td { background: #14203a !important; }
+
+body.sx-dark-portal .btn-secondary,
+body.sx-dark-portal .secondary-btn,
+body.sx-dark-portal .button-secondary {
+  background: #14203a !important;
+  color: #dce8ff !important;
+  border-color: rgba(148, 180, 255, .24) !important;
+}
+body.sx-dark-portal .btn-primary,
+body.sx-dark-portal .primary-btn,
+body.sx-dark-portal .button-primary {
+  background: #2f6fed !important;
+  border-color: #2f6fed !important;
+  color: #ffffff !important;
+}
+
+body.sx-dark-portal .empty-state,
+body.sx-dark-portal .loading,
+body.sx-dark-portal .notice,
+body.sx-dark-portal .info-box {
+  background: #111a2c !important;
+  border-color: rgba(148, 180, 255, .18) !important;
+  color: #9bb0d2 !important;
+}

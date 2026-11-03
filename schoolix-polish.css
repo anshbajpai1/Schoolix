@@ -719,6 +719,7 @@ tbody > tr[hidden] {
     padding-bottom: 2px;
   }
 }
+
 /* Shared, accessible fallback for unexpected runtime and network failures. */
 .sx-runtime-error {
   position: fixed;
@@ -748,5 +749,165 @@ tbody > tr[hidden] {
   font: inherit;
   font-size: 12px;
   cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   Schoolix light workspace system
+   A final shared layer for every portal. Page-level structure remains intact,
+   while surfaces and controls use one restrained, professional visual language.
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --sx-workspace-bg: #f7f8fa;
+  --sx-workspace-surface: #ffffff;
+  --sx-workspace-subtle: #f8fafc;
+  --sx-workspace-ink: #101828;
+  --sx-workspace-muted: #667085;
+  --sx-workspace-border: #e4e7ec;
+  --sx-workspace-border-strong: #d0d5dd;
+  --sx-workspace-primary: #175cd3;
+  --sx-workspace-primary-hover: #1849a9;
+  --sx-workspace-success: #067647;
+  --sx-workspace-danger: #b42318;
+  --sx-polish-radius: 6px;
+  --sx-radius: 6px;
+}
+
+html, body {
+  background: var(--sx-workspace-bg) !important;
+  color: var(--sx-workspace-ink) !important;
+}
+
+body {
+  font-family: "Inter", "DM Sans", "Segoe UI", Arial, sans-serif !important;
+  background-image: none !important;
+}
+
+/* Give page content a neutral canvas without changing its layout. */
+.page, .page-shell, .app-shell, .app-container, .main-content, .content-area,
+.dashboard-container, .dashboard-shell, .container, .driver-shell {
+  color: var(--sx-workspace-ink);
+}
+
+.page {
+  background: var(--sx-workspace-bg) !important;
+  background-image: none !important;
+}
+
+/* Shared surfaces: no glass, gradients, or oversized rounded cards. */
+.card, .panel, .content-card, .stat-card, .summary-card, .metric-card,
+.info-card, .form-card, .table-card, .dashboard-card, .section-card,
+.widget, .control-card, .table-wrapper, .modal-content, .modal-box,
+.dialog, .session-item, .term-item, .metric, .sx-chart-card {
+  background: var(--sx-workspace-surface) !important;
+  border: 1px solid var(--sx-workspace-border) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+  backdrop-filter: none !important;
+}
+
+/* Rectangular, consistent controls. */
+button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
+.submit-btn, .save-btn, .cancel-btn, .delete-btn, .edit-btn, .back-link,
+input, select, textarea, .form-control, .search-input, .filter-select {
+  border-radius: 6px !important;
+}
+
+button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
+.submit-btn, .save-btn, .cancel-btn, .delete-btn, .edit-btn {
+  box-shadow: none !important;
+  font-weight: 650 !important;
+}
+
+input, select, textarea, .form-control, .search-input, .filter-select {
+  background: #ffffff !important;
+  color: #344054 !important;
+  border: 1px solid var(--sx-workspace-border-strong) !important;
+  box-shadow: none !important;
+}
+
+input::placeholder, textarea::placeholder { color: #98a2b3 !important; }
+input:focus, select:focus, textarea:focus, .form-control:focus {
+  border-color: #84adff !important;
+  box-shadow: 0 0 0 3px #eff4ff !important;
+  outline: 0 !important;
+}
+
+/* Pills become compact status labels, never oversized capsules. */
+.badge, .chip, .tag, .pill, .status-badge, .count-badge, .role-badge,
+.status-chip, .filter-chip, .sx-chip, .sx-tag {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+/* Keep data views restrained and legible. */
+table, .table { background: #fff !important; color: #344054 !important; }
+th { background: #f9fafb !important; color: #475467 !important; }
+th, td { border-color: var(--sx-workspace-border) !important; }
+tr:hover td { background: #fcfcfd !important; }
+
+/* Common top bars and sidebars use clear white separation. */
+.navbar, .topbar, .top-bar, .header, .app-header, .sidebar, .side-nav,
+.navigation, .nav-panel {
+  border-color: var(--sx-workspace-border) !important;
+  box-shadow: none !important;
+}
+
+/* Avoid decorative blobs/gradients in shared page shells. */
+.page::before, .page::after, .app-shell::before, .app-shell::after {
+  background-image: none !important;
+}
+
+@media (max-width: 640px) {
+  button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
+  .submit-btn, .save-btn, .cancel-btn, .delete-btn, .edit-btn {
+    min-height: 38px;
+  }
+}
+
+/* User-selected sharp interface: no pills, rounded cards, or circular controls. */
+html *,
+html *::before,
+html *::after {
+  border-radius: 0 !important;
+}
+
+/* Intentional circular UI: data visualisations and compact functional indicators. */
+.sx-donut,
+.sx-donut::after,
+.donut-chart,
+.donut-chart::before,
+.donut-center,
+.pie-chart,
+.radial-chart,
+.circular-chart,
+.chart-donut,
+.progress-ring,
+.progress-circle,
+.circle-progress,
+.sx-donut-wrap [data-chart="donut"],
+.donut-wrap [data-chart="donut"] {
+  border-radius: 50% !important;
+}
+
+/* A square UI still needs recognisable status/activity indicators. */
+.spinner,
+.sx-spinner,
+.loading-spinner,
+.auth-loader-ring,
+.auth-loader-ring span,
+.loader::after,
+.notice-spinner,
+.dashboard-notice-spinner,
+.status-dot,
+.connection-dot,
+.sx-dot,
+.sx-vehicle-marker-dot,
+.avatar,
+.profile-avatar,
+.teacher-avatar,
+.user-avatar,
+.topbar-avatar {
+  border-radius: 50% !important;
 }
 

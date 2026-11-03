@@ -10039,31 +10039,33 @@ document.getElementById('termFilter').addEventListener('change', applyFilters);\
   </section>\r
 </div>\r
 \r
+<header class="workspace-header">\r
+  <div class="workspace-brand"><span class="brand-mark">S</span><span>Schoolix</span><span class="workspace-label">Super Admin Workspace</span></div>\r
+  <div class="super-admin-top-actions"><button type="button" class="super-admin-logout" onclick="logoutSuperAdmin()">Sign out</button></div>\r
+</header>\r
+\r
 <div class="shell">\r
 \r
   <!-- LEFT: Hero + School List -->\r
   <section class="panel hero">\r
     <div class="panel-body">\r
-      <div class="super-admin-top-actions">\r
-        <div class="eyebrow" style="margin-bottom:0;">Schoolix Super Admin</div>\r
-        <button type="button" class="super-admin-logout" onclick="logoutSuperAdmin()">Logout</button>\r
-      </div>\r
-      <h1>School Access Control Panel</h1>\r
-      <p>Create admin accounts for schools and control exactly which features each school can access - from one place.</p>\r
-\r
-      <div class="chips">\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h4v7H4v-7Zm6-9h4v16h-4V4Zm6 5h4v11h-4V9Z"/></svg>Dashboard</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 8a8 8 0 0 1 16 0H4Z"/></svg>Teachers</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v2h3v16H4V5h3V3Zm2 4H6v12h12V7h-3v2H9V7Zm1 6h6v2h-6v-2Z"/></svg>Attendance</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4V6Zm2 2v8h12V8H6Zm6 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>Payroll</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7l2 2h7v12H4V5Zm3 8h10v-2H7v2Zm0 4h7v-2H7v2Z"/></svg>Reports</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Zm-7 9v4l7 4 7-4v-4l-7 3.5L5 12Z"/></svg>Students</span>\r
-        <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l7 4V6l-7 4H4Zm13-1.5v7a4 4 0 0 0 0-7Z"/></svg>Announcements</span>\r
+      <div class="eyebrow">Operations overview</div>\r
+      <h1>School portfolio</h1>\r
+      <p>Manage access, subscriptions, billing records and modules for every school from one workspace.</p>\r
+      <div class="admin-summary" aria-label="Portfolio summary">\r
+        <div class="summary-cell"><span>Total schools</span><strong id="summaryTotal">0</strong></div>\r
+        <div class="summary-cell"><span>Active</span><strong id="summaryActive">0</strong></div>\r
+        <div class="summary-cell"><span>Need attention</span><strong id="summaryAttention">0</strong></div>\r
+        <div class="summary-cell"><span>Modules controlled</span><strong>11</strong></div>\r
       </div>\r
 \r
       <div class="list-head">\r
         <h3>Schools With Access</h3>\r
         <span class="count-badge" id="schoolCount">0 schools</span>\r
+      </div>\r
+      <div class="school-toolbar">\r
+        <input id="schoolSearch" class="school-search" type="search" placeholder="Search by school or admin email">\r
+        <select id="schoolStatusFilter" class="school-filter"><option value="all">All status</option><option value="active">Active</option><option value="attention">Needs attention</option><option value="blocked">Blocked</option></select>\r
       </div>\r
 \r
       <div class="school-list" id="schoolList">\r
@@ -10075,9 +10077,9 @@ document.getElementById('termFilter').addEventListener('change', applyFilters);\
   <!-- RIGHT: Signup Form -->\r
   <section class="panel form-panel">\r
     <div class="panel-body">\r
-      <div class="eyebrow">Admin Signup</div>\r
-      <h2>Create School Admin</h2>\r
-      <p class="sub">Enter school and admin details to create a new admin account with full access.</p>\r
+      <div class="eyebrow">New school</div>\r
+      <h2>Create school workspace</h2>\r
+      <p class="sub">Set up the school administrator, branding and first subscription in one step.</p>\r
 \r
       <div class="form-grid">\r
         <div class="field">\r
@@ -10106,6 +10108,14 @@ document.getElementById('termFilter').addEventListener('change', applyFilters);\
         </div>\r
         <div class="hint">\r
           New admin gets access to all features by default. You can restrict individual features anytime from the school list.\r
+        </div>\r
+        <div class="field">\r
+          <label for="signupPlan">Subscription Plan</label>\r
+          <select id="signupPlan"><option value="Starter">Starter</option><option value="Growth" selected>Growth</option><option value="Enterprise">Enterprise</option></select>\r
+        </div>\r
+        <div class="field">\r
+          <label for="signupExpiry">Licence Expiry</label>\r
+          <input type="date" id="signupExpiry" required>\r
         </div>\r
         <button class="submit-btn" onclick="signup()">Create Admin Account</button>\r
       </div>\r
@@ -10152,6 +10162,35 @@ document.getElementById('termFilter').addEventListener('change', applyFilters);\
           </label>\r
         </div>\r
       </div>\r
+\r
+      <section class="school-profile-panel" aria-label="School profile controls">\r
+        <h3>School profile</h3>\r
+        <p>Update the school information shown throughout Schoolix. The login email is visible here but is changed through a separate secure credential process.</p>\r
+        <div class="school-profile-grid">\r
+          <label>School name<input id="profileSchoolName" type="text" maxlength="120"></label>\r
+          <label>Administrator name<input id="profileAdminName" type="text" maxlength="100"></label>\r
+          <label>Login email<input id="profileAdminEmail" class="profile-readonly" type="email" readonly></label>\r
+          <label>Contact number<input id="profilePhone" type="tel" maxlength="30" placeholder="School contact number"></label>\r
+          <label>School code<input id="profileSchoolCode" type="text" maxlength="40" placeholder="Optional internal code"></label>\r
+          <label>Replace logo<input id="profileSchoolLogo" type="file" accept="image/*"></label>\r
+          <label class="profile-wide">Address<textarea id="profileAddress" maxlength="300" placeholder="School address, city and state"></textarea></label>\r
+        </div>\r
+      </section>\r
+\r
+      <section class="subscription-panel" aria-label="Subscription and billing controls">\r
+        <h3>Subscription & Billing Control</h3>\r
+        <p>Expiry automatically blocks every school user at their next protected page check. Set a manual suspension anytime.</p>\r
+        <div class="subscription-grid">\r
+          <label>Plan<select id="subscriptionPlan"><option value="Starter">Starter</option><option value="Growth">Growth</option><option value="Enterprise">Enterprise</option></select></label>\r
+          <label>Status<select id="subscriptionStatus"><option value="active">Active</option><option value="past_due">Payment due</option><option value="suspended">Suspended</option><option value="cancelled">Cancelled</option></select></label>\r
+          <label>Expiry date<input id="subscriptionExpiresAt" type="date"></label>\r
+          <label>Billing amount (₹)<input id="paymentAmount" type="number" min="0" step="0.01" placeholder="Optional renewal payment"></label>\r
+          <label>Payment date<input id="paymentDate" type="date"></label>\r
+          <label>Reference / note<input id="paymentReference" maxlength="100" placeholder="Invoice or transaction ID"></label>\r
+        </div>\r
+        <div class="subscription-summary" id="subscriptionSummary">Loading subscription...</div>\r
+        <div class="billing-history"><h4>Recent payment records</h4><div id="billingHistory"><div class="billing-empty">Loading records...</div></div></div>\r
+      </section>\r
 \r
       <!-- Feature Toggles -->\r
       <div class="features-head">Module-Level Control</div>\r
@@ -10228,6 +10267,35 @@ let currentData = null;\r
 let signupInProgress = false;\r
 const CLOUDINARY_CLOUD_NAME = "fthnumnk";\r
 const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";\r
+\r
+function isoDate(value) {\r
+  const date = toJsDate(value);\r
+  return date ? date.toISOString().slice(0, 10) : "";\r
+}\r
+\r
+function defaultExpiryDate() {\r
+  const date = new Date();\r
+  date.setFullYear(date.getFullYear() + 1);\r
+  return date.toISOString().slice(0, 10);\r
+}\r
+\r
+function subscriptionState(data = {}) {\r
+  const subscription = data.subscription || {};\r
+  const expiresAt = isoDate(subscription.expiresAt || data.subscriptionExpiresAt);\r
+  const status = String(subscription.status || "active").toLowerCase();\r
+  const expired = Boolean(expiresAt && new Date(\`\${expiresAt}T23:59:59\`).getTime() < Date.now());\r
+  const blocked = ["suspended", "cancelled"].includes(status) || expired;\r
+  return { plan: subscription.plan || "Growth", status: expired ? "expired" : status, expiresAt, expired, blocked };\r
+}\r
+\r
+function subscriptionLabel(data = {}) {\r
+  const sub = subscriptionState(data);\r
+  if (sub.status === "expired") return \`Expired \${sub.expiresAt || ""}\`.trim();\r
+  if (sub.status === "suspended") return "Suspended";\r
+  if (sub.status === "past_due") return "Payment due";\r
+  if (sub.status === "cancelled") return "Cancelled";\r
+  return \`Active · expires \${sub.expiresAt || "not set"}\`;\r
+}\r
 \r
 function normalizeEmail(value = "") {\r
   return String(value || "").trim().toLowerCase();\r
@@ -10325,12 +10393,17 @@ window.signup = async () => {\r
   const email      = normalizeEmail(document.getElementById("email").value);\r
   const password   = document.getElementById("password").value;\r
   const logoFile   = document.getElementById("schoolLogo")?.files?.[0] || null;\r
+  const plan = document.getElementById("signupPlan").value;\r
+  const expiresAt = document.getElementById("signupExpiry").value;\r
 \r
   if (!schoolName || !adminName || !email || !password) {\r
     showToast("Please fill all fields", "error"); return;\r
   }\r
   if (password.length < 6) {\r
     showToast("Password must be at least 6 characters", "error"); return;\r
+  }\r
+  if (!expiresAt) {\r
+    showToast("Please set the school licence expiry date", "error"); return;\r
   }\r
 \r
   const btn = document.querySelector(".submit-btn");\r
@@ -10367,7 +10440,8 @@ window.signup = async () => {\r
         logoUrl: logoUpload.logoUrl,
         schoolLogoUrl: logoUpload.logoUrl,
         logoPublicId: logoUpload.logoPublicId,
-        features: defaultFeatures
+        features: defaultFeatures,\r
+        subscription: { plan, status: "active", expiresAt }\r
       })
     });
     const result = await response.json().catch(() => ({}));
@@ -10383,6 +10457,7 @@ window.signup = async () => {\r
       logoPublicId: logoUpload.logoPublicId,\r
       access: true,\r
       features: defaultFeatures,\r
+      subscription: { plan, status: "active", expiresAt },\r
       onboardingRequired: true,\r
       onboardingCompleted: false,\r
       onboardingVersion: 1,\r
@@ -10390,9 +10465,16 @@ window.signup = async () => {\r
       createdBy: auth.currentUser?.uid || "",\r
       createdByEmail: SUPER_ADMIN_EMAIL
     }, { merge: true });
+    await setDoc(doc(db, "users", result.uid), {\r
+      access: true,\r
+      features: defaultFeatures,\r
+      subscription: { plan, status: "active", expiresAt },\r
+      updatedAt: new Date()\r
+    }, { merge: true });\r
 
     showToast(\`Admin created for \${schoolName}\`);
     ["schoolName","adminName","email","password"].forEach(id => document.getElementById(id).value = "");\r
+    document.getElementById("signupExpiry").value = defaultExpiryDate();\r
     const logoInput = document.getElementById("schoolLogo");\r
     if (logoInput) logoInput.value = "";\r
     const logoPreview = document.getElementById("schoolLogoPreview");\r
@@ -10541,6 +10623,27 @@ function renderInsightGrid(metrics = {}) {\r
   return rows.map(([label, value]) => \`<div class="insight-card"><span>\${label}</span><strong>\${Number(value || 0).toLocaleString("en-IN")}</strong></div>\`).join("");\r
 }\r
 \r
+function updatePortfolioSummary(schools = []) {\r
+  const active = schools.filter((school) => school.access !== false && !subscriptionState(school).blocked).length;\r
+  const attention = schools.filter((school) => {\r
+    const state = subscriptionState(school);\r
+    return state.status === "past_due" || state.expired || state.blocked || school.access === false;\r
+  }).length;\r
+  document.getElementById("summaryTotal").textContent = schools.length.toLocaleString("en-IN");\r
+  document.getElementById("summaryActive").textContent = active.toLocaleString("en-IN");\r
+  document.getElementById("summaryAttention").textContent = attention.toLocaleString("en-IN");\r
+}\r
+\r
+function applySchoolFilters() {\r
+  const search = String(document.getElementById("schoolSearch")?.value || "").trim().toLowerCase();\r
+  const filter = String(document.getElementById("schoolStatusFilter")?.value || "all");\r
+  document.querySelectorAll(".school-card").forEach((card) => {\r
+    const matchesSearch = !search || String(card.dataset.search || "").includes(search);\r
+    const matchesStatus = filter === "all" || card.dataset.status === filter;\r
+    card.hidden = !(matchesSearch && matchesStatus);\r
+  });\r
+}\r
+\r
 // ---- LOAD SCHOOLS ----\r
 async function loadSchools() {\r
   const list = document.getElementById("schoolList");\r
@@ -10556,6 +10659,7 @@ async function loadSchools() {\r
     });\r
 \r
     countBadge.textContent = schools.length + " school" + (schools.length !== 1 ? "s" : "");\r
+    updatePortfolioSummary(schools);\r
 \r
     if (!schools.length) {\r
       list.innerHTML = \`<div class="empty-state">No schools registered yet.</div>\`;\r
@@ -10566,21 +10670,24 @@ async function loadSchools() {\r
     const metricsBySchool = Object.fromEntries(metricEntries);\r
 \r
     list.innerHTML = schools.map(s => {\r
-      const on = s.access !== false;\r
+      const subscription = subscriptionState(s);\r
+      const on = s.access !== false && !subscription.blocked;\r
+      const portfolioStatus = !on ? "blocked" : (subscription.status === "past_due" ? "attention" : "active");\r
       const ini = initials(s.schoolName);\r
       const featOn = s.features ? Object.values(s.features).filter(Boolean).length : FEATURES.length;\r
       const metrics = metricsBySchool[s.uid] || {};\r
       return \`\r
-      <div class="school-card" id="card-\${s.uid}">\r
+      <div class="school-card" id="card-\${s.uid}" data-status="\${portfolioStatus}" data-search="\${escapeHtml(\`\${s.schoolName || ""} \${s.email || ""} \${s.adminEmail || ""}\`).toLowerCase()}">\r
         <div class="card-main">\r
           <div class="school-avatar">\${renderLogo(s.logoUrl || s.schoolLogoUrl || "", ini)}</div>\r
           <div class="card-info">\r
             <div class="card-name">\${escapeHtml(s.schoolName)}</div>\r
             <div class="card-meta">\r
               <span class="status-dot \${on ? 'on' : 'off'}"></span>\r
-              \${on ? "Access Enabled" : "Access Disabled"} &nbsp;|&nbsp;\r
+              \${on ? "Access Enabled" : "Access blocked"} &nbsp;|&nbsp;\r
               \${featOn}/\${FEATURES.length} modules\r
             </div>\r
+            <div class="card-meta" style="margin-top:4px;color:\${subscription.blocked ? '#f87171' : '#94a3b8'}">\${escapeHtml(subscriptionLabel(s))}</div>\r
           </div>\r
         </div>\r
         <div class="school-card-stats">\r
@@ -10596,11 +10703,7 @@ async function loadSchools() {\r
           </button>\r
           <button class="btn btn-features"\r
             onclick="openModal('\${s.uid}')">\r
-            Manage Features\r
-          </button>\r
-          <button class="btn btn-insights"\r
-            onclick="openModal('\${s.uid}')">\r
-            Track School\r
+            Manage school\r
           </button>\r
           <button class="btn btn-delete"\r
             onclick="deleteSchool('\${s.uid}', '\${jsString(s.schoolName)}')">\r
@@ -10609,6 +10712,7 @@ async function loadSchools() {\r
         </div>\r
       </div>\`;\r
     }).join("");\r
+    applySchoolFilters();\r
   } catch(e) {\r
     list.innerHTML = \`<div class="empty-state">Failed to load schools.</div>\`;\r
     console.error(e);\r
@@ -10633,7 +10737,8 @@ window.openModal = async (uid) => {\r
   try {\r
     const snap = await getDoc(doc(db, "users", uid));\r
     if (!snap.exists()) { showToast("School not found", "error"); return; }\r
-    currentData = snap.data();\r
+    const schoolSnap = await getDoc(doc(db, "schools", uid)).catch(() => null);\r
+    currentData = { ...(schoolSnap?.exists?.() ? schoolSnap.data() : {}), ...snap.data() };\r
 \r
     document.getElementById("modalSchoolName").textContent = currentData.schoolName;\r
     document.getElementById("modalSchoolEmail").textContent = currentData.email;\r
@@ -10653,6 +10758,22 @@ window.openModal = async (uid) => {\r
     const toggle = document.getElementById("masterAccessToggle");\r
     toggle.checked = currentData.access !== false;\r
     updateAccessLabel();\r
+    document.getElementById("profileSchoolName").value = currentData.schoolName || currentData.name || "";\r
+    document.getElementById("profileAdminName").value = currentData.adminName || currentData.name || "";\r
+    document.getElementById("profileAdminEmail").value = currentData.adminEmail || currentData.email || "";\r
+    document.getElementById("profilePhone").value = currentData.phone || currentData.contactNumber || "";\r
+    document.getElementById("profileSchoolCode").value = currentData.schoolCode || "";\r
+    document.getElementById("profileAddress").value = currentData.address || "";\r
+    document.getElementById("profileSchoolLogo").value = "";\r
+    const subscription = subscriptionState(currentData);\r
+    document.getElementById("subscriptionPlan").value = subscription.plan;\r
+    document.getElementById("subscriptionStatus").value = subscription.status === "expired" ? "past_due" : subscription.status;\r
+    document.getElementById("subscriptionExpiresAt").value = subscription.expiresAt;\r
+    document.getElementById("paymentAmount").value = "";\r
+    document.getElementById("paymentDate").value = new Date().toISOString().slice(0, 10);\r
+    document.getElementById("paymentReference").value = "";\r
+    document.getElementById("subscriptionSummary").textContent = \`\${subscription.plan} · \${subscriptionLabel(currentData)}\${subscription.blocked ? " — school access is blocked" : ""}\`;\r
+    loadBillingHistory(uid);\r
 \r
     // Build feature rows\r
     const grid = document.getElementById("featuresGrid");\r
@@ -10679,6 +10800,20 @@ window.openModal = async (uid) => {\r
   } catch(e) { showToast(e.message, "error"); }\r
 };\r
 \r
+async function loadBillingHistory(uid) {\r
+  const target = document.getElementById("billingHistory");\r
+  if (!target) return;\r
+  target.innerHTML = \`<div class="billing-empty">Loading records...</div>\`;\r
+  try {\r
+    const snap = await getDocs(collection(db, "schools", uid, "billingPayments"));\r
+    const rows = snap.docs.map((item) => ({ id: item.id, ...item.data() }))\r
+      .sort((a, b) => String(b.paymentDate || b.createdAt || "").localeCompare(String(a.paymentDate || a.createdAt || ""))).slice(0, 8);\r
+    target.innerHTML = rows.length ? rows.map((payment) => \`<div class="billing-item"><div><strong>₹\${Number(payment.amount || 0).toLocaleString("en-IN")}</strong><span>\${escapeHtml(payment.reference || "Payment recorded")}</span></div><span>\${escapeHtml(payment.paymentDate || "")}</span></div>\`).join("") : \`<div class="billing-empty">No payments recorded for this school yet.</div>\`;\r
+  } catch (_) {\r
+    target.innerHTML = \`<div class="billing-empty">Payment history could not be loaded.</div>\`;\r
+  }\r
+}\r
+\r
 // ---- CLOSE MODAL ----\r
 window.closeModal = () => {\r
   document.getElementById("featureModal").classList.remove("open");\r
@@ -10690,6 +10825,9 @@ window.closeModal = () => {\r
 document.getElementById("featureModal").addEventListener("click", function(e) {\r
   if (e.target === this) closeModal();\r
 });\r
+\r
+document.getElementById("schoolSearch").addEventListener("input", applySchoolFilters);\r
+document.getElementById("schoolStatusFilter").addEventListener("change", applySchoolFilters);\r
 \r
 // ---- UPDATE ACCESS LABEL ----\r
 window.updateAccessLabel = () => {\r
@@ -10712,17 +10850,61 @@ window.saveFeatures = async () => {\r
     FEATURES.forEach(f => {\r
       newFeatures[f.key] = document.getElementById("feat-" + f.key).checked;\r
     });\r
+    const subscription = {\r
+      plan: document.getElementById("subscriptionPlan").value,\r
+      status: document.getElementById("subscriptionStatus").value,\r
+      expiresAt: document.getElementById("subscriptionExpiresAt").value\r
+    };\r
+    if (!subscription.expiresAt) throw new Error("Set a licence expiry date before saving.");\r
+    const paymentAmount = Number(document.getElementById("paymentAmount").value || 0);\r
+    const paymentDate = document.getElementById("paymentDate").value;\r
+    const paymentReference = document.getElementById("paymentReference").value.trim();\r
+    if (paymentAmount > 0 && !paymentDate) throw new Error("Set a payment date for the recorded payment.");\r
+    const schoolDetails = {\r
+      schoolName: document.getElementById("profileSchoolName").value.trim(),\r
+      name: document.getElementById("profileSchoolName").value.trim(),\r
+      adminName: document.getElementById("profileAdminName").value.trim(),\r
+      phone: document.getElementById("profilePhone").value.trim(),\r
+      contactNumber: document.getElementById("profilePhone").value.trim(),\r
+      schoolCode: document.getElementById("profileSchoolCode").value.trim(),\r
+      address: document.getElementById("profileAddress").value.trim()\r
+    };\r
+    if (!schoolDetails.schoolName || !schoolDetails.adminName) throw new Error("School name and administrator name are required.");\r
+    const replacementLogo = document.getElementById("profileSchoolLogo").files?.[0] || null;\r
+    if (replacementLogo) {\r
+      const logoUpload = await uploadSchoolLogo(replacementLogo, schoolDetails.schoolName);\r
+      Object.assign(schoolDetails, logoUpload, { schoolLogoUrl: logoUpload.logoUrl });\r
+    }\r
 \r
     await updateDoc(doc(db, "users", currentUID), {\r
       access: newAccess,\r
-      features: newFeatures\r
+      features: newFeatures,\r
+      subscription,\r
+      ...schoolDetails,\r
+      name: schoolDetails.adminName\r
     });\r
     await setDoc(doc(db, "schools", currentUID), {\r
       access: newAccess,\r
       features: newFeatures,\r
+      subscription,\r
+      ...schoolDetails,\r
       updatedAt: new Date(),\r
       updatedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL\r
     }, { merge: true });\r
+    if (replacementLogo) {\r
+      await setDoc(doc(db, "schools", currentUID, "config", "branding"), {\r
+        schoolName: schoolDetails.schoolName,\r
+        logoUrl: schoolDetails.logoUrl,\r
+        schoolLogoUrl: schoolDetails.schoolLogoUrl,\r
+        logoPublicId: schoolDetails.logoPublicId,\r
+        updatedAt: new Date(),\r
+        updatedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL\r
+      }, { merge: true });\r
+    }\r
+    if (paymentAmount > 0) {\r
+      const paymentRef = doc(collection(db, "schools", currentUID, "billingPayments"));\r
+      await setDoc(paymentRef, { amount: paymentAmount, paymentDate, reference: paymentReference, plan: subscription.plan, recordedAt: new Date(), recordedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL });\r
+    }\r
 \r
     showToast("Settings saved successfully");\r
     closeModal();\r
@@ -10770,7 +10952,8 @@ onAuthStateChanged(auth, async (user) => {\r
   } catch (profileError) {
     console.warn("Super admin profile bootstrap failed:", profileError);
   }
-  loadSchools();
+  document.getElementById("signupExpiry").value = defaultExpiryDate();\r
+  loadSchools();\r
 });
 <\/script>\r
   <script src="schoolix-polish.js" defer><\/script>\r
@@ -10819,7 +11002,45 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 .sx-page-loader .dot {
   display: none !important;
 }
-`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
+`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:`\r
+<style>\r
+/* Super admin workspace: restrained, light and operational */\r
+:root { --bg:#f6f8fb; --surface:#ffffff; --surface2:#ffffff; --line:#e4e9f0; --line2:#edf1f5; --text:#172033; --muted:#667085; --brand:#1d4ed8; --brand2:#1e40af; --danger:#b42318; --success:#067647; --warn:#b54708; }\r
+body { display:block; padding:0; color:var(--text); background:var(--bg); background-image:none; }\r
+.workspace-header { height:72px; background:#fff; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 max(24px, calc((100vw - 1280px) / 2)); }\r
+.workspace-brand { display:flex; align-items:center; gap:12px; font-family:var(--font-head); font-weight:700; letter-spacing:-.03em; }\r
+.brand-mark { width:32px; height:32px; display:grid; place-items:center; background:#1d4ed8; color:#fff; font-size:13px; border-radius:7px; }\r
+.workspace-label { font-size:12px; color:var(--muted); font-family:var(--font-body); font-weight:600; letter-spacing:0; }\r
+.workspace-header .super-admin-top-actions { margin:0; }\r
+.super-admin-top-actions .eyebrow { display:none; }\r
+.super-admin-logout { border-color:#e5e7eb; border-radius:7px; background:#fff; color:#344054; padding:9px 14px; font-weight:600; }\r
+.super-admin-logout:hover { background:#f9fafb; border-color:#d0d5dd; }\r
+.shell { width:min(1280px,100%); padding:32px 24px 48px; grid-template-columns:minmax(0,1.55fr) minmax(340px,.9fr); gap:24px; }\r
+.panel { background:#fff; border:1px solid var(--line); border-radius:10px; backdrop-filter:none; box-shadow:0 1px 2px rgba(16,24,40,.03); overflow:visible; }\r
+.panel-body,.form-panel .panel-body { padding:26px; }\r
+.hero .super-admin-top-actions { display:none; }\r
+.eyebrow { color:#475467; font-family:var(--font-body); font-size:11px; letter-spacing:.08em; margin-bottom:9px; }\r
+.hero h1 { font-size:28px; color:#101828; margin-bottom:8px; letter-spacing:-.035em; }\r
+.hero p { color:var(--muted); font-size:14px; line-height:1.55; margin-bottom:22px; }\r
+.chips { display:none; }\r
+.admin-summary { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); margin:0 0 26px; }\r
+.summary-cell { padding:15px; border-right:1px solid var(--line); }\r
+.summary-cell:last-child { border:0; }\r
+.summary-cell span { display:block; color:var(--muted); font-size:11px; margin-bottom:5px; }\r
+.summary-cell strong { color:#101828; font:700 20px var(--font-head); letter-spacing:-.04em; }\r
+.school-toolbar { display:flex; gap:10px; align-items:center; margin-bottom:16px; }\r
+.school-search,.school-filter { height:36px; border:1px solid #d0d5dd; border-radius:6px; background:#fff; color:#344054; padding:0 10px; font:13px var(--font-body); outline:none; }\r
+.school-search { flex:1; }.school-search:focus,.school-filter:focus { border-color:#84adff; box-shadow:0 0 0 3px #eff4ff; }\r
+.list-head { margin-bottom:12px; }.list-head h3 { color:#101828; font-family:var(--font-head); font-size:15px; }.count-badge { background:#f2f4f7; color:#475467; border-radius:5px; padding:4px 8px; }\r
+.school-list { gap:10px; }.school-card { background:#fff; border:1px solid var(--line); border-radius:8px; }.school-card:hover { border-color:#b2ccff; box-shadow:0 2px 8px rgba(16,24,40,.05); }\r
+.card-main { padding:15px 16px 12px; }.school-avatar { width:38px; height:38px; border-radius:7px; background:#eff4ff; border-color:#d1e0ff; color:#1d4ed8; }.card-name { color:#101828; }.card-meta { color:#667085; font-size:12px; }.status-dot { border-radius:2px; box-shadow:none!important; }.school-card-stats { padding:0 15px 12px; gap:8px; }.school-card-stat { border-radius:5px; background:#f9fafb; border-color:#eaecf0; padding:8px; }.school-card-stat strong { color:#101828; font-family:var(--font-body); font-size:14px; }.school-card-stat span { color:#667085; }\r
+.card-actions { border-top-color:#eaecf0; padding:10px 15px; }.btn { border-radius:6px; padding:7px 10px; font-size:12px; background:#fff; }.btn-toggle-on,.btn-toggle-off,.btn-features,.btn-insights,.btn-delete { background:#fff; }.btn-toggle-on{color:#067647;border:1px solid #a6f4c5}.btn-toggle-off,.btn-delete{color:#b42318;border:1px solid #fecdca}.btn-features{color:#175cd3;border:1px solid #b2ccff}.btn-insights{color:#344054;border:1px solid #d0d5dd}\r
+.form-panel { position:sticky; top:20px; }.form-panel h2 { color:#101828; font-size:21px; }.form-panel .sub { color:var(--muted); font-size:13px; margin-bottom:22px; }.form-grid { gap:13px; }.field { gap:6px; }.field label,.logo-upload-copy label { color:#344054; font-size:12px; }.field input,.field select { background:#fff; border:1px solid #d0d5dd; color:#344054; border-radius:6px; padding:10px 11px; font-size:13px; }.field input::placeholder { color:#98a2b3; }.field input:focus { border-color:#84adff; box-shadow:0 0 0 3px #eff4ff; }.logo-upload-row { border-radius:7px; border-color:#d0d5dd; background:#f9fafb; padding:12px; }.school-logo-preview { border-radius:7px; background:#fff; border-color:#d0d5dd; color:#475467; }.logo-upload-copy small { color:#667085; font-size:11px; }.hint { color:#475467; background:#f9fafb; border-color:#eaecf0; border-radius:6px; font-size:12px; }.submit-btn { border-radius:6px; padding:11px; background:#1d4ed8; font-family:var(--font-body); font-size:13px; }\r
+.modal-overlay { background:rgba(16,24,40,.42); backdrop-filter:blur(3px); }.modal { background:#fff; border-color:#eaecf0; border-radius:10px; width:min(760px,100%); }.modal-header,.modal-footer { background:#fff; border-color:#eaecf0; }.modal-header { padding:20px 24px 16px; }.modal-title { color:#101828; }.modal-sub { color:#667085; }.modal-close { border-radius:5px; background:#f2f4f7; color:#475467; }.modal-body { padding:20px 24px; }.modal-logo { border-radius:7px; background:#eff4ff; border-color:#d1e0ff; color:#1d4ed8; }.insight-grid { grid-template-columns:repeat(4,1fr); }.insight-card { border-radius:6px; background:#f9fafb; border-color:#eaecf0; }.insight-card span{color:#667085}.insight-card strong{color:#101828}.control-note { border-radius:6px; color:#6941c6; background:#f9f5ff; border-color:#e9d7fe; }.access-row,.feature-row { background:#fff; border-color:#eaecf0; border-radius:6px; }.access-row-info strong,.feature-row-info strong { color:#344054; }.access-row-info span,.feature-row-info span { color:#667085; }.subscription-panel,.school-profile-panel { border-radius:6px; background:#f9fafb; border-color:#eaecf0; }.subscription-panel h3,.school-profile-panel h3,.billing-history h4 { color:#344054; }.school-profile-panel p { color:#667085; }.subscription-grid input,.subscription-grid select,.school-profile-grid input,.school-profile-grid textarea { border-radius:5px; border-color:#d0d5dd; }.school-profile-grid .profile-readonly { background:#f2f4f7; color:#667085; }.subscription-summary { border-radius:5px; background:#eff4ff; color:#175cd3; }.btn-cancel,.btn-save { border-radius:6px; }.btn-cancel { color:#344054; background:#fff; border-color:#d0d5dd; }.btn-save { background:#1d4ed8; }.features-head { color:#475467; font-family:var(--font-body); }.empty-state { border-radius:6px; color:#667085; }.toast { background:#fff; color:#344054; border-color:#d0d5dd; border-radius:7px; box-shadow:0 8px 24px rgba(16,24,40,.14); }\r
+.toggle,.mini-toggle { border-radius:4px; }.slider-track,.mini-track { border-radius:4px; background:#eaecf0; border-color:#d0d5dd; }.slider-track::before,.mini-track::before { border-radius:2px; }.toggle input:checked~.slider-track,.mini-toggle input:checked~.mini-track { background:#1d4ed8; border-color:#1d4ed8; }.toggle input:checked~.slider-track::before,.mini-toggle input:checked~.mini-track::before { background:#fff; }\r
+@media(max-width:900px){.shell{grid-template-columns:1fr}.form-panel{position:static}.workspace-header{padding:0 18px}.admin-summary{grid-template-columns:repeat(2,1fr)}.summary-cell:nth-child(2){border-right:0}.summary-cell:nth-child(-n+2){border-bottom:1px solid var(--line)}}\r
+@media(max-width:520px){.shell{padding:20px 14px}.panel-body,.form-panel .panel-body{padding:20px}.workspace-label{display:none}.admin-summary{grid-template-columns:repeat(2,1fr)}.school-toolbar{flex-wrap:wrap}.school-search{min-width:100%}.subscription-grid,.school-profile-grid{grid-template-columns:1fr}.insight-grid{grid-template-columns:repeat(2,1fr)}}\r
+`}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
 (function () {\r
   var root = document.documentElement;\r
   root.classList.add("sx-page-loading");\r
@@ -10918,6 +11139,35 @@ let signupInProgress = false;\r
 const CLOUDINARY_CLOUD_NAME = "fthnumnk";\r
 const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";\r
 \r
+function isoDate(value) {\r
+  const date = toJsDate(value);\r
+  return date ? date.toISOString().slice(0, 10) : "";\r
+}\r
+\r
+function defaultExpiryDate() {\r
+  const date = new Date();\r
+  date.setFullYear(date.getFullYear() + 1);\r
+  return date.toISOString().slice(0, 10);\r
+}\r
+\r
+function subscriptionState(data = {}) {\r
+  const subscription = data.subscription || {};\r
+  const expiresAt = isoDate(subscription.expiresAt || data.subscriptionExpiresAt);\r
+  const status = String(subscription.status || "active").toLowerCase();\r
+  const expired = Boolean(expiresAt && new Date(\`\${expiresAt}T23:59:59\`).getTime() < Date.now());\r
+  const blocked = ["suspended", "cancelled"].includes(status) || expired;\r
+  return { plan: subscription.plan || "Growth", status: expired ? "expired" : status, expiresAt, expired, blocked };\r
+}\r
+\r
+function subscriptionLabel(data = {}) {\r
+  const sub = subscriptionState(data);\r
+  if (sub.status === "expired") return \`Expired \${sub.expiresAt || ""}\`.trim();\r
+  if (sub.status === "suspended") return "Suspended";\r
+  if (sub.status === "past_due") return "Payment due";\r
+  if (sub.status === "cancelled") return "Cancelled";\r
+  return \`Active · expires \${sub.expiresAt || "not set"}\`;\r
+}\r
+\r
 function normalizeEmail(value = "") {\r
   return String(value || "").trim().toLowerCase();\r
 }\r
@@ -11014,12 +11264,17 @@ window.signup = async () => {\r
   const email      = normalizeEmail(document.getElementById("email").value);\r
   const password   = document.getElementById("password").value;\r
   const logoFile   = document.getElementById("schoolLogo")?.files?.[0] || null;\r
+  const plan = document.getElementById("signupPlan").value;\r
+  const expiresAt = document.getElementById("signupExpiry").value;\r
 \r
   if (!schoolName || !adminName || !email || !password) {\r
     showToast("Please fill all fields", "error"); return;\r
   }\r
   if (password.length < 6) {\r
     showToast("Password must be at least 6 characters", "error"); return;\r
+  }\r
+  if (!expiresAt) {\r
+    showToast("Please set the school licence expiry date", "error"); return;\r
   }\r
 \r
   const btn = document.querySelector(".submit-btn");\r
@@ -11056,7 +11311,8 @@ window.signup = async () => {\r
         logoUrl: logoUpload.logoUrl,
         schoolLogoUrl: logoUpload.logoUrl,
         logoPublicId: logoUpload.logoPublicId,
-        features: defaultFeatures
+        features: defaultFeatures,\r
+        subscription: { plan, status: "active", expiresAt }\r
       })
     });
     const result = await response.json().catch(() => ({}));
@@ -11072,6 +11328,7 @@ window.signup = async () => {\r
       logoPublicId: logoUpload.logoPublicId,\r
       access: true,\r
       features: defaultFeatures,\r
+      subscription: { plan, status: "active", expiresAt },\r
       onboardingRequired: true,\r
       onboardingCompleted: false,\r
       onboardingVersion: 1,\r
@@ -11079,9 +11336,16 @@ window.signup = async () => {\r
       createdBy: auth.currentUser?.uid || "",\r
       createdByEmail: SUPER_ADMIN_EMAIL
     }, { merge: true });
+    await setDoc(doc(db, "users", result.uid), {\r
+      access: true,\r
+      features: defaultFeatures,\r
+      subscription: { plan, status: "active", expiresAt },\r
+      updatedAt: new Date()\r
+    }, { merge: true });\r
 
     showToast(\`Admin created for \${schoolName}\`);
     ["schoolName","adminName","email","password"].forEach(id => document.getElementById(id).value = "");\r
+    document.getElementById("signupExpiry").value = defaultExpiryDate();\r
     const logoInput = document.getElementById("schoolLogo");\r
     if (logoInput) logoInput.value = "";\r
     const logoPreview = document.getElementById("schoolLogoPreview");\r
@@ -11230,6 +11494,27 @@ function renderInsightGrid(metrics = {}) {\r
   return rows.map(([label, value]) => \`<div class="insight-card"><span>\${label}</span><strong>\${Number(value || 0).toLocaleString("en-IN")}</strong></div>\`).join("");\r
 }\r
 \r
+function updatePortfolioSummary(schools = []) {\r
+  const active = schools.filter((school) => school.access !== false && !subscriptionState(school).blocked).length;\r
+  const attention = schools.filter((school) => {\r
+    const state = subscriptionState(school);\r
+    return state.status === "past_due" || state.expired || state.blocked || school.access === false;\r
+  }).length;\r
+  document.getElementById("summaryTotal").textContent = schools.length.toLocaleString("en-IN");\r
+  document.getElementById("summaryActive").textContent = active.toLocaleString("en-IN");\r
+  document.getElementById("summaryAttention").textContent = attention.toLocaleString("en-IN");\r
+}\r
+\r
+function applySchoolFilters() {\r
+  const search = String(document.getElementById("schoolSearch")?.value || "").trim().toLowerCase();\r
+  const filter = String(document.getElementById("schoolStatusFilter")?.value || "all");\r
+  document.querySelectorAll(".school-card").forEach((card) => {\r
+    const matchesSearch = !search || String(card.dataset.search || "").includes(search);\r
+    const matchesStatus = filter === "all" || card.dataset.status === filter;\r
+    card.hidden = !(matchesSearch && matchesStatus);\r
+  });\r
+}\r
+\r
 // ---- LOAD SCHOOLS ----\r
 async function loadSchools() {\r
   const list = document.getElementById("schoolList");\r
@@ -11245,6 +11530,7 @@ async function loadSchools() {\r
     });\r
 \r
     countBadge.textContent = schools.length + " school" + (schools.length !== 1 ? "s" : "");\r
+    updatePortfolioSummary(schools);\r
 \r
     if (!schools.length) {\r
       list.innerHTML = \`<div class="empty-state">No schools registered yet.</div>\`;\r
@@ -11255,21 +11541,24 @@ async function loadSchools() {\r
     const metricsBySchool = Object.fromEntries(metricEntries);\r
 \r
     list.innerHTML = schools.map(s => {\r
-      const on = s.access !== false;\r
+      const subscription = subscriptionState(s);\r
+      const on = s.access !== false && !subscription.blocked;\r
+      const portfolioStatus = !on ? "blocked" : (subscription.status === "past_due" ? "attention" : "active");\r
       const ini = initials(s.schoolName);\r
       const featOn = s.features ? Object.values(s.features).filter(Boolean).length : FEATURES.length;\r
       const metrics = metricsBySchool[s.uid] || {};\r
       return \`\r
-      <div class="school-card" id="card-\${s.uid}">\r
+      <div class="school-card" id="card-\${s.uid}" data-status="\${portfolioStatus}" data-search="\${escapeHtml(\`\${s.schoolName || ""} \${s.email || ""} \${s.adminEmail || ""}\`).toLowerCase()}">\r
         <div class="card-main">\r
           <div class="school-avatar">\${renderLogo(s.logoUrl || s.schoolLogoUrl || "", ini)}</div>\r
           <div class="card-info">\r
             <div class="card-name">\${escapeHtml(s.schoolName)}</div>\r
             <div class="card-meta">\r
               <span class="status-dot \${on ? 'on' : 'off'}"></span>\r
-              \${on ? "Access Enabled" : "Access Disabled"} &nbsp;|&nbsp;\r
+              \${on ? "Access Enabled" : "Access blocked"} &nbsp;|&nbsp;\r
               \${featOn}/\${FEATURES.length} modules\r
             </div>\r
+            <div class="card-meta" style="margin-top:4px;color:\${subscription.blocked ? '#f87171' : '#94a3b8'}">\${escapeHtml(subscriptionLabel(s))}</div>\r
           </div>\r
         </div>\r
         <div class="school-card-stats">\r
@@ -11285,11 +11574,7 @@ async function loadSchools() {\r
           </button>\r
           <button class="btn btn-features"\r
             onclick="openModal('\${s.uid}')">\r
-            Manage Features\r
-          </button>\r
-          <button class="btn btn-insights"\r
-            onclick="openModal('\${s.uid}')">\r
-            Track School\r
+            Manage school\r
           </button>\r
           <button class="btn btn-delete"\r
             onclick="deleteSchool('\${s.uid}', '\${jsString(s.schoolName)}')">\r
@@ -11298,6 +11583,7 @@ async function loadSchools() {\r
         </div>\r
       </div>\`;\r
     }).join("");\r
+    applySchoolFilters();\r
   } catch(e) {\r
     list.innerHTML = \`<div class="empty-state">Failed to load schools.</div>\`;\r
     console.error(e);\r
@@ -11322,7 +11608,8 @@ window.openModal = async (uid) => {\r
   try {\r
     const snap = await getDoc(doc(db, "users", uid));\r
     if (!snap.exists()) { showToast("School not found", "error"); return; }\r
-    currentData = snap.data();\r
+    const schoolSnap = await getDoc(doc(db, "schools", uid)).catch(() => null);\r
+    currentData = { ...(schoolSnap?.exists?.() ? schoolSnap.data() : {}), ...snap.data() };\r
 \r
     document.getElementById("modalSchoolName").textContent = currentData.schoolName;\r
     document.getElementById("modalSchoolEmail").textContent = currentData.email;\r
@@ -11342,6 +11629,22 @@ window.openModal = async (uid) => {\r
     const toggle = document.getElementById("masterAccessToggle");\r
     toggle.checked = currentData.access !== false;\r
     updateAccessLabel();\r
+    document.getElementById("profileSchoolName").value = currentData.schoolName || currentData.name || "";\r
+    document.getElementById("profileAdminName").value = currentData.adminName || currentData.name || "";\r
+    document.getElementById("profileAdminEmail").value = currentData.adminEmail || currentData.email || "";\r
+    document.getElementById("profilePhone").value = currentData.phone || currentData.contactNumber || "";\r
+    document.getElementById("profileSchoolCode").value = currentData.schoolCode || "";\r
+    document.getElementById("profileAddress").value = currentData.address || "";\r
+    document.getElementById("profileSchoolLogo").value = "";\r
+    const subscription = subscriptionState(currentData);\r
+    document.getElementById("subscriptionPlan").value = subscription.plan;\r
+    document.getElementById("subscriptionStatus").value = subscription.status === "expired" ? "past_due" : subscription.status;\r
+    document.getElementById("subscriptionExpiresAt").value = subscription.expiresAt;\r
+    document.getElementById("paymentAmount").value = "";\r
+    document.getElementById("paymentDate").value = new Date().toISOString().slice(0, 10);\r
+    document.getElementById("paymentReference").value = "";\r
+    document.getElementById("subscriptionSummary").textContent = \`\${subscription.plan} · \${subscriptionLabel(currentData)}\${subscription.blocked ? " — school access is blocked" : ""}\`;\r
+    loadBillingHistory(uid);\r
 \r
     // Build feature rows\r
     const grid = document.getElementById("featuresGrid");\r
@@ -11368,6 +11671,20 @@ window.openModal = async (uid) => {\r
   } catch(e) { showToast(e.message, "error"); }\r
 };\r
 \r
+async function loadBillingHistory(uid) {\r
+  const target = document.getElementById("billingHistory");\r
+  if (!target) return;\r
+  target.innerHTML = \`<div class="billing-empty">Loading records...</div>\`;\r
+  try {\r
+    const snap = await getDocs(collection(db, "schools", uid, "billingPayments"));\r
+    const rows = snap.docs.map((item) => ({ id: item.id, ...item.data() }))\r
+      .sort((a, b) => String(b.paymentDate || b.createdAt || "").localeCompare(String(a.paymentDate || a.createdAt || ""))).slice(0, 8);\r
+    target.innerHTML = rows.length ? rows.map((payment) => \`<div class="billing-item"><div><strong>₹\${Number(payment.amount || 0).toLocaleString("en-IN")}</strong><span>\${escapeHtml(payment.reference || "Payment recorded")}</span></div><span>\${escapeHtml(payment.paymentDate || "")}</span></div>\`).join("") : \`<div class="billing-empty">No payments recorded for this school yet.</div>\`;\r
+  } catch (_) {\r
+    target.innerHTML = \`<div class="billing-empty">Payment history could not be loaded.</div>\`;\r
+  }\r
+}\r
+\r
 // ---- CLOSE MODAL ----\r
 window.closeModal = () => {\r
   document.getElementById("featureModal").classList.remove("open");\r
@@ -11379,6 +11696,9 @@ window.closeModal = () => {\r
 document.getElementById("featureModal").addEventListener("click", function(e) {\r
   if (e.target === this) closeModal();\r
 });\r
+\r
+document.getElementById("schoolSearch").addEventListener("input", applySchoolFilters);\r
+document.getElementById("schoolStatusFilter").addEventListener("change", applySchoolFilters);\r
 \r
 // ---- UPDATE ACCESS LABEL ----\r
 window.updateAccessLabel = () => {\r
@@ -11401,17 +11721,61 @@ window.saveFeatures = async () => {\r
     FEATURES.forEach(f => {\r
       newFeatures[f.key] = document.getElementById("feat-" + f.key).checked;\r
     });\r
+    const subscription = {\r
+      plan: document.getElementById("subscriptionPlan").value,\r
+      status: document.getElementById("subscriptionStatus").value,\r
+      expiresAt: document.getElementById("subscriptionExpiresAt").value\r
+    };\r
+    if (!subscription.expiresAt) throw new Error("Set a licence expiry date before saving.");\r
+    const paymentAmount = Number(document.getElementById("paymentAmount").value || 0);\r
+    const paymentDate = document.getElementById("paymentDate").value;\r
+    const paymentReference = document.getElementById("paymentReference").value.trim();\r
+    if (paymentAmount > 0 && !paymentDate) throw new Error("Set a payment date for the recorded payment.");\r
+    const schoolDetails = {\r
+      schoolName: document.getElementById("profileSchoolName").value.trim(),\r
+      name: document.getElementById("profileSchoolName").value.trim(),\r
+      adminName: document.getElementById("profileAdminName").value.trim(),\r
+      phone: document.getElementById("profilePhone").value.trim(),\r
+      contactNumber: document.getElementById("profilePhone").value.trim(),\r
+      schoolCode: document.getElementById("profileSchoolCode").value.trim(),\r
+      address: document.getElementById("profileAddress").value.trim()\r
+    };\r
+    if (!schoolDetails.schoolName || !schoolDetails.adminName) throw new Error("School name and administrator name are required.");\r
+    const replacementLogo = document.getElementById("profileSchoolLogo").files?.[0] || null;\r
+    if (replacementLogo) {\r
+      const logoUpload = await uploadSchoolLogo(replacementLogo, schoolDetails.schoolName);\r
+      Object.assign(schoolDetails, logoUpload, { schoolLogoUrl: logoUpload.logoUrl });\r
+    }\r
 \r
     await updateDoc(doc(db, "users", currentUID), {\r
       access: newAccess,\r
-      features: newFeatures\r
+      features: newFeatures,\r
+      subscription,\r
+      ...schoolDetails,\r
+      name: schoolDetails.adminName\r
     });\r
     await setDoc(doc(db, "schools", currentUID), {\r
       access: newAccess,\r
       features: newFeatures,\r
+      subscription,\r
+      ...schoolDetails,\r
       updatedAt: new Date(),\r
       updatedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL\r
     }, { merge: true });\r
+    if (replacementLogo) {\r
+      await setDoc(doc(db, "schools", currentUID, "config", "branding"), {\r
+        schoolName: schoolDetails.schoolName,\r
+        logoUrl: schoolDetails.logoUrl,\r
+        schoolLogoUrl: schoolDetails.schoolLogoUrl,\r
+        logoPublicId: schoolDetails.logoPublicId,\r
+        updatedAt: new Date(),\r
+        updatedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL\r
+      }, { merge: true });\r
+    }\r
+    if (paymentAmount > 0) {\r
+      const paymentRef = doc(collection(db, "schools", currentUID, "billingPayments"));\r
+      await setDoc(paymentRef, { amount: paymentAmount, paymentDate, reference: paymentReference, plan: subscription.plan, recordedAt: new Date(), recordedBy: auth.currentUser?.email || SUPER_ADMIN_EMAIL });\r
+    }\r
 \r
     showToast("Settings saved successfully");\r
     closeModal();\r
@@ -11459,7 +11823,8 @@ onAuthStateChanged(auth, async (user) => {\r
   } catch (profileError) {
     console.warn("Super admin profile bootstrap failed:", profileError);
   }
-  loadSchools();
+  document.getElementById("signupExpiry").value = defaultExpiryDate();\r
+  loadSchools();\r
 });
 `},{attributes:{src:"schoolix-polish.js"},text:""}]},"admin-timetable.html":{file:"admin-timetable.html",title:"Admin Timetable",htmlClass:"",bodyClass:"sx-admin-tool",body:`\r
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">\r
@@ -31237,7 +31602,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });\r
             setTimeout(emergencyHide, 3200);\r
         }());\r
-    `},{attributes:{src:"school-branding.js"},text:""},{attributes:{type:"module",src:"teachers-ops.js"},text:""},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""},{attributes:{src:"admin-shell.js?v=navbar-20260721"},text:""}]},"teacher-profile.html":{file:"teacher-profile.html",title:"Staff Profile | Schoolix",htmlClass:"",bodyClass:"sx-admin-app",body:`\r
+    `},{attributes:{src:"school-branding.js"},text:""},{attributes:{type:"module",src:"teachers-ops.js"},text:""},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""},{attributes:{src:"admin-shell.js?v=navbar-20260721"},text:""}]},"teacher-profile.html":{file:"teacher-profile.html",title:"Staff Profile | Schoolix",htmlClass:"",bodyClass:"sx-admin-app sx-dark-portal",body:`\r
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">\r
   <section class="dots-container" aria-label="Loading page">\r
     <div class="dot"></div>\r
@@ -31437,7 +31802,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 .sx-page-loader .dot {
   display: none !important;
 }
-`},{tag:"link",attributes:{href:"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap",rel:"stylesheet"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"teacher-profile.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"admin-shell.css?v=navbar-20260721"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
+`},{tag:"link",attributes:{href:"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap",rel:"stylesheet"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"teacher-profile.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"admin-shell.css?v=navbar-20260721"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-portal-dark.css"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
 (function () {\r
   var root = document.documentElement;\r
   root.classList.add("sx-page-loading");\r
@@ -44116,7 +44481,7 @@ onAuthStateChanged(auth, async (user) => {\r
     showToast("Unable to verify admin access.", "error");\r
   }\r
 });\r
-`},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""},{attributes:{src:"admin-shell.js?v=navbar-20260721"},text:""}]},"student-dashboard.html":{file:"student-dashboard.html",title:"Student Dashboard | Schoolix",htmlClass:"",bodyClass:"",body:`\r
+`},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""},{attributes:{src:"admin-shell.js?v=navbar-20260721"},text:""}]},"student-dashboard.html":{file:"student-dashboard.html",title:"Student Dashboard | Schoolix",htmlClass:"",bodyClass:"sx-dark-portal",body:`\r
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">\r
   <section class="dots-container" aria-label="Loading page">\r
     <div class="dot"></div>\r
@@ -47744,7 +48109,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 .sx-page-loader .dot {
   display: none !important;
 }
-`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"notice-panel.css?v=notices-20260720"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
+`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-portal-dark.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"notice-panel.css?v=notices-20260720"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
 (function () {\r
   var root = document.documentElement;\r
   root.classList.add("sx-page-loading");\r
@@ -50838,7 +51203,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 `},{attributes:{type:"module",src:"notice-panel.js?v=notices-20260720"},text:""},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""}]},"student-notices.html":{file:"student-notices.html",title:"Opening Notices - Schoolix",htmlClass:"",bodyClass:"",body:`
   <script>window.location.replace("#/student-dashboard.html#notices");<\/script>
   <a href="#/student-dashboard.html#notices">Open student notices</a>
-`,styles:[],scripts:[{attributes:{},text:'window.location.replace("#/student-dashboard.html#notices");'}]},"teacher-dashboard.html":{file:"teacher-dashboard.html",title:"Teacher Dashboard — Schoolix",htmlClass:"",bodyClass:"",body:`\r
+`,styles:[{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""}],scripts:[{attributes:{},text:'window.location.replace("#/student-dashboard.html#notices");'}]},"teacher-dashboard.html":{file:"teacher-dashboard.html",title:"Teacher Dashboard — Schoolix",htmlClass:"",bodyClass:"sx-dark-portal",body:`\r
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">\r
   <section class="dots-container" aria-label="Loading page">\r
     <div class="dot"></div>\r
@@ -53941,7 +54306,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 .sx-page-loader .dot {
   display: none !important;
 }
-`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"notice-panel.css?v=notices-20260720"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
+`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-portal-dark.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"notice-panel.css?v=notices-20260720"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`\r
 (function () {\r
   var root = document.documentElement;\r
   root.classList.add("sx-page-loading");\r
@@ -57435,7 +57800,7 @@ window.printClassTimetable = async function() {\r
 `},{attributes:{src:"/schoolix-app.js?v=navbar-20260721"},text:""},{attributes:{type:"module",src:"notice-panel.js?v=notices-20260720"},text:""},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""}]},"teacher-notices.html":{file:"teacher-notices.html",title:"Opening Notices - Schoolix",htmlClass:"",bodyClass:"",body:`
   <script>window.location.replace("#/teacher-dashboard.html#notices");<\/script>
   <a href="#/teacher-dashboard.html#notices">Open teacher notices</a>
-`,styles:[],scripts:[{attributes:{},text:'window.location.replace("#/teacher-dashboard.html#notices");'}]},"driver-dashboard.html":{file:"driver-dashboard.html",title:"Driver Dashboard - Schoolix",htmlClass:"",bodyClass:"",body:`
+`,styles:[{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""}],scripts:[{attributes:{},text:'window.location.replace("#/teacher-dashboard.html#notices");'}]},"driver-dashboard.html":{file:"driver-dashboard.html",title:"Driver Dashboard - Schoolix",htmlClass:"",bodyClass:"",body:`
 <main class="driver-shell">
   <section class="panel top">
     <div>
@@ -57764,7 +58129,7 @@ button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
 .sx-vehicle-marker-label small { color:#a8bad1; }
 .sx-map-popup { color:#172033; }
 @media (max-width:640px) { .driver-shell { padding:14px; } .panel { padding:15px; } .top { padding:17px; } h1 { font-size:21px; } .map { min-height:310px; height:52vh; } }
-`}],scripts:[{attributes:{type:"module"},text:`
+`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""}],scripts:[{attributes:{type:"module"},text:`
 import { initializeApp, getAuth, getFirestore, onAuthStateChanged, signOut, doc, getDoc, collection, getDocs, query, where } from "./firebase-compat.js";
 import { activeTrips, accessToken, myDriverProfile, subscribeTransport, upsertLiveLocation } from "./schoolix-transport.js";
 import { calibratedSpeedKmh, createVehicleMap } from "./schoolix-maplibre.js";

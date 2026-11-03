@@ -135,7 +135,7 @@ service cloud.firestore {
 
     function keepsProtectedUserFields() {
       return !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(["role", "adminId", "schoolId", "superAdmin"]);
+        .hasAny(["role", "adminId", "schoolId", "superAdmin", "access", "features", "subscription"]);
     }
 
     match /appUpdates/latest {
@@ -313,9 +313,13 @@ service cloud.firestore {
         && request.resource.data.token.size() <= 4096;
     }
 
+    match /schools/{schoolId}/billingPayments/{paymentId} {
+      allow read, create, update, delete: if isSuperAdmin();
+    }
+
     match /schools/{schoolId}/{collectionId}/{docId} {
       allow read: if signedIn()
-        && !(collectionId in ["accounts", "notificationDevices"])
+        && !(collectionId in ["accounts", "notificationDevices", "billingPayments"])
         && canReadSchoolData(schoolId);
       allow create, update, delete: if signedIn()
         && (isSchoolAdminForSchool(schoolId) || isSuperAdmin())
