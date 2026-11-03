@@ -97,7 +97,7 @@ public class UpdateDialogController {
         if (percent >= 0) {
             progressBar.setIndeterminate(false);
             progressBar.setProgress(percent);
-            progressText.setText("Downloaded " + percent + "%");
+            progressText.setText(String.format(java.util.Locale.US, "%d%% · %.1f MB / %.1f MB", percent, downloadedBytes / 1048576.0, totalBytes / 1048576.0));
         } else {
             progressBar.setIndeterminate(true);
             progressText.setText("Downloading update...");

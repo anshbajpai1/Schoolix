@@ -31,6 +31,7 @@ public class AppUpdateManager {
 
     private boolean checkInProgress;
     private boolean downloadInProgress;
+    private long promptedVersion;
     private UpdateInfo latestUpdate;
 
     public AppUpdateManager(Activity activity) {
@@ -42,7 +43,7 @@ public class AppUpdateManager {
     }
 
     public void checkForUpdates() {
-        if (checkInProgress) return;
+        if (checkInProgress || downloadInProgress) return;
         checkInProgress = true;
         String updateUrl = activity.getString(R.string.update_json_url);
         updateCheckClient.fetch(updateUrl, new UpdateCheckClient.Callback() {
@@ -52,7 +53,10 @@ public class AppUpdateManager {
                 if (updateInfo.getVersionCode() > getInstalledVersionCode()) {
                     latestUpdate = updateInfo;
                     emitUpdateState(updateInfo);
-                    showUpdate(updateInfo);
+                    if (promptedVersion != updateInfo.getVersionCode()) {
+                        promptedVersion = updateInfo.getVersionCode();
+                        showUpdate(updateInfo);
+                    }
                 } else {
                     latestUpdate = null;
                     emitUpdateState(null);
@@ -95,6 +99,7 @@ public class AppUpdateManager {
     }
 
     private void showUpdate(UpdateInfo updateInfo) {
+        if (downloadInProgress) return;
         dialogController.showUpdateDialog(updateInfo, new UpdateDialogController.ActionListener() {
             @Override
             public void onUpdateNow(UpdateInfo selectedUpdate) {
@@ -155,6 +160,16 @@ public class AppUpdateManager {
 
             @Override
             public void onComplete(File apkFile) {
+                PackageInfo archive = activity.getPackageManager().getPackageArchiveInfo(apkFile.getAbsolutePath(), 0);
+                long archiveVersion = archive == null ? 0 : (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? archive.getLongVersionCode() : archive.versionCode);
+                if (archive == null || !activity.getPackageName().equals(archive.packageName)
+                        || archiveVersion != updateInfo.getVersionCode() || archiveVersion <= getInstalledVersionCode()) {
+                    downloadInProgress = false;
+                    dialogController.dismissProgressDialog();
+                    NotificationManagerCompat.from(activity).cancel(UPDATE_NOTIFICATION_ID);
+                    dialogController.showMessage("The update file is unavailable or out of date. Please try again later.");
+                    return;
+                }
                 downloadInProgress = false;
                 dialogController.dismissProgressDialog();
                 showUpdateNotification(

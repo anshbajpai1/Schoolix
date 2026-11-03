@@ -1,6 +1,6 @@
 {
-  "versionCode": 110,
-  "versionName": "5.4.0",
+  "versionCode": 109,
+  "versionName": "5.3.9",
   "forceUpdate": false,
   "message": "Release 5.4.0: Student records stay isolated until an academic session is verified.",
   "changelog": [
@@ -35,5 +35,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=110"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=109"
 }
