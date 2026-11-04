@@ -769,8 +769,10 @@ tbody > tr[hidden] {
   --sx-workspace-primary-hover: #1849a9;
   --sx-workspace-success: #067647;
   --sx-workspace-danger: #b42318;
-  --sx-polish-radius: 6px;
-  --sx-radius: 6px;
+  --sx-polish-radius: 16px;
+  --sx-radius: 16px;
+  --sx-control-radius: 11px;
+  --sx-modal-radius: 20px;
 }
 
 html, body {
@@ -801,8 +803,8 @@ body {
 .dialog, .session-item, .term-item, .metric, .sx-chart-card {
   background: var(--sx-workspace-surface) !important;
   border: 1px solid var(--sx-workspace-border) !important;
-  border-radius: 6px !important;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+  border-radius: var(--sx-polish-radius) !important;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06) !important;
   backdrop-filter: none !important;
 }
 
@@ -810,7 +812,7 @@ body {
 button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
 .submit-btn, .save-btn, .cancel-btn, .delete-btn, .edit-btn, .back-link,
 input, select, textarea, .form-control, .search-input, .filter-select {
-  border-radius: 6px !important;
+  border-radius: var(--sx-control-radius) !important;
 }
 
 button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
@@ -836,7 +838,7 @@ input:focus, select:focus, textarea:focus, .form-control:focus {
 /* Pills become compact status labels, never oversized capsules. */
 .badge, .chip, .tag, .pill, .status-badge, .count-badge, .role-badge,
 .status-chip, .filter-chip, .sx-chip, .sx-tag {
-  border-radius: 4px !important;
+  border-radius: 999px !important;
   box-shadow: none !important;
 }
 
@@ -865,11 +867,93 @@ tr:hover td { background: #fcfcfd !important; }
   }
 }
 
-/* User-selected sharp interface: no pills, rounded cards, or circular controls. */
-html *,
-html *::before,
-html *::after {
-  border-radius: 0 !important;
+/* Consistent soft geometry across the shared application UI. */
+.card, .panel, .content-card, .stat-card, .summary-card, .metric-card,
+.info-card, .form-card, .table-card, .dashboard-card, .section-card,
+.widget, .control-card, .table-wrapper, .sx-chart-card,
+[class*="-card"]:not(.id-card):not(.report-card-sheet) {
+  border-radius: var(--sx-polish-radius) !important;
+}
+
+button, .btn, .button, .action-btn, .primary-btn, .secondary-btn,
+.submit-btn, .save-btn, .cancel-btn, .delete-btn, .edit-btn, .back-link,
+input, select, textarea, .form-control, .search-input, .filter-select,
+.dropdown, .dropdown-menu, .menu, .notice, .alert, .toast {
+  border-radius: var(--sx-control-radius) !important;
+}
+
+/* Modal scroll belongs to the modal. The document is locked by schoolix-polish.js. */
+html.sx-modal-open,
+body.sx-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+body.sx-modal-open {
+  position: fixed !important;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+dialog[open],
+.modal.sx-modal-active,
+.modal-overlay.sx-modal-active,
+.modal-backdrop.sx-modal-active,
+.dialog-overlay.sx-modal-active,
+.popup-overlay.sx-modal-active,
+.delete-modal.sx-modal-active,
+.receipt-modal.sx-modal-active,
+[role="dialog"].sx-modal-active,
+[aria-modal="true"].sx-modal-active {
+  overscroll-behavior: contain !important;
+}
+
+.sx-modal-scroll-surface,
+dialog[open],
+.modal-content, .modal-card, .modal-box, .dialog-content, .dialog-box,
+.popup-content, .popup-card, [class*="modal-content" i],
+[class*="modal-card" i], [class*="modal-box" i] {
+  max-width: min(960px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px) !important;
+  overflow: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--sx-modal-radius) !important;
+  scrollbar-gutter: stable;
+}
+
+.sx-modal-large .sx-modal-scroll-surface,
+.sx-modal-fullscreen .sx-modal-scroll-surface,
+.fullscreen-modal .modal-content,
+.modal-fullscreen .modal-content,
+[data-fullscreen="true"] .modal-content,
+.report-modal .modal-content,
+.preview-modal .modal-content,
+.document-modal .modal-content,
+.image-modal .modal-content {
+  width: calc(100vw - 32px) !important;
+  max-width: 1440px !important;
+  height: calc(100dvh - 32px) !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+
+@media (max-width: 640px) {
+  .sx-modal-scroll-surface,
+  dialog[open],
+  .modal-content, .modal-card, .modal-box, .dialog-content, .dialog-box,
+  .popup-content, .popup-card {
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 16px !important;
+  }
+
+  .sx-modal-large .sx-modal-scroll-surface,
+  .sx-modal-fullscreen .sx-modal-scroll-surface {
+    height: calc(100dvh - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+  }
 }
 
 /* Intentional circular UI: data visualisations and compact functional indicators. */

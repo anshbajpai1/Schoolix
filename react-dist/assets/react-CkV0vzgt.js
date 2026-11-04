@@ -58067,6 +58067,7 @@ onAuthStateChanged(auth, async (user) => {
   await loadDriver();
 });
 <\/script>
+<script src="schoolix-polish.js" defer><\/script>
 `,styles:[{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-app.css"},text:`
 <style>
 body { margin:0; font-family:"Segoe UI",sans-serif; background:#f4f7fb; color:#0f172a; }
@@ -58361,7 +58362,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   await loadDriver();
 });
-`}]},"vehicle-management.html":{file:"vehicle-management.html",title:"Vehicle Management - Schoolix",htmlClass:"",bodyClass:"sx-admin-tool sx-transport-page",body:`\r
+`},{attributes:{src:"schoolix-polish.js"},text:""}]},"vehicle-management.html":{file:"vehicle-management.html",title:"Vehicle Management - Schoolix",htmlClass:"",bodyClass:"sx-admin-tool sx-transport-page",body:`\r
 <div class="sx-transport-page-busy" id="transportPageBusy" aria-live="polite" aria-hidden="true">\r
   <div class="sx-transport-busy-card">\r
     <div class="sx-spinner" aria-hidden="true"></div>\r

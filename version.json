@@ -1,9 +1,12 @@
 {
-  "versionCode": 111,
-  "versionName": "5.4.1",
+  "versionCode": 112,
+  "versionName": "5.4.2",
   "forceUpdate": false,
-  "message": "Latest website and improved app updates with download progress.",
+  "message": "Softer rounded interface and improved full-screen modal scrolling.",
   "changelog": [
+    "Adds balanced rounded corners across cards, controls, menus, alerts, and dialogs.",
+    "Locks the page behind open modals so only modal content scrolls.",
+    "Uses the full viewport for reports, previews, documents, and other large modal content.",
     "Bundles the latest full website and refreshed login screen.",
     "Prevents repeated update prompts during downloads and repeated checks.",
     "Shows download percentage and MB progress, and verifies APK version before installation.",
@@ -38,5 +41,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=111"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=112"
 }

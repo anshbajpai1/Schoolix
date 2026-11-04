@@ -707,11 +707,112 @@
     if (notice?.dataset.message === errorMessages["network-request-failed"]) notice.remove();
   });
 
+  const MODAL_SELECTOR = [
+    "dialog[open]",
+    ".modal",
+    ".modal-overlay",
+    ".modal-backdrop",
+    ".dialog-overlay",
+    ".popup-overlay",
+    ".delete-modal",
+    ".receipt-modal",
+    "[role='dialog']",
+    "[aria-modal='true']"
+  ].join(",");
+  const MODAL_SURFACE_SELECTOR = [
+    ".modal-content",
+    ".modal-card",
+    ".modal-box",
+    ".dialog-content",
+    ".dialog-box",
+    ".popup-content",
+    ".popup-card",
+    "[class*='modal-content' i]",
+    "[class*='modal-card' i]",
+    "[class*='modal-box' i]"
+  ].join(",");
+  let modalLock = null;
+  let modalScanFrame = 0;
+
+  function isVisibleModal(element) {
+    if (!(element instanceof HTMLElement) || element.hidden || element.getAttribute("aria-hidden") === "true") return false;
+    if (typeof HTMLDialogElement !== "undefined" && element instanceof HTMLDialogElement && !element.open) return false;
+    const style = getComputedStyle(element);
+    if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return false;
+    return element.getClientRects().length > 0;
+  }
+
+  function modalSurface(modal) {
+    if (modal.matches(".modal-backdrop") && !modal.querySelector(MODAL_SURFACE_SELECTOR)) return null;
+    if (modal.matches("dialog,[role='dialog'],[aria-modal='true']") && !modal.querySelector(MODAL_SURFACE_SELECTOR)) return modal;
+    return modal.querySelector(MODAL_SURFACE_SELECTOR) || modal;
+  }
+
+  function lockDocumentForModal() {
+    if (modalLock) return;
+    const scrollY = window.scrollY;
+    modalLock = {
+      scrollY,
+      top: document.body.style.top,
+      position: document.body.style.position,
+      width: document.body.style.width
+    };
+    document.documentElement.classList.add("sx-modal-open");
+    document.body.classList.add("sx-modal-open");
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+  }
+
+  function unlockDocumentFromModal() {
+    if (!modalLock) return;
+    const previous = modalLock;
+    modalLock = null;
+    document.documentElement.classList.remove("sx-modal-open");
+    document.body.classList.remove("sx-modal-open");
+    document.body.style.top = previous.top;
+    document.body.style.position = previous.position;
+    document.body.style.width = previous.width;
+    window.scrollTo(0, previous.scrollY);
+  }
+
+  function enhanceOpenModals() {
+    const active = Array.from(document.querySelectorAll(MODAL_SELECTOR)).filter(isVisibleModal);
+    document.querySelectorAll(".sx-modal-active").forEach((modal) => {
+      if (!active.includes(modal)) modal.classList.remove("sx-modal-active", "sx-modal-large", "sx-modal-fullscreen");
+    });
+    document.querySelectorAll(".sx-modal-scroll-surface").forEach((surface) => {
+      if (!active.some((modal) => modal.contains(surface) || modal === surface)) surface.classList.remove("sx-modal-scroll-surface");
+    });
+
+    active.forEach((modal) => {
+      const surface = modalSurface(modal);
+      modal.classList.add("sx-modal-active");
+      if (!surface) return;
+      surface.classList.add("sx-modal-scroll-surface");
+      const explicitFullscreen = modal.matches(".fullscreen-modal,.modal-fullscreen,[data-fullscreen='true']") ||
+        Boolean(modal.querySelector("[data-fullscreen-content],iframe,object,embed,.document-preview,.image-preview,.print-preview"));
+      const largeContent = explicitFullscreen || Boolean(surface.querySelector("table,.report-sheet,.report-preview,.timetable,.calendar-grid")) ||
+        surface.scrollWidth > Math.min(900, window.innerWidth * 0.8);
+      modal.classList.toggle("sx-modal-fullscreen", explicitFullscreen);
+      modal.classList.toggle("sx-modal-large", largeContent);
+    });
+
+    if (active.length) lockDocumentForModal();
+    else unlockDocumentFromModal();
+  }
+
+  function scheduleModalScan() {
+    cancelAnimationFrame(modalScanFrame);
+    modalScanFrame = requestAnimationFrame(enhanceOpenModals);
+  }
+
   ready(() => {
     ensurePageLoader();
     optimizeMedia();
     enhanceProfessionalSurface();
     enhanceLoadingText();
+    enhanceOpenModals();
     afterFirstPaint(() => enhancePagination());
     hidePageLoaderAfterFullLoad();
 
@@ -737,5 +838,16 @@
       }, 90);
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    const modalObserver = new MutationObserver(scheduleModalScan);
+    modalObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "hidden", "open", "aria-hidden", "aria-modal"]
+    });
+    document.addEventListener("click", scheduleModalScan, true);
+    document.addEventListener("close", scheduleModalScan, true);
+    window.addEventListener("resize", scheduleModalScan, { passive: true });
   });
 })();
