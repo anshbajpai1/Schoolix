@@ -1,9 +1,17 @@
 {
-  "versionCode": 113,
-  "versionName": "5.4.3",
+  "versionCode": 115,
+  "versionName": "5.4.5",
   "forceUpdate": false,
-  "message": "A more professional campus ERP interface with cleaner navigation, cards, tables, and responsive layouts.",
+  "message": "Daily fee transactions by date, plus faster loading and sharper ERP-style corners.",
   "changelog": [
+    "Adds a Daily Transactions section to Fees Report with an exact-date picker.",
+    "Automatically opens the most recent transaction day and provides quick Latest Day and Today actions.",
+    "Shows daily transaction count, amount received, time, student, payment mode, applied amount, extra amount, and transaction ID.",
+    "Reduces excessive rounding across cards, controls, icons, navigation, and dialogs.",
+    "Reveals pages immediately after the first render instead of waiting for images or idle time.",
+    "Removes the expensive full-page loader mutation scan and lowers the fallback wait to half a second.",
+    "Splits the React compatibility shell into 36 lazy page chunks, reducing its initial JavaScript from 3.18 MB to about 162 KB.",
+    "Reduces blur, hover movement, and heavy shadows for a sharper and faster ERP interface.",
     "Introduces a cohesive enterprise design system across Schoolix portals.",
     "Adds a professional navy admin sidebar with clearer active navigation and hierarchy.",
     "Refines KPI cards, quick actions, forms, tables, spacing, shadows, and status styling.",
@@ -46,5 +54,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=113"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=115"
 }

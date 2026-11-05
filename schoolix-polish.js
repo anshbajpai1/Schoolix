@@ -51,11 +51,10 @@
     "#issueList",
     "#schoolList"
   ].join(",");
-  const PAGE_LOADER_MIN_VISIBLE_MS = 60;
-  const PAGE_LOADER_STABLE_MS = 60;
-  const PAGE_LOADER_FAST_PAGE = /(?:accountant|fees-report|school-accounts|admin-timetable)/i.test(location.pathname);
-  const PAGE_LOADER_MAX_WAIT_MS = PAGE_LOADER_FAST_PAGE ? 900 : 1600;
-  const PAGE_LOADER_CHECK_DEBOUNCE_MS = 40;
+  const PAGE_LOADER_MIN_VISIBLE_MS = 0;
+  const PAGE_LOADER_STABLE_MS = 16;
+  const PAGE_LOADER_MAX_WAIT_MS = 520;
+  const PAGE_LOADER_CHECK_DEBOUNCE_MS = 12;
   const PAGE_LOADER_DISABLED = window.SchoolixDisablePageLoader === true;
   const PAGE_LOADER_CONTENT_READY_EVENTS = [
     "schoolix:critical-load-ready",
@@ -79,11 +78,7 @@
   }
 
   function afterFirstPaint(fn) {
-    const run = () => {
-      if ("requestIdleCallback" in window) window.requestIdleCallback(fn, { timeout: 900 });
-      else setTimeout(fn, 120);
-    };
-    requestAnimationFrame(() => requestAnimationFrame(run));
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, 0)));
   }
 
   if (PAGE_LOADER_DISABLED) document.documentElement.classList.add("sx-page-loaded");
@@ -308,19 +303,6 @@
       });
     });
 
-    pageLoaderState.observer = new MutationObserver(() => {
-      clearTimeout(pageLoaderState.stableTimer);
-      pageLoaderState.stableTimer = 0;
-      schedulePageLoaderCheck();
-    });
-    pageLoaderState.observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class", "hidden", "style", "aria-busy", "data-loading"],
-      childList: true,
-      characterData: true,
-      subtree: true
-    });
-
     pageLoaderState.maxTimer = setTimeout(() => {
       if (!pageLoaderState.hidden) hidePageLoader();
     }, PAGE_LOADER_MAX_WAIT_MS);
@@ -392,8 +374,7 @@
       const canHide =
         Date.now() - pageLoaderState.startedAt >= PAGE_LOADER_MIN_VISIBLE_MS &&
         pageLoaderState.readySignals.size > 0 &&
-        hasRenderablePageContent() &&
-        !hasPendingCriticalImages();
+        hasRenderablePageContent();
 
       if (!canHide) {
         clearTimeout(pageLoaderState.stableTimer);

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, useLocation, useNavigate } from "react-router-dom";
-import { pageNames, pages } from "./generated/pages.js";
+import { pageLoaders, pageNames } from "./generated/pages.js";
 import { isInternalPageLink, resolvePage, toAssetUrl } from "./router-utils.js";
 import "./react-shell.css";
 
@@ -10,11 +10,24 @@ function addAttributes(element, attributes = {}) {
 }
 
 function ReactScreen({ page }) {
-  const screen = pages[page];
+  const [screen, setScreen] = useState(null);
+  const [screenError, setScreenError] = useState(null);
   const [ready, setReady] = useState(false);
   const pageRoot = useRef(null);
 
   useEffect(() => {
+    let active = true;
+    setScreen(null);
+    setScreenError(null);
+    setReady(false);
+    pageLoaders[page]()
+      .then((nextScreen) => { if (active) setScreen(nextScreen); })
+      .catch((error) => { if (active) setScreenError(error); });
+    return () => { active = false; };
+  }, [page]);
+
+  useEffect(() => {
+    if (!screen || screen.file !== page) return undefined;
     let disposed = false;
     const additions = [];
     document.title = screen.title;
@@ -60,6 +73,11 @@ function ReactScreen({ page }) {
     run();
     return () => { disposed = true; additions.forEach((element) => element.remove()); };
   }, [page, screen]);
+
+  if (screenError) throw screenError;
+  if (!screen || screen.file !== page) return <main className="schoolix-page" aria-busy="true">
+    <div className="schoolix-react-loading" role="status">Loading Schoolix workspace…</div>
+  </main>;
 
   return <main ref={pageRoot} className={`schoolix-page${ready ? " is-ready" : ""}`} aria-busy={!ready} tabIndex="-1">
     {!ready && <div className="schoolix-react-loading" role="status">Loading Schoolix workspace…</div>}

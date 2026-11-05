@@ -769,10 +769,10 @@ tbody > tr[hidden] {
   --sx-workspace-primary-hover: #1849a9;
   --sx-workspace-success: #067647;
   --sx-workspace-danger: #b42318;
-  --sx-polish-radius: 16px;
-  --sx-radius: 16px;
-  --sx-control-radius: 11px;
-  --sx-modal-radius: 20px;
+  --sx-polish-radius: 9px;
+  --sx-radius: 9px;
+  --sx-control-radius: 7px;
+  --sx-modal-radius: 13px;
 }
 
 html, body {
@@ -804,7 +804,7 @@ body {
   background: var(--sx-workspace-surface) !important;
   border: 1px solid var(--sx-workspace-border) !important;
   border-radius: var(--sx-polish-radius) !important;
-  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06) !important;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.055) !important;
   backdrop-filter: none !important;
 }
 
@@ -946,7 +946,7 @@ dialog[open],
     width: calc(100vw - 16px) !important;
     max-width: none !important;
     max-height: calc(100dvh - 16px) !important;
-    border-radius: 16px !important;
+    border-radius: 10px !important;
   }
 
   .sx-modal-large .sx-modal-scroll-surface,
@@ -1007,7 +1007,7 @@ body.sx-enterprise-ui:not(.sx-login-app) {
   --sx-enterprise-blue-soft: #edf4ff;
   --sx-enterprise-canvas: #f3f6fb;
   --sx-enterprise-line: #dfe5ee;
-  --sx-enterprise-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 24px rgba(16, 24, 40, .055);
+  --sx-enterprise-shadow: 0 1px 2px rgba(16, 24, 40, .035), 0 5px 14px rgba(16, 24, 40, .045);
   line-height: 1.5;
   text-rendering: optimizeLegibility;
 }
@@ -1037,8 +1037,8 @@ body.sx-enterprise-ui:not(.sx-login-app) .sx-interactive-surface {
 
 body.sx-enterprise-ui:not(.sx-login-app) .sx-interactive-surface:hover {
   border-color: #c8d6ea !important;
-  box-shadow: 0 2px 4px rgba(16,24,40,.05), 0 14px 30px rgba(28,55,99,.09) !important;
-  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(16,24,40,.05), 0 8px 18px rgba(28,55,99,.07) !important;
+  transform: translateY(-1px);
 }
 
 body.sx-enterprise-ui:not(.sx-login-app) :is(.stats,.stats-bar,.stats-row,.account-stats,.summary-grid,.metrics-grid) {
@@ -1082,7 +1082,7 @@ body.sx-enterprise-ui:not(.sx-login-app) :is(.quick-action,.quick-link) {
 
 body.sx-enterprise-ui:not(.sx-login-app) :is(.quick-icon,.card-icon,.stat-icon-wrap) {
   flex: 0 0 auto;
-  border-radius: 12px !important;
+  border-radius: 7px !important;
 }
 
 body.sx-enterprise-ui:not(.sx-login-app) .sx-data-region {
@@ -1145,7 +1145,7 @@ body.sx-enterprise-ui:not(.sx-login-app) :is(.empty-state,.no-data,.empty,.sx-em
 
 body.sx-enterprise-ui:not(.sx-login-app) :is(.modal,.modal-overlay,.dialog-overlay,.popup-overlay,.delete-modal,.receipt-modal).sx-modal-active {
   background-color: rgba(10, 20, 38, .58) !important;
-  backdrop-filter: blur(3px);
+  backdrop-filter: none;
 }
 
 body.sx-enterprise-ui:not(.sx-login-app) .sx-modal-scroll-surface {
@@ -1170,7 +1170,7 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
 
 @media (max-width: 760px) {
   body.sx-enterprise-ui:not(.sx-login-app) :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.form-card,.table-card,.dashboard-card,.section-card) {
-    border-radius: 13px !important;
+    border-radius: 8px !important;
   }
 
   body.sx-enterprise-ui:not(.sx-login-app) :is(.stats,.stats-bar,.stats-row,.account-stats,.summary-grid,.metrics-grid) {

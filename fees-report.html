@@ -2270,6 +2270,48 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-weight: 800;
     }
 
+    body .daily-transactions-card .card-head { align-items: flex-end; }
+
+    body .daily-transaction-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    body .daily-transaction-controls input[type="date"] {
+      width: auto;
+      min-width: 170px;
+    }
+
+    body .daily-transaction-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid #e4e7ec;
+      border-radius: 8px;
+      margin: 0 20px 16px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    body .daily-transaction-summary > div {
+      padding: 12px 14px;
+      border-right: 1px solid #e4e7ec;
+    }
+
+    body .daily-transaction-summary > div:last-child { border-right: 0; }
+    body .daily-transaction-summary small,
+    body .daily-transaction-summary strong { display: block; }
+    body .daily-transaction-summary small { color: #667085; font-size: 11px; font-weight: 700; }
+    body .daily-transaction-summary strong { margin-top: 3px; color: #172033; font-size: 16px; }
+
+    body #dailyTransactionsTable {
+      overflow: auto;
+      border-top: 1px solid #e4e7ec;
+    }
+
+    body #dailyTransactionsTable table { min-width: 1080px; margin: 0; }
+
     @media (max-width: 1280px) {
       body .fee-ops-grid,
       body .filter-card .form-group {
@@ -2300,6 +2342,22 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       body .top-bar h1 {
         font-size: 30px;
       }
+
+      body .daily-transaction-controls,
+      body .daily-transaction-controls input,
+      body .daily-transaction-controls .btn { width: 100%; }
+
+      body .daily-transaction-summary {
+        grid-template-columns: 1fr;
+        margin-inline: 14px;
+      }
+
+      body .daily-transaction-summary > div {
+        border-right: 0;
+        border-bottom: 1px solid #e4e7ec;
+      }
+
+      body .daily-transaction-summary > div:last-child { border-bottom: 0; }
     }
 
     @media print {
@@ -2326,6 +2384,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       .stats-grid,
       .sx-chart-grid,
       .filter-card,
+      .daily-transactions-card,
       .report-actions,
       .pagination,
       .report-card > .card-head p,
@@ -2636,6 +2695,26 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <button class="btn" onclick="loadReports()">Apply Filter</button>
         <button class="btn btn-success" onclick="loadAllReports()">Load All</button>
       </div>
+    </div>
+
+    <div class="card daily-transactions-card">
+      <div class="card-head">
+        <div>
+          <h2>Daily Transactions <span id="dailyTransactionCount">(0)</span></h2>
+          <p>View fee payments received on one exact day. The latest transaction day opens automatically.</p>
+        </div>
+        <div class="daily-transaction-controls">
+          <input id="dailyTransactionDate" type="date" aria-label="Daily transaction date" onchange="renderDailyTransactions()">
+          <button class="btn" type="button" onclick="showLatestTransactionDay()">Latest Day</button>
+          <button class="btn btn-success" type="button" onclick="showTodayTransactions()">Today</button>
+        </div>
+      </div>
+      <div class="daily-transaction-summary">
+        <div><small>Selected day</small><strong id="dailyTransactionDateLabel">-</strong></div>
+        <div><small>Transactions</small><strong id="dailyTransactionTotalCount">0</strong></div>
+        <div><small>Amount received</small><strong id="dailyTransactionAmount">₹0</strong></div>
+      </div>
+      <div id="dailyTransactionsTable"><div class="no-data">Load fee records to view daily transactions.</div></div>
     </div>
 
     <div class="card report-card">
@@ -4620,6 +4699,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           filteredFees = buildReportEntries(allFees);
           displayReports();
           updateStats(filteredFees);
+          renderDailyTransactions();
           showToast(`Auto fine applied: Rs ${autoResult.totalFine.toLocaleString()} on ${autoResult.appliedCount} student(s).`, "partial");
         }
       } catch (error) {
@@ -4637,6 +4717,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         currentPage = 1;
         displayReports();
         updateStats(filteredFees);
+        renderDailyTransactions();
         showToast(`${allFees.length} records loaded${activeSessionLabel ? ` for ${activeSessionLabel}` : ""}${cleanupResult.docsDeleted ? `, ${cleanupResult.docsDeleted} duplicate removed` : ""}`);
         setTimeout(async () => {
           await refreshStudentTcMap();
@@ -4659,6 +4740,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         currentPage = 1;
         displayReports();
         updateStats(filteredFees);
+        renderDailyTransactions();
         if (cleanupResult.docsDeleted) {
           showToast(`${cleanupResult.docsDeleted} duplicate fee record(s) removed.`);
         } else {
@@ -4700,6 +4782,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         currentPage = 1;
         displayReports();
         updateStats([]);
+        const dailyDate = document.getElementById("dailyTransactionDate");
+        if (dailyDate) dailyDate.value = "";
+        renderDailyTransactions();
         document.getElementById("reportsTable").innerHTML = '<div class="no-data">All fee records deleted.</div>';
         document.getElementById("pagination").innerHTML = "";
         showToast(`Deleted ${deletedFees} fee record(s), ${deletedOnlineTransactions} online transaction(s), and ${deletedFeeAccounts} fee account entry(s).`);
@@ -5816,7 +5901,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       });
 
       (Array.isArray(fee.payments) ? fee.payments : []).forEach((payment, index) => {
-        const received = Number(payment.receivedAmount ?? payment.fullAmount ?? payment.amount ?? 0);
+        const received = getPaymentReceivedAmount(payment);
         const applied = Number(payment.appliedAmount ?? payment.amount ?? 0);
         const extra = Number(payment.extraAmount || 0);
         if (received <= 0 && applied <= 0) return;
@@ -5840,13 +5925,104 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     function feePaymentRowsForReceipt(fee) {
       const payments = Array.isArray(fee.payments) ? fee.payments : [];
       return payments.map((payment, index) => {
-        const received = Number(payment.receivedAmount ?? payment.fullAmount ?? payment.amount ?? 0);
+        const received = getPaymentReceivedAmount(payment);
         const applied = Number(payment.appliedAmount ?? payment.amount ?? 0);
         const extra = Number(payment.extraAmount || 0);
         const txn = payment.transactionId || payment.txnId || payment.paymentId || payment.razorpayPaymentId || payment.razorpay_payment_id || payment.razorpay_order_id || generatedFeeTxnId(fee, index);
         return { received, applied, extra, txn, mode: payment.paymentMode || payment.mode || payment.method || "-", date: payment.date || payment.paymentDate || payment.paidAt || payment.createdAt || fee.lastPaymentDate, note: payment.note || payment.remarks || "" };
       }).filter((payment) => payment.received > 0 || payment.applied > 0);
     }
+
+    function transactionDateValue(value) {
+      const raw = value?.toDate?.() || value;
+      const date = raw instanceof Date ? raw : new Date(raw || 0);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function localTransactionDateKey(value) {
+      const date = transactionDateValue(value);
+      if (!date) return "";
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function buildDailyPaymentTransactions(fees = allFees) {
+      const rows = [];
+      fees.forEach((fee) => {
+        feePaymentRowsForReceipt(fee).forEach((payment, index) => {
+          const date = transactionDateValue(payment.date);
+          if (!date) return;
+          rows.push({
+            ...payment,
+            date,
+            dateKey: localTransactionDateKey(date),
+            feeId: fee.id,
+            studentId: fee.studentId || "-",
+            studentName: fee.studentName || "-",
+            className: [fee.class, fee.section].filter(Boolean).join("-") || "-",
+            month: fee.month || "-",
+            index
+          });
+        });
+      });
+      return rows.sort((a, b) => b.date.getTime() - a.date.getTime());
+    }
+
+    window.renderDailyTransactions = () => {
+      const input = document.getElementById("dailyTransactionDate");
+      const transactions = buildDailyPaymentTransactions(allFees);
+      if (input && !input.value && transactions.length) input.value = transactions[0].dateKey;
+      const selectedDate = input?.value || "";
+      const rows = selectedDate ? transactions.filter((transaction) => transaction.dateKey === selectedDate) : [];
+      const totalReceived = rows.reduce((sum, transaction) => sum + Number(transaction.received || transaction.applied || 0), 0);
+      const selectedDateObject = selectedDate ? new Date(`${selectedDate}T00:00:00`) : null;
+      const dateLabel = selectedDateObject && !Number.isNaN(selectedDateObject.getTime())
+        ? selectedDateObject.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+        : "-";
+
+      document.getElementById("dailyTransactionCount").textContent = `(${rows.length})`;
+      document.getElementById("dailyTransactionDateLabel").textContent = dateLabel;
+      document.getElementById("dailyTransactionTotalCount").textContent = rows.length.toLocaleString("en-IN");
+      document.getElementById("dailyTransactionAmount").textContent = `₹${totalReceived.toLocaleString("en-IN")}`;
+
+      const target = document.getElementById("dailyTransactionsTable");
+      if (!rows.length) {
+        target.innerHTML = `<div class="no-data">${selectedDate ? `No fee payment was received on ${esc(dateLabel)}.` : "No payment transactions are available."}</div>`;
+        return;
+      }
+
+      target.innerHTML = `<table>
+        <thead><tr><th>Time</th><th>Student</th><th>Student ID</th><th>Class</th><th>Month</th><th>Transaction ID</th><th>Mode</th><th>Received</th><th>Applied</th><th>Extra</th><th>Note</th></tr></thead>
+        <tbody>${rows.map((transaction) => `<tr ondblclick="viewStudentHistoryByFee('${transaction.feeId || ""}')">
+          <td>${transaction.date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td>
+          <td><strong>${esc(transaction.studentName)}</strong></td>
+          <td>${esc(transaction.studentId)}</td>
+          <td>${esc(transaction.className)}</td>
+          <td>${esc(transaction.month)}</td>
+          <td style="font-size:12px;word-break:break-all;">${esc(transaction.txn || "-")}</td>
+          <td>${esc(transaction.mode || "-")}</td>
+          <td><strong>₹${Number(transaction.received || transaction.applied || 0).toLocaleString("en-IN")}</strong></td>
+          <td>₹${Number(transaction.applied || 0).toLocaleString("en-IN")}</td>
+          <td>₹${Number(transaction.extra || 0).toLocaleString("en-IN")}</td>
+          <td style="white-space:normal;min-width:180px;">${esc(transaction.note || "-")}</td>
+        </tr>`).join("")}</tbody>
+      </table>`;
+    };
+
+    window.showLatestTransactionDay = () => {
+      const latest = buildDailyPaymentTransactions(allFees)[0];
+      if (!latest) return showToast("No fee payment transactions are available.", "error");
+      document.getElementById("dailyTransactionDate").value = latest.dateKey;
+      renderDailyTransactions();
+    };
+
+    window.showTodayTransactions = () => {
+      document.getElementById("dailyTransactionDate").value = localTransactionDateKey(new Date());
+      renderDailyTransactions();
+    };
 
     function buildHistoryReceiptHtml(feesToPrint, title = "Fee Receipt") {
       const fees = Array.isArray(feesToPrint) ? feesToPrint : [];

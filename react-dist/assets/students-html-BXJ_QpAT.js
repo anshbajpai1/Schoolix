@@ -1,0 +1,5527 @@
+const e={file:"students.html",title:"Students - Schoolix Dashboard",htmlClass:"",bodyClass:"sx-admin-app",body:`
+  <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
+    <section class="dots-container" aria-label="Loading page">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </section>
+  </div>
+
+  <div id="sx-page-root">
+    <div class="container">
+      <div class="top-bar">
+        <div class="header-text">
+          <span class="hero-eyebrow">Student Operations</span>
+          <h1>Students Management</h1>
+          <p>Real-time attendance, results percentage, fee history and bulk promotion</p>
+          <div class="hero-chips">
+            <span class="hero-chip">Live analytics</span>
+            <span class="hero-chip">Attendance insights</span>
+            <span class="hero-chip">Fee health</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <div class="hero-metrics" aria-label="Student dashboard summary">
+            <div class="hero-metric">
+              <span>Total students</span>
+              <strong id="heroTotalStudents">--</strong>
+            </div>
+            <div class="hero-metric">
+              <span>Today's attendance</span>
+              <strong id="heroTodayAttendance">--</strong>
+            </div>
+          </div>
+          <div class="hero-quick-actions" aria-label="Quick actions">
+            <button class="btn btn-primary btn-small" onclick="loadData()">Refresh</button>
+            <button class="btn btn-secondary btn-small" onclick="printAttendanceFilteredList()">Print List</button>
+            <button class="btn btn-danger btn-small" onclick="openPassOutModal()">Pass Out</button>
+            <button class="btn btn-secondary btn-small" onclick="togglePromotionBanner()">Promote</button>
+          </div>
+          <div class="hero-meta" id="pageContextLabel">All active students summary</div>
+          <button class="btn btn-secondary" onclick="goBack()">Back to Dashboard</button>
+        </div>
+      </div>
+
+      <!-- PROMOTION BANNER -->
+      <div class="promotion-banner" id="promotionBanner" style="display: none;">
+        <div>
+          <h3>Bulk Promote Students</h3>
+          <p>Automatically promote all students using the selected result source above the threshold</p>
+        </div>
+        <div class="promotion-controls" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+          <div style="display:flex; flex-direction:column; gap:4px; min-width:220px;">
+            <label for="promotionResultSession"
+              style="font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Choose Result
+              From</label>
+            <select id="promotionResultSession" onchange="refreshPromotionResultOptions()"
+              style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; min-width:220px;">
+              <option value="">Use active/current session</option>
+            </select>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; min-width:220px;">
+            <label for="promotionResultTerm"
+              style="font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Exam /
+              Term</label>
+            <select id="promotionResultTerm"
+              style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; min-width:220px;">
+              <option value="">Latest result in selected session</option>
+            </select>
+          </div>
+          <input type="number" id="promotionThreshold" placeholder="Enter % threshold" min="0" max="100" value="60">
+          <button class="btn btn-success" onclick="showPromotionPreview()">Preview Promotion</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="controls-head">
+          <div>
+            <span class="control-kicker">Roster Controls</span>
+            <h2>Search & Filter Students</h2>
+          </div>
+          <div class="selection-pill" id="selectionSummary">0 selected</div>
+        </div>
+
+        <div class="search-row control-search-row">
+          <label class="filter-field">
+            <span>Name / ID / Roll</span>
+            <input id="searchName" placeholder="Search student..." oninput="queueStudentRefresh()">
+          </label>
+          <label class="filter-field">
+            <span>Phone</span>
+            <input id="searchPhone" placeholder="Search phone number..." oninput="queueStudentRefresh()">
+          </label>
+        </div>
+
+        <div class="filter-row student-filter-row">
+          <label class="filter-field compact">
+            <span>Result Above</span>
+            <input type="number" id="percentAbove" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
+          </label>
+          <label class="filter-field compact">
+            <span>Result Below</span>
+            <input type="number" id="percentBelow" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
+          </label>
+          <label class="filter-field compact">
+            <span>Attendance Below</span>
+            <input type="number" id="attendanceBelow" min="0" max="100" step="1" placeholder="%" oninput="queueStudentRefresh()">
+          </label>
+          <label class="filter-field">
+            <span>Session</span>
+            <select id="filterSession" onchange="loadData(true, true)">
+              <option value="">All Sessions</option>
+            </select>
+          </label>
+          <label class="filter-field compact">
+            <span>Class</span>
+            <select id="filterClass" onchange="loadData(true, true)">
+              <option value="">All Classes</option>
+            </select>
+          </label>
+          <label class="filter-field compact">
+            <span>Section</span>
+            <select id="filterSection" onchange="loadData()">
+              <option value="">All Sections</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Rows</span>
+            <select id="pageSize" onchange="loadData()">
+              <option value="25">25 students per page</option>
+              <option value="50">50 students per page</option>
+              <option value="100">100 students per page</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="controls-actions">
+          <button class="btn btn-primary" onclick="loadData()">Refresh</button>
+          <button class="btn btn-print" onclick="printAttendanceFilteredList()">Print Attendance List</button>
+          <button class="btn btn-secondary" onclick="window.location.href='passed-out-#/students.html'">Passed Out</button>
+          <button class="btn btn-danger" onclick="openPassOutModal()">Pass Out Students</button>
+          <button class="btn btn-warning" onclick="togglePromotionBanner()">Promote</button>
+          <button class="btn btn-success" onclick="promoteSelected()">Promote Selected</button>
+          <button class="btn btn-danger" onclick="deleteAllStudents()">Delete All Students</button>
+        </div>
+
+        <div class="shuffle-tools">
+          <label class="filter-field">
+            <span>Shuffle Class</span>
+            <select id="shuffleClassSelect">
+              <option value="">Select class</option>
+            </select>
+          </label>
+          <label class="filter-field compact">
+            <span>Sections</span>
+            <input id="shuffleSectionCount" type="number" min="2" max="10" value="2">
+          </label>
+          <button class="btn btn-secondary" onclick="previewSectionShuffle()">Preview Shuffle</button>
+          <button class="btn btn-warning" onclick="applySectionShuffle()">Apply Shuffle</button>
+        </div>
+      </div>
+
+      <div class="stats" id="statsGrid"></div>
+      <div class="insights-grid">
+        <section class="insight-card insight-wide">
+          <div class="insight-head">
+            <div>
+              <span class="insight-kicker">Today</span>
+              <h3>Attendance Snapshot</h3>
+            </div>
+            <p class="insight-note" id="attendanceInsightNote">Waiting for attendance data...</p>
+          </div>
+          <div id="attendanceChart"></div>
+        </section>
+        <section class="insight-card">
+          <div class="insight-head">
+            <div>
+              <span class="insight-kicker">Performance</span>
+              <h3>Result Bands</h3>
+            </div>
+            <p class="insight-note" id="resultInsightNote">Latest report card distribution</p>
+          </div>
+          <div id="resultBandChart"></div>
+        </section>
+        <section class="insight-card class-mix-card is-collapsed">
+          <div class="insight-head">
+            <div>
+              <span class="insight-kicker">Structure</span>
+              <h3>Class Mix</h3>
+            </div>
+            <div class="insight-head-actions">
+              <p class="insight-note" id="classInsightNote">Visible roster by class and section</p>
+              <button class="insight-toggle" type="button" aria-expanded="false" aria-controls="classMixChart" aria-label="Show class mix chart" title="Show class mix chart" onclick="toggleClassMixChart(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="classMixChart"></div>
+        </section>
+        <section class="insight-card">
+          <div class="insight-head">
+            <div>
+              <span class="insight-kicker">Finance</span>
+              <h3>Fee Health</h3>
+            </div>
+            <p class="insight-note" id="feeInsightNote">Collection status across the current view</p>
+          </div>
+          <div id="feeHealthChart"></div>
+        </section>
+      </div>
+
+      <div class="students-grid">
+        <div class="students-summary">
+          <div>
+            <div class="students-summary-title">Roster Overview</div>
+            <div class="students-summary-text" id="studentsSummaryText">Loading roster summary...</div>
+          </div>
+          <div class="students-summary-badge" id="studentsSummaryBadge">Live view</div>
+        </div>
+        <div class="students-header">
+          <span><input type="checkbox" id="selectAllStudents" aria-label="Select all visible students"></span>
+          <span>Student Name</span>
+          <span>ID / Roll</span>
+          <span>Class</span>
+          <span>Phone</span>
+          <span>Results %</span>
+          <span>Today Status</span>
+          <span>Attendance %</span>
+          <span>Total Fees</span>
+          <span>Due</span>
+          <span>Actions</span>
+        </div>
+        <div id="studentsList">Loading students...</div>
+      </div>
+
+      <div class="pagination sx-pagination" id="pagination"></div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="attendanceModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalStudentName">Student Details</h2>
+          <span class="btn btn-secondary btn-small" onclick="closeAttendanceModal()" style="float:right;">Close</span>
+        </div>
+        <div class="modal-body">
+          <div id="modalStudentDetails"></div>
+
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('attendance', event)">Attendance</button>
+            <button class="tab-btn" onclick="switchTab('fees', event)">Fee History</button>
+          </div>
+
+          <div id="attendanceTab" class="tab-content active">
+            <div class="date-selector">
+              <h4>Select Date to Edit</h4>
+              <div style="margin-top:15px;">
+                <input type="date" id="selectedDate"
+                  style="padding:12px 16px;border:2px solid #e2e8f0;border-radius:8px;font-size:15px;width:200px;">
+                <button class="btn btn-primary btn-small" onclick="loadDateAttendance()" style="margin-left:10px;">Load
+                  Date</button>
+                <button class="btn btn-success btn-small" onclick="markSelectedDateAttendance()"
+                  style="margin-left:10px;" id="markDateBtn" disabled>Update Attendance</button>
+              </div>
+              <div style="margin-top:15px; padding:12px; background:#f8fafc; border-radius:8px;">
+                <strong>Quick Update:</strong>
+                <button class="btn btn-success btn-small" onclick="quickMarkAttendance('Present')"
+                  style="margin-left:10px;">Present</button>
+                <button class="btn btn-danger btn-small" onclick="quickMarkAttendance('Absent')"
+                  style="margin-left:10px;">Absent</button>
+                <button class="btn btn-secondary btn-small" onclick="quickMarkAttendance('Half Day')"
+                  style="margin-left:10px;">Half Day</button>
+              </div>
+            </div>
+
+            <div class="attendance-summary" id="attendanceSummary"></div>
+            <div id="attendanceHistory" class="attendance-history"></div>
+            <div id="attendanceHistoryPager" class="sx-pagination sx-pagination--compact"></div>
+          </div>
+
+          <div id="feesTab" class="tab-content">
+            <div class="fee-history" id="feeHistory"></div>
+            <div id="feeHistoryPager" class="sx-pagination sx-pagination--compact"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo Preview Modal -->
+    <div id="photoPreviewModal" class="modal" onclick="closePhotoPreview(event)">
+      <div class="modal-content photo-preview-content">
+        <div class="modal-header">
+          <h2 id="photoPreviewTitle">Student Photo</h2>
+          <span class="btn btn-secondary btn-small" onclick="closePhotoPreview()" style="float:right;">Close</span>
+        </div>
+        <div class="modal-body">
+          <div class="photo-preview-stage">
+            <img id="photoPreviewImage" src="" alt="Student photo preview">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Shuffle Preview Modal -->
+    <div id="sectionShuffleModal" class="modal promotion-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Section Shuffle Preview</h2>
+          <span class="btn btn-secondary btn-small" onclick="closeSectionShuffleModal()"
+            style="float:right;">Close</span>
+        </div>
+        <div class="modal-body">
+          <div id="sectionShuffleContent"></div>
+          <div style="margin-top: 25px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-danger" onclick="closeSectionShuffleModal()">Cancel</button>
+            <button class="btn btn-success" onclick="applySectionShuffle()" id="confirmSectionShuffleBtn">Apply
+              Shuffle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Promotion Preview Modal -->
+    <div id="promotionModal" class="modal promotion-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Promotion Preview</h2>
+          <span class="btn btn-secondary btn-small" onclick="closePromotionModal()" style="float:right;">Close</span>
+        </div>
+        <div class="modal-body">
+          <div id="promotionContent"></div>
+          <div style="margin-top: 25px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-danger" onclick="closePromotionModal()">Cancel</button>
+            <button class="btn btn-success" onclick="executePromotion()" id="confirmPromotionBtn">Confirm
+              Promotion</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pass Out Preview Modal -->
+    <div id="passOutModal" class="modal promotion-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Pass Out Students</h2>
+          <span class="btn btn-secondary btn-small" onclick="closePassOutModal()" style="float:right;">Close</span>
+        </div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;">
+            <label class="filter-field">
+              <span>Class</span>
+              <select id="passOutClassSelect" onchange="updatePassOutSectionOptions(); renderPassOutPreview()">
+                <option value="">Select class</option>
+              </select>
+            </label>
+            <label class="filter-field">
+              <span>Section</span>
+              <select id="passOutSectionSelect" onchange="renderPassOutPreview()">
+                <option value="">All Sections</option>
+              </select>
+            </label>
+            <label class="filter-field">
+              <span>Passout Year</span>
+              <input id="passOutYearInput" type="number" min="2000" max="2100" placeholder="Year">
+            </label>
+          </div>
+          <div id="passOutContent"></div>
+          <div style="margin-top: 25px; display: flex; flex-wrap:wrap; gap: 12px; justify-content: center;">
+            <button class="btn btn-danger" onclick="closePassOutModal()">Cancel</button>
+            <button class="btn btn-secondary" onclick="renderPassOutPreview()">Refresh Preview</button>
+            <button class="btn btn-success" onclick="executePassOut()" id="confirmPassOutBtn">Confirm Pass Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="school-branding.js"><\/script>
+    <script type="module">
+      import { initializeApp } from "./firebase-compat.js";
+      import {
+        getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc,
+        serverTimestamp, onSnapshot, query, where
+      } from "./firebase-compat.js";
+      import { getAuth, onAuthStateChanged, sendPasswordResetEmail } from "./firebase-compat.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+        authDomain: "schoolix-48107.firebaseapp.com",
+        projectId: "schoolix-48107",
+        storageBucket: "schoolix-48107.firebasestorage.app",
+        messagingSenderId: "133937954491",
+        appId: "1:133937954491:web:69d8064422617eb8c4339e",
+        measurementId: "G-EG23XE5Q0Z"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+      const ABSENCE_EMAIL_FUNCTION_URL = \`\${SUPABASE_URL}/functions/v1/send-absence-email\`;
+
+      let currentUser = null;
+      let allStudents = [];
+      let allAttendance = [];
+      let allFees = [];
+      let allReports = [];
+      let allSessions = [];
+      let allTerms = [];
+      let activeSessionId = "";
+      let activeSessionLabel = "";
+      let unsubscribeAttendance = null;
+      let unsubscribeFees = null;
+      let currentPage = 1;
+      let pageSize = 25;
+      const selectedStudentIds = new Set();
+      let currentStudentId = null;
+      let currentSelectedDate = null;
+      let selectedAttendanceStatus = null;
+      let activeTab = 'attendance';
+      let promotionPreviewData = [];
+      let passOutPreviewData = [];
+      let sectionShufflePreviewData = [];
+      let attendanceRecordsByStudent = new Map();
+      let feeRecordsByStudent = new Map();
+      let latestReportByStudent = new Map();
+      let latestReportBySessionStudent = new Map();
+      let studentRefreshTimer = 0;
+      let todayStatusFilter = "";
+
+      function getHeaderViewSessionId() {
+        try {
+          return localStorage.getItem("schoolix.viewSessionId") || "";
+        } catch (_) {
+          return "";
+        }
+      }
+
+      const CLASS_SEQUENCE = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+      const ROMAN_TO_NUMERIC_CLASS = {
+        I: "1", II: "2", III: "3", IV: "4", V: "5", VI: "6",
+        VII: "7", VIII: "8", IX: "9", X: "10", XI: "11", XII: "12"
+      };
+      const CLASS_PARSE_TOKENS = Array.from(
+        new Set([...CLASS_SEQUENCE, ...Object.keys(ROMAN_TO_NUMERIC_CLASS)])
+      ).sort((left, right) => right.length - left.length);
+
+      const toLocalDateISO = (input = new Date()) => {
+        const date = input instanceof Date ? input : new Date(input);
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return local.toISOString().split('T')[0];
+      };
+
+      const toMoneyNumber = (value = 0) => {
+        if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+        const cleaned = String(value || "0").replace(/[^\\d.-]/g, "");
+        const parsed = Number(cleaned);
+        return Number.isFinite(parsed) ? parsed : 0;
+      };
+      const formatCurrency = (value = 0) => \`\\u20B9\${toMoneyNumber(value).toLocaleString('en-IN')}\`;
+      const getFatherPhone = (student = {}) => student.fatherPhone || student.fatherMobile || student.fatherContact || student.phone || "";
+      const getMotherPhone = (student = {}) => student.motherPhone || student.motherMobile || student.motherContact || student.phone || "";
+      const getParentEmail = (student = {}) => String(student.parentEmail || student.fatherEmail || student.motherEmail || student.guardianEmail || student.email || "").trim();
+      const getStudentKey = (student) => student?.studentId || student?.id || student;
+
+      function removeUndefinedFields(value) {
+        if (Array.isArray(value)) return value.map(removeUndefinedFields);
+        if (!value || Object.getPrototypeOf(value) !== Object.prototype) return value;
+        return Object.fromEntries(
+          Object.entries(value)
+            .filter(([, entryValue]) => entryValue !== undefined)
+            .map(([entryKey, entryValue]) => [entryKey, removeUndefinedFields(entryValue)])
+        );
+      }
+
+      function sortStudentsForRollNumber(left, right) {
+        return String(left.name || "").trim().localeCompare(String(right.name || "").trim(), "en", { sensitivity: "base", numeric: true }) ||
+          String(left.studentId || left.id || "").localeCompare(String(right.studentId || right.id || ""), "en", { numeric: true });
+      }
+
+      function sortStudentsByClassSectionRollName(left, right) {
+        const leftClass = parseClassSortValue(left.class || "");
+        const rightClass = parseClassSortValue(right.class || "");
+        const leftRoll = Number(String(left.roll || left.rollNo || "").replace(/[^\\d]/g, "")) || Number.MAX_SAFE_INTEGER;
+        const rightRoll = Number(String(right.roll || right.rollNo || "").replace(/[^\\d]/g, "")) || Number.MAX_SAFE_INTEGER;
+        return leftClass - rightClass ||
+          String(left.class || "").localeCompare(String(right.class || ""), "en", { numeric: true }) ||
+          String(left.section || "").localeCompare(String(right.section || ""), "en", { numeric: true }) ||
+          leftRoll - rightRoll ||
+          String(left.name || "").localeCompare(String(right.name || ""), "en", { sensitivity: "base", numeric: true }) ||
+          String(left.studentId || left.id || "").localeCompare(String(right.studentId || right.id || ""), "en", { numeric: true });
+      }
+
+      function normalizeRollValue(value) {
+        const cleaned = String(value || "").trim();
+        if (!cleaned) return "";
+        const digits = cleaned.replace(/[^\\d]/g, "");
+        if (digits) return String(Number(digits));
+        return cleaned.toUpperCase();
+      }
+
+      function normalizeRollPlacement(classValue, sectionValue = "", rollValue = "") {
+        const placement = extractClassSection(classValue, sectionValue);
+        return {
+          class: placement.class,
+          section: placement.section,
+          roll: normalizeRollValue(rollValue)
+        };
+      }
+
+      function findDuplicateRollStudent({ classValue, sectionValue, rollValue, ignoreId = "" }) {
+        const { class: normalizedClass, section: normalizedSection, roll: normalizedRoll } = normalizeRollPlacement(classValue, sectionValue, rollValue);
+        if (!normalizedClass || !normalizedSection || !normalizedRoll) return null;
+        return getStudentsForSelectedSession().find((student) => {
+          if (student.id === ignoreId) return false;
+          const studentPlacement = normalizeRollPlacement(student.class, student.section, student.roll || student.rollNo);
+          return studentPlacement.class === normalizedClass &&
+            studentPlacement.section === normalizedSection &&
+            studentPlacement.roll === normalizedRoll;
+        }) || null;
+      }
+
+      async function findDuplicateRollStudentLive({ classValue, sectionValue, rollValue, ignoreId = "" }) {
+        const { class: normalizedClass, section: normalizedSection, roll: normalizedRoll } = normalizeRollPlacement(classValue, sectionValue, rollValue);
+        if (!normalizedClass || !normalizedSection || !normalizedRoll || !currentUser?.uid) return null;
+        const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+        const selectedSessionId = getSelectedSessionId();
+        for (const studentDoc of snap.docs) {
+          if (studentDoc.id === ignoreId) continue;
+          const student = { id: studentDoc.id, ...studentDoc.data() };
+          const sessionPlacement = selectedSessionId ? getSessionPlacement(student, selectedSessionId) : null;
+          const placementSource = sessionPlacement
+            ? { ...student, class: sessionPlacement.class, section: sessionPlacement.section, roll: sessionPlacement.roll || student.roll || student.rollNo }
+            : student;
+          const studentPlacement = normalizeRollPlacement(placementSource.class, placementSource.section, placementSource.roll || placementSource.rollNo);
+          if (
+            studentPlacement.class === normalizedClass &&
+            studentPlacement.section === normalizedSection &&
+            studentPlacement.roll === normalizedRoll
+          ) {
+            return student;
+          }
+        }
+        return null;
+      }
+
+      function getStudentPlacementForSelectedSession(student) {
+        // Backwards-compatible wrapper used in some older call sites.
+        // Returns the session placement for the currently selected session.
+        return getSessionPlacement(student);
+      }
+
+      async function reassignRollNumbersForClassSection(classValue, sectionValue) {
+        const normalizedClass = String(classValue || "").trim();
+        const normalizedSection = String(sectionValue || "").trim();
+        if (!normalizedClass || !normalizedSection || !currentUser?.uid) return;
+
+        const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+        const selectedSession = getSelectedSession();
+        const students = snap.docs
+          .map((studentDoc) => ({ id: studentDoc.id, ...studentDoc.data() }))
+          .filter((student) => {
+            const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+            const placement = extractClassSection(
+              sessionPlacement?.class || student.class,
+              sessionPlacement?.section || student.section
+            );
+            return placement.class === normalizedClass && placement.section === normalizedSection;
+          })
+          .sort(sortStudentsForRollNumber);
+
+        let changed = false;
+        await Promise.all(students.map(async (student, index) => {
+          const roll = String(index + 1).padStart(2, "0");
+          const placement = selectedSession?.id ? getStudentPlacementForSelectedSession(student) : null;
+          const rootRollMatches = String(student.roll || "") === roll && String(student.rollNo || "") === roll;
+          const placementRollMatches = !placement || String(placement.roll || "") === roll;
+          if (rootRollMatches && placementRollMatches) return;
+
+          changed = true;
+          const payload = { roll, rollNo: roll, updatedAt: serverTimestamp() };
+          if (
+            selectedSession?.id &&
+            placement &&
+            String(placement.class || student.class || "").trim() === normalizedClass &&
+            String(placement.section || student.section || "").trim() === normalizedSection
+          ) {
+            payload[\`sessionPlacements.\${selectedSession.id}\`] = removeUndefinedFields(makeSessionPlacement({ ...student, roll, rollNo: roll }, selectedSession, { roll }));
+          }
+          await updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), removeUndefinedFields(payload));
+          const mirrorIds = [student.studentId, student.authUid].map(value => String(value || "").trim()).filter(Boolean);
+          const mirrorResults = await Promise.allSettled([...new Set(mirrorIds)].map((id) => setDoc(doc(db, "users", id), { rollNo: roll, roll, updatedAt: serverTimestamp() }, { merge: true })));
+          mirrorResults
+            .filter((result) => result.status === "rejected")
+            .forEach((result) => console.warn("Roll mirror update failed:", result.reason));
+        }));
+        return changed;
+      }
+
+      async function reassignRollNumbersForPlacements(...placements) {
+        const unique = new Map();
+        placements.forEach((placement) => {
+          const normalized = extractClassSection(placement?.class, placement?.section);
+          if (!normalized.class || !normalized.section) return;
+          unique.set(getClassSectionKey(normalized.class, normalized.section), normalized);
+        });
+        for (const placement of unique.values()) {
+          await reassignRollNumbersForClassSection(placement.class, placement.section);
+        }
+      }
+
+      async function reconcileAllRollNumbers() {
+        const groups = new Map();
+        const selectedSession = getSelectedSession();
+        allStudents.forEach((student) => {
+          if (student.tcIssued || String(student.status || "").toLowerCase() === "passed out") return;
+          const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+          const placement = extractClassSection(
+            sessionPlacement?.class || student.class,
+            sessionPlacement?.section || student.section
+          );
+          if (!placement.class || !placement.section) return;
+          groups.set(getClassSectionKey(placement.class, placement.section), placement);
+        });
+
+        let changed = false;
+        for (const placement of groups.values()) {
+          changed = (await reassignRollNumbersForClassSection(placement.class, placement.section)) || changed;
+        }
+        return changed;
+      }
+
+      function getStudentIdentity(student = {}) {
+        const studentId = String(student?.studentId || "").trim();
+        const authUid = String(student?.authUid || "").trim();
+        const email = String(student?.email || "").trim().toLowerCase();
+        if (studentId) return \`studentId:\${studentId}\`;
+        if (authUid) return \`authUid:\${authUid}\`;
+        if (email) return \`email:\${email}\`;
+        return \`doc:\${student?.id || ""}\`;
+      }
+
+      function getStudentRecordScore(student = {}) {
+        return [
+          Boolean(student?.studentId),
+          Boolean(student?.name),
+          Boolean(student?.class),
+          Boolean(student?.section),
+          Boolean(student?.authUid),
+          Boolean(student?.email),
+          Boolean(student?.father),
+          Boolean(student?.mother)
+        ].filter(Boolean).length;
+      }
+
+      function selectPreferredStudent(existing = {}, incoming = {}) {
+        const existingScore = getStudentRecordScore(existing);
+        const incomingScore = getStudentRecordScore(incoming);
+        if (incomingScore !== existingScore) return incomingScore > existingScore ? incoming : existing;
+        const incomingTs = toMillis(incoming.updatedAt || incoming.createdAt);
+        const existingTs = toMillis(existing.updatedAt || existing.createdAt);
+        return incomingTs >= existingTs ? incoming : existing;
+      }
+
+      function deduplicateStudents(students = []) {
+        const unique = new Map();
+        students.forEach((student) => {
+          const key = getStudentIdentity(student);
+          const existing = unique.get(key);
+          if (!existing) {
+            unique.set(key, student);
+            return;
+          }
+          unique.set(key, selectPreferredStudent(existing, student));
+        });
+        return Array.from(unique.values());
+      }
+
+      const getAttendanceWeight = (status) => status === 'Present' ? 1 : status === 'Half Day' ? 0.5 : 0;
+      const clampPercent = (value) => Math.max(0, Math.min(100, Number(value || 0)));
+
+      function toMillis(value) {
+        if (!value) return 0;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+        }
+        if (typeof value.toDate === 'function') return value.toDate().getTime();
+        if (typeof value.seconds === 'number') return value.seconds * 1000;
+        return 0;
+      }
+
+      function cleanupClassValue(value) {
+        return String(value || '').trim().toUpperCase().replace(/^CLASS\\s+/, '');
+      }
+
+      function normalizeSectionValue(value) {
+        return String(value || '').trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+      }
+
+      function normalizeClassLabel(value) {
+        const cleaned = cleanupClassValue(value);
+        if (!cleaned) return '';
+        if (cleaned === 'PASSED OUT') return 'Passed Out';
+        if (/^\\d+$/.test(cleaned)) return String(Number(cleaned));
+        return ROMAN_TO_NUMERIC_CLASS[cleaned] || cleaned;
+      }
+
+      function extractClassSection(classValue, sectionValue = '') {
+        const explicitSection = normalizeSectionValue(sectionValue);
+        const cleanedClass = cleanupClassValue(classValue);
+
+        if (!cleanedClass) {
+          return { class: '', section: explicitSection };
+        }
+
+        if (explicitSection) {
+          return { class: normalizeClassLabel(cleanedClass), section: explicitSection };
+        }
+
+        for (const token of CLASS_PARSE_TOKENS) {
+          if (!cleanedClass.startsWith(token)) continue;
+          const remainder = cleanedClass.slice(token.length).replace(/^[\\s-]+/, '');
+          if (!remainder) {
+            return { class: normalizeClassLabel(token), section: '' };
+          }
+          if (/^[A-Z]$/.test(remainder)) {
+            return { class: normalizeClassLabel(token), section: remainder };
+          }
+        }
+
+        return { class: normalizeClassLabel(cleanedClass), section: '' };
+      }
+
+      function formatClassSectionLabel(classValue, sectionValue = '') {
+        const placement = extractClassSection(classValue, sectionValue);
+        if (!placement.class && !placement.section) return 'N/A';
+        return placement.section ? \`\${placement.class}-\${placement.section}\` : placement.class || placement.section;
+      }
+
+      function getSessionPlacement(student, sessionId = getSelectedSessionId()) {
+        if (!student || !sessionId) return null;
+        const placements = student.sessionPlacements || {};
+        if (placements[sessionId]) return placements[sessionId];
+        const label = getSelectedSessionLabel();
+        return Object.values(placements).find((placement) =>
+          placement?.sessionId === sessionId ||
+          (label && (placement?.session === label || placement?.currentYear === label))
+        ) || null;
+      }
+
+      function getStudentForSelectedSession(student) {
+        if (!student) return null;
+        const placement = getSessionPlacement(student);
+        if (!placement) return { ...student, _sessionPlacement: null };
+        return {
+          ...student,
+          class: placement.class || student.class || '',
+          section: placement.section || student.section || '',
+          roll: placement.roll || student.roll || student.rollNo || '',
+          currentYear: placement.currentYear || placement.session || getSelectedSessionLabel() || student.currentYear || '',
+          _sessionPlacement: placement
+        };
+      }
+
+      function getStudentsForSelectedSession() {
+        return allStudents.map(getStudentForSelectedSession);
+      }
+
+      function makeSessionPlacement(student, session = getSelectedSession(), overrides = {}) {
+        const sessionId = session?.id || getSelectedSessionId();
+        const sessionLabel = getSessionLabel(session) || getSelectedSessionLabel() || student.currentYear || '';
+        const existing = student.sessionPlacements?.[sessionId] || {};
+        const now = Date.now();
+        return {
+          ...existing,
+          sessionId,
+          session: sessionLabel,
+          currentYear: sessionLabel,
+          class: student.class || '',
+          section: student.section || '',
+          roll: student.roll || student.rollNo || '',
+          locked: Boolean(session?.locked),
+          classLocked: Boolean(session?.classesLocked),
+          createdAt: existing.createdAt || now,
+          updatedAt: now,
+          ...overrides
+        };
+      }
+
+      function getClassSectionKey(classValue, sectionValue = '') {
+        const placement = extractClassSection(classValue, sectionValue);
+        return \`\${placement.class || ''}__\${placement.section || ''}\`;
+      }
+
+      function isSamePlacement(left, right) {
+        return left?.class === right?.class && left?.section === right?.section;
+      }
+
+      function parseClassSortValue(value) {
+        if (value === undefined || value === null || value === '') return Number.MAX_SAFE_INTEGER;
+        const placement = extractClassSection(value);
+        const orderIndex = CLASS_SEQUENCE.indexOf(placement.class);
+        if (orderIndex !== -1) return orderIndex;
+        const numeric = Number(placement.class);
+        if (!Number.isNaN(numeric)) return numeric;
+        return Number.MAX_SAFE_INTEGER - 1;
+      }
+
+      function parseDisplayDate(value) {
+        if (!value) return null;
+        if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+        if (typeof value === 'string' || typeof value === 'number') {
+          const parsed = new Date(value);
+          if (!Number.isNaN(parsed.getTime())) return parsed;
+          if (typeof value === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {
+            const dateOnly = new Date(\`\${value}T00:00:00\`);
+            if (!Number.isNaN(dateOnly.getTime())) return dateOnly;
+          }
+          return null;
+        }
+        if (typeof value.toDate === 'function') return parseDisplayDate(value.toDate());
+        if (typeof value.seconds === 'number') return new Date(value.seconds * 1000);
+        return null;
+      }
+
+      function formatDisplayDate(dateValue, options = { day: 'numeric', month: 'short' }) {
+        const date = parseDisplayDate(dateValue);
+        return date ? date.toLocaleDateString('en-IN', options) : 'N/A';
+      }
+
+      async function sendAdminAbsenceEmail(student, date, attendanceDocId) {
+        const parentEmail = getParentEmail(student);
+
+        const response = await fetch(ABSENCE_EMAIL_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`
+          },
+          body: JSON.stringify({
+            parentEmail,
+            studentName: student.name || "Student",
+            studentId: student.studentId || student.id || "",
+            studentDocId: student.id || "",
+            authUid: student.authUid || student.uid || "",
+            studentAliases: [
+              student.studentId,
+              student.id,
+              student.studentDocId,
+              student.authUid,
+              student.uid,
+              student.email,
+              student.authEmail
+            ].filter(Boolean),
+            schoolId: currentUser?.uid || "",
+            className: student.class || "",
+            section: student.section || "",
+            date: formatDisplayDate(date, { day: 'numeric', month: 'short', year: 'numeric' }),
+            teacherName: "Admin Office",
+            schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"
+          })
+        });
+
+        if (!response.ok) {
+          const details = await response.text();
+          throw new Error(details || "Absence email failed");
+        }
+        const result = await response.json().catch(() => ({}));
+
+        await updateDoc(doc(db, "schools", currentUser.uid, "attendance", attendanceDocId), {
+          absenceEmailSent: Boolean(result.emailSent),
+          absenceEmailSentAt: serverTimestamp(),
+          absenceEmailSentTo: result.emailSent ? parentEmail : "",
+          absenceStudentNotificationSent: Boolean(result.notificationSent),
+          absenceStudentNotificationSentAt: serverTimestamp()
+        });
+        return Boolean(result.emailSent || result.notificationSent);
+      }
+
+      function formatInputDate(value) {
+        const date = parseDisplayDate(value);
+        return date ? toLocalDateISO(date) : '';
+      }
+
+      function createEmptyChart(message) {
+        return \`<div class="chart-empty">\${message}</div>\`;
+      }
+
+      function rebuildDataIndexes() {
+        attendanceRecordsByStudent = new Map();
+        feeRecordsByStudent = new Map();
+        latestReportByStudent = new Map();
+        latestReportBySessionStudent = new Map();
+
+        allAttendance.forEach((record) => {
+          const key = record.studentId;
+          if (!key) return;
+          if (!attendanceRecordsByStudent.has(key)) attendanceRecordsByStudent.set(key, []);
+          attendanceRecordsByStudent.get(key).push(record);
+        });
+
+        allFees.forEach((record) => {
+          const key = record.studentId;
+          if (!key) return;
+          if (!feeRecordsByStudent.has(key)) feeRecordsByStudent.set(key, []);
+          feeRecordsByStudent.get(key).push(record);
+        });
+
+        allReports.forEach((report) => {
+          const key = report.student?.studentId || report.studentId;
+          if (!key) return;
+          const previous = latestReportByStudent.get(key);
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = previous ? Math.max(
+            toMillis(previous.updatedAt),
+            toMillis(previous.generatedAt),
+            toMillis(previous.createdAt),
+            toMillis(previous.timestamp)
+          ) : 0;
+
+          if (!previous || currentStamp >= previousStamp) {
+            latestReportByStudent.set(key, report);
+          }
+        });
+      }
+
+      window.goBack = () => window.location.href = "#/add-student.html";
+
+      window.closeAttendanceModal = () => {
+        document.getElementById("attendanceModal").style.display = "none";
+        currentSelectedDate = null;
+        selectedAttendanceStatus = null;
+        document.getElementById("markDateBtn").disabled = true;
+      };
+
+      window.closePromotionModal = () => {
+        document.getElementById("promotionModal").style.display = "none";
+        promotionPreviewData = [];
+      };
+
+      window.closePassOutModal = () => {
+        document.getElementById("passOutModal").style.display = "none";
+        passOutPreviewData = [];
+      };
+
+      window.closeSectionShuffleModal = () => {
+        document.getElementById("sectionShuffleModal").style.display = "none";
+        sectionShufflePreviewData = [];
+      };
+
+      window.togglePromotionBanner = () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked || classesLocked) {
+          return showToast("This session is locked — promotion is disabled.", "error");
+        }
+
+        const banner = document.getElementById("promotionBanner");
+        banner.style.display = banner.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      function populatePassOutClassOptions() {
+        const classSelect = document.getElementById("passOutClassSelect");
+        const sectionSelect = document.getElementById("passOutSectionSelect");
+        if (!classSelect || !sectionSelect) return;
+
+        const currentFilterClass = document.getElementById("filterClass")?.value || "";
+        const currentFilterSection = document.getElementById("filterSection")?.value || "";
+        const classValues = [...new Set(getStudentsForSelectedSession().map((student) => student.class).filter(Boolean))]
+          .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b), "en", { numeric: true }));
+
+        classSelect.innerHTML = '<option value="">Select class</option>' +
+          classValues.map((classValue) => \`<option value="\${escapeHtml(classValue)}">\${escapeHtml(classValue)}</option>\`).join("");
+        classSelect.value = classValues.includes(currentFilterClass) ? currentFilterClass : "";
+        updatePassOutSectionOptions(currentFilterSection);
+      }
+
+      function updatePassOutSectionOptions(preferredSection = "") {
+        const classValue = document.getElementById("passOutClassSelect")?.value || "";
+        const sectionSelect = document.getElementById("passOutSectionSelect");
+        if (!sectionSelect) return;
+
+        const sections = [...new Set(getStudentsForSelectedSession()
+          .filter((student) => !classValue || student.class === classValue)
+          .map((student) => student.section)
+          .filter(Boolean))]
+          .sort((a, b) => String(a).localeCompare(String(b), "en", { numeric: true }));
+
+        sectionSelect.innerHTML = '<option value="">All Sections</option>' +
+          sections.map((section) => \`<option value="\${escapeHtml(section)}">\${escapeHtml(section)}</option>\`).join("");
+        sectionSelect.value = sections.includes(preferredSection) ? preferredSection : "";
+      }
+
+      window.openPassOutModal = () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked) return showToast("This session is locked - pass out is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session - pass out is disabled.", "error");
+
+        populatePassOutClassOptions();
+        const yearInput = document.getElementById("passOutYearInput");
+        if (yearInput && !yearInput.value) yearInput.value = getPassoutYear();
+        document.getElementById("passOutModal").style.display = "flex";
+        renderPassOutPreview();
+      };
+
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = \`
+    position: fixed; top: 20px; right: 20px; 
+    padding: 15px 25px; border-radius: 12px; 
+    color: white; z-index: 10000; 
+    font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  \`;
+        if (type === 'success') toast.style.background = 'linear-gradient(135deg, #48bb78, #38a169)';
+        else toast.style.background = 'linear-gradient(135deg, #f56565, #e53e3e)';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) return window.location.href = "#/index.html";
+        currentUser = user;
+        await loadAllData();
+        setupRealtimeSync();
+      });
+
+      async function loadAllData() {
+        try {
+          document.getElementById("studentsList").innerHTML = '<div class="loading">Loading students...</div>';
+
+          const [studentSnap, attendanceSnap, feesSnap, reportSnap, sessionsSnap, termsSnap] = await Promise.all([
+            getDocs(collection(db, "schools", currentUser.uid, "students")),
+            getDocs(collection(db, "schools", currentUser.uid, "attendance")),
+            getDocs(collection(db, "schools", currentUser.uid, "fees")),
+            getDocs(collection(db, "schools", currentUser.uid, "reportCards")),
+            getDocs(collection(db, "schools", currentUser.uid, "sessions")),
+            getDocs(collection(db, "schools", currentUser.uid, "terms"))
+          ]);
+
+          allStudents = deduplicateStudents(studentSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+          allSessions = sessionsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allTerms = termsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          const settingsSnap = await getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'));
+          const schoolActiveSessionId = settingsSnap.exists() ? settingsSnap.data().sessionId || '' : '';
+          activeSessionId = getHeaderViewSessionId() || schoolActiveSessionId;
+          if (activeSessionId) {
+            const sessionObj = allSessions.find((s) => s.id === activeSessionId);
+            activeSessionLabel = getSessionLabel(sessionObj);
+            if (!sessionObj) {
+              try { localStorage.removeItem("schoolix.viewSessionId"); } catch (_) { }
+              activeSessionId = schoolActiveSessionId;
+              const fallbackSession = allSessions.find((s) => s.id === activeSessionId);
+              activeSessionLabel = getSessionLabel(fallbackSession);
+              if (!fallbackSession) activeSessionId = '';
+            }
+          }
+
+          allAttendance = attendanceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allFees = feesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allReports = reportSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // Existing records are corrected automatically once per load. A
+          // second load only happens when at least one roll actually changed.
+          if (await reconcileAllRollNumbers()) return loadAllData();
+
+          rebuildDataIndexes();
+          populateFilters();
+          populateSessionSelector();
+          populatePromotionResultControls();
+          loadData(false);
+
+        } catch (error) {
+          console.error("Error loading data:", error);
+          showToast('Error loading data', 'error');
+          document.getElementById("studentsList").innerHTML = '<div class="loading">Failed to load data</div>';
+        }
+      }
+
+      function setupRealtimeSync() {
+        if (unsubscribeAttendance) unsubscribeAttendance();
+        if (unsubscribeFees) unsubscribeFees();
+
+        const attendanceRef = collection(db, "schools", currentUser.uid, "attendance");
+        const feesRef = collection(db, "schools", currentUser.uid, "fees");
+
+        unsubscribeAttendance = onSnapshot(attendanceRef, (snapshot) => {
+          allAttendance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          rebuildDataIndexes();
+          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'attendance') {
+            updateModalAttendance();
+          }
+          loadData(false);
+        });
+
+        unsubscribeFees = onSnapshot(feesRef, (snapshot) => {
+          allFees = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          rebuildDataIndexes();
+          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'fees') {
+            updateFeeHistory();
+          }
+          loadData(false);
+        });
+      }
+
+      function getLatestReportForStudent(studentId) {
+        const cacheKey = \`\${getSelectedSessionId() || 'all'}:\${studentId || ''}\`;
+        if (latestReportBySessionStudent.has(cacheKey)) {
+          return latestReportBySessionStudent.get(cacheKey);
+        }
+        const reports = allReports
+          .filter((report) => (report.student?.studentId || report.studentId) === studentId)
+          .filter(entryBelongsToSession);
+
+        if (!reports.length) {
+          latestReportBySessionStudent.set(cacheKey, null);
+          return null;
+        }
+        const latest = reports.reduce((latest, report) => {
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = Math.max(
+            toMillis(latest.updatedAt),
+            toMillis(latest.generatedAt),
+            toMillis(latest.createdAt),
+            toMillis(latest.timestamp)
+          );
+          return currentStamp >= previousStamp ? report : latest;
+        });
+        latestReportBySessionStudent.set(cacheKey, latest);
+        return latest;
+      }
+
+      function getStudentPercentage(studentId) {
+        const report = getLatestReportForStudent(studentId);
+        return clampPercent(Number(report?.percentage || report?.student?.percentage || 0));
+      }
+
+      function getPercentInputNumber(inputId) {
+        const raw = document.getElementById(inputId)?.value;
+        if (raw === undefined || raw === null || raw === '') return NaN;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? clampPercent(parsed) : NaN;
+      }
+
+      function getPercentageClass(percentage) {
+        if (percentage >= 80) return 'percentage-excellent';
+        if (percentage >= 65) return 'percentage-good';
+        if (percentage >= 50) return 'percentage-average';
+        return 'percentage-poor';
+      }
+
+      function getCurrentViewLabel(students = []) {
+        const sessionFilter = document.getElementById("filterSession").value;
+        const classFilter = document.getElementById("filterClass").value;
+        const sectionFilter = document.getElementById("filterSection").value;
+        const hasSearch = Boolean(document.getElementById("searchName").value.trim() || document.getElementById("searchPhone").value.trim());
+        const hasPerformanceFilter = Boolean(document.getElementById("percentAbove").value || document.getElementById("percentBelow").value);
+        const hasAttendanceFilter = Boolean(document.getElementById("attendanceBelow")?.value);
+        const parts = [];
+
+        if (sessionFilter) {
+          const session = allSessions.find((s) => s.id === sessionFilter);
+          parts.push(getSessionLabel(session) || 'Selected Session');
+        }
+        if (classFilter) parts.push(\`Class \${classFilter}\`);
+        if (sectionFilter) parts.push(\`Section \${sectionFilter}\`);
+        if (hasSearch) parts.push('Search filtered');
+        if (hasPerformanceFilter) parts.push('Performance filtered');
+        if (hasAttendanceFilter) parts.push('Attendance filtered');
+        if (todayStatusFilter) parts.push(\`Today: \${todayStatusFilter}\`);
+
+        if (parts.length) return parts.join(' • ');
+        if (!students.length) return 'No students in current view';
+        return 'All classes • full roster';
+      }
+
+      function buildTodayAttendanceMetrics(students) {
+        const today = toLocalDateISO();
+        return students.reduce((summary, student) => {
+          const status = getTodayStatus(getStudentKey(student), today);
+          if (status === 'Present') summary.present += 1;
+          else if (status === 'Half Day') summary.half += 1;
+          else if (status === 'Absent') summary.absent += 1;
+          else summary.missing += 1;
+          return summary;
+        }, { present: 0, half: 0, absent: 0, missing: 0, total: students.length });
+      }
+
+      function buildFeeMetrics(students) {
+        return students.reduce((summary, student) => {
+          const fee = getStudentFeesSummary(getStudentKey(student));
+          summary.total += fee.total;
+          summary.paid += fee.paid;
+          summary.due += fee.due;
+          if (!fee.total) summary.noPlan += 1;
+          else if (fee.due > 0) summary.pending += 1;
+          else summary.cleared += 1;
+          return summary;
+        }, { total: 0, paid: 0, due: 0, pending: 0, cleared: 0, noPlan: 0 });
+      }
+
+      function buildResultBands(students) {
+        const bands = [
+          { label: '80%+', count: 0, color: 'linear-gradient(180deg, rgba(15, 159, 98, 0.95), rgba(15, 159, 98, 0.35))' },
+          { label: '65-79%', count: 0, color: 'linear-gradient(180deg, rgba(49, 94, 251, 0.95), rgba(49, 94, 251, 0.35))' },
+          { label: '50-64%', count: 0, color: 'linear-gradient(180deg, rgba(192, 118, 22, 0.95), rgba(192, 118, 22, 0.35))' },
+          { label: 'Below 50%', count: 0, color: 'linear-gradient(180deg, rgba(209, 67, 67, 0.95), rgba(209, 67, 67, 0.35))' },
+          { label: 'No Report', count: 0, color: 'linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(148, 163, 184, 0.35))' }
+        ];
+
+        students.forEach((student) => {
+          if (!latestReportByStudent.has(getStudentKey(student))) {
+            bands[4].count += 1;
+            return;
+          }
+          const percentage = getStudentPercentage(getStudentKey(student));
+          if (percentage >= 80) bands[0].count += 1;
+          else if (percentage >= 65) bands[1].count += 1;
+          else if (percentage >= 50) bands[2].count += 1;
+          else bands[3].count += 1;
+        });
+
+        return bands;
+      }
+
+      function buildClassMix(students) {
+        const counts = new Map();
+        students.forEach((student) => {
+          const label = \`\${student.class || '?'}-\${student.section || '-'}\`;
+          counts.set(label, (counts.get(label) || 0) + 1);
+        });
+
+        return Array.from(counts.entries())
+          .map(([label, count]) => ({ label, count }))
+          .sort((a, b) => {
+            const [classA, sectionA] = a.label.split('-');
+            const [classB, sectionB] = b.label.split('-');
+            const classOrder = parseClassSortValue(classA) - parseClassSortValue(classB);
+            return classOrder || String(sectionA).localeCompare(String(sectionB)) || b.count - a.count;
+          });
+      }
+
+      function updateHeaderSummary(students) {
+        const feeMetrics = buildFeeMetrics(students);
+        const todayMetrics = buildTodayAttendanceMetrics(students);
+        const markedToday = todayMetrics.present + todayMetrics.absent + todayMetrics.half;
+        const tcCount = students.filter((student) => student.tcIssued).length;
+        const filtered = students.length !== allStudents.length;
+        document.getElementById("pageContextLabel").textContent = getCurrentViewLabel(students);
+        const heroTotal = document.getElementById("heroTotalStudents");
+        const heroToday = document.getElementById("heroTodayAttendance");
+        if (heroTotal) heroTotal.textContent = String(students.length);
+        if (heroToday) heroToday.textContent = students.length ? \`\${markedToday}/\${students.length}\` : "0/0";
+        document.getElementById("studentsSummaryText").textContent = students.length
+          ? \`\${students.length} students visible, \${tcCount} TC restricted, \${formatCurrency(feeMetrics.due)} outstanding in this view.\`
+          : 'No students match the active filters. Adjust the search, class, result percentage or attendance range to see data again.';
+        document.getElementById("studentsSummaryBadge").textContent = filtered ? 'Filtered view' : 'Live view';
+      }
+
+      function updateStats(students = allStudents) {
+        const todayMetrics = buildTodayAttendanceMetrics(students);
+        const feeMetrics = buildFeeMetrics(students);
+        const studentsWithAttendance = students.filter((student) => (attendanceRecordsByStudent.get(getStudentKey(student)) || []).length > 0);
+        const avgAttendance = studentsWithAttendance.length
+          ? Math.round(studentsWithAttendance.reduce((sum, student) => sum + calculateAttendancePercentage(getStudentKey(student)), 0) / studentsWithAttendance.length)
+          : 0;
+        const studentsWithReports = students.filter((student) => latestReportByStudent.has(getStudentKey(student)));
+        const avgPercentage = studentsWithReports.length
+          ? (studentsWithReports.reduce((sum, student) => sum + getStudentPercentage(getStudentKey(student)), 0) / studentsWithReports.length).toFixed(1)
+          : '0.0';
+        const attendanceCoverage = students.length
+          ? Math.round(((todayMetrics.present + todayMetrics.absent + todayMetrics.half) / students.length) * 100)
+          : 0;
+        const collectionRate = feeMetrics.total
+          ? Math.round((feeMetrics.paid / feeMetrics.total) * 100)
+          : 0;
+        const tcCount = students.filter((student) => student.tcIssued).length;
+
+        document.getElementById('statsGrid').innerHTML = \`
+        <article class="stat-card info">
+          <div class="stat-label">Visible Students</div>
+          <div class="stat-number">\${students.length}</div>
+          <div class="stat-meta">
+            <span>\${allStudents.length} total in school roster</span>
+            <span class="stat-trend neutral">\${getCurrentViewLabel(students)}</span>
+          </div>
+        </article>
+        <article class="stat-card success">
+          <div class="stat-label">Attendance Marked Today</div>
+          <div class="stat-number">\${todayMetrics.present + todayMetrics.absent + todayMetrics.half}</div>
+          <div class="stat-meta">
+            <span>\${attendanceCoverage}% coverage across visible students</span>
+            <span class="stat-trend positive">\${todayMetrics.present} present</span>
+          </div>
+        </article>
+        <article class="stat-card danger">
+          <div class="stat-label">Students Requiring Follow-up</div>
+          <div class="stat-number">\${todayMetrics.absent + todayMetrics.missing}</div>
+          <div class="stat-meta">
+            <span>\${todayMetrics.absent} absent, \${todayMetrics.missing} not marked</span>
+            <span class="stat-trend negative">Check today</span>
+          </div>
+        </article>
+        <article class="stat-card info">
+          <div class="stat-label">Average Result</div>
+          <div class="stat-number">\${avgPercentage}%</div>
+          <div class="stat-meta">
+            <span>\${studentsWithReports.length} students with report cards</span>
+            <span class="stat-trend neutral">\${avgAttendance}% avg attendance</span>
+          </div>
+        </article>
+        <article class="stat-card warning">
+          <div class="stat-label">Fee Collection</div>
+          <div class="stat-number">\${collectionRate}%</div>
+          <div class="stat-meta">
+            <span>\${formatCurrency(feeMetrics.due)} still due</span>
+            <span class="stat-trend neutral">\${formatCurrency(feeMetrics.paid)} collected</span>
+          </div>
+        </article>
+        <article class="stat-card \${tcCount ? 'danger' : 'success'}">
+          <div class="stat-label">TC Restricted</div>
+          <div class="stat-number">\${tcCount}</div>
+          <div class="stat-meta">
+            <span>\${students.length ? Math.round((tcCount / students.length) * 100) : 0}% of current view</span>
+            <span class="stat-trend \${tcCount ? 'negative' : 'positive'}">\${tcCount ? 'Read-only records' : 'No restrictions'}</span>
+          </div>
+        </article>
+      \`;
+
+        updateHeaderSummary(students);
+      }
+
+      function populateFilters() {
+        const classSelect = document.getElementById('filterClass');
+        const sectionSelect = document.getElementById('filterSection');
+        const currentClass = classSelect.value;
+        const currentSection = sectionSelect.value;
+        const classSet = new Set();
+        const sectionSet = new Set();
+
+        getStudentsForSelectedSession().forEach((student) => {
+          if (student.class) classSet.add(student.class);
+          if (student.section) sectionSet.add(student.section);
+        });
+
+        classSelect.innerHTML = '<option value="">All Classes</option>';
+        Array.from(classSet)
+          .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b)))
+          .forEach((value) => {
+            classSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+          });
+
+        sectionSelect.innerHTML = '<option value="">All Sections</option>';
+        Array.from(sectionSet)
+          .sort((a, b) => String(a).localeCompare(String(b)))
+          .forEach((value) => {
+            sectionSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+          });
+
+        classSelect.value = Array.from(classSet).includes(currentClass) ? currentClass : '';
+        sectionSelect.value = Array.from(sectionSet).includes(currentSection) ? currentSection : '';
+
+        const shuffleClassSelect = document.getElementById('shuffleClassSelect');
+        if (shuffleClassSelect) {
+          const previousValue = shuffleClassSelect.value;
+          const shuffleClassSet = new Set();
+          getStudentsForSelectedSession().forEach((student) => {
+            if (student.class) shuffleClassSet.add(student.class);
+          });
+          shuffleClassSelect.innerHTML = '<option value="">Select class</option>';
+          Array.from(shuffleClassSet)
+            .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b)))
+            .forEach((value) => {
+              shuffleClassSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+            });
+          shuffleClassSelect.value = shuffleClassSet.has(previousValue) ? previousValue : '';
+        }
+      }
+
+      function getSessionLabel(session) {
+        return session?.session || session?.name || '';
+      }
+
+      function sortSessions(sessions) {
+        return [...sessions].sort((a, b) => {
+          const aOrder = Number(a.startYear || 0) || new Date(a.startDate || a.createdAt?.seconds * 1000 || a.createdAt || 0).getTime();
+          const bOrder = Number(b.startYear || 0) || new Date(b.startDate || b.createdAt?.seconds * 1000 || b.createdAt || 0).getTime();
+          return aOrder - bOrder;
+        });
+      }
+
+      function populateSessionSelector() {
+        const selector = document.getElementById('filterSession');
+        if (!selector) return;
+        selector.innerHTML = '<option value="">All Sessions</option>';
+        sortSessions(allSessions).forEach((session) => {
+          const option = document.createElement('option');
+          option.value = session.id;
+          option.textContent = \`\${getSessionLabel(session) || 'Unnamed'}\${session.locked ? ' (Locked)' : ''}\`;
+          selector.appendChild(option);
+        });
+        if (activeSessionId) selector.value = activeSessionId;
+      }
+
+      function getSelectedSessionId() {
+        const selectorValue = document.getElementById('filterSession')?.value;
+        return selectorValue || activeSessionId || '';
+      }
+
+      function getSelectedSessionLabel() {
+        const sessionId = getSelectedSessionId();
+        const session = allSessions.find((s) => s.id === sessionId);
+        return getSessionLabel(session) || '';
+      }
+
+      function getSelectedSession() {
+        const sessionId = getSelectedSessionId();
+        return allSessions.find((s) => s.id === sessionId);
+      }
+
+      function getPromotionResultSessionId() {
+        return document.getElementById('promotionResultSession')?.value || activeSessionId || getSelectedSessionId() || '';
+      }
+
+      function getPromotionResultSessionLabel(sessionId = getPromotionResultSessionId()) {
+        const session = allSessions.find((item) => item.id === sessionId);
+        return getSessionLabel(session) || '';
+      }
+
+      function getPromotionResultTermKey() {
+        return document.getElementById('promotionResultTerm')?.value || '';
+      }
+
+      function getPromotionResultTitle() {
+        const selectedTermOption = document.getElementById('promotionResultTerm')?.selectedOptions?.[0]?.textContent?.trim() || '';
+        const selectedSessionLabel = getPromotionResultSessionLabel();
+        if (selectedTermOption && selectedSessionLabel) return \`\${selectedTermOption} • \${selectedSessionLabel}\`;
+        if (selectedTermOption) return selectedTermOption;
+        if (selectedSessionLabel) return selectedSessionLabel;
+        return 'Latest report';
+      }
+
+      function normalizePromotionOptionLabel(value) {
+        return String(value || '').trim();
+      }
+
+      function getPromotionTermKey(value) {
+        return normalizePromotionOptionLabel(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      function collectPromotionResultOptions(sessionId = getPromotionResultSessionId()) {
+        const options = [];
+        const seen = new Set();
+        const addOption = (label) => {
+          const normalized = normalizePromotionOptionLabel(label);
+          if (!normalized) return;
+          const key = getPromotionTermKey(normalized);
+          if (!key || seen.has(key)) return;
+          seen.add(key);
+          options.push({ key, label: normalized });
+        };
+
+        const effectiveSessionId = sessionId || activeSessionId || getSelectedSessionId() || '';
+        const effectiveSessionLabel = getPromotionResultSessionLabel(effectiveSessionId);
+
+        allReports.forEach((report) => {
+          const reportStudentId = report.student?.studentId || report.studentId;
+          if (!reportStudentId) return;
+          const reportSessionValue = report.sessionId || report.session || report.currentYear || report.academicSession || '';
+          const matchesSession = !effectiveSessionId ||
+            reportSessionValue === effectiveSessionId ||
+            report.session === effectiveSessionLabel ||
+            report.currentYear === effectiveSessionLabel ||
+            report.academicSession === effectiveSessionLabel;
+          if (!matchesSession) return;
+
+          [
+            report.termLabel,
+            report.term,
+            report.examName,
+            report.exam,
+            report.assessmentName,
+            report.assessment,
+            report.testName,
+            report.test,
+            report.sourceLabel,
+            report.periodLabel,
+            report.resultType
+          ].forEach(addOption);
+        });
+
+        allTerms.forEach((term) => {
+          const termSessionValue = term.sessionId || term.session || term.currentYear || term.academicSession || '';
+          const termLabel = term.label || term.term || term.name || term.termName || term.examName || '';
+          const matchesSession = !effectiveSessionId ||
+            termSessionValue === effectiveSessionId ||
+            term.session === effectiveSessionLabel ||
+            term.currentYear === effectiveSessionLabel ||
+            term.academicSession === effectiveSessionLabel;
+          if (matchesSession) addOption(termLabel);
+        });
+
+        return options;
+      }
+
+      function populatePromotionResultControls() {
+        const sessionSelect = document.getElementById('promotionResultSession');
+        const termSelect = document.getElementById('promotionResultTerm');
+        if (!sessionSelect || !termSelect) return;
+
+        const currentSessionValue = sessionSelect.value || '';
+        sessionSelect.innerHTML = '<option value="">Use active/current session</option>';
+        sortSessions(allSessions).forEach((session) => {
+          const option = document.createElement('option');
+          option.value = session.id;
+          option.textContent = \`\${getSessionLabel(session) || 'Unnamed'}\${session.locked ? ' (Locked)' : ''}\`;
+          sessionSelect.appendChild(option);
+        });
+
+        if (currentSessionValue && allSessions.some((session) => session.id === currentSessionValue)) {
+          sessionSelect.value = currentSessionValue;
+        } else if (activeSessionId) {
+          sessionSelect.value = activeSessionId;
+        } else if (getSelectedSessionId()) {
+          sessionSelect.value = getSelectedSessionId();
+        }
+
+        refreshPromotionResultOptions();
+      }
+
+      function refreshPromotionResultOptions() {
+        const termSelect = document.getElementById('promotionResultTerm');
+        if (!termSelect) return;
+        const currentTermValue = termSelect.value;
+        const options = collectPromotionResultOptions(getPromotionResultSessionId());
+        termSelect.innerHTML = '<option value="">Latest result in selected session</option>';
+        options.forEach((option) => {
+          const element = document.createElement('option');
+          element.value = option.key;
+          element.textContent = option.label;
+          termSelect.appendChild(element);
+        });
+        termSelect.value = currentTermValue && options.some((option) => option.key === currentTermValue) ? currentTermValue : '';
+      }
+
+      window.refreshPromotionResultOptions = refreshPromotionResultOptions;
+
+      function getPromotionReportForStudent(studentId, sessionId = getPromotionResultSessionId(), termKey = getPromotionResultTermKey()) {
+        const effectiveSessionId = sessionId || activeSessionId || getSelectedSessionId() || '';
+        const effectiveSessionLabel = getPromotionResultSessionLabel(effectiveSessionId);
+
+        const reports = allReports.filter((report) => {
+          const reportStudentId = report.student?.studentId || report.studentId;
+          if (reportStudentId !== studentId) return false;
+
+          const reportSessionValue = report.sessionId || report.session || report.currentYear || report.academicSession || '';
+          const matchesSession = !effectiveSessionId ||
+            reportSessionValue === effectiveSessionId ||
+            report.session === effectiveSessionLabel ||
+            report.currentYear === effectiveSessionLabel ||
+            report.academicSession === effectiveSessionLabel;
+          if (!matchesSession) return false;
+
+          if (!termKey) return true;
+
+          const reportTerms = [
+            report.termKey,
+            report.termLabel,
+            report.term,
+            report.examName,
+            report.exam,
+            report.assessmentName,
+            report.assessment,
+            report.testName,
+            report.test,
+            report.sourceLabel,
+            report.periodLabel,
+            report.resultType
+          ].map(getPromotionTermKey).filter(Boolean);
+
+          return reportTerms.includes(termKey);
+        });
+
+        if (!reports.length) return null;
+        return reports.reduce((latest, report) => {
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = Math.max(
+            toMillis(latest.updatedAt),
+            toMillis(latest.generatedAt),
+            toMillis(latest.createdAt),
+            toMillis(latest.timestamp)
+          );
+          return currentStamp >= previousStamp ? report : latest;
+        });
+      }
+
+      function getPromotionPercentage(studentId, sessionId = getPromotionResultSessionId(), termKey = getPromotionResultTermKey()) {
+        const report = getPromotionReportForStudent(studentId, sessionId, termKey);
+        return clampPercent(Number(report?.percentage || report?.student?.percentage || 0));
+      }
+
+      function entryBelongsToSession(entry) {
+        const sessionId = getSelectedSessionId();
+        if (!sessionId) return true;
+        const sessionLabel = getSelectedSessionLabel();
+        return entry?.sessionId === sessionId ||
+          entry?.session === sessionId ||
+          entry?.currentYear === sessionId ||
+          entry?.academicSession === sessionId ||
+          entry?.session === sessionLabel ||
+          entry?.currentYear === sessionLabel ||
+          entry?.academicSession === sessionLabel;
+      }
+
+      async function loadStudentSessions() {
+        try {
+          const sessionsSnap = await getDocs(collection(db, 'schools', currentUser.uid, 'sessions'));
+          allSessions = sessionsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+          const settingsSnap = await getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'));
+          const schoolActiveSessionId = settingsSnap.exists() ? settingsSnap.data().sessionId || '' : '';
+          activeSessionId = getHeaderViewSessionId() || schoolActiveSessionId;
+          if (activeSessionId) {
+            const sessionObj = allSessions.find((s) => s.id === activeSessionId);
+            activeSessionLabel = getSessionLabel(sessionObj);
+            if (!sessionObj) {
+              try { localStorage.removeItem("schoolix.viewSessionId"); } catch (_) { }
+              activeSessionId = schoolActiveSessionId;
+              const fallbackSession = allSessions.find((s) => s.id === activeSessionId);
+              activeSessionLabel = getSessionLabel(fallbackSession);
+              if (!fallbackSession) activeSessionId = '';
+            }
+          }
+
+          populateSessionSelector();
+        } catch (error) {
+          console.error('Unable to load sessions:', error);
+        }
+      }
+
+      window.queueStudentRefresh = () => {
+        clearTimeout(studentRefreshTimer);
+        studentRefreshTimer = window.setTimeout(() => loadData(), 180);
+      };
+
+      window.filterByTodayStatus = (status) => {
+        todayStatusFilter = todayStatusFilter === status ? "" : status;
+        loadData();
+      };
+
+      window.loadData = (resetPage = true, refreshFilters = false) => {
+        pageSize = Number(document.getElementById("pageSize").value) || 25;
+        if (resetPage) currentPage = 1;
+        if (refreshFilters) {
+          populateFilters();
+          populatePromotionResultControls();
+        }
+
+        const filteredStudents = getFilteredStudents().sort(sortStudentsByClassSectionRollName);
+        const activeIds = new Set(allStudents.map((student) => student.id));
+        Array.from(selectedStudentIds).forEach((studentId) => {
+          if (!activeIds.has(studentId)) selectedStudentIds.delete(studentId);
+        });
+        const totalPages = Math.ceil(filteredStudents.length / pageSize);
+        currentPage = totalPages ? Math.min(currentPage, totalPages) : 1;
+
+        updateStats(filteredStudents);
+        renderAnalytics(filteredStudents);
+        renderStudents(filteredStudents);
+        updateButtonStates();
+      };
+
+      function updateButtonStates() {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        const disabled = sessionLocked || classesLocked;
+
+        const promoteBtn = document.querySelector('button[onclick="togglePromotionBanner()"]');
+        const promoteSelectedBtn = document.querySelector('button[onclick="promoteSelected()"]');
+        const passOutBtns = document.querySelectorAll('button[onclick="openPassOutModal()"]');
+
+        if (promoteBtn) {
+          promoteBtn.disabled = disabled;
+          promoteBtn.style.opacity = disabled ? '0.55' : '1';
+        }
+        if (promoteSelectedBtn) {
+          promoteSelectedBtn.disabled = disabled;
+          promoteSelectedBtn.style.opacity = disabled ? '0.55' : '1';
+        }
+        passOutBtns.forEach((button) => {
+          button.disabled = disabled;
+          button.style.opacity = disabled ? '0.55' : '1';
+        });
+      }
+
+      function getFilteredStudents() {
+        const searchQuery = document.getElementById("searchName").value.toLowerCase();
+        const searchPhone = document.getElementById("searchPhone").value.toLowerCase();
+        const classFilter = document.getElementById("filterClass").value;
+        const sectionFilter = document.getElementById("filterSection").value;
+
+        const above = parseFloat(document.getElementById("percentAbove").value);
+        const below = parseFloat(document.getElementById("percentBelow").value);
+        const attendanceBelow = getPercentInputNumber("attendanceBelow");
+
+        return getStudentsForSelectedSession().filter(student => {
+          const studentId = getStudentKey(student);
+          const percentage = getStudentPercentage(studentId);
+          const attendancePercentage = calculateAttendancePercentage(studentId);
+
+          const matchesSearch = !searchQuery || [
+            student.name,
+            student.studentId,
+            student.roll,
+            student.father,
+            student.mother,
+            student.email,
+            student.yearOfAdmission,
+            student.currentYear,
+            student.admissionDate,
+            student.dateOfAdmission
+          ].some(value => String(value || '').toLowerCase().includes(searchQuery));
+
+          const matchesPhone = !searchPhone || [
+            student.phone,
+            getFatherPhone(student),
+            getMotherPhone(student)
+          ].some(value => String(value || '').toLowerCase().includes(searchPhone));
+          const matchesClass = !classFilter || student.class === classFilter;
+          const matchesSection = !sectionFilter || student.section === sectionFilter;
+
+          const aboveMatch = Number.isNaN(above) || percentage >= above;
+          const belowMatch = Number.isNaN(below) || percentage <= below;
+          const attendanceBelowMatch = Number.isNaN(attendanceBelow) || attendancePercentage < attendanceBelow;
+          const todayStatusMatch = !todayStatusFilter || getTodayStatus(studentId) === todayStatusFilter;
+
+          return matchesSearch && matchesPhone && matchesClass && matchesSection && aboveMatch && belowMatch && attendanceBelowMatch && todayStatusMatch;
+        });
+      }
+
+      function buildSectionShufflePlan(students, sectionCount) {
+        const targetSections = Array.from({ length: sectionCount }, (_, index) => String.fromCharCode(65 + index));
+        const shuffled = [...students].sort(() => Math.random() - 0.5);
+        return shuffled.map((student, index) => ({
+          student,
+          newSection: targetSections[index % sectionCount]
+        }));
+      }
+
+      window.previewSectionShuffle = () => {
+        const classValue = document.getElementById('shuffleClassSelect')?.value;
+        const sectionCount = parseInt(document.getElementById('shuffleSectionCount')?.value, 10);
+        if (!classValue) return showToast('Please select a class first', 'error');
+        if (!sectionCount || sectionCount < 2) return showToast('Please enter at least 2 sections', 'error');
+
+        const students = getStudentsForSelectedSession().filter((student) => student.class === classValue);
+        if (!students.length) return showToast('No students found for this class', 'error');
+
+        const plan = buildSectionShufflePlan(students, sectionCount).map((entry) => ({ ...entry, selected: true }));
+        sectionShufflePreviewData = plan;
+        const sectionCounts = Object.fromEntries(targetSectionsForCount(sectionCount).map((section) => [section, 0]));
+        const rows = plan.map(({ student, newSection, selected }, index) => {
+          sectionCounts[newSection] = (sectionCounts[newSection] || 0) + 1;
+          return \`<tr><td style="padding:10px;border:1px solid #cbd5e1;"><input type="checkbox" class="section-shuffle-checkbox" data-index="\${index}" \${selected ? 'checked' : ''}></td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.name || 'N/A'}</td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.studentId || student.id || 'N/A'}</td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.section || '-'}</td><td style="padding:10px;border:1px solid #cbd5e1;"><strong>\${newSection}</strong></td></tr>\`;
+        }).join('');
+
+        document.getElementById('sectionShuffleContent').innerHTML = \`
+        <div style="background:#f8fafc;padding:16px 18px;border-radius:12px;margin-bottom:16px;">
+          <h3 style="margin:0 0 8px;color:#0f172a;">\${classValue} • \${students.length} students</h3>
+          <p style="margin:0;color:#64748b;">Students will be redistributed into \${sectionCount} sections: \${targetSectionsForCount(sectionCount).join(', ')}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;">
+          \${targetSectionsForCount(sectionCount).map((section) => \`<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px;border-radius:10px;text-align:center;font-weight:700;color:#1d4ed8;">\${section}: \${sectionCounts[section] || 0}</div>\`).join('')}
+        </div>
+        <div style="max-height:420px;overflow:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#e2e8f0;"><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;"><input type="checkbox" id="sectionShuffleSelectAll" checked></th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">Student</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">ID</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">Current Section</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">New Section</th></tr></thead>
+            <tbody>\${rows}</tbody>
+          </table>
+        </div>
+      \`;
+        document.getElementById('sectionShuffleSelectAll')?.addEventListener('change', (event) => {
+          const checked = event.target.checked;
+          sectionShufflePreviewData = sectionShufflePreviewData.map((entry) => ({ ...entry, selected: checked }));
+          document.querySelectorAll('.section-shuffle-checkbox').forEach((checkbox) => {
+            checkbox.checked = checked;
+          });
+        });
+        document.querySelectorAll('.section-shuffle-checkbox').forEach((checkbox) => {
+          checkbox.addEventListener('change', (event) => {
+            const index = Number(event.target.dataset.index);
+            if (!Number.isNaN(index)) {
+              sectionShufflePreviewData[index].selected = event.target.checked;
+            }
+          });
+        });
+        document.getElementById('sectionShuffleModal').style.display = 'flex';
+      };
+
+      window.applySectionShuffle = async () => {
+        const classValue = document.getElementById('shuffleClassSelect')?.value;
+        const sectionCount = parseInt(document.getElementById('shuffleSectionCount')?.value, 10);
+        if (!classValue) return showToast('Please select a class first', 'error');
+        if (!sectionCount || sectionCount < 2) return showToast('Please enter at least 2 sections', 'error');
+
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked || classesLocked) return showToast('This session is locked — section shuffle is disabled.', 'error');
+
+        const students = getStudentsForSelectedSession().filter((student) => student.class === classValue);
+        if (!students.length) return showToast('No students found for this class', 'error');
+        if (!confirm(\`Shuffle \${students.length} students in \${classValue} into \${sectionCount} sections?\`)) return;
+
+        const selectedPlan = sectionShufflePreviewData.filter((entry) => entry.selected !== false);
+        if (!selectedPlan.length) return showToast('Please select at least one student to shuffle', 'error');
+
+        const selectedSession = getSelectedSession();
+        const updatePromises = selectedPlan.map(({ student, newSection }) => {
+          const studentDocId = student.id;
+          const updatePayload = {
+            section: newSection,
+            updatedAt: serverTimestamp()
+          };
+
+          if (selectedSession?.id) {
+            updatePayload[\`sessionPlacements.\${selectedSession.id}\`] = makeSessionPlacement({
+              ...student,
+              class: classValue,
+              section: newSection
+            }, selectedSession);
+          }
+
+          return updateDoc(doc(db, 'schools', currentUser.uid, 'students', studentDocId), updatePayload);
+        });
+
+        try {
+          await Promise.all(updatePromises);
+          await reassignRollNumbersForPlacements(...targetSectionsForCount(sectionCount).map((section) => ({ class: classValue, section })));
+          await loadAllData();
+          closeSectionShuffleModal();
+          showToast(\`Section shuffle applied to \${students.length} students\`, 'success');
+        } catch (error) {
+          console.error('Section shuffle error:', error);
+          showToast('Unable to shuffle sections', 'error');
+        }
+      };
+
+      function targetSectionsForCount(count) {
+        return Array.from({ length: count }, (_, index) => String.fromCharCode(65 + index));
+      }
+
+      function getAttendanceRecordsForStudent(studentId) {
+        return (attendanceRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+      }
+
+      function calculateAttendancePercentage(studentId) {
+        const records = getAttendanceRecordsForStudent(studentId);
+        if (records.length === 0) return 0;
+        const weightedPresent = records.reduce((sum, record) => sum + getAttendanceWeight(record.status), 0);
+        return Math.round((weightedPresent / records.length) * 100);
+      }
+
+      function getTodayStatus(studentId, date = toLocalDateISO()) {
+        const records = getAttendanceRecordsForStudent(studentId);
+        const record = records.find(entry => entry.date === date);
+        return record ? record.status : 'Not Marked';
+      }
+
+      function getFeeAppliedAmount(fee) {
+        return toMoneyNumber(fee?.totalPaidAmount ?? fee?.paidAmount ?? 0);
+      }
+
+      function getFeeExtraAmount(fee) {
+        const storedExtra = toMoneyNumber(
+          fee?.totalExtraPaidAmount ?? fee?.extraPaidAmount ?? fee?.extraAmount ?? fee?.lastExtraAmount ?? 0
+        );
+        if (storedExtra > 0) return storedExtra;
+        return (Array.isArray(fee?.payments) ? fee.payments : [])
+          .reduce((sum, payment) => sum + toMoneyNumber(payment?.extraAmount || 0), 0);
+      }
+
+      function getFeeCollectedAmount(fee) {
+        const storedCollected = toMoneyNumber(fee?.totalCollectedAmount ?? 0);
+        if (storedCollected > 0) return storedCollected;
+        return getFeeAppliedAmount(fee) + getFeeExtraAmount(fee);
+      }
+
+      function getStudentFeesSummary(studentId) {
+        const studentFees = (feeRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+        const total = studentFees.reduce((sum, fee) => sum + toMoneyNumber(fee.originalAmount || fee.amount || 0), 0);
+        const paid = studentFees.reduce((sum, fee) => sum + getFeeCollectedAmount(fee), 0);
+        return { total, paid, due: Math.max(total - paid, 0) };
+      }
+
+      function renderAttendanceChart(students) {
+        const target = document.getElementById('attendanceChart');
+        if (!students.length) {
+          document.getElementById('attendanceInsightNote').textContent = 'Change filters to repopulate today\\'s attendance breakdown.';
+          target.innerHTML = createEmptyChart('No students available for the current filters.');
+          return;
+        }
+
+        const metrics = buildTodayAttendanceMetrics(students);
+        const total = metrics.total || 1;
+        const markedCount = metrics.present + metrics.absent + metrics.half;
+        document.getElementById('attendanceInsightNote').textContent = \`\${markedCount} of \${metrics.total} students have today's attendance marked.\`;
+
+        target.innerHTML = \`
+        <div class="attendance-snapshot">
+          <div class="attendance-meter">
+            <span class="present" style="width:\${(metrics.present / total) * 100}%"></span>
+            <span class="half" style="width:\${(metrics.half / total) * 100}%"></span>
+            <span class="absent" style="width:\${(metrics.absent / total) * 100}%"></span>
+            <span class="missing" style="width:\${(metrics.missing / total) * 100}%"></span>
+          </div>
+          <div class="attendance-legend">
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Present' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Present')" aria-pressed="\${todayStatusFilter === 'Present'}" title="Show students marked Present today">
+              <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Present</span></div>
+              <strong>\${metrics.present}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Half Day' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Half Day')" aria-pressed="\${todayStatusFilter === 'Half Day'}" title="Show students marked Half Day today">
+              <div class="legend-left"><span class="legend-dot" style="background:#d97706;"></span><span>Half Day</span></div>
+              <strong>\${metrics.half}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Absent' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Absent')" aria-pressed="\${todayStatusFilter === 'Absent'}" title="Show students marked Absent today">
+              <div class="legend-left"><span class="legend-dot" style="background:#dc2626;"></span><span>Absent</span></div>
+              <strong>\${metrics.absent}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Not Marked' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Not Marked')" aria-pressed="\${todayStatusFilter === 'Not Marked'}" title="Show students whose attendance is not marked today">
+              <div class="legend-left"><span class="legend-dot" style="background:#94a3b8;"></span><span>Not Marked</span></div>
+              <strong>\${metrics.missing}</strong>
+            </button>
+          </div>
+        </div>
+      \`;
+      }
+
+      function renderResultBandChart(students) {
+        const target = document.getElementById('resultBandChart');
+        if (!students.length) {
+          document.getElementById('resultInsightNote').textContent = 'No report distribution available for an empty view.';
+          target.innerHTML = createEmptyChart('No students found for performance analysis.');
+          return;
+        }
+
+        const bands = buildResultBands(students);
+        const maxCount = Math.max(...bands.map(band => band.count), 1);
+        const reportCoverage = students.filter(student => latestReportByStudent.has(getStudentKey(student))).length;
+        document.getElementById('resultInsightNote').textContent = \`\${reportCoverage} students currently have report card data.\`;
+
+        target.innerHTML = \`
+        <div class="chart-columns">
+          \${bands.map(band => \`
+            <div class="chart-column">
+              <div class="chart-column-value">\${band.count} students</div>
+              <div class="chart-column-bar" style="height:\${Math.max(26, (band.count / maxCount) * 170)}px; background:\${band.color};"></div>
+              <div class="chart-column-label">\${band.label}</div>
+            </div>
+          \`).join('')}
+        </div>
+      \`;
+      }
+
+      function renderClassMixChart(students) {
+        const target = document.getElementById('classMixChart');
+        if (!students.length) {
+          document.getElementById('classInsightNote').textContent = 'Class distribution becomes visible once students are in the current view.';
+          target.innerHTML = createEmptyChart('No class mix to show right now.');
+          return;
+        }
+
+        const classMix = buildClassMix(students);
+        const strongest = classMix[0];
+        const maxCount = Math.max(...classMix.map(item => item.count), 1);
+        const previewCount = Math.min(3, classMix.length);
+        target.dataset.total = String(classMix.length);
+        target.dataset.previewCount = String(previewCount);
+        document.getElementById('classInsightNote').textContent = classMix.length > previewCount
+          ? \`Showing \${previewCount} of \${classMix.length} class sections.\`
+          : (strongest ? \`\${strongest.label} has the highest visible strength with \${strongest.count} students.\` : 'Visible roster class split.');
+
+        target.innerHTML = \`
+        <div class="bar-list">
+          \${classMix.map((item, index) => \`
+            <div class="bar-row \${index >= previewCount ? 'is-extra' : ''}">
+              <div class="bar-row-head">
+                <span>\${item.label}</span>
+                <span>\${item.count} students</span>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill" style="width:\${(item.count / maxCount) * 100}%"></span>
+              </div>
+            </div>
+          \`).join('')}
+        </div>
+      \`;
+      }
+
+      window.toggleClassMixChart = (button) => {
+        const card = button?.closest('.class-mix-card');
+        if (!card) return;
+        const isCollapsed = card.classList.toggle('is-collapsed');
+        const chart = card.querySelector('#classMixChart');
+        const note = card.querySelector('#classInsightNote');
+        const total = Number(chart?.dataset.total || 0);
+        const previewCount = Number(chart?.dataset.previewCount || 0);
+        button.setAttribute('aria-expanded', String(!isCollapsed));
+        const action = isCollapsed ? 'Show' : 'Hide';
+        button.setAttribute('aria-label', \`\${action} class mix chart\`);
+        button.setAttribute('title', \`\${action} class mix chart\`);
+        if (note && total > previewCount) {
+          note.textContent = isCollapsed
+            ? \`Showing \${previewCount} of \${total} class sections.\`
+            : \`Showing all \${total} class sections.\`;
+        }
+      };
+
+      function renderFeeHealthChart(students) {
+        const target = document.getElementById('feeHealthChart');
+        if (!students.length) {
+          document.getElementById('feeInsightNote').textContent = 'Fee health is calculated from the visible roster.';
+          target.innerHTML = createEmptyChart('No fee records to analyze in the current view.');
+          return;
+        }
+
+        const metrics = buildFeeMetrics(students);
+        if (!metrics.total) {
+          document.getElementById('feeInsightNote').textContent = \`\${metrics.noPlan} students in this view do not have fee records yet.\`;
+          target.innerHTML = createEmptyChart('Fee plans have not been created for these students yet.');
+          return;
+        }
+
+        const paidAngle = (metrics.paid / metrics.total) * 360;
+        const dueAngle = (metrics.due / metrics.total) * 360;
+        const noPlanAngle = Math.max(0, 360 - paidAngle - dueAngle);
+        const collectionRate = Math.round((metrics.paid / metrics.total) * 100);
+        document.getElementById('feeInsightNote').textContent = \`\${metrics.pending} students still have pending dues in this view.\`;
+
+        target.innerHTML = \`
+        <div class="donut-wrap">
+          <div class="donut-chart" style="background: conic-gradient(#16a34a 0deg \${paidAngle}deg, #ef4444 \${paidAngle}deg \${paidAngle + dueAngle}deg, #cbd5e1 \${paidAngle + dueAngle}deg \${paidAngle + dueAngle + noPlanAngle}deg);">
+            <div class="donut-center">
+              <strong>\${collectionRate}%</strong>
+              <span>Collected</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Collected</span></div>
+              <strong>\${formatCurrency(metrics.paid)}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#ef4444;"></span><span>Outstanding</span></div>
+              <strong>\${formatCurrency(metrics.due)}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#cbd5e1;"></span><span>No Fee Plan</span></div>
+              <strong>\${metrics.noPlan}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#315efb;"></span><span>Students Cleared</span></div>
+              <strong>\${metrics.cleared}</strong>
+            </div>
+          </div>
+        </div>
+      \`;
+      }
+
+      function renderAnalytics(students) {
+        renderAttendanceChart(students);
+        renderResultBandChart(students);
+        renderClassMixChart(students);
+        renderFeeHealthChart(students);
+      }
+
+      function updateSelectionSummary() {
+        const visibleCheckboxes = Array.from(document.querySelectorAll(".selectStudent"));
+        const selectedCount = selectedStudentIds.size;
+        const visibleSelectedCount = visibleCheckboxes.filter(checkbox => checkbox.checked).length;
+        const visibleCount = visibleCheckboxes.length;
+        document.getElementById("selectionSummary").textContent = selectedCount ? \`\${selectedCount} selected\` : '0 selected';
+
+        const selectAll = document.getElementById("selectAllStudents");
+        if (selectAll) {
+          selectAll.checked = visibleCount > 0 && visibleSelectedCount === visibleCount;
+          selectAll.indeterminate = visibleSelectedCount > 0 && visibleSelectedCount < visibleCount;
+        }
+      }
+      window.updateSelectionSummary = updateSelectionSummary;
+
+      window.handleStudentSelection = (studentId, checked) => {
+        if (!studentId) return;
+        if (checked) selectedStudentIds.add(studentId);
+        else selectedStudentIds.delete(studentId);
+        updateSelectionSummary();
+      };
+
+      function buildStudentAttendancePrintRows(students) {
+        return students.map((student, index) => {
+          const studentId = getStudentKey(student);
+          const records = getAttendanceRecordsForStudent(studentId);
+          const attendancePct = calculateAttendancePercentage(studentId);
+          return \`<tr>
+            <td>\${index + 1}</td>
+            <td>\${escapeHtml(student.name || 'N/A')}</td>
+            <td>\${escapeHtml(studentId || '-')}</td>
+            <td>\${escapeHtml(student.roll || student.rollNo || '-')}</td>
+            <td>\${escapeHtml(student.class || '-')}</td>
+            <td>\${escapeHtml(student.section || '-')}</td>
+            <td>\${attendancePct}%</td>
+            <td>\${records.length}</td>
+          </tr>\`;
+        }).join("");
+      }
+
+      function buildStudentPrintablePage(title, subtitle, tableHtml) {
+        const schoolName = window.SchoolBranding?.getSchoolName?.() || "Schoolix";
+        return \`<!doctype html>
+          <html><head><title>\${escapeHtml(title)}</title>
+          <style>
+            body{font-family:Arial,sans-serif;color:#111827;margin:28px;}
+            h1{font-size:22px;margin:0 0 4px;text-align:center;}
+            .sub{text-align:center;color:#4b5563;margin-bottom:18px;font-size:13px;}
+            table{width:100%;border-collapse:collapse;font-size:12px;}
+            th{background:#1e2f8a;color:#fff;padding:9px;border:1px solid #111827;text-align:left;}
+            td{padding:9px;border:1px solid #9ca3af;vertical-align:top;}
+            .footer{margin-top:22px;text-align:center;font-size:11px;color:#6b7280;}
+            @media print{body{margin:10mm;}button{display:none;}}
+          </style></head><body>
+            <h1>\${escapeHtml(schoolName)}</h1>
+            <div class="sub"><strong>\${escapeHtml(title)}</strong><br>\${escapeHtml(subtitle)}</div>
+            \${tableHtml}
+            <div class="footer">Generated on \${new Date().toLocaleDateString("en-IN")}</div>
+          `,styles:[{tag:"style",attributes:{id:"sxCriticalLoaderStyle"},text:`
+html.sx-page-loading,
+html.sx-page-loading body {
+  min-height: 100%;
+  background: #f8fafc !important;
+}
+html.sx-page-loading body::before,
+html.sx-page-loading body::after {
+  visibility: hidden !important;
+}
+html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
+  visibility: hidden !important;
+}
+.sx-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #f8fafc;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s ease;
+  overflow: hidden;
+}
+.sx-page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sx-page-loader .dots-container {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #f8fafc;
+}
+.sx-page-loader .dots-container::before,
+.sx-page-loader .dots-container::after,
+.sx-page-loader .dot {
+  display: none !important;
+}
+`},{tag:"link",attributes:{rel:"stylesheet",href:"schoolix-polish.css"},text:""},{tag:"link",attributes:{rel:"stylesheet",href:"admin-shell.css?v=navbar-20260721"},text:""}],scripts:[{attributes:{id:"sxCriticalLoaderScript"},text:`
+(function () {
+  var root = document.documentElement;
+  root.classList.add("sx-page-loading");
+  window.SchoolixPageLoaderEarly = window.SchoolixPageLoaderEarly || { startedAt: Date.now() };
+
+  function markEarlyReady(reason) {
+    window.SchoolixPageLoaderEarly.ready = true;
+    window.SchoolixPageLoaderEarly.reason = reason || "dom-ready";
+    try {
+      window.dispatchEvent(new CustomEvent("schoolix:critical-load-ready", { detail: window.SchoolixPageLoaderEarly }));
+    } catch (_) {}
+  }
+
+  function afterFirstPaint(reason) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { markEarlyReady(reason); });
+    });
+  }
+
+  function emergencyHide() {
+    if (window.SchoolixPageLoader || !root.classList.contains("sx-page-loading")) return;
+    root.classList.remove("sx-page-loading");
+    root.classList.add("sx-page-loaded");
+    var loader = document.getElementById("sxPageLoader");
+    if (!loader) return;
+    loader.classList.add("is-hidden");
+    setTimeout(function () { loader.remove(); }, 260);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { afterFirstPaint("dom-ready"); }, { once: true });
+  } else {
+    afterFirstPaint(document.readyState === "complete" ? "document-complete" : "dom-ready");
+  }
+  window.addEventListener("load", function () { markEarlyReady("window-load"); }, { once: true });
+  setTimeout(emergencyHide, 3200);
+}());
+`},{attributes:{src:"school-branding.js"},text:""},{attributes:{type:"module"},text:`
+      import { initializeApp } from "./firebase-compat.js";
+      import {
+        getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc,
+        serverTimestamp, onSnapshot, query, where
+      } from "./firebase-compat.js";
+      import { getAuth, onAuthStateChanged, sendPasswordResetEmail } from "./firebase-compat.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+        authDomain: "schoolix-48107.firebaseapp.com",
+        projectId: "schoolix-48107",
+        storageBucket: "schoolix-48107.firebasestorage.app",
+        messagingSenderId: "133937954491",
+        appId: "1:133937954491:web:69d8064422617eb8c4339e",
+        measurementId: "G-EG23XE5Q0Z"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+      const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+      const ABSENCE_EMAIL_FUNCTION_URL = \`\${SUPABASE_URL}/functions/v1/send-absence-email\`;
+
+      let currentUser = null;
+      let allStudents = [];
+      let allAttendance = [];
+      let allFees = [];
+      let allReports = [];
+      let allSessions = [];
+      let allTerms = [];
+      let activeSessionId = "";
+      let activeSessionLabel = "";
+      let unsubscribeAttendance = null;
+      let unsubscribeFees = null;
+      let currentPage = 1;
+      let pageSize = 25;
+      const selectedStudentIds = new Set();
+      let currentStudentId = null;
+      let currentSelectedDate = null;
+      let selectedAttendanceStatus = null;
+      let activeTab = 'attendance';
+      let promotionPreviewData = [];
+      let passOutPreviewData = [];
+      let sectionShufflePreviewData = [];
+      let attendanceRecordsByStudent = new Map();
+      let feeRecordsByStudent = new Map();
+      let latestReportByStudent = new Map();
+      let latestReportBySessionStudent = new Map();
+      let studentRefreshTimer = 0;
+      let todayStatusFilter = "";
+
+      function getHeaderViewSessionId() {
+        try {
+          return localStorage.getItem("schoolix.viewSessionId") || "";
+        } catch (_) {
+          return "";
+        }
+      }
+
+      const CLASS_SEQUENCE = ["PG", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+      const ROMAN_TO_NUMERIC_CLASS = {
+        I: "1", II: "2", III: "3", IV: "4", V: "5", VI: "6",
+        VII: "7", VIII: "8", IX: "9", X: "10", XI: "11", XII: "12"
+      };
+      const CLASS_PARSE_TOKENS = Array.from(
+        new Set([...CLASS_SEQUENCE, ...Object.keys(ROMAN_TO_NUMERIC_CLASS)])
+      ).sort((left, right) => right.length - left.length);
+
+      const toLocalDateISO = (input = new Date()) => {
+        const date = input instanceof Date ? input : new Date(input);
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return local.toISOString().split('T')[0];
+      };
+
+      const toMoneyNumber = (value = 0) => {
+        if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+        const cleaned = String(value || "0").replace(/[^\\d.-]/g, "");
+        const parsed = Number(cleaned);
+        return Number.isFinite(parsed) ? parsed : 0;
+      };
+      const formatCurrency = (value = 0) => \`\\u20B9\${toMoneyNumber(value).toLocaleString('en-IN')}\`;
+      const getFatherPhone = (student = {}) => student.fatherPhone || student.fatherMobile || student.fatherContact || student.phone || "";
+      const getMotherPhone = (student = {}) => student.motherPhone || student.motherMobile || student.motherContact || student.phone || "";
+      const getParentEmail = (student = {}) => String(student.parentEmail || student.fatherEmail || student.motherEmail || student.guardianEmail || student.email || "").trim();
+      const getStudentKey = (student) => student?.studentId || student?.id || student;
+
+      function removeUndefinedFields(value) {
+        if (Array.isArray(value)) return value.map(removeUndefinedFields);
+        if (!value || Object.getPrototypeOf(value) !== Object.prototype) return value;
+        return Object.fromEntries(
+          Object.entries(value)
+            .filter(([, entryValue]) => entryValue !== undefined)
+            .map(([entryKey, entryValue]) => [entryKey, removeUndefinedFields(entryValue)])
+        );
+      }
+
+      function sortStudentsForRollNumber(left, right) {
+        return String(left.name || "").trim().localeCompare(String(right.name || "").trim(), "en", { sensitivity: "base", numeric: true }) ||
+          String(left.studentId || left.id || "").localeCompare(String(right.studentId || right.id || ""), "en", { numeric: true });
+      }
+
+      function sortStudentsByClassSectionRollName(left, right) {
+        const leftClass = parseClassSortValue(left.class || "");
+        const rightClass = parseClassSortValue(right.class || "");
+        const leftRoll = Number(String(left.roll || left.rollNo || "").replace(/[^\\d]/g, "")) || Number.MAX_SAFE_INTEGER;
+        const rightRoll = Number(String(right.roll || right.rollNo || "").replace(/[^\\d]/g, "")) || Number.MAX_SAFE_INTEGER;
+        return leftClass - rightClass ||
+          String(left.class || "").localeCompare(String(right.class || ""), "en", { numeric: true }) ||
+          String(left.section || "").localeCompare(String(right.section || ""), "en", { numeric: true }) ||
+          leftRoll - rightRoll ||
+          String(left.name || "").localeCompare(String(right.name || ""), "en", { sensitivity: "base", numeric: true }) ||
+          String(left.studentId || left.id || "").localeCompare(String(right.studentId || right.id || ""), "en", { numeric: true });
+      }
+
+      function normalizeRollValue(value) {
+        const cleaned = String(value || "").trim();
+        if (!cleaned) return "";
+        const digits = cleaned.replace(/[^\\d]/g, "");
+        if (digits) return String(Number(digits));
+        return cleaned.toUpperCase();
+      }
+
+      function normalizeRollPlacement(classValue, sectionValue = "", rollValue = "") {
+        const placement = extractClassSection(classValue, sectionValue);
+        return {
+          class: placement.class,
+          section: placement.section,
+          roll: normalizeRollValue(rollValue)
+        };
+      }
+
+      function findDuplicateRollStudent({ classValue, sectionValue, rollValue, ignoreId = "" }) {
+        const { class: normalizedClass, section: normalizedSection, roll: normalizedRoll } = normalizeRollPlacement(classValue, sectionValue, rollValue);
+        if (!normalizedClass || !normalizedSection || !normalizedRoll) return null;
+        return getStudentsForSelectedSession().find((student) => {
+          if (student.id === ignoreId) return false;
+          const studentPlacement = normalizeRollPlacement(student.class, student.section, student.roll || student.rollNo);
+          return studentPlacement.class === normalizedClass &&
+            studentPlacement.section === normalizedSection &&
+            studentPlacement.roll === normalizedRoll;
+        }) || null;
+      }
+
+      async function findDuplicateRollStudentLive({ classValue, sectionValue, rollValue, ignoreId = "" }) {
+        const { class: normalizedClass, section: normalizedSection, roll: normalizedRoll } = normalizeRollPlacement(classValue, sectionValue, rollValue);
+        if (!normalizedClass || !normalizedSection || !normalizedRoll || !currentUser?.uid) return null;
+        const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+        const selectedSessionId = getSelectedSessionId();
+        for (const studentDoc of snap.docs) {
+          if (studentDoc.id === ignoreId) continue;
+          const student = { id: studentDoc.id, ...studentDoc.data() };
+          const sessionPlacement = selectedSessionId ? getSessionPlacement(student, selectedSessionId) : null;
+          const placementSource = sessionPlacement
+            ? { ...student, class: sessionPlacement.class, section: sessionPlacement.section, roll: sessionPlacement.roll || student.roll || student.rollNo }
+            : student;
+          const studentPlacement = normalizeRollPlacement(placementSource.class, placementSource.section, placementSource.roll || placementSource.rollNo);
+          if (
+            studentPlacement.class === normalizedClass &&
+            studentPlacement.section === normalizedSection &&
+            studentPlacement.roll === normalizedRoll
+          ) {
+            return student;
+          }
+        }
+        return null;
+      }
+
+      function getStudentPlacementForSelectedSession(student) {
+        // Backwards-compatible wrapper used in some older call sites.
+        // Returns the session placement for the currently selected session.
+        return getSessionPlacement(student);
+      }
+
+      async function reassignRollNumbersForClassSection(classValue, sectionValue) {
+        const normalizedClass = String(classValue || "").trim();
+        const normalizedSection = String(sectionValue || "").trim();
+        if (!normalizedClass || !normalizedSection || !currentUser?.uid) return;
+
+        const snap = await getDocs(collection(db, "schools", currentUser.uid, "students"));
+        const selectedSession = getSelectedSession();
+        const students = snap.docs
+          .map((studentDoc) => ({ id: studentDoc.id, ...studentDoc.data() }))
+          .filter((student) => {
+            const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+            const placement = extractClassSection(
+              sessionPlacement?.class || student.class,
+              sessionPlacement?.section || student.section
+            );
+            return placement.class === normalizedClass && placement.section === normalizedSection;
+          })
+          .sort(sortStudentsForRollNumber);
+
+        let changed = false;
+        await Promise.all(students.map(async (student, index) => {
+          const roll = String(index + 1).padStart(2, "0");
+          const placement = selectedSession?.id ? getStudentPlacementForSelectedSession(student) : null;
+          const rootRollMatches = String(student.roll || "") === roll && String(student.rollNo || "") === roll;
+          const placementRollMatches = !placement || String(placement.roll || "") === roll;
+          if (rootRollMatches && placementRollMatches) return;
+
+          changed = true;
+          const payload = { roll, rollNo: roll, updatedAt: serverTimestamp() };
+          if (
+            selectedSession?.id &&
+            placement &&
+            String(placement.class || student.class || "").trim() === normalizedClass &&
+            String(placement.section || student.section || "").trim() === normalizedSection
+          ) {
+            payload[\`sessionPlacements.\${selectedSession.id}\`] = removeUndefinedFields(makeSessionPlacement({ ...student, roll, rollNo: roll }, selectedSession, { roll }));
+          }
+          await updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), removeUndefinedFields(payload));
+          const mirrorIds = [student.studentId, student.authUid].map(value => String(value || "").trim()).filter(Boolean);
+          const mirrorResults = await Promise.allSettled([...new Set(mirrorIds)].map((id) => setDoc(doc(db, "users", id), { rollNo: roll, roll, updatedAt: serverTimestamp() }, { merge: true })));
+          mirrorResults
+            .filter((result) => result.status === "rejected")
+            .forEach((result) => console.warn("Roll mirror update failed:", result.reason));
+        }));
+        return changed;
+      }
+
+      async function reassignRollNumbersForPlacements(...placements) {
+        const unique = new Map();
+        placements.forEach((placement) => {
+          const normalized = extractClassSection(placement?.class, placement?.section);
+          if (!normalized.class || !normalized.section) return;
+          unique.set(getClassSectionKey(normalized.class, normalized.section), normalized);
+        });
+        for (const placement of unique.values()) {
+          await reassignRollNumbersForClassSection(placement.class, placement.section);
+        }
+      }
+
+      async function reconcileAllRollNumbers() {
+        const groups = new Map();
+        const selectedSession = getSelectedSession();
+        allStudents.forEach((student) => {
+          if (student.tcIssued || String(student.status || "").toLowerCase() === "passed out") return;
+          const sessionPlacement = selectedSession?.id ? getSessionPlacement(student, selectedSession.id) : null;
+          const placement = extractClassSection(
+            sessionPlacement?.class || student.class,
+            sessionPlacement?.section || student.section
+          );
+          if (!placement.class || !placement.section) return;
+          groups.set(getClassSectionKey(placement.class, placement.section), placement);
+        });
+
+        let changed = false;
+        for (const placement of groups.values()) {
+          changed = (await reassignRollNumbersForClassSection(placement.class, placement.section)) || changed;
+        }
+        return changed;
+      }
+
+      function getStudentIdentity(student = {}) {
+        const studentId = String(student?.studentId || "").trim();
+        const authUid = String(student?.authUid || "").trim();
+        const email = String(student?.email || "").trim().toLowerCase();
+        if (studentId) return \`studentId:\${studentId}\`;
+        if (authUid) return \`authUid:\${authUid}\`;
+        if (email) return \`email:\${email}\`;
+        return \`doc:\${student?.id || ""}\`;
+      }
+
+      function getStudentRecordScore(student = {}) {
+        return [
+          Boolean(student?.studentId),
+          Boolean(student?.name),
+          Boolean(student?.class),
+          Boolean(student?.section),
+          Boolean(student?.authUid),
+          Boolean(student?.email),
+          Boolean(student?.father),
+          Boolean(student?.mother)
+        ].filter(Boolean).length;
+      }
+
+      function selectPreferredStudent(existing = {}, incoming = {}) {
+        const existingScore = getStudentRecordScore(existing);
+        const incomingScore = getStudentRecordScore(incoming);
+        if (incomingScore !== existingScore) return incomingScore > existingScore ? incoming : existing;
+        const incomingTs = toMillis(incoming.updatedAt || incoming.createdAt);
+        const existingTs = toMillis(existing.updatedAt || existing.createdAt);
+        return incomingTs >= existingTs ? incoming : existing;
+      }
+
+      function deduplicateStudents(students = []) {
+        const unique = new Map();
+        students.forEach((student) => {
+          const key = getStudentIdentity(student);
+          const existing = unique.get(key);
+          if (!existing) {
+            unique.set(key, student);
+            return;
+          }
+          unique.set(key, selectPreferredStudent(existing, student));
+        });
+        return Array.from(unique.values());
+      }
+
+      const getAttendanceWeight = (status) => status === 'Present' ? 1 : status === 'Half Day' ? 0.5 : 0;
+      const clampPercent = (value) => Math.max(0, Math.min(100, Number(value || 0)));
+
+      function toMillis(value) {
+        if (!value) return 0;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+        }
+        if (typeof value.toDate === 'function') return value.toDate().getTime();
+        if (typeof value.seconds === 'number') return value.seconds * 1000;
+        return 0;
+      }
+
+      function cleanupClassValue(value) {
+        return String(value || '').trim().toUpperCase().replace(/^CLASS\\s+/, '');
+      }
+
+      function normalizeSectionValue(value) {
+        return String(value || '').trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+      }
+
+      function normalizeClassLabel(value) {
+        const cleaned = cleanupClassValue(value);
+        if (!cleaned) return '';
+        if (cleaned === 'PASSED OUT') return 'Passed Out';
+        if (/^\\d+$/.test(cleaned)) return String(Number(cleaned));
+        return ROMAN_TO_NUMERIC_CLASS[cleaned] || cleaned;
+      }
+
+      function extractClassSection(classValue, sectionValue = '') {
+        const explicitSection = normalizeSectionValue(sectionValue);
+        const cleanedClass = cleanupClassValue(classValue);
+
+        if (!cleanedClass) {
+          return { class: '', section: explicitSection };
+        }
+
+        if (explicitSection) {
+          return { class: normalizeClassLabel(cleanedClass), section: explicitSection };
+        }
+
+        for (const token of CLASS_PARSE_TOKENS) {
+          if (!cleanedClass.startsWith(token)) continue;
+          const remainder = cleanedClass.slice(token.length).replace(/^[\\s-]+/, '');
+          if (!remainder) {
+            return { class: normalizeClassLabel(token), section: '' };
+          }
+          if (/^[A-Z]$/.test(remainder)) {
+            return { class: normalizeClassLabel(token), section: remainder };
+          }
+        }
+
+        return { class: normalizeClassLabel(cleanedClass), section: '' };
+      }
+
+      function formatClassSectionLabel(classValue, sectionValue = '') {
+        const placement = extractClassSection(classValue, sectionValue);
+        if (!placement.class && !placement.section) return 'N/A';
+        return placement.section ? \`\${placement.class}-\${placement.section}\` : placement.class || placement.section;
+      }
+
+      function getSessionPlacement(student, sessionId = getSelectedSessionId()) {
+        if (!student || !sessionId) return null;
+        const placements = student.sessionPlacements || {};
+        if (placements[sessionId]) return placements[sessionId];
+        const label = getSelectedSessionLabel();
+        return Object.values(placements).find((placement) =>
+          placement?.sessionId === sessionId ||
+          (label && (placement?.session === label || placement?.currentYear === label))
+        ) || null;
+      }
+
+      function getStudentForSelectedSession(student) {
+        if (!student) return null;
+        const placement = getSessionPlacement(student);
+        if (!placement) return { ...student, _sessionPlacement: null };
+        return {
+          ...student,
+          class: placement.class || student.class || '',
+          section: placement.section || student.section || '',
+          roll: placement.roll || student.roll || student.rollNo || '',
+          currentYear: placement.currentYear || placement.session || getSelectedSessionLabel() || student.currentYear || '',
+          _sessionPlacement: placement
+        };
+      }
+
+      function getStudentsForSelectedSession() {
+        return allStudents.map(getStudentForSelectedSession);
+      }
+
+      function makeSessionPlacement(student, session = getSelectedSession(), overrides = {}) {
+        const sessionId = session?.id || getSelectedSessionId();
+        const sessionLabel = getSessionLabel(session) || getSelectedSessionLabel() || student.currentYear || '';
+        const existing = student.sessionPlacements?.[sessionId] || {};
+        const now = Date.now();
+        return {
+          ...existing,
+          sessionId,
+          session: sessionLabel,
+          currentYear: sessionLabel,
+          class: student.class || '',
+          section: student.section || '',
+          roll: student.roll || student.rollNo || '',
+          locked: Boolean(session?.locked),
+          classLocked: Boolean(session?.classesLocked),
+          createdAt: existing.createdAt || now,
+          updatedAt: now,
+          ...overrides
+        };
+      }
+
+      function getClassSectionKey(classValue, sectionValue = '') {
+        const placement = extractClassSection(classValue, sectionValue);
+        return \`\${placement.class || ''}__\${placement.section || ''}\`;
+      }
+
+      function isSamePlacement(left, right) {
+        return left?.class === right?.class && left?.section === right?.section;
+      }
+
+      function parseClassSortValue(value) {
+        if (value === undefined || value === null || value === '') return Number.MAX_SAFE_INTEGER;
+        const placement = extractClassSection(value);
+        const orderIndex = CLASS_SEQUENCE.indexOf(placement.class);
+        if (orderIndex !== -1) return orderIndex;
+        const numeric = Number(placement.class);
+        if (!Number.isNaN(numeric)) return numeric;
+        return Number.MAX_SAFE_INTEGER - 1;
+      }
+
+      function parseDisplayDate(value) {
+        if (!value) return null;
+        if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+        if (typeof value === 'string' || typeof value === 'number') {
+          const parsed = new Date(value);
+          if (!Number.isNaN(parsed.getTime())) return parsed;
+          if (typeof value === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {
+            const dateOnly = new Date(\`\${value}T00:00:00\`);
+            if (!Number.isNaN(dateOnly.getTime())) return dateOnly;
+          }
+          return null;
+        }
+        if (typeof value.toDate === 'function') return parseDisplayDate(value.toDate());
+        if (typeof value.seconds === 'number') return new Date(value.seconds * 1000);
+        return null;
+      }
+
+      function formatDisplayDate(dateValue, options = { day: 'numeric', month: 'short' }) {
+        const date = parseDisplayDate(dateValue);
+        return date ? date.toLocaleDateString('en-IN', options) : 'N/A';
+      }
+
+      async function sendAdminAbsenceEmail(student, date, attendanceDocId) {
+        const parentEmail = getParentEmail(student);
+
+        const response = await fetch(ABSENCE_EMAIL_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": \`Bearer \${SUPABASE_ANON_KEY}\`
+          },
+          body: JSON.stringify({
+            parentEmail,
+            studentName: student.name || "Student",
+            studentId: student.studentId || student.id || "",
+            studentDocId: student.id || "",
+            authUid: student.authUid || student.uid || "",
+            studentAliases: [
+              student.studentId,
+              student.id,
+              student.studentDocId,
+              student.authUid,
+              student.uid,
+              student.email,
+              student.authEmail
+            ].filter(Boolean),
+            schoolId: currentUser?.uid || "",
+            className: student.class || "",
+            section: student.section || "",
+            date: formatDisplayDate(date, { day: 'numeric', month: 'short', year: 'numeric' }),
+            teacherName: "Admin Office",
+            schoolName: window.SchoolBranding?.getSchoolName() || "Schoolix"
+          })
+        });
+
+        if (!response.ok) {
+          const details = await response.text();
+          throw new Error(details || "Absence email failed");
+        }
+        const result = await response.json().catch(() => ({}));
+
+        await updateDoc(doc(db, "schools", currentUser.uid, "attendance", attendanceDocId), {
+          absenceEmailSent: Boolean(result.emailSent),
+          absenceEmailSentAt: serverTimestamp(),
+          absenceEmailSentTo: result.emailSent ? parentEmail : "",
+          absenceStudentNotificationSent: Boolean(result.notificationSent),
+          absenceStudentNotificationSentAt: serverTimestamp()
+        });
+        return Boolean(result.emailSent || result.notificationSent);
+      }
+
+      function formatInputDate(value) {
+        const date = parseDisplayDate(value);
+        return date ? toLocalDateISO(date) : '';
+      }
+
+      function createEmptyChart(message) {
+        return \`<div class="chart-empty">\${message}</div>\`;
+      }
+
+      function rebuildDataIndexes() {
+        attendanceRecordsByStudent = new Map();
+        feeRecordsByStudent = new Map();
+        latestReportByStudent = new Map();
+        latestReportBySessionStudent = new Map();
+
+        allAttendance.forEach((record) => {
+          const key = record.studentId;
+          if (!key) return;
+          if (!attendanceRecordsByStudent.has(key)) attendanceRecordsByStudent.set(key, []);
+          attendanceRecordsByStudent.get(key).push(record);
+        });
+
+        allFees.forEach((record) => {
+          const key = record.studentId;
+          if (!key) return;
+          if (!feeRecordsByStudent.has(key)) feeRecordsByStudent.set(key, []);
+          feeRecordsByStudent.get(key).push(record);
+        });
+
+        allReports.forEach((report) => {
+          const key = report.student?.studentId || report.studentId;
+          if (!key) return;
+          const previous = latestReportByStudent.get(key);
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = previous ? Math.max(
+            toMillis(previous.updatedAt),
+            toMillis(previous.generatedAt),
+            toMillis(previous.createdAt),
+            toMillis(previous.timestamp)
+          ) : 0;
+
+          if (!previous || currentStamp >= previousStamp) {
+            latestReportByStudent.set(key, report);
+          }
+        });
+      }
+
+      window.goBack = () => window.location.href = "#/add-student.html";
+
+      window.closeAttendanceModal = () => {
+        document.getElementById("attendanceModal").style.display = "none";
+        currentSelectedDate = null;
+        selectedAttendanceStatus = null;
+        document.getElementById("markDateBtn").disabled = true;
+      };
+
+      window.closePromotionModal = () => {
+        document.getElementById("promotionModal").style.display = "none";
+        promotionPreviewData = [];
+      };
+
+      window.closePassOutModal = () => {
+        document.getElementById("passOutModal").style.display = "none";
+        passOutPreviewData = [];
+      };
+
+      window.closeSectionShuffleModal = () => {
+        document.getElementById("sectionShuffleModal").style.display = "none";
+        sectionShufflePreviewData = [];
+      };
+
+      window.togglePromotionBanner = () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked || classesLocked) {
+          return showToast("This session is locked — promotion is disabled.", "error");
+        }
+
+        const banner = document.getElementById("promotionBanner");
+        banner.style.display = banner.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      function populatePassOutClassOptions() {
+        const classSelect = document.getElementById("passOutClassSelect");
+        const sectionSelect = document.getElementById("passOutSectionSelect");
+        if (!classSelect || !sectionSelect) return;
+
+        const currentFilterClass = document.getElementById("filterClass")?.value || "";
+        const currentFilterSection = document.getElementById("filterSection")?.value || "";
+        const classValues = [...new Set(getStudentsForSelectedSession().map((student) => student.class).filter(Boolean))]
+          .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b), "en", { numeric: true }));
+
+        classSelect.innerHTML = '<option value="">Select class</option>' +
+          classValues.map((classValue) => \`<option value="\${escapeHtml(classValue)}">\${escapeHtml(classValue)}</option>\`).join("");
+        classSelect.value = classValues.includes(currentFilterClass) ? currentFilterClass : "";
+        updatePassOutSectionOptions(currentFilterSection);
+      }
+
+      function updatePassOutSectionOptions(preferredSection = "") {
+        const classValue = document.getElementById("passOutClassSelect")?.value || "";
+        const sectionSelect = document.getElementById("passOutSectionSelect");
+        if (!sectionSelect) return;
+
+        const sections = [...new Set(getStudentsForSelectedSession()
+          .filter((student) => !classValue || student.class === classValue)
+          .map((student) => student.section)
+          .filter(Boolean))]
+          .sort((a, b) => String(a).localeCompare(String(b), "en", { numeric: true }));
+
+        sectionSelect.innerHTML = '<option value="">All Sections</option>' +
+          sections.map((section) => \`<option value="\${escapeHtml(section)}">\${escapeHtml(section)}</option>\`).join("");
+        sectionSelect.value = sections.includes(preferredSection) ? preferredSection : "";
+      }
+
+      window.openPassOutModal = () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked) return showToast("This session is locked - pass out is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session - pass out is disabled.", "error");
+
+        populatePassOutClassOptions();
+        const yearInput = document.getElementById("passOutYearInput");
+        if (yearInput && !yearInput.value) yearInput.value = getPassoutYear();
+        document.getElementById("passOutModal").style.display = "flex";
+        renderPassOutPreview();
+      };
+
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = \`
+    position: fixed; top: 20px; right: 20px; 
+    padding: 15px 25px; border-radius: 12px; 
+    color: white; z-index: 10000; 
+    font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  \`;
+        if (type === 'success') toast.style.background = 'linear-gradient(135deg, #48bb78, #38a169)';
+        else toast.style.background = 'linear-gradient(135deg, #f56565, #e53e3e)';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) return window.location.href = "#/index.html";
+        currentUser = user;
+        await loadAllData();
+        setupRealtimeSync();
+      });
+
+      async function loadAllData() {
+        try {
+          document.getElementById("studentsList").innerHTML = '<div class="loading">Loading students...</div>';
+
+          const [studentSnap, attendanceSnap, feesSnap, reportSnap, sessionsSnap, termsSnap] = await Promise.all([
+            getDocs(collection(db, "schools", currentUser.uid, "students")),
+            getDocs(collection(db, "schools", currentUser.uid, "attendance")),
+            getDocs(collection(db, "schools", currentUser.uid, "fees")),
+            getDocs(collection(db, "schools", currentUser.uid, "reportCards")),
+            getDocs(collection(db, "schools", currentUser.uid, "sessions")),
+            getDocs(collection(db, "schools", currentUser.uid, "terms"))
+          ]);
+
+          allStudents = deduplicateStudents(studentSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+          allSessions = sessionsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allTerms = termsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          const settingsSnap = await getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'));
+          const schoolActiveSessionId = settingsSnap.exists() ? settingsSnap.data().sessionId || '' : '';
+          activeSessionId = getHeaderViewSessionId() || schoolActiveSessionId;
+          if (activeSessionId) {
+            const sessionObj = allSessions.find((s) => s.id === activeSessionId);
+            activeSessionLabel = getSessionLabel(sessionObj);
+            if (!sessionObj) {
+              try { localStorage.removeItem("schoolix.viewSessionId"); } catch (_) { }
+              activeSessionId = schoolActiveSessionId;
+              const fallbackSession = allSessions.find((s) => s.id === activeSessionId);
+              activeSessionLabel = getSessionLabel(fallbackSession);
+              if (!fallbackSession) activeSessionId = '';
+            }
+          }
+
+          allAttendance = attendanceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allFees = feesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allReports = reportSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          // Existing records are corrected automatically once per load. A
+          // second load only happens when at least one roll actually changed.
+          if (await reconcileAllRollNumbers()) return loadAllData();
+
+          rebuildDataIndexes();
+          populateFilters();
+          populateSessionSelector();
+          populatePromotionResultControls();
+          loadData(false);
+
+        } catch (error) {
+          console.error("Error loading data:", error);
+          showToast('Error loading data', 'error');
+          document.getElementById("studentsList").innerHTML = '<div class="loading">Failed to load data</div>';
+        }
+      }
+
+      function setupRealtimeSync() {
+        if (unsubscribeAttendance) unsubscribeAttendance();
+        if (unsubscribeFees) unsubscribeFees();
+
+        const attendanceRef = collection(db, "schools", currentUser.uid, "attendance");
+        const feesRef = collection(db, "schools", currentUser.uid, "fees");
+
+        unsubscribeAttendance = onSnapshot(attendanceRef, (snapshot) => {
+          allAttendance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          rebuildDataIndexes();
+          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'attendance') {
+            updateModalAttendance();
+          }
+          loadData(false);
+        });
+
+        unsubscribeFees = onSnapshot(feesRef, (snapshot) => {
+          allFees = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          rebuildDataIndexes();
+          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'fees') {
+            updateFeeHistory();
+          }
+          loadData(false);
+        });
+      }
+
+      function getLatestReportForStudent(studentId) {
+        const cacheKey = \`\${getSelectedSessionId() || 'all'}:\${studentId || ''}\`;
+        if (latestReportBySessionStudent.has(cacheKey)) {
+          return latestReportBySessionStudent.get(cacheKey);
+        }
+        const reports = allReports
+          .filter((report) => (report.student?.studentId || report.studentId) === studentId)
+          .filter(entryBelongsToSession);
+
+        if (!reports.length) {
+          latestReportBySessionStudent.set(cacheKey, null);
+          return null;
+        }
+        const latest = reports.reduce((latest, report) => {
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = Math.max(
+            toMillis(latest.updatedAt),
+            toMillis(latest.generatedAt),
+            toMillis(latest.createdAt),
+            toMillis(latest.timestamp)
+          );
+          return currentStamp >= previousStamp ? report : latest;
+        });
+        latestReportBySessionStudent.set(cacheKey, latest);
+        return latest;
+      }
+
+      function getStudentPercentage(studentId) {
+        const report = getLatestReportForStudent(studentId);
+        return clampPercent(Number(report?.percentage || report?.student?.percentage || 0));
+      }
+
+      function getPercentInputNumber(inputId) {
+        const raw = document.getElementById(inputId)?.value;
+        if (raw === undefined || raw === null || raw === '') return NaN;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? clampPercent(parsed) : NaN;
+      }
+
+      function getPercentageClass(percentage) {
+        if (percentage >= 80) return 'percentage-excellent';
+        if (percentage >= 65) return 'percentage-good';
+        if (percentage >= 50) return 'percentage-average';
+        return 'percentage-poor';
+      }
+
+      function getCurrentViewLabel(students = []) {
+        const sessionFilter = document.getElementById("filterSession").value;
+        const classFilter = document.getElementById("filterClass").value;
+        const sectionFilter = document.getElementById("filterSection").value;
+        const hasSearch = Boolean(document.getElementById("searchName").value.trim() || document.getElementById("searchPhone").value.trim());
+        const hasPerformanceFilter = Boolean(document.getElementById("percentAbove").value || document.getElementById("percentBelow").value);
+        const hasAttendanceFilter = Boolean(document.getElementById("attendanceBelow")?.value);
+        const parts = [];
+
+        if (sessionFilter) {
+          const session = allSessions.find((s) => s.id === sessionFilter);
+          parts.push(getSessionLabel(session) || 'Selected Session');
+        }
+        if (classFilter) parts.push(\`Class \${classFilter}\`);
+        if (sectionFilter) parts.push(\`Section \${sectionFilter}\`);
+        if (hasSearch) parts.push('Search filtered');
+        if (hasPerformanceFilter) parts.push('Performance filtered');
+        if (hasAttendanceFilter) parts.push('Attendance filtered');
+        if (todayStatusFilter) parts.push(\`Today: \${todayStatusFilter}\`);
+
+        if (parts.length) return parts.join(' • ');
+        if (!students.length) return 'No students in current view';
+        return 'All classes • full roster';
+      }
+
+      function buildTodayAttendanceMetrics(students) {
+        const today = toLocalDateISO();
+        return students.reduce((summary, student) => {
+          const status = getTodayStatus(getStudentKey(student), today);
+          if (status === 'Present') summary.present += 1;
+          else if (status === 'Half Day') summary.half += 1;
+          else if (status === 'Absent') summary.absent += 1;
+          else summary.missing += 1;
+          return summary;
+        }, { present: 0, half: 0, absent: 0, missing: 0, total: students.length });
+      }
+
+      function buildFeeMetrics(students) {
+        return students.reduce((summary, student) => {
+          const fee = getStudentFeesSummary(getStudentKey(student));
+          summary.total += fee.total;
+          summary.paid += fee.paid;
+          summary.due += fee.due;
+          if (!fee.total) summary.noPlan += 1;
+          else if (fee.due > 0) summary.pending += 1;
+          else summary.cleared += 1;
+          return summary;
+        }, { total: 0, paid: 0, due: 0, pending: 0, cleared: 0, noPlan: 0 });
+      }
+
+      function buildResultBands(students) {
+        const bands = [
+          { label: '80%+', count: 0, color: 'linear-gradient(180deg, rgba(15, 159, 98, 0.95), rgba(15, 159, 98, 0.35))' },
+          { label: '65-79%', count: 0, color: 'linear-gradient(180deg, rgba(49, 94, 251, 0.95), rgba(49, 94, 251, 0.35))' },
+          { label: '50-64%', count: 0, color: 'linear-gradient(180deg, rgba(192, 118, 22, 0.95), rgba(192, 118, 22, 0.35))' },
+          { label: 'Below 50%', count: 0, color: 'linear-gradient(180deg, rgba(209, 67, 67, 0.95), rgba(209, 67, 67, 0.35))' },
+          { label: 'No Report', count: 0, color: 'linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(148, 163, 184, 0.35))' }
+        ];
+
+        students.forEach((student) => {
+          if (!latestReportByStudent.has(getStudentKey(student))) {
+            bands[4].count += 1;
+            return;
+          }
+          const percentage = getStudentPercentage(getStudentKey(student));
+          if (percentage >= 80) bands[0].count += 1;
+          else if (percentage >= 65) bands[1].count += 1;
+          else if (percentage >= 50) bands[2].count += 1;
+          else bands[3].count += 1;
+        });
+
+        return bands;
+      }
+
+      function buildClassMix(students) {
+        const counts = new Map();
+        students.forEach((student) => {
+          const label = \`\${student.class || '?'}-\${student.section || '-'}\`;
+          counts.set(label, (counts.get(label) || 0) + 1);
+        });
+
+        return Array.from(counts.entries())
+          .map(([label, count]) => ({ label, count }))
+          .sort((a, b) => {
+            const [classA, sectionA] = a.label.split('-');
+            const [classB, sectionB] = b.label.split('-');
+            const classOrder = parseClassSortValue(classA) - parseClassSortValue(classB);
+            return classOrder || String(sectionA).localeCompare(String(sectionB)) || b.count - a.count;
+          });
+      }
+
+      function updateHeaderSummary(students) {
+        const feeMetrics = buildFeeMetrics(students);
+        const todayMetrics = buildTodayAttendanceMetrics(students);
+        const markedToday = todayMetrics.present + todayMetrics.absent + todayMetrics.half;
+        const tcCount = students.filter((student) => student.tcIssued).length;
+        const filtered = students.length !== allStudents.length;
+        document.getElementById("pageContextLabel").textContent = getCurrentViewLabel(students);
+        const heroTotal = document.getElementById("heroTotalStudents");
+        const heroToday = document.getElementById("heroTodayAttendance");
+        if (heroTotal) heroTotal.textContent = String(students.length);
+        if (heroToday) heroToday.textContent = students.length ? \`\${markedToday}/\${students.length}\` : "0/0";
+        document.getElementById("studentsSummaryText").textContent = students.length
+          ? \`\${students.length} students visible, \${tcCount} TC restricted, \${formatCurrency(feeMetrics.due)} outstanding in this view.\`
+          : 'No students match the active filters. Adjust the search, class, result percentage or attendance range to see data again.';
+        document.getElementById("studentsSummaryBadge").textContent = filtered ? 'Filtered view' : 'Live view';
+      }
+
+      function updateStats(students = allStudents) {
+        const todayMetrics = buildTodayAttendanceMetrics(students);
+        const feeMetrics = buildFeeMetrics(students);
+        const studentsWithAttendance = students.filter((student) => (attendanceRecordsByStudent.get(getStudentKey(student)) || []).length > 0);
+        const avgAttendance = studentsWithAttendance.length
+          ? Math.round(studentsWithAttendance.reduce((sum, student) => sum + calculateAttendancePercentage(getStudentKey(student)), 0) / studentsWithAttendance.length)
+          : 0;
+        const studentsWithReports = students.filter((student) => latestReportByStudent.has(getStudentKey(student)));
+        const avgPercentage = studentsWithReports.length
+          ? (studentsWithReports.reduce((sum, student) => sum + getStudentPercentage(getStudentKey(student)), 0) / studentsWithReports.length).toFixed(1)
+          : '0.0';
+        const attendanceCoverage = students.length
+          ? Math.round(((todayMetrics.present + todayMetrics.absent + todayMetrics.half) / students.length) * 100)
+          : 0;
+        const collectionRate = feeMetrics.total
+          ? Math.round((feeMetrics.paid / feeMetrics.total) * 100)
+          : 0;
+        const tcCount = students.filter((student) => student.tcIssued).length;
+
+        document.getElementById('statsGrid').innerHTML = \`
+        <article class="stat-card info">
+          <div class="stat-label">Visible Students</div>
+          <div class="stat-number">\${students.length}</div>
+          <div class="stat-meta">
+            <span>\${allStudents.length} total in school roster</span>
+            <span class="stat-trend neutral">\${getCurrentViewLabel(students)}</span>
+          </div>
+        </article>
+        <article class="stat-card success">
+          <div class="stat-label">Attendance Marked Today</div>
+          <div class="stat-number">\${todayMetrics.present + todayMetrics.absent + todayMetrics.half}</div>
+          <div class="stat-meta">
+            <span>\${attendanceCoverage}% coverage across visible students</span>
+            <span class="stat-trend positive">\${todayMetrics.present} present</span>
+          </div>
+        </article>
+        <article class="stat-card danger">
+          <div class="stat-label">Students Requiring Follow-up</div>
+          <div class="stat-number">\${todayMetrics.absent + todayMetrics.missing}</div>
+          <div class="stat-meta">
+            <span>\${todayMetrics.absent} absent, \${todayMetrics.missing} not marked</span>
+            <span class="stat-trend negative">Check today</span>
+          </div>
+        </article>
+        <article class="stat-card info">
+          <div class="stat-label">Average Result</div>
+          <div class="stat-number">\${avgPercentage}%</div>
+          <div class="stat-meta">
+            <span>\${studentsWithReports.length} students with report cards</span>
+            <span class="stat-trend neutral">\${avgAttendance}% avg attendance</span>
+          </div>
+        </article>
+        <article class="stat-card warning">
+          <div class="stat-label">Fee Collection</div>
+          <div class="stat-number">\${collectionRate}%</div>
+          <div class="stat-meta">
+            <span>\${formatCurrency(feeMetrics.due)} still due</span>
+            <span class="stat-trend neutral">\${formatCurrency(feeMetrics.paid)} collected</span>
+          </div>
+        </article>
+        <article class="stat-card \${tcCount ? 'danger' : 'success'}">
+          <div class="stat-label">TC Restricted</div>
+          <div class="stat-number">\${tcCount}</div>
+          <div class="stat-meta">
+            <span>\${students.length ? Math.round((tcCount / students.length) * 100) : 0}% of current view</span>
+            <span class="stat-trend \${tcCount ? 'negative' : 'positive'}">\${tcCount ? 'Read-only records' : 'No restrictions'}</span>
+          </div>
+        </article>
+      \`;
+
+        updateHeaderSummary(students);
+      }
+
+      function populateFilters() {
+        const classSelect = document.getElementById('filterClass');
+        const sectionSelect = document.getElementById('filterSection');
+        const currentClass = classSelect.value;
+        const currentSection = sectionSelect.value;
+        const classSet = new Set();
+        const sectionSet = new Set();
+
+        getStudentsForSelectedSession().forEach((student) => {
+          if (student.class) classSet.add(student.class);
+          if (student.section) sectionSet.add(student.section);
+        });
+
+        classSelect.innerHTML = '<option value="">All Classes</option>';
+        Array.from(classSet)
+          .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b)))
+          .forEach((value) => {
+            classSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+          });
+
+        sectionSelect.innerHTML = '<option value="">All Sections</option>';
+        Array.from(sectionSet)
+          .sort((a, b) => String(a).localeCompare(String(b)))
+          .forEach((value) => {
+            sectionSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+          });
+
+        classSelect.value = Array.from(classSet).includes(currentClass) ? currentClass : '';
+        sectionSelect.value = Array.from(sectionSet).includes(currentSection) ? currentSection : '';
+
+        const shuffleClassSelect = document.getElementById('shuffleClassSelect');
+        if (shuffleClassSelect) {
+          const previousValue = shuffleClassSelect.value;
+          const shuffleClassSet = new Set();
+          getStudentsForSelectedSession().forEach((student) => {
+            if (student.class) shuffleClassSet.add(student.class);
+          });
+          shuffleClassSelect.innerHTML = '<option value="">Select class</option>';
+          Array.from(shuffleClassSet)
+            .sort((a, b) => parseClassSortValue(a) - parseClassSortValue(b) || String(a).localeCompare(String(b)))
+            .forEach((value) => {
+              shuffleClassSelect.innerHTML += \`<option value="\${value}">\${value}</option>\`;
+            });
+          shuffleClassSelect.value = shuffleClassSet.has(previousValue) ? previousValue : '';
+        }
+      }
+
+      function getSessionLabel(session) {
+        return session?.session || session?.name || '';
+      }
+
+      function sortSessions(sessions) {
+        return [...sessions].sort((a, b) => {
+          const aOrder = Number(a.startYear || 0) || new Date(a.startDate || a.createdAt?.seconds * 1000 || a.createdAt || 0).getTime();
+          const bOrder = Number(b.startYear || 0) || new Date(b.startDate || b.createdAt?.seconds * 1000 || b.createdAt || 0).getTime();
+          return aOrder - bOrder;
+        });
+      }
+
+      function populateSessionSelector() {
+        const selector = document.getElementById('filterSession');
+        if (!selector) return;
+        selector.innerHTML = '<option value="">All Sessions</option>';
+        sortSessions(allSessions).forEach((session) => {
+          const option = document.createElement('option');
+          option.value = session.id;
+          option.textContent = \`\${getSessionLabel(session) || 'Unnamed'}\${session.locked ? ' (Locked)' : ''}\`;
+          selector.appendChild(option);
+        });
+        if (activeSessionId) selector.value = activeSessionId;
+      }
+
+      function getSelectedSessionId() {
+        const selectorValue = document.getElementById('filterSession')?.value;
+        return selectorValue || activeSessionId || '';
+      }
+
+      function getSelectedSessionLabel() {
+        const sessionId = getSelectedSessionId();
+        const session = allSessions.find((s) => s.id === sessionId);
+        return getSessionLabel(session) || '';
+      }
+
+      function getSelectedSession() {
+        const sessionId = getSelectedSessionId();
+        return allSessions.find((s) => s.id === sessionId);
+      }
+
+      function getPromotionResultSessionId() {
+        return document.getElementById('promotionResultSession')?.value || activeSessionId || getSelectedSessionId() || '';
+      }
+
+      function getPromotionResultSessionLabel(sessionId = getPromotionResultSessionId()) {
+        const session = allSessions.find((item) => item.id === sessionId);
+        return getSessionLabel(session) || '';
+      }
+
+      function getPromotionResultTermKey() {
+        return document.getElementById('promotionResultTerm')?.value || '';
+      }
+
+      function getPromotionResultTitle() {
+        const selectedTermOption = document.getElementById('promotionResultTerm')?.selectedOptions?.[0]?.textContent?.trim() || '';
+        const selectedSessionLabel = getPromotionResultSessionLabel();
+        if (selectedTermOption && selectedSessionLabel) return \`\${selectedTermOption} • \${selectedSessionLabel}\`;
+        if (selectedTermOption) return selectedTermOption;
+        if (selectedSessionLabel) return selectedSessionLabel;
+        return 'Latest report';
+      }
+
+      function normalizePromotionOptionLabel(value) {
+        return String(value || '').trim();
+      }
+
+      function getPromotionTermKey(value) {
+        return normalizePromotionOptionLabel(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      function collectPromotionResultOptions(sessionId = getPromotionResultSessionId()) {
+        const options = [];
+        const seen = new Set();
+        const addOption = (label) => {
+          const normalized = normalizePromotionOptionLabel(label);
+          if (!normalized) return;
+          const key = getPromotionTermKey(normalized);
+          if (!key || seen.has(key)) return;
+          seen.add(key);
+          options.push({ key, label: normalized });
+        };
+
+        const effectiveSessionId = sessionId || activeSessionId || getSelectedSessionId() || '';
+        const effectiveSessionLabel = getPromotionResultSessionLabel(effectiveSessionId);
+
+        allReports.forEach((report) => {
+          const reportStudentId = report.student?.studentId || report.studentId;
+          if (!reportStudentId) return;
+          const reportSessionValue = report.sessionId || report.session || report.currentYear || report.academicSession || '';
+          const matchesSession = !effectiveSessionId ||
+            reportSessionValue === effectiveSessionId ||
+            report.session === effectiveSessionLabel ||
+            report.currentYear === effectiveSessionLabel ||
+            report.academicSession === effectiveSessionLabel;
+          if (!matchesSession) return;
+
+          [
+            report.termLabel,
+            report.term,
+            report.examName,
+            report.exam,
+            report.assessmentName,
+            report.assessment,
+            report.testName,
+            report.test,
+            report.sourceLabel,
+            report.periodLabel,
+            report.resultType
+          ].forEach(addOption);
+        });
+
+        allTerms.forEach((term) => {
+          const termSessionValue = term.sessionId || term.session || term.currentYear || term.academicSession || '';
+          const termLabel = term.label || term.term || term.name || term.termName || term.examName || '';
+          const matchesSession = !effectiveSessionId ||
+            termSessionValue === effectiveSessionId ||
+            term.session === effectiveSessionLabel ||
+            term.currentYear === effectiveSessionLabel ||
+            term.academicSession === effectiveSessionLabel;
+          if (matchesSession) addOption(termLabel);
+        });
+
+        return options;
+      }
+
+      function populatePromotionResultControls() {
+        const sessionSelect = document.getElementById('promotionResultSession');
+        const termSelect = document.getElementById('promotionResultTerm');
+        if (!sessionSelect || !termSelect) return;
+
+        const currentSessionValue = sessionSelect.value || '';
+        sessionSelect.innerHTML = '<option value="">Use active/current session</option>';
+        sortSessions(allSessions).forEach((session) => {
+          const option = document.createElement('option');
+          option.value = session.id;
+          option.textContent = \`\${getSessionLabel(session) || 'Unnamed'}\${session.locked ? ' (Locked)' : ''}\`;
+          sessionSelect.appendChild(option);
+        });
+
+        if (currentSessionValue && allSessions.some((session) => session.id === currentSessionValue)) {
+          sessionSelect.value = currentSessionValue;
+        } else if (activeSessionId) {
+          sessionSelect.value = activeSessionId;
+        } else if (getSelectedSessionId()) {
+          sessionSelect.value = getSelectedSessionId();
+        }
+
+        refreshPromotionResultOptions();
+      }
+
+      function refreshPromotionResultOptions() {
+        const termSelect = document.getElementById('promotionResultTerm');
+        if (!termSelect) return;
+        const currentTermValue = termSelect.value;
+        const options = collectPromotionResultOptions(getPromotionResultSessionId());
+        termSelect.innerHTML = '<option value="">Latest result in selected session</option>';
+        options.forEach((option) => {
+          const element = document.createElement('option');
+          element.value = option.key;
+          element.textContent = option.label;
+          termSelect.appendChild(element);
+        });
+        termSelect.value = currentTermValue && options.some((option) => option.key === currentTermValue) ? currentTermValue : '';
+      }
+
+      window.refreshPromotionResultOptions = refreshPromotionResultOptions;
+
+      function getPromotionReportForStudent(studentId, sessionId = getPromotionResultSessionId(), termKey = getPromotionResultTermKey()) {
+        const effectiveSessionId = sessionId || activeSessionId || getSelectedSessionId() || '';
+        const effectiveSessionLabel = getPromotionResultSessionLabel(effectiveSessionId);
+
+        const reports = allReports.filter((report) => {
+          const reportStudentId = report.student?.studentId || report.studentId;
+          if (reportStudentId !== studentId) return false;
+
+          const reportSessionValue = report.sessionId || report.session || report.currentYear || report.academicSession || '';
+          const matchesSession = !effectiveSessionId ||
+            reportSessionValue === effectiveSessionId ||
+            report.session === effectiveSessionLabel ||
+            report.currentYear === effectiveSessionLabel ||
+            report.academicSession === effectiveSessionLabel;
+          if (!matchesSession) return false;
+
+          if (!termKey) return true;
+
+          const reportTerms = [
+            report.termKey,
+            report.termLabel,
+            report.term,
+            report.examName,
+            report.exam,
+            report.assessmentName,
+            report.assessment,
+            report.testName,
+            report.test,
+            report.sourceLabel,
+            report.periodLabel,
+            report.resultType
+          ].map(getPromotionTermKey).filter(Boolean);
+
+          return reportTerms.includes(termKey);
+        });
+
+        if (!reports.length) return null;
+        return reports.reduce((latest, report) => {
+          const currentStamp = Math.max(
+            toMillis(report.updatedAt),
+            toMillis(report.generatedAt),
+            toMillis(report.createdAt),
+            toMillis(report.timestamp)
+          );
+          const previousStamp = Math.max(
+            toMillis(latest.updatedAt),
+            toMillis(latest.generatedAt),
+            toMillis(latest.createdAt),
+            toMillis(latest.timestamp)
+          );
+          return currentStamp >= previousStamp ? report : latest;
+        });
+      }
+
+      function getPromotionPercentage(studentId, sessionId = getPromotionResultSessionId(), termKey = getPromotionResultTermKey()) {
+        const report = getPromotionReportForStudent(studentId, sessionId, termKey);
+        return clampPercent(Number(report?.percentage || report?.student?.percentage || 0));
+      }
+
+      function entryBelongsToSession(entry) {
+        const sessionId = getSelectedSessionId();
+        if (!sessionId) return true;
+        const sessionLabel = getSelectedSessionLabel();
+        return entry?.sessionId === sessionId ||
+          entry?.session === sessionId ||
+          entry?.currentYear === sessionId ||
+          entry?.academicSession === sessionId ||
+          entry?.session === sessionLabel ||
+          entry?.currentYear === sessionLabel ||
+          entry?.academicSession === sessionLabel;
+      }
+
+      async function loadStudentSessions() {
+        try {
+          const sessionsSnap = await getDocs(collection(db, 'schools', currentUser.uid, 'sessions'));
+          allSessions = sessionsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+          const settingsSnap = await getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'));
+          const schoolActiveSessionId = settingsSnap.exists() ? settingsSnap.data().sessionId || '' : '';
+          activeSessionId = getHeaderViewSessionId() || schoolActiveSessionId;
+          if (activeSessionId) {
+            const sessionObj = allSessions.find((s) => s.id === activeSessionId);
+            activeSessionLabel = getSessionLabel(sessionObj);
+            if (!sessionObj) {
+              try { localStorage.removeItem("schoolix.viewSessionId"); } catch (_) { }
+              activeSessionId = schoolActiveSessionId;
+              const fallbackSession = allSessions.find((s) => s.id === activeSessionId);
+              activeSessionLabel = getSessionLabel(fallbackSession);
+              if (!fallbackSession) activeSessionId = '';
+            }
+          }
+
+          populateSessionSelector();
+        } catch (error) {
+          console.error('Unable to load sessions:', error);
+        }
+      }
+
+      window.queueStudentRefresh = () => {
+        clearTimeout(studentRefreshTimer);
+        studentRefreshTimer = window.setTimeout(() => loadData(), 180);
+      };
+
+      window.filterByTodayStatus = (status) => {
+        todayStatusFilter = todayStatusFilter === status ? "" : status;
+        loadData();
+      };
+
+      window.loadData = (resetPage = true, refreshFilters = false) => {
+        pageSize = Number(document.getElementById("pageSize").value) || 25;
+        if (resetPage) currentPage = 1;
+        if (refreshFilters) {
+          populateFilters();
+          populatePromotionResultControls();
+        }
+
+        const filteredStudents = getFilteredStudents().sort(sortStudentsByClassSectionRollName);
+        const activeIds = new Set(allStudents.map((student) => student.id));
+        Array.from(selectedStudentIds).forEach((studentId) => {
+          if (!activeIds.has(studentId)) selectedStudentIds.delete(studentId);
+        });
+        const totalPages = Math.ceil(filteredStudents.length / pageSize);
+        currentPage = totalPages ? Math.min(currentPage, totalPages) : 1;
+
+        updateStats(filteredStudents);
+        renderAnalytics(filteredStudents);
+        renderStudents(filteredStudents);
+        updateButtonStates();
+      };
+
+      function updateButtonStates() {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        const disabled = sessionLocked || classesLocked;
+
+        const promoteBtn = document.querySelector('button[onclick="togglePromotionBanner()"]');
+        const promoteSelectedBtn = document.querySelector('button[onclick="promoteSelected()"]');
+        const passOutBtns = document.querySelectorAll('button[onclick="openPassOutModal()"]');
+
+        if (promoteBtn) {
+          promoteBtn.disabled = disabled;
+          promoteBtn.style.opacity = disabled ? '0.55' : '1';
+        }
+        if (promoteSelectedBtn) {
+          promoteSelectedBtn.disabled = disabled;
+          promoteSelectedBtn.style.opacity = disabled ? '0.55' : '1';
+        }
+        passOutBtns.forEach((button) => {
+          button.disabled = disabled;
+          button.style.opacity = disabled ? '0.55' : '1';
+        });
+      }
+
+      function getFilteredStudents() {
+        const searchQuery = document.getElementById("searchName").value.toLowerCase();
+        const searchPhone = document.getElementById("searchPhone").value.toLowerCase();
+        const classFilter = document.getElementById("filterClass").value;
+        const sectionFilter = document.getElementById("filterSection").value;
+
+        const above = parseFloat(document.getElementById("percentAbove").value);
+        const below = parseFloat(document.getElementById("percentBelow").value);
+        const attendanceBelow = getPercentInputNumber("attendanceBelow");
+
+        return getStudentsForSelectedSession().filter(student => {
+          const studentId = getStudentKey(student);
+          const percentage = getStudentPercentage(studentId);
+          const attendancePercentage = calculateAttendancePercentage(studentId);
+
+          const matchesSearch = !searchQuery || [
+            student.name,
+            student.studentId,
+            student.roll,
+            student.father,
+            student.mother,
+            student.email,
+            student.yearOfAdmission,
+            student.currentYear,
+            student.admissionDate,
+            student.dateOfAdmission
+          ].some(value => String(value || '').toLowerCase().includes(searchQuery));
+
+          const matchesPhone = !searchPhone || [
+            student.phone,
+            getFatherPhone(student),
+            getMotherPhone(student)
+          ].some(value => String(value || '').toLowerCase().includes(searchPhone));
+          const matchesClass = !classFilter || student.class === classFilter;
+          const matchesSection = !sectionFilter || student.section === sectionFilter;
+
+          const aboveMatch = Number.isNaN(above) || percentage >= above;
+          const belowMatch = Number.isNaN(below) || percentage <= below;
+          const attendanceBelowMatch = Number.isNaN(attendanceBelow) || attendancePercentage < attendanceBelow;
+          const todayStatusMatch = !todayStatusFilter || getTodayStatus(studentId) === todayStatusFilter;
+
+          return matchesSearch && matchesPhone && matchesClass && matchesSection && aboveMatch && belowMatch && attendanceBelowMatch && todayStatusMatch;
+        });
+      }
+
+      function buildSectionShufflePlan(students, sectionCount) {
+        const targetSections = Array.from({ length: sectionCount }, (_, index) => String.fromCharCode(65 + index));
+        const shuffled = [...students].sort(() => Math.random() - 0.5);
+        return shuffled.map((student, index) => ({
+          student,
+          newSection: targetSections[index % sectionCount]
+        }));
+      }
+
+      window.previewSectionShuffle = () => {
+        const classValue = document.getElementById('shuffleClassSelect')?.value;
+        const sectionCount = parseInt(document.getElementById('shuffleSectionCount')?.value, 10);
+        if (!classValue) return showToast('Please select a class first', 'error');
+        if (!sectionCount || sectionCount < 2) return showToast('Please enter at least 2 sections', 'error');
+
+        const students = getStudentsForSelectedSession().filter((student) => student.class === classValue);
+        if (!students.length) return showToast('No students found for this class', 'error');
+
+        const plan = buildSectionShufflePlan(students, sectionCount).map((entry) => ({ ...entry, selected: true }));
+        sectionShufflePreviewData = plan;
+        const sectionCounts = Object.fromEntries(targetSectionsForCount(sectionCount).map((section) => [section, 0]));
+        const rows = plan.map(({ student, newSection, selected }, index) => {
+          sectionCounts[newSection] = (sectionCounts[newSection] || 0) + 1;
+          return \`<tr><td style="padding:10px;border:1px solid #cbd5e1;"><input type="checkbox" class="section-shuffle-checkbox" data-index="\${index}" \${selected ? 'checked' : ''}></td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.name || 'N/A'}</td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.studentId || student.id || 'N/A'}</td><td style="padding:10px;border:1px solid #cbd5e1;">\${student.section || '-'}</td><td style="padding:10px;border:1px solid #cbd5e1;"><strong>\${newSection}</strong></td></tr>\`;
+        }).join('');
+
+        document.getElementById('sectionShuffleContent').innerHTML = \`
+        <div style="background:#f8fafc;padding:16px 18px;border-radius:12px;margin-bottom:16px;">
+          <h3 style="margin:0 0 8px;color:#0f172a;">\${classValue} • \${students.length} students</h3>
+          <p style="margin:0;color:#64748b;">Students will be redistributed into \${sectionCount} sections: \${targetSectionsForCount(sectionCount).join(', ')}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;">
+          \${targetSectionsForCount(sectionCount).map((section) => \`<div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px;border-radius:10px;text-align:center;font-weight:700;color:#1d4ed8;">\${section}: \${sectionCounts[section] || 0}</div>\`).join('')}
+        </div>
+        <div style="max-height:420px;overflow:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#e2e8f0;"><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;"><input type="checkbox" id="sectionShuffleSelectAll" checked></th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">Student</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">ID</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">Current Section</th><th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">New Section</th></tr></thead>
+            <tbody>\${rows}</tbody>
+          </table>
+        </div>
+      \`;
+        document.getElementById('sectionShuffleSelectAll')?.addEventListener('change', (event) => {
+          const checked = event.target.checked;
+          sectionShufflePreviewData = sectionShufflePreviewData.map((entry) => ({ ...entry, selected: checked }));
+          document.querySelectorAll('.section-shuffle-checkbox').forEach((checkbox) => {
+            checkbox.checked = checked;
+          });
+        });
+        document.querySelectorAll('.section-shuffle-checkbox').forEach((checkbox) => {
+          checkbox.addEventListener('change', (event) => {
+            const index = Number(event.target.dataset.index);
+            if (!Number.isNaN(index)) {
+              sectionShufflePreviewData[index].selected = event.target.checked;
+            }
+          });
+        });
+        document.getElementById('sectionShuffleModal').style.display = 'flex';
+      };
+
+      window.applySectionShuffle = async () => {
+        const classValue = document.getElementById('shuffleClassSelect')?.value;
+        const sectionCount = parseInt(document.getElementById('shuffleSectionCount')?.value, 10);
+        if (!classValue) return showToast('Please select a class first', 'error');
+        if (!sectionCount || sectionCount < 2) return showToast('Please enter at least 2 sections', 'error');
+
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked || classesLocked) return showToast('This session is locked — section shuffle is disabled.', 'error');
+
+        const students = getStudentsForSelectedSession().filter((student) => student.class === classValue);
+        if (!students.length) return showToast('No students found for this class', 'error');
+        if (!confirm(\`Shuffle \${students.length} students in \${classValue} into \${sectionCount} sections?\`)) return;
+
+        const selectedPlan = sectionShufflePreviewData.filter((entry) => entry.selected !== false);
+        if (!selectedPlan.length) return showToast('Please select at least one student to shuffle', 'error');
+
+        const selectedSession = getSelectedSession();
+        const updatePromises = selectedPlan.map(({ student, newSection }) => {
+          const studentDocId = student.id;
+          const updatePayload = {
+            section: newSection,
+            updatedAt: serverTimestamp()
+          };
+
+          if (selectedSession?.id) {
+            updatePayload[\`sessionPlacements.\${selectedSession.id}\`] = makeSessionPlacement({
+              ...student,
+              class: classValue,
+              section: newSection
+            }, selectedSession);
+          }
+
+          return updateDoc(doc(db, 'schools', currentUser.uid, 'students', studentDocId), updatePayload);
+        });
+
+        try {
+          await Promise.all(updatePromises);
+          await reassignRollNumbersForPlacements(...targetSectionsForCount(sectionCount).map((section) => ({ class: classValue, section })));
+          await loadAllData();
+          closeSectionShuffleModal();
+          showToast(\`Section shuffle applied to \${students.length} students\`, 'success');
+        } catch (error) {
+          console.error('Section shuffle error:', error);
+          showToast('Unable to shuffle sections', 'error');
+        }
+      };
+
+      function targetSectionsForCount(count) {
+        return Array.from({ length: count }, (_, index) => String.fromCharCode(65 + index));
+      }
+
+      function getAttendanceRecordsForStudent(studentId) {
+        return (attendanceRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+      }
+
+      function calculateAttendancePercentage(studentId) {
+        const records = getAttendanceRecordsForStudent(studentId);
+        if (records.length === 0) return 0;
+        const weightedPresent = records.reduce((sum, record) => sum + getAttendanceWeight(record.status), 0);
+        return Math.round((weightedPresent / records.length) * 100);
+      }
+
+      function getTodayStatus(studentId, date = toLocalDateISO()) {
+        const records = getAttendanceRecordsForStudent(studentId);
+        const record = records.find(entry => entry.date === date);
+        return record ? record.status : 'Not Marked';
+      }
+
+      function getFeeAppliedAmount(fee) {
+        return toMoneyNumber(fee?.totalPaidAmount ?? fee?.paidAmount ?? 0);
+      }
+
+      function getFeeExtraAmount(fee) {
+        const storedExtra = toMoneyNumber(
+          fee?.totalExtraPaidAmount ?? fee?.extraPaidAmount ?? fee?.extraAmount ?? fee?.lastExtraAmount ?? 0
+        );
+        if (storedExtra > 0) return storedExtra;
+        return (Array.isArray(fee?.payments) ? fee.payments : [])
+          .reduce((sum, payment) => sum + toMoneyNumber(payment?.extraAmount || 0), 0);
+      }
+
+      function getFeeCollectedAmount(fee) {
+        const storedCollected = toMoneyNumber(fee?.totalCollectedAmount ?? 0);
+        if (storedCollected > 0) return storedCollected;
+        return getFeeAppliedAmount(fee) + getFeeExtraAmount(fee);
+      }
+
+      function getStudentFeesSummary(studentId) {
+        const studentFees = (feeRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+        const total = studentFees.reduce((sum, fee) => sum + toMoneyNumber(fee.originalAmount || fee.amount || 0), 0);
+        const paid = studentFees.reduce((sum, fee) => sum + getFeeCollectedAmount(fee), 0);
+        return { total, paid, due: Math.max(total - paid, 0) };
+      }
+
+      function renderAttendanceChart(students) {
+        const target = document.getElementById('attendanceChart');
+        if (!students.length) {
+          document.getElementById('attendanceInsightNote').textContent = 'Change filters to repopulate today\\'s attendance breakdown.';
+          target.innerHTML = createEmptyChart('No students available for the current filters.');
+          return;
+        }
+
+        const metrics = buildTodayAttendanceMetrics(students);
+        const total = metrics.total || 1;
+        const markedCount = metrics.present + metrics.absent + metrics.half;
+        document.getElementById('attendanceInsightNote').textContent = \`\${markedCount} of \${metrics.total} students have today's attendance marked.\`;
+
+        target.innerHTML = \`
+        <div class="attendance-snapshot">
+          <div class="attendance-meter">
+            <span class="present" style="width:\${(metrics.present / total) * 100}%"></span>
+            <span class="half" style="width:\${(metrics.half / total) * 100}%"></span>
+            <span class="absent" style="width:\${(metrics.absent / total) * 100}%"></span>
+            <span class="missing" style="width:\${(metrics.missing / total) * 100}%"></span>
+          </div>
+          <div class="attendance-legend">
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Present' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Present')" aria-pressed="\${todayStatusFilter === 'Present'}" title="Show students marked Present today">
+              <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Present</span></div>
+              <strong>\${metrics.present}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Half Day' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Half Day')" aria-pressed="\${todayStatusFilter === 'Half Day'}" title="Show students marked Half Day today">
+              <div class="legend-left"><span class="legend-dot" style="background:#d97706;"></span><span>Half Day</span></div>
+              <strong>\${metrics.half}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Absent' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Absent')" aria-pressed="\${todayStatusFilter === 'Absent'}" title="Show students marked Absent today">
+              <div class="legend-left"><span class="legend-dot" style="background:#dc2626;"></span><span>Absent</span></div>
+              <strong>\${metrics.absent}</strong>
+            </button>
+            <button class="legend-item attendance-filter \${todayStatusFilter === 'Not Marked' ? 'is-active' : ''}" type="button" onclick="filterByTodayStatus('Not Marked')" aria-pressed="\${todayStatusFilter === 'Not Marked'}" title="Show students whose attendance is not marked today">
+              <div class="legend-left"><span class="legend-dot" style="background:#94a3b8;"></span><span>Not Marked</span></div>
+              <strong>\${metrics.missing}</strong>
+            </button>
+          </div>
+        </div>
+      \`;
+      }
+
+      function renderResultBandChart(students) {
+        const target = document.getElementById('resultBandChart');
+        if (!students.length) {
+          document.getElementById('resultInsightNote').textContent = 'No report distribution available for an empty view.';
+          target.innerHTML = createEmptyChart('No students found for performance analysis.');
+          return;
+        }
+
+        const bands = buildResultBands(students);
+        const maxCount = Math.max(...bands.map(band => band.count), 1);
+        const reportCoverage = students.filter(student => latestReportByStudent.has(getStudentKey(student))).length;
+        document.getElementById('resultInsightNote').textContent = \`\${reportCoverage} students currently have report card data.\`;
+
+        target.innerHTML = \`
+        <div class="chart-columns">
+          \${bands.map(band => \`
+            <div class="chart-column">
+              <div class="chart-column-value">\${band.count} students</div>
+              <div class="chart-column-bar" style="height:\${Math.max(26, (band.count / maxCount) * 170)}px; background:\${band.color};"></div>
+              <div class="chart-column-label">\${band.label}</div>
+            </div>
+          \`).join('')}
+        </div>
+      \`;
+      }
+
+      function renderClassMixChart(students) {
+        const target = document.getElementById('classMixChart');
+        if (!students.length) {
+          document.getElementById('classInsightNote').textContent = 'Class distribution becomes visible once students are in the current view.';
+          target.innerHTML = createEmptyChart('No class mix to show right now.');
+          return;
+        }
+
+        const classMix = buildClassMix(students);
+        const strongest = classMix[0];
+        const maxCount = Math.max(...classMix.map(item => item.count), 1);
+        const previewCount = Math.min(3, classMix.length);
+        target.dataset.total = String(classMix.length);
+        target.dataset.previewCount = String(previewCount);
+        document.getElementById('classInsightNote').textContent = classMix.length > previewCount
+          ? \`Showing \${previewCount} of \${classMix.length} class sections.\`
+          : (strongest ? \`\${strongest.label} has the highest visible strength with \${strongest.count} students.\` : 'Visible roster class split.');
+
+        target.innerHTML = \`
+        <div class="bar-list">
+          \${classMix.map((item, index) => \`
+            <div class="bar-row \${index >= previewCount ? 'is-extra' : ''}">
+              <div class="bar-row-head">
+                <span>\${item.label}</span>
+                <span>\${item.count} students</span>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill" style="width:\${(item.count / maxCount) * 100}%"></span>
+              </div>
+            </div>
+          \`).join('')}
+        </div>
+      \`;
+      }
+
+      window.toggleClassMixChart = (button) => {
+        const card = button?.closest('.class-mix-card');
+        if (!card) return;
+        const isCollapsed = card.classList.toggle('is-collapsed');
+        const chart = card.querySelector('#classMixChart');
+        const note = card.querySelector('#classInsightNote');
+        const total = Number(chart?.dataset.total || 0);
+        const previewCount = Number(chart?.dataset.previewCount || 0);
+        button.setAttribute('aria-expanded', String(!isCollapsed));
+        const action = isCollapsed ? 'Show' : 'Hide';
+        button.setAttribute('aria-label', \`\${action} class mix chart\`);
+        button.setAttribute('title', \`\${action} class mix chart\`);
+        if (note && total > previewCount) {
+          note.textContent = isCollapsed
+            ? \`Showing \${previewCount} of \${total} class sections.\`
+            : \`Showing all \${total} class sections.\`;
+        }
+      };
+
+      function renderFeeHealthChart(students) {
+        const target = document.getElementById('feeHealthChart');
+        if (!students.length) {
+          document.getElementById('feeInsightNote').textContent = 'Fee health is calculated from the visible roster.';
+          target.innerHTML = createEmptyChart('No fee records to analyze in the current view.');
+          return;
+        }
+
+        const metrics = buildFeeMetrics(students);
+        if (!metrics.total) {
+          document.getElementById('feeInsightNote').textContent = \`\${metrics.noPlan} students in this view do not have fee records yet.\`;
+          target.innerHTML = createEmptyChart('Fee plans have not been created for these students yet.');
+          return;
+        }
+
+        const paidAngle = (metrics.paid / metrics.total) * 360;
+        const dueAngle = (metrics.due / metrics.total) * 360;
+        const noPlanAngle = Math.max(0, 360 - paidAngle - dueAngle);
+        const collectionRate = Math.round((metrics.paid / metrics.total) * 100);
+        document.getElementById('feeInsightNote').textContent = \`\${metrics.pending} students still have pending dues in this view.\`;
+
+        target.innerHTML = \`
+        <div class="donut-wrap">
+          <div class="donut-chart" style="background: conic-gradient(#16a34a 0deg \${paidAngle}deg, #ef4444 \${paidAngle}deg \${paidAngle + dueAngle}deg, #cbd5e1 \${paidAngle + dueAngle}deg \${paidAngle + dueAngle + noPlanAngle}deg);">
+            <div class="donut-center">
+              <strong>\${collectionRate}%</strong>
+              <span>Collected</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#16a34a;"></span><span>Collected</span></div>
+              <strong>\${formatCurrency(metrics.paid)}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#ef4444;"></span><span>Outstanding</span></div>
+              <strong>\${formatCurrency(metrics.due)}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#cbd5e1;"></span><span>No Fee Plan</span></div>
+              <strong>\${metrics.noPlan}</strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><span class="legend-dot" style="background:#315efb;"></span><span>Students Cleared</span></div>
+              <strong>\${metrics.cleared}</strong>
+            </div>
+          </div>
+        </div>
+      \`;
+      }
+
+      function renderAnalytics(students) {
+        renderAttendanceChart(students);
+        renderResultBandChart(students);
+        renderClassMixChart(students);
+        renderFeeHealthChart(students);
+      }
+
+      function updateSelectionSummary() {
+        const visibleCheckboxes = Array.from(document.querySelectorAll(".selectStudent"));
+        const selectedCount = selectedStudentIds.size;
+        const visibleSelectedCount = visibleCheckboxes.filter(checkbox => checkbox.checked).length;
+        const visibleCount = visibleCheckboxes.length;
+        document.getElementById("selectionSummary").textContent = selectedCount ? \`\${selectedCount} selected\` : '0 selected';
+
+        const selectAll = document.getElementById("selectAllStudents");
+        if (selectAll) {
+          selectAll.checked = visibleCount > 0 && visibleSelectedCount === visibleCount;
+          selectAll.indeterminate = visibleSelectedCount > 0 && visibleSelectedCount < visibleCount;
+        }
+      }
+      window.updateSelectionSummary = updateSelectionSummary;
+
+      window.handleStudentSelection = (studentId, checked) => {
+        if (!studentId) return;
+        if (checked) selectedStudentIds.add(studentId);
+        else selectedStudentIds.delete(studentId);
+        updateSelectionSummary();
+      };
+
+      function buildStudentAttendancePrintRows(students) {
+        return students.map((student, index) => {
+          const studentId = getStudentKey(student);
+          const records = getAttendanceRecordsForStudent(studentId);
+          const attendancePct = calculateAttendancePercentage(studentId);
+          return \`<tr>
+            <td>\${index + 1}</td>
+            <td>\${escapeHtml(student.name || 'N/A')}</td>
+            <td>\${escapeHtml(studentId || '-')}</td>
+            <td>\${escapeHtml(student.roll || student.rollNo || '-')}</td>
+            <td>\${escapeHtml(student.class || '-')}</td>
+            <td>\${escapeHtml(student.section || '-')}</td>
+            <td>\${attendancePct}%</td>
+            <td>\${records.length}</td>
+          </tr>\`;
+        }).join("");
+      }
+
+      function buildStudentPrintablePage(title, subtitle, tableHtml) {
+        const schoolName = window.SchoolBranding?.getSchoolName?.() || "Schoolix";
+        return \`<!doctype html>
+          <html><head><title>\${escapeHtml(title)}</title>
+          <style>
+            body{font-family:Arial,sans-serif;color:#111827;margin:28px;}
+            h1{font-size:22px;margin:0 0 4px;text-align:center;}
+            .sub{text-align:center;color:#4b5563;margin-bottom:18px;font-size:13px;}
+            table{width:100%;border-collapse:collapse;font-size:12px;}
+            th{background:#1e2f8a;color:#fff;padding:9px;border:1px solid #111827;text-align:left;}
+            td{padding:9px;border:1px solid #9ca3af;vertical-align:top;}
+            .footer{margin-top:22px;text-align:center;font-size:11px;color:#6b7280;}
+            @media print{body{margin:10mm;}button{display:none;}}
+          </style></head><body>
+            <h1>\${escapeHtml(schoolName)}</h1>
+            <div class="sub"><strong>\${escapeHtml(title)}</strong><br>\${escapeHtml(subtitle)}</div>
+            \${tableHtml}
+            <div class="footer">Generated on \${new Date().toLocaleDateString("en-IN")}</div>
+          </body></html>\`;
+      }
+
+      function openStudentPrintableDocument(title, subtitle, tableHtml) {
+        const html = buildStudentPrintablePage(title, subtitle, tableHtml);
+        if (window.SchoolixPrint?.printHtml?.(title, html)) return;
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+          showToast("Please allow popups to print or save PDF.", "error");
+          return;
+        }
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }
+
+      window.printAttendanceFilteredList = () => {
+        const threshold = getPercentInputNumber("attendanceBelow");
+        const students = getFilteredStudents().sort(sortStudentsByClassSectionRollName);
+        if (!students.length) {
+          const message = Number.isNaN(threshold)
+            ? "No students found to print."
+            : \`No students found below \${threshold}% attendance.\`;
+          return showToast(message, "error");
+        }
+
+        const thresholdLabel = Number.isNaN(threshold) ? "current filters" : \`attendance below \${threshold}%\`;
+        const title = Number.isNaN(threshold) ? "Student Attendance List" : \`Low Attendance List Below \${threshold}%\`;
+        const subtitle = \`\${students.length} student(s) | \${thresholdLabel} | \${getSelectedSessionLabel() || "Current Session"}\`;
+        const table = \`<table>
+          <thead><tr><th>S.No.</th><th>Student Name</th><th>Student ID</th><th>Roll No.</th><th>Class</th><th>Section</th><th>Attendance %</th><th>Marked Days</th></tr></thead>
+          <tbody>\${buildStudentAttendancePrintRows(students)}</tbody>
+        </table>\`;
+        openStudentPrintableDocument(title, subtitle, table);
+      };
+
+      function getStudentInitials(value) {
+        const words = String(value || "Student").trim().split(/\\s+/).filter(Boolean);
+        if (!words.length) return "ST";
+        return words.slice(0, 2).map(word => word[0]).join("").toUpperCase();
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\\"": "&quot;", "'": "&#39;" }[m]));
+      }
+
+      function optionSelected(currentValue, optionValue) {
+        return String(currentValue || "").toLowerCase() === String(optionValue || "").toLowerCase() ? "selected" : "";
+      }
+
+      function renderBloodGroupOptions(currentValue = "") {
+        return ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((group) => {
+          const label = group || "Select blood group";
+          return \`<option value="\${escapeHtml(group)}" \${optionSelected(currentValue, group)}>\${escapeHtml(label)}</option>\`;
+        }).join("");
+      }
+
+      const CLOUDINARY_CLOUD_NAME = "fthnumnk";
+      const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";
+
+      function getStudentPhotoUrl(student = {}) {
+        return String(student.photoUrl || student.imageUrl || student.profilePhotoUrl || student.avatarUrl || "").trim();
+      }
+
+      function renderStudentAvatar(student = {}, size = "small") {
+        const url = getStudentPhotoUrl(student);
+        const initials = getStudentInitials(student.name || student.studentId || student.id);
+        const className = size === "large" ? "student-photo-large" : "student-avatar";
+        const title = escapeHtml(student.name || "Student");
+        return \`<button type="button" class="\${className}" onclick="event.stopPropagation(); openPhotoPreview('\${escapeHtml(url)}','\${title}')" title="View \${title} photo">\${url ? \`<img src="\${escapeHtml(url)}" alt="\${title} photo">\` : escapeHtml(initials)}</button>\`;
+      }
+
+      window.openPhotoPreview = (photoUrl, title = "Student Photo") => {
+        if (!photoUrl) return showToast("Photo is not available yet.", "error");
+        document.getElementById("photoPreviewTitle").textContent = title || "Student Photo";
+        document.getElementById("photoPreviewImage").src = photoUrl;
+        document.getElementById("photoPreviewModal").style.display = "flex";
+      };
+
+      window.closePhotoPreview = (event) => {
+        if (event && event.target !== document.getElementById("photoPreviewModal")) return;
+        const modal = document.getElementById("photoPreviewModal");
+        modal.style.display = "none";
+        document.getElementById("photoPreviewImage").src = "";
+      };
+
+      function getCloudinaryConfig() {
+        return {
+          cloudName: CLOUDINARY_CLOUD_NAME,
+          uploadPreset: CLOUDINARY_UPLOAD_PRESET
+        };
+      }
+
+      async function uploadStudentPhoto(file, studentId) {
+        if (!file) return null;
+        if (!file.type.startsWith("image/")) throw new Error("Please select an image file.");
+        if (file.size > 5 * 1024 * 1024) throw new Error("Student photo must be under 5 MB.");
+        const config = getCloudinaryConfig();
+        if (!config.cloudName || !config.uploadPreset) {
+          throw new Error("Cloudinary photo upload is not configured.");
+        }
+        const form = new FormData();
+        form.append("file", file);
+        form.append("upload_preset", config.uploadPreset);
+        form.append("folder", \`schoolix/students/\${currentUser.uid}\`);
+        form.append("public_id", \`\${String(studentId || "student").replace(/[^a-zA-Z0-9_-]/g, "_")}_\${Date.now()}\`);
+        const response = await fetch(\`https://api.cloudinary.com/v1_1/\${encodeURIComponent(config.cloudName)}/image/upload\`, {
+          method: "POST",
+          body: form
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error?.message || "Cloudinary upload failed.");
+        return { photoUrl: data.secure_url || data.url || "", photoPublicId: data.public_id || "" };
+      }
+
+      window.previewEditedStudentPhoto = () => {
+        const student = allStudents.find(s => s.id === currentStudentId) || {};
+        const file = document.getElementById("editStudentPhoto")?.files?.[0];
+        const preview = document.getElementById("editStudentPhotoPreview");
+        if (!preview) return;
+        if (!file) {
+          const url = getStudentPhotoUrl(student);
+          preview.onclick = () => window.openPhotoPreview(url, student.name || "Student");
+          preview.innerHTML = url
+            ? \`<img src="\${escapeHtml(url)}" alt="">\`
+            : escapeHtml(getStudentInitials(student.name || student.studentId || student.id));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          preview.innerHTML = \`<img src="\${reader.result}" alt="Selected student photo">\`;
+          preview.onclick = () => window.openPhotoPreview(reader.result, student.name || "Selected Photo");
+        };
+        reader.readAsDataURL(file);
+      };
+
+      window.removeStudentPhoto = () => {
+        const input = document.getElementById("editStudentPhoto");
+        if (input) input.value = "";
+        const preview = document.getElementById("editStudentPhotoPreview");
+        if (preview) {
+          preview.textContent = "No photo";
+          preview.onclick = () => window.openPhotoPreview("", "Student");
+        }
+        const flag = document.getElementById("removeStudentPhotoFlag");
+        if (flag) flag.value = "1";
+      };
+
+      function renderStudents(students) {
+        const totalPages = Math.ceil(students.length / pageSize);
+        const startIndex = (currentPage - 1) * pageSize;
+        const paginated = students.slice(startIndex, startIndex + pageSize);
+        const selectedIds = selectedStudentIds;
+
+        const html = paginated.map(s => {
+          const studentId = getStudentKey(s);
+          const percentage = getStudentPercentage(studentId);
+          const percentageClass = getPercentageClass(percentage);
+          const todayStatus = getTodayStatus(studentId);
+          const attendancePct = calculateAttendancePercentage(studentId);
+          const attendanceRecords = getAttendanceRecordsForStudent(studentId);
+          const fees = getStudentFeesSummary(studentId);
+          const statusClass = todayStatus === 'Present' ? 'status-present' :
+            todayStatus === 'Absent' ? 'status-absent' :
+              todayStatus === 'Half Day' ? 'status-half' : 'status-noclass';
+          const tc = !!s.tcIssued;
+          const phoneNumber = s.phone || getFatherPhone(s) || getMotherPhone(s) || "-";
+          const placement = s._sessionPlacement;
+          const placementBadge = placement?.locked || placement?.classLocked
+            ? '<span class="tc-badge">Class Locked</span>'
+            : placement ? '<span class="tc-badge" style="background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe;">Session Class</span>' : '';
+
+          return \`
+    
+      <div class="student-row \${tc ? 'row-tc' : ''}">
+       <div class="student-cell" data-label="">
+  <input type="checkbox" class="selectStudent" value="\${s.id}" \${selectedIds.has(s.id) ? 'checked' : ''} onchange="handleStudentSelection('\${s.id}', this.checked)">
+</div>
+        <div class="student-name student-cell" data-label="Student Name">
+          <div class="student-identity">
+            \${renderStudentAvatar(s)}
+            <div class="student-primary">
+              <span>\${s.name || 'N/A'}\${tc ? ' <span class="tc-badge">TC Issued</span>' : ''} \${placementBadge}</span>
+              <div class="student-secondary">
+                <div class="student-meta-item"><strong>Session:</strong> \${s.currentYear || getSelectedSessionLabel() || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="student-info student-cell" data-label="ID / Roll"><strong>\${s.studentId || s.id || 'N/A'}</strong><br><small>Roll \${s.roll || '-'}</small></div>
+        <div class="student-info student-cell" data-label="Class"><strong>\${s.class || '?'}</strong><br><small>Section \${s.section || '-'}</small></div>
+        <div class="student-info student-cell" data-label="Phone"><strong>\${phoneNumber}</strong></div>
+        <div class="student-cell" data-label="Results %"><div class="percentage-display \${percentageClass}">\${percentage}%</div></div>
+        <div class="student-cell" data-label="Today Status"><span class="\${statusClass}">\${todayStatus}</span></div>
+        <div class="student-info student-cell" data-label="Attendance %"><div class="att-stack"><strong style="color:#315efb;">\${attendancePct}%</strong><div class="mini-progress"><span style="width:\${attendancePct}%"></span></div><small>\${attendanceRecords.length} marked days</small></div></div>
+        <div class="student-info student-cell" data-label="Total Fees"><div class="fee-stack"><strong style="color:#0f172a;">\${formatCurrency(fees.total)}</strong><small>Paid \${formatCurrency(fees.paid)}</small></div></div>
+        <div class="student-info student-cell" data-label="Due"><div class="fee-stack"><strong style="color:\${fees.due > 0 ? '#d14343' : '#0f9f62'};">\${formatCurrency(fees.due)}</strong><small>\${fees.due > 0 ? 'Needs follow-up' : 'Fully cleared'}</small></div></div>
+        <div class="action-buttons student-cell" data-label="Actions">
+          <button class="btn btn-primary btn-small" onclick="showAttendance('\${s.id}')">\${tc ? 'View (R/O)' : 'Open Profile'}</button>
+        </div>
+      </div>
+    \`;
+        }).join('') || \`
+    <div class="chart-empty" style="margin: 18px 24px 24px;">
+      <h3 style="font-size:24px;margin-bottom:10px;color:#0f172a;">No students found</h3>
+      <p>Try adjusting your search, class filter, section filter, result percentage, or attendance percentage.</p>
+    </div>
+  \`;
+
+        document.getElementById("studentsList").innerHTML = html;
+        renderPagination(students.length, totalPages);
+        updateSelectionSummary();
+      }
+
+      function renderPagination(totalCount, totalPages) {
+        const pagination = document.getElementById("pagination");
+        if (!totalCount) { pagination.innerHTML = ''; return; }
+        if (totalPages <= 1) {
+          pagination.innerHTML = \`<div class="pagination-info" role="status">Showing all \${totalCount} students in the current view</div>\`;
+          return;
+        }
+
+        const startItem = (currentPage - 1) * pageSize + 1;
+        const endItem = Math.min(currentPage * pageSize, totalCount);
+        const pages = new Set([1, totalPages]);
+        for (let page = currentPage - 1; page <= currentPage + 1; page += 1) {
+          if (page > 0 && page <= totalPages) pages.add(page);
+        }
+        if (currentPage <= 3) [2, 3, 4].forEach((page) => page <= totalPages && pages.add(page));
+        if (currentPage >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach((page) => page > 0 && pages.add(page));
+
+        const pageList = Array.from(pages).sort((a, b) => a - b);
+        const pageButtons = [];
+        let previousPage = 0;
+        pageList.forEach((page) => {
+          if (page - previousPage > 1) {
+            pageButtons.push('<span class="page-btn page-btn--ellipsis" aria-hidden="true">…</span>');
+          }
+          pageButtons.push(\`<button class="page-btn \${page === currentPage ? 'active' : ''}" type="button" onclick="changePage(\${page})" \${page === currentPage ? 'aria-current="page"' : ''} aria-label="Go to page \${page}">\${page}</button>\`);
+          previousPage = page;
+        });
+
+        pagination.innerHTML = \`
+          <div class="pagination-info" role="status">Showing <strong>\${startItem}–\${endItem}</strong> of <strong>\${totalCount}</strong> students <span aria-hidden="true">·</span> Page \${currentPage} of \${totalPages}</div>
+          <nav class="pagination-controls" aria-label="Students pagination">
+            <button class="page-btn page-btn--wide page-btn--first" type="button" onclick="changePage(1)" \${currentPage === 1 ? 'disabled' : ''} aria-label="First page">First</button>
+            <button class="page-btn page-btn--wide page-btn--previous" type="button" onclick="changePage(\${currentPage - 1})" \${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">Previous</button>
+            \${pageButtons.join('')}
+            <button class="page-btn page-btn--wide page-btn--next" type="button" onclick="changePage(\${currentPage + 1})" \${currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">Next</button>
+            <button class="page-btn page-btn--wide page-btn--last" type="button" onclick="changePage(\${totalPages})" \${currentPage === totalPages ? 'disabled' : ''} aria-label="Last page">Last</button>
+          </nav>
+        \`;
+      }
+
+      window.changePage = (page) => {
+        const totalPages = Math.ceil(getFilteredStudents().length / pageSize);
+        if (page >= 1 && page <= totalPages) {
+          currentPage = page;
+          loadData(false);
+          document.getElementById("studentsList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      };
+
+      window.showAttendance = async (docId) => {
+        currentStudentId = docId;
+        const rawStudent = allStudents.find(s => s.id === docId);
+        if (!rawStudent) return showToast("Student not found", "error");
+        const student = getStudentForSelectedSession(rawStudent);
+        const tcLocked = !!student.tcIssued;
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+
+        document.getElementById("modalStudentName").textContent = \`\${student.name || 'N/A'} - \${tcLocked ? 'TC issued (restricted)' : sessionLocked ? 'Session locked (view only)' : 'Complete Profile'}\`;
+
+        const fees = getStudentFeesSummary(student.studentId || student.id);
+        const percentage = getStudentPercentage(student.studentId || student.id);
+        const d = tcLocked || sessionLocked ? "disabled" : "";
+        const classDisabled = tcLocked || sessionLocked || classesLocked ? "disabled" : "";
+        const fatherPhone = getFatherPhone(student);
+        const motherPhone = getMotherPhone(student);
+        const photoUrl = getStudentPhotoUrl(student);
+        const currentStatus = student.status || (student.tcIssued ? "TC Issued" : "Active");
+        const photoPreview = photoUrl
+          ? \`<img src="\${escapeHtml(photoUrl)}" alt="\${escapeHtml(student.name || "Student")} photo">\`
+          : escapeHtml(getStudentInitials(student.name || student.studentId || student.id));
+        const sessionPlacementNote = student._sessionPlacement
+          ? \`<div style="background:#eef6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 14px;border-radius:10px;margin-bottom:14px;font-weight:600;">
+      Showing class for \${getSelectedSessionLabel() || student.currentYear || 'selected session'}: \${student.class || '?'}-\${student.section || '-'}\${student._sessionPlacement.locked || student._sessionPlacement.classLocked ? ' (locked snapshot)' : ''}
+    </div>\`
+          : '';
+
+        document.getElementById("modalStudentDetails").innerHTML = \`
+    \${tcLocked ? \`<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
+      Transfer Certificate issued for this student. Attendance and fee changes are disabled.
+    </div>\` : sessionLocked ? \`<div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 16px;border-radius:10px;margin-bottom:16px;font-weight:600;">
+      This session is locked. Editing is disabled for all users.
+    </div>\` : ''}
+    \${sessionPlacementNote}
+    <div style="background:#f8fafc;padding:20px;border-radius:12px;margin-bottom:20px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#4299e1;margin-bottom:5px;">\${percentage}%</div>
+          <div style="color:#718096;">Latest Result %</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#48bb78;margin-bottom:5px;">\${formatCurrency(fees.paid)}</div>
+          <div style="color:#718096;">Total Paid</div>
+          <div style="font-size:18px;color:#f56565;margin-top:5px;">Due: \${formatCurrency(fees.due)}</div>
+        </div>
+        <div>
+          <p><strong>Student ID:</strong> \${student.studentId || student.id}</p>
+          <p><strong>Class:</strong> \${student.class || "?"}-\${student.section || "?"} | <strong>Roll:</strong> \${student.roll || "?"}</p>
+        </div>
+      </div>
+
+      <div class="student-photo-editor">
+        <button type="button" class="student-photo-large" id="editStudentPhotoPreview" onclick="openPhotoPreview('\${escapeHtml(photoUrl)}','\${escapeHtml(student.name || "Student")}')">\${photoPreview}</button>
+        <div>
+          <div class="detail-field">
+            <label>Student Photo</label>
+            <input id="editStudentPhoto" type="file" accept="image/*" onchange="previewEditedStudentPhoto()" \${d}>
+            <input id="removeStudentPhotoFlag" type="hidden" value="0">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <button class="btn btn-secondary btn-small" type="button" onclick="removeStudentPhoto()" \${d}>Remove Photo</button>
+          </div>
+          <small style="display:block;margin-top:8px;color:#64748b;font-weight:700">Photo upload/edit is available only from this students page.</small>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-field"><label>Name</label><input id="editName" value="\${student.name || ""}" \${d}></div>
+        <div class="detail-field"><label>Student ID</label><input id="editStudentId" value="\${student.studentId || student.id || ""}" readonly></div>
+        <div class="detail-field"><label>SR Number</label><input id="editSrNumber" value="\${student.srNumber || ""}" \${d}></div>
+        <div class="detail-field"><label>Email Address</label><input id="editEmail" type="email" value="\${student.email || ""}" \${d}></div>
+        <div class="detail-field"><label>Parent Email</label><input id="editParentEmail" type="email" value="\${student.parentEmail || student.fatherEmail || student.motherEmail || ""}" \${d}></div>
+        <div class="detail-field"><label>Year of Admission</label><input id="editYearOfAdmission" value="\${student.yearOfAdmission || ""}" \${d}></div>
+          <div class="detail-field"><label>Admission Date</label><input id="editAdmissionDate" type="date" value="\${formatInputDate(student.admissionDate || student.dateOfAdmission)}" \${d} placeholder="YYYY-MM-DD"></div>
+        <div class="detail-field"><label>Academic Year</label><input id="editAcademicYear" value="\${student.currentYear || ""}" \${d}></div>
+        <div class="detail-field"><label>Class</label><input id="editClass" value="\${student.class || ""}" \${classDisabled}></div>
+        <div class="detail-field"><label>Section</label><input id="editSection" value="\${student.section || ""}" \${classDisabled}></div>
+        <div class="detail-field"><label>Roll</label><input id="editRoll" value="\${student.roll || ""}" \${classDisabled}></div>
+        <div class="detail-field">
+          <label>Status</label>
+          <select id="editStatus" \${d}>
+            <option \${optionSelected(currentStatus, "Active")}>Active</option>
+            <option \${optionSelected(currentStatus, "Passed Out")}>Passed Out</option>
+            <option \${optionSelected(currentStatus, "TC Issued")}>TC Issued</option>
+          </select>
+        </div>
+        <div class="detail-field">
+          <label>Gender</label>
+          <select id="editGender" \${d}>
+            <option value="">Select gender</option>
+            <option \${optionSelected(student.gender, "Male")}>Male</option>
+            <option \${optionSelected(student.gender, "Female")}>Female</option>
+            <option \${optionSelected(student.gender, "Other")}>Other</option>
+          </select>
+        </div>
+        <div class="detail-field">
+          <label>Category</label>
+          <select id="editCategory" \${d}>
+            <option value="">Select category</option>
+            <option \${optionSelected(student.category, "General")}>General</option>
+            <option \${optionSelected(student.category, "OBC")}>OBC</option>
+            <option \${optionSelected(student.category, "SC")}>SC</option>
+            <option \${optionSelected(student.category, "ST")}>ST</option>
+          </select>
+        </div>
+        <div class="detail-field"><label>Phone</label><input id="editPhone" value="\${student.phone || ""}" \${d}></div>
+        <div class="detail-field"><label>Father Name</label><input id="editFather" value="\${student.father || ""}" \${d}></div>
+        <div class="detail-field"><label>Father Phone</label><input id="editFatherPhone" value="\${fatherPhone}" \${d}></div>
+        <div class="detail-field"><label>Mother Name</label><input id="editMother" value="\${student.mother || ""}" \${d}></div>
+        <div class="detail-field"><label>Mother Phone</label><input id="editMotherPhone" value="\${motherPhone}" \${d}></div>
+        <div class="detail-field"><label>Aadhaar</label><input id="editAadhar" value="\${student.aadharNumber || ""}" \${d}></div>
+        <div class="detail-field"><label>Date of Birth</label><input id="editDob" type="date" value="\${student.dob || ""}" \${d}></div>
+        <div class="detail-field"><label>Blood Group</label><select id="editBloodGroup" \${d}>\${renderBloodGroupOptions(student.bloodGroup)}</select></div>
+        <div class="detail-field"><label>Religion</label><input id="editReligion" value="\${student.religion || ""}" \${d}></div>
+        <div class="detail-field"><label>Previous School</label><input id="editPreviousSchool" value="\${student.previousSchool || ""}" \${d}></div>
+        <div class="detail-field" style="grid-column:1/-1"><label>Address</label><textarea id="editAddress" \${d}>\${student.address || ""}</textarea></div>
+        <div class="detail-field" style="grid-column:1/-1"><label>Document List</label><textarea id="editDocumentList" \${d}>\${student.documentList || student.documents || ""}</textarea></div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn btn-success btn-small" onclick="saveStudentDetails()" \${tcLocked || sessionLocked ? 'disabled style="opacity:0.55"' : ''}>Save Details</button>
+      </div>
+    </div>
+  \`;
+
+        const today = toLocalDateISO();
+        currentSelectedDate = today;
+        selectedAttendanceStatus = null;
+        document.getElementById("selectedDate").value = today;
+        activeTab = 'attendance';
+        document.querySelectorAll('.tab-btn').forEach((button, index) => {
+          button.classList.toggle('active', index === 0);
+        });
+        document.querySelectorAll('.tab-content').forEach((content) => {
+          content.classList.remove('active');
+        });
+        document.getElementById('attendanceTab').classList.add('active');
+
+        updateModalAttendance();
+        updateFeeHistory();
+        document.getElementById("attendanceModal").style.display = "flex";
+        document.querySelectorAll(".date-selector .btn").forEach((b) => {
+          b.disabled = false;
+          b.style.opacity = "1";
+        });
+        document.getElementById("markDateBtn").disabled = true;
+        document.getElementById("markDateBtn").textContent = "Update Attendance";
+        if (tcLocked) {
+          document.getElementById("markDateBtn").disabled = true;
+          document.querySelectorAll(".date-selector .btn").forEach((b) => {
+            b.disabled = true;
+            b.style.opacity = "0.55";
+          });
+        }
+      };
+
+      window.loadDateAttendance = () => {
+        currentSelectedDate = document.getElementById("selectedDate").value;
+        if (!currentSelectedDate) return showToast("Please select a date", "error");
+        updateModalAttendance();
+        showToast(\`Loaded attendance for \${new Date(currentSelectedDate + 'T00:00').toLocaleDateString()}\`, "success");
+      };
+
+      window.markSelectedDateAttendance = async () => {
+        if (!currentStudentId || !currentSelectedDate || !selectedAttendanceStatus) {
+          return showToast("Please select date and status first", "error");
+        }
+
+        const rawStudent = allStudents.find(s => s.id === currentStudentId);
+        const student = getStudentForSelectedSession(rawStudent);
+        if (student?.tcIssued) return showToast("TC issued — attendance cannot be changed.", "error");
+
+        const sessionLocked = getSelectedSession()?.locked || false;
+        if (sessionLocked) return showToast("This session is locked — attendance changes are disabled.", "error");
+
+        const attendanceData = {
+          studentId: student.studentId || student.id,
+          studentName: student.name,
+          class: student.class,
+          section: student.section,
+          roll: student.roll,
+          status: selectedAttendanceStatus,
+          date: currentSelectedDate,
+          sessionId: getSelectedSessionId() || "",
+          session: getSelectedSessionLabel() || "",
+          academicSession: getSelectedSessionLabel() || "",
+          markedBy: "Admin Staff",
+          markedByRole: "admin",
+          timestamp: serverTimestamp()
+        };
+        if (selectedAttendanceStatus !== 'Absent') {
+          attendanceData.absenceEmailSent = false;
+          attendanceData.absenceEmailSentAt = null;
+          attendanceData.absenceEmailSentTo = "";
+          attendanceData.absenceStudentNotificationSent = false;
+          attendanceData.absenceStudentNotificationSentAt = null;
+        }
+
+        try {
+          const sid = student.studentId || student.id;
+          const attendanceKey = \`\${sid}_\${currentSelectedDate}_\${getSelectedSessionId() || 'default'}\`;
+          const existing = allAttendance.find(a => a.studentId === sid && a.date === currentSelectedDate && entryBelongsToSession(a));
+          const attendanceDocId = existing?.id || attendanceKey;
+          const hasParentEmail = Boolean(getParentEmail(student));
+          const shouldEmailAbsent = selectedAttendanceStatus === 'Absent' &&
+            (existing?.status !== 'Absent' || (hasParentEmail && !existing?.absenceEmailSent) || !existing?.absenceStudentNotificationSent);
+          if (selectedAttendanceStatus === 'Absent' && existing?.absenceEmailSent) {
+            attendanceData.absenceEmailSent = true;
+            attendanceData.absenceEmailSentAt = existing.absenceEmailSentAt || null;
+            attendanceData.absenceEmailSentTo = existing.absenceEmailSentTo || "";
+            attendanceData.absenceStudentNotificationSent = existing.absenceStudentNotificationSent || false;
+            attendanceData.absenceStudentNotificationSentAt = existing.absenceStudentNotificationSentAt || null;
+          }
+
+          if (existing) {
+            await setDoc(doc(db, "schools", currentUser.uid, "attendance", existing.id), attendanceData);
+          } else {
+            await setDoc(doc(db, "schools", currentUser.uid, "attendance", attendanceKey), attendanceData);
+          }
+          if (shouldEmailAbsent) {
+            try {
+              await sendAdminAbsenceEmail(student, currentSelectedDate, attendanceDocId);
+              showToast("Attendance updated.", 'success');
+            } catch (emailError) {
+              console.error("Absence email error:", emailError);
+              showToast("Attendance updated.", 'success');
+            }
+          } else {
+            showToast("Attendance updated.", 'success');
+          }
+          updateModalAttendance();
+        } catch (error) {
+          console.error("Error updating attendance:", error);
+          showToast('Error updating attendance', 'error');
+        }
+      };
+
+      window.quickMarkAttendance = (status) => {
+        const student = allStudents.find(s => s.id === currentStudentId);
+        if (student?.tcIssued) return showToast("TC issued — attendance is locked.", "error");
+        selectedAttendanceStatus = status;
+        document.getElementById("markDateBtn").disabled = false;
+        document.getElementById("markDateBtn").textContent = \`Update to \${status}\`;
+        showToast(\`Selected: \${status}. Click Update Attendance.\`, 'success');
+      };
+
+      window.selectAttendanceRecordDate = (date, status = "") => {
+        if (!date) return;
+        const input = document.getElementById("selectedDate");
+        if (input) input.value = date;
+        currentSelectedDate = date;
+        selectedAttendanceStatus = status || null;
+        const markBtn = document.getElementById("markDateBtn");
+        if (markBtn) {
+          markBtn.disabled = !selectedAttendanceStatus;
+          markBtn.textContent = selectedAttendanceStatus ? \`Update \${selectedAttendanceStatus}\` : "Update Attendance";
+        }
+        updateModalAttendance();
+        showToast(\`Loaded \${status || 'attendance'} for \${new Date(date + 'T00:00').toLocaleDateString()}\`, "success");
+      };
+
+      window.saveStudentDetails = async () => {
+        const student = allStudents.find((s) => s.id === currentStudentId);
+        if (!student) return showToast("Student not found", "error");
+        if (student.tcIssued) return showToast("TC issued — profile edit is disabled.", "error");
+        const sessionStudent = getStudentForSelectedSession(student);
+
+        const sessionLocked = getSelectedSession()?.locked || false;
+        if (sessionLocked) return showToast("This session is locked — editing is disabled.", "error");
+
+        const updatedStudent = {
+          ...student,
+          name: document.getElementById("editName")?.value?.trim() || "",
+          srNumber: document.getElementById("editSrNumber")?.value?.trim() || "",
+          email: document.getElementById("editEmail")?.value?.trim() || "",
+          parentEmail: document.getElementById("editParentEmail")?.value?.trim() || "",
+          yearOfAdmission: document.getElementById("editYearOfAdmission")?.value?.trim() || "",
+          admissionDate: document.getElementById("editAdmissionDate")?.value || "",
+          currentYear: document.getElementById("editAcademicYear")?.value?.trim() || "",
+          class: document.getElementById("editClass")?.value?.trim() || "",
+          section: document.getElementById("editSection")?.value?.trim() || "",
+          roll: document.getElementById("editRoll")?.value?.trim() || "",
+          status: document.getElementById("editStatus")?.value?.trim() || "Active",
+          gender: document.getElementById("editGender")?.value?.trim() || "",
+          category: document.getElementById("editCategory")?.value?.trim() || "",
+          phone: document.getElementById("editPhone")?.value?.trim() || document.getElementById("editFatherPhone")?.value?.trim() || document.getElementById("editMotherPhone")?.value?.trim() || "",
+          father: document.getElementById("editFather")?.value?.trim() || "",
+          fatherPhone: document.getElementById("editFatherPhone")?.value?.trim() || "",
+          mother: document.getElementById("editMother")?.value?.trim() || "",
+          motherPhone: document.getElementById("editMotherPhone")?.value?.trim() || "",
+          aadharNumber: document.getElementById("editAadhar")?.value?.trim() || "",
+          dob: document.getElementById("editDob")?.value || "",
+          bloodGroup: document.getElementById("editBloodGroup")?.value?.trim() || "",
+          religion: document.getElementById("editReligion")?.value?.trim() || "",
+          previousSchool: document.getElementById("editPreviousSchool")?.value?.trim() || "",
+          address: document.getElementById("editAddress")?.value?.trim() || "",
+          documentList: document.getElementById("editDocumentList")?.value?.trim() || ""
+        };
+        updatedStudent.documents = updatedStudent.documentList;
+        updatedStudent.tcIssued = updatedStudent.status === "TC Issued";
+
+        if (!updatedStudent.name || !updatedStudent.class) {
+          return showToast("Name and class are required", "error");
+        }
+        if (updatedStudent.srNumber) {
+          const duplicateSrStudent = allStudents.find((entry) =>
+            entry.id !== student.id &&
+            String(entry.srNumber || "").trim().toLowerCase() === updatedStudent.srNumber.toLowerCase()
+          );
+          if (duplicateSrStudent) {
+            return showToast(\`SR Number \${updatedStudent.srNumber} is already assigned to \${duplicateSrStudent.name || duplicateSrStudent.studentId || "another student"}.\`, "error");
+          }
+        }
+        const normalizedPlacement = extractClassSection(updatedStudent.class, updatedStudent.section);
+        updatedStudent.class = normalizedPlacement.class;
+        updatedStudent.section = normalizedPlacement.section;
+        updatedStudent.roll = String(updatedStudent.roll || "").trim();
+
+        if (updatedStudent.roll && (!updatedStudent.class || !updatedStudent.section)) {
+          return showToast("Roll number ke liye class aur section dono required hain.", "error");
+        }
+
+        // Check if class is being changed and classes are locked
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        const classChanged = updatedStudent.class !== sessionStudent.class ||
+          updatedStudent.section !== sessionStudent.section ||
+          updatedStudent.roll !== sessionStudent.roll;
+        if (classesLocked && classChanged) {
+          return showToast("Classes are locked for this session — class changes are not allowed.", "error");
+        }
+
+        const duplicateRollStudent = findDuplicateRollStudent({
+          classValue: updatedStudent.class,
+          sectionValue: updatedStudent.section,
+          rollValue: updatedStudent.roll,
+          ignoreId: student.id
+        });
+        if (duplicateRollStudent) {
+          return showToast(\`Roll number \${updatedStudent.roll} is already assigned to \${duplicateRollStudent.name || duplicateRollStudent.studentId || "another student"} in Class \${updatedStudent.class}-\${updatedStudent.section}.\`, "error");
+        }
+
+        try {
+          const liveDuplicateRollStudent = await findDuplicateRollStudentLive({
+            classValue: updatedStudent.class,
+            sectionValue: updatedStudent.section,
+            rollValue: updatedStudent.roll,
+            ignoreId: student.id
+          });
+          if (liveDuplicateRollStudent) {
+            return showToast(\`Roll number \${updatedStudent.roll} is already assigned to \${liveDuplicateRollStudent.name || liveDuplicateRollStudent.studentId || "another student"} in Class \${updatedStudent.class}-\${updatedStudent.section}.\`, "error");
+          }
+
+          const previousPlacement = extractClassSection(sessionStudent.class, sessionStudent.section);
+          const selectedPhoto = document.getElementById("editStudentPhoto")?.files?.[0] || null;
+          const removePhoto = document.getElementById("removeStudentPhotoFlag")?.value === "1";
+          if (selectedPhoto) {
+            const uploadedPhoto = await uploadStudentPhoto(selectedPhoto, updatedStudent.studentId || updatedStudent.id);
+            updatedStudent.photoUrl = uploadedPhoto.photoUrl;
+            updatedStudent.photoPublicId = uploadedPhoto.photoPublicId;
+          } else if (removePhoto) {
+            updatedStudent.photoUrl = "";
+            updatedStudent.photoPublicId = "";
+          }
+
+          const selectedSession = getSelectedSession();
+          const updatePayload = {
+            name: updatedStudent.name,
+            srNumber: updatedStudent.srNumber,
+            email: updatedStudent.email,
+            parentEmail: updatedStudent.parentEmail,
+            yearOfAdmission: updatedStudent.yearOfAdmission,
+            admissionDate: updatedStudent.admissionDate,
+            dateOfAdmission: updatedStudent.admissionDate,
+            currentYear: updatedStudent.currentYear,
+            class: updatedStudent.class,
+            section: updatedStudent.section,
+            roll: updatedStudent.roll,
+            rollNo: updatedStudent.roll,
+            status: updatedStudent.status,
+            tcIssued: updatedStudent.tcIssued,
+            gender: updatedStudent.gender,
+            category: updatedStudent.category,
+            phone: updatedStudent.phone,
+            father: updatedStudent.father,
+            fatherPhone: updatedStudent.fatherPhone,
+            mother: updatedStudent.mother,
+            motherPhone: updatedStudent.motherPhone,
+            aadharNumber: updatedStudent.aadharNumber,
+            dob: updatedStudent.dob,
+            bloodGroup: updatedStudent.bloodGroup,
+            religion: updatedStudent.religion,
+            previousSchool: updatedStudent.previousSchool,
+            address: updatedStudent.address,
+            documentList: updatedStudent.documentList,
+            documents: updatedStudent.documentList,
+            photoUrl: updatedStudent.photoUrl || "",
+            photoPublicId: updatedStudent.photoPublicId || "",
+            updatedAt: serverTimestamp()
+          };
+
+          if (selectedSession?.id) {
+            const placement = makeSessionPlacement(updatedStudent, selectedSession);
+            updatePayload[\`sessionPlacements.\${selectedSession.id}\`] = removeUndefinedFields(placement);
+            updatePayload.currentYear = getSessionLabel(selectedSession) || updatedStudent.currentYear;
+            updatePayload.sessionId = selectedSession.id;
+            updatePayload.session = updatePayload.currentYear;
+            updatePayload.academicSession = updatePayload.currentYear;
+            updatedStudent.sessionPlacements = {
+              ...(student.sessionPlacements || {}),
+              [selectedSession.id]: placement
+            };
+            updatedStudent.currentYear = updatePayload.currentYear;
+            updatedStudent.sessionId = selectedSession.id;
+            updatedStudent.session = updatePayload.session;
+            updatedStudent.academicSession = updatePayload.academicSession;
+          }
+
+          await updateDoc(doc(db, "schools", currentUser.uid, "students", student.id), removeUndefinedFields(updatePayload));
+          const userMirrorPayload = {
+            name: updatedStudent.name,
+            srNumber: updatedStudent.srNumber,
+            email: updatedStudent.email,
+            parentEmail: updatedStudent.parentEmail,
+            class: updatedStudent.class,
+            section: updatedStudent.section,
+            roll: updatedStudent.roll,
+            rollNo: updatedStudent.roll,
+            dob: updatedStudent.dob,
+            gender: updatedStudent.gender,
+            category: updatedStudent.category,
+            phone: updatedStudent.phone,
+            father: updatedStudent.father,
+            fatherPhone: updatedStudent.fatherPhone,
+            mother: updatedStudent.mother,
+            motherPhone: updatedStudent.motherPhone,
+            aadharNumber: updatedStudent.aadharNumber,
+            bloodGroup: updatedStudent.bloodGroup,
+            religion: updatedStudent.religion,
+            previousSchool: updatedStudent.previousSchool,
+            address: updatedStudent.address,
+            documentList: updatedStudent.documentList,
+            documents: updatedStudent.documentList,
+            status: updatedStudent.status,
+            tcIssued: updatedStudent.tcIssued,
+            yearOfAdmission: updatedStudent.yearOfAdmission,
+            currentYear: updatedStudent.currentYear,
+            admissionDate: updatedStudent.admissionDate,
+            photoUrl: updatedStudent.photoUrl || "",
+            photoPublicId: updatedStudent.photoPublicId || "",
+            updatedAt: serverTimestamp()
+          };
+          const mirrorIds = [updatedStudent.studentId, updatedStudent.authUid].map(value => String(value || "").trim()).filter(Boolean);
+          const mirrorResults = await Promise.allSettled([...new Set(mirrorIds)].map((id) => setDoc(doc(db, "users", id), removeUndefinedFields(userMirrorPayload), { merge: true })));
+          mirrorResults
+            .filter((result) => result.status === "rejected")
+            .forEach((result) => console.warn("User mirror update failed:", result.reason));
+          try {
+            await reassignRollNumbersForPlacements(previousPlacement, extractClassSection(updatedStudent.class, updatedStudent.section));
+          } catch (rollError) {
+            console.warn("Roll reassignment after save failed:", rollError);
+          }
+
+          await loadAllData();
+          await showAttendance(student.id);
+          showToast("Student details updated successfully", "success");
+        } catch (error) {
+          console.error("Error updating student details:", error);
+          showToast(error?.message || "Unable to update student details", "error");
+        }
+      };
+
+      window.deleteStudent = async (docId) => {
+        const student = allStudents.find((s) => s.id === docId);
+        if (!student) return showToast("Student not found", "error");
+        if (student.tcIssued) return showToast("TC issued — remove TC from TC page first, then delete.", "error");
+
+        const sessionLocked = getSelectedSession()?.locked || false;
+        if (sessionLocked) return showToast("This session is locked — deletion is disabled.", "error");
+
+        const label = \`\${student.name || "Student"} (\${student.studentId || docId})\`;
+
+        if (!window.confirm(\`Delete \${label}?\\n\\nThis will remove the student record and linked attendance/fees entries.\`)) {
+          return;
+        }
+
+        try {
+          await deleteDoc(doc(db, "schools", currentUser.uid, "students", docId));
+
+          const sid = student.studentId || docId;
+          const relatedAttendance = allAttendance.filter((entry) => entry.studentId === sid);
+          const relatedFees = allFees.filter((entry) => entry.studentId === sid);
+          const relatedReports = allReports.filter((entry) => (entry.student?.studentId || entry.studentId) === sid);
+
+          await Promise.all([
+            ...relatedAttendance.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "attendance", entry.id))),
+            ...relatedFees.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "fees", entry.id))),
+            ...relatedReports.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "reportCards", entry.id)))
+          ]);
+
+          allStudents = allStudents.filter((entry) => entry.id !== docId);
+          allAttendance = allAttendance.filter((entry) => entry.studentId !== sid);
+          allFees = allFees.filter((entry) => entry.studentId !== sid);
+          allReports = allReports.filter((entry) => (entry.student?.studentId || entry.studentId) !== sid);
+
+          rebuildDataIndexes();
+          populateFilters();
+          loadData(false);
+
+          if (currentStudentId === docId) closeAttendanceModal();
+          showToast("Student deleted successfully", "success");
+        } catch (error) {
+          console.error("Error deleting student:", error);
+          showToast("Unable to delete student", "error");
+        }
+      };
+
+      window.deleteAllStudents = async () => {
+        const students = [...allStudents];
+        if (!students.length) return showToast("No student records to delete.", "info");
+        if (!window.confirm(\`Delete ALL \${students.length} student records?\\n\\nThis permanently removes every active student and their linked attendance, fees, report cards, and profile records for this school.\`)) return;
+
+        const actionButton = document.querySelector('button[onclick="deleteAllStudents()"]');
+        const originalText = actionButton?.textContent || "Delete All Students";
+        try {
+          if (actionButton) {
+            actionButton.disabled = true;
+            actionButton.textContent = "Deleting students...";
+          }
+
+          const studentIds = new Set(students.map((student) => String(student.studentId || student.id || "").trim()).filter(Boolean));
+          const documentIds = new Set(students.map((student) => String(student.id || "").trim()).filter(Boolean));
+          const userIds = new Set(students.flatMap((student) => [student.studentId, student.authUid]).map((id) => String(id || "").trim()).filter(Boolean));
+          const attendanceToDelete = allAttendance.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));
+          const feesToDelete = allFees.filter((entry) => studentIds.has(String(entry.studentId || "").trim()));
+          const reportsToDelete = allReports.filter((entry) => studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));
+
+          const deletions = [
+            ...students.map((student) => deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id))),
+            ...attendanceToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "attendance", entry.id))),
+            ...feesToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "fees", entry.id))),
+            ...reportsToDelete.map((entry) => deleteDoc(doc(db, "schools", currentUser.uid, "reportCards", entry.id))),
+            ...[...userIds].map((id) => deleteDoc(doc(db, "users", id)).catch(() => {}))
+          ];
+          await Promise.all(deletions);
+
+          allStudents = allStudents.filter((student) => !documentIds.has(String(student.id || "").trim()));
+          allAttendance = allAttendance.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));
+          allFees = allFees.filter((entry) => !studentIds.has(String(entry.studentId || "").trim()));
+          allReports = allReports.filter((entry) => !studentIds.has(String(entry.student?.studentId || entry.studentId || "").trim()));
+          selectedStudentIds.clear();
+          rebuildDataIndexes();
+          populateFilters();
+          loadData(false);
+          if (currentStudentId && documentIds.has(String(currentStudentId))) closeAttendanceModal();
+          showToast(\`\${students.length} student record(s) deleted successfully.\`, "success");
+        } catch (error) {
+          console.error("Bulk student deletion failed:", error);
+          showToast(error?.message || "Unable to delete all student records.", "error");
+        } finally {
+          if (actionButton) {
+            actionButton.disabled = false;
+            actionButton.textContent = originalText;
+          }
+        }
+      };
+
+      function updateModalAttendance() {
+        const student = allStudents.find(s => s.id === currentStudentId);
+        if (!student) return;
+
+        const sid = student.studentId || student.id;
+        const records = allAttendance
+          .filter(a => a.studentId === sid)
+          .filter(entryBelongsToSession)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const total = records.length;
+        const present = records.filter(r => r.status === 'Present').length;
+        const absent = records.filter(r => r.status === 'Absent').length;
+        const half = records.filter(r => r.status === 'Half Day').length;
+        const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+
+        document.getElementById('attendanceSummary').innerHTML = \`
+    <div class="summary-card summary-present"><div class="summary-number">\${present}</div><div>Present Days</div></div>
+    <div class="summary-card summary-absent"><div class="summary-number">\${absent}</div><div>Absent Days</div></div>
+    <div class="summary-card summary-half"><div class="summary-number">\${half}</div><div>Half Days</div></div>
+    <div class="summary-card summary-percent"><div class="summary-number">\${pct}%</div><div>Attendance %</div></div>
+  \`;
+
+        const monthly = {};
+        records.forEach(r => {
+          const key = new Date(r.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+          if (!monthly[key]) monthly[key] = [];
+          monthly[key].push(r);
+        });
+
+        const html = Object.entries(monthly)
+          .sort(([a], [b]) => new Date(b) - new Date(a))
+          .map(([month, recs]) => {
+            const mP = recs.filter(r => r.status === 'Present').length;
+            const mA = recs.filter(r => r.status === 'Absent').length;
+            const mH = recs.filter(r => r.status === 'Half Day').length;
+
+            const days = recs.map(r => {
+              const cls = r.status === 'Present' ? 'day-present' :
+                r.status === 'Absent' ? 'day-absent' :
+                  r.status === 'Half Day' ? 'day-half' : 'day-no-class';
+              const selectedCls = r.date === currentSelectedDate ? ' is-selected' : '';
+              return \`<button type="button" class="day-cell \${cls}\${selectedCls}" title="\${r.status} - click to edit \${r.date}" onclick="selectAttendanceRecordDate('\${r.date}','\${r.status}')">\${new Date(r.date + 'T00:00').getDate()}</button>\`;
+            }).join('');
+
+            return \`
+        <div class="attendance-month">
+          <div class="month-header">
+            <h4>\${month} (\${recs.length} days)</h4>
+            <div style="font-size:14px;color:#718096;">P: \${mP} | A: \${mA} | H: \${mH}</div>
+          </div>
+          <div class="days-grid">\${days}</div>
+        </div>
+      \`;
+          }).join('') || '<div style="text-align:center;padding:40px;color:#718096;">No attendance records found</div>';
+
+        document.getElementById("attendanceHistory").innerHTML = html;
+      }
+
+      function updateFeeHistory() {
+        const student = allStudents.find(s => s.id === currentStudentId);
+        if (!student) return;
+
+        const sid = student.studentId || student.id;
+        const fees = allFees
+          .filter(f => f.studentId === sid)
+          .filter(entryBelongsToSession)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const html = fees.map(fee => {
+          const paidAmount = getFeeCollectedAmount(fee);
+          const isPaid = paidAmount > 0;
+          const cls = isPaid ? 'fee-paid' : 'fee-pending';
+          const statusText = fee.status === 'Paid' ? 'PAID' : 'PENDING';
+          const amount = toMoneyNumber(fee.originalAmount || fee.amount || paidAmount || 0);
+          const dateStr = fee.date?.toDate ? new Date(fee.date.toDate()).toLocaleDateString() : (fee.date || 'N/A');
+
+          return \`
+      <div class="fee-item \${cls}">
+        <div>
+          <div style="font-weight:700; color:#2d3748;">\${fee.title || fee.month || 'Fee Payment'}</div>
+          <div style="color:#718096; font-size:14px;">\${dateStr} | \${formatCurrency(amount)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700; font-size:18px; color:\${isPaid ? '#48bb78' : '#f56565'};">\${statusText}</div>
+        </div>
+      </div>
+    \`;
+        }).join('') || '<div style="text-align:center; padding:60px; color:#718096;">No fee records found</div>';
+
+        document.getElementById("feeHistory").innerHTML = html;
+      }
+
+      function getNextClass(currentClass) {
+        const normalizedClass = normalizeClassLabel(currentClass);
+        if (!normalizedClass) return '';
+        if (normalizedClass === 'Passed Out') return 'Passed Out';
+        const currentIndex = CLASS_SEQUENCE.indexOf(normalizedClass);
+        if (currentIndex === -1) return normalizedClass;
+        return currentIndex === CLASS_SEQUENCE.length - 1 ? 'Passed Out' : CLASS_SEQUENCE[currentIndex + 1];
+      }
+
+      function getPassoutYear() {
+        const labels = [
+          getPromotionResultSessionLabel(),
+          getSelectedSessionLabel(),
+          activeSessionLabel,
+          new Date().getFullYear().toString()
+        ].filter(Boolean);
+        for (const label of labels) {
+          const years = String(label).match(/\\b(20\\d{2}|19\\d{2})\\b/g);
+          if (years?.length) return years[years.length - 1];
+        }
+        return new Date().getFullYear().toString();
+      }
+
+      function getArchivedStudentRecords(student = {}) {
+        const sid = student.studentId || student.id;
+        return {
+          attendance: allAttendance.filter((entry) => entry.studentId === sid),
+          fees: allFees.filter((entry) => entry.studentId === sid),
+          reportCards: allReports.filter((entry) => (entry.student?.studentId || entry.studentId) === sid)
+        };
+      }
+
+      async function archivePassedOutStudent(promotion) {
+        const student = promotion.student;
+        const passoutYear = getPassoutYear();
+        const records = getArchivedStudentRecords(student);
+        const archiveId = student.id || student.studentId;
+        const archiveData = {
+          ...student,
+          activeStudentDocId: student.id || "",
+          originalStudentDocId: student.id || "",
+          studentId: student.studentId || student.id || "",
+          passoutYear,
+          archiveReason: "Class 12 promotion",
+          archiveSource: "students-promotion",
+          status: "Passed Out",
+          class: promotion.currentPlacement.class || student.class || "",
+          section: promotion.currentPlacement.section || student.section || "",
+          finalClass: promotion.currentPlacement.class || student.class || "",
+          finalSection: promotion.currentPlacement.section || student.section || "",
+          promotedToClass: "Passed Out",
+          resultPercentage: promotion.resultPercentage,
+          resultSourceLabel: promotion.resultSourceLabel,
+          passedOutAt: new Date().toISOString(),
+          archivedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          records
+        };
+
+        await setDoc(doc(db, "schools", currentUser.uid, "passedOutStudents", archiveId), archiveData);
+        await deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id));
+      }
+
+      function getPassOutPreviewStudents() {
+        const classValue = document.getElementById("passOutClassSelect")?.value || "";
+        const sectionValue = document.getElementById("passOutSectionSelect")?.value || "";
+        if (!classValue) return [];
+
+        return getStudentsForSelectedSession()
+          .filter((student) => student.class === classValue)
+          .filter((student) => !sectionValue || student.section === sectionValue)
+          .sort(sortStudentsByClassSectionRollName);
+      }
+
+      function getSelectedPassOutYear() {
+        const inputYear = String(document.getElementById("passOutYearInput")?.value || "").trim();
+        return inputYear || getPassoutYear();
+      }
+
+      window.updatePassOutSectionOptions = updatePassOutSectionOptions;
+
+      window.renderPassOutPreview = () => {
+        const classValue = document.getElementById("passOutClassSelect")?.value || "";
+        const sectionValue = document.getElementById("passOutSectionSelect")?.value || "";
+        const target = document.getElementById("passOutContent");
+        if (!target) return;
+
+        if (!classValue) {
+          passOutPreviewData = [];
+          target.innerHTML = \`
+            <div class="chart-empty">
+              <h3 style="font-size:22px;margin-bottom:8px;color:#0f172a;">Select a class</h3>
+              <p>Class choose karte hi us class ke students preview me dikh jayenge.</p>
+            </div>
+          \`;
+          return;
+        }
+
+        const previousSelections = new Map(passOutPreviewData.map((entry) => [entry.student.id, entry.selected !== false]));
+        passOutPreviewData = getPassOutPreviewStudents().map((student) => ({
+          student,
+          selected: previousSelections.has(student.id) ? previousSelections.get(student.id) : true
+        }));
+
+        if (!passOutPreviewData.length) {
+          target.innerHTML = \`
+            <div class="chart-empty">
+              <h3 style="font-size:22px;margin-bottom:8px;color:#0f172a;">No students found</h3>
+              <p>Class \${escapeHtml(classValue)}\${sectionValue ? \`-\${escapeHtml(sectionValue)}\` : ""} me koi active student nahi mila.</p>
+            </div>
+          \`;
+          return;
+        }
+
+        const selectedCount = passOutPreviewData.filter((entry) => entry.selected !== false).length;
+        const rows = passOutPreviewData.map(({ student, selected }, index) => {
+          const studentId = getStudentKey(student);
+          return \`
+            <tr style="border-bottom:1px solid #e2e8f0;">
+              <td style="padding:10px;border:1px solid #cbd5e1;"><input type="checkbox" class="passout-preview-checkbox" data-index="\${index}" \${selected ? "checked" : ""}></td>
+              <td style="padding:10px;border:1px solid #cbd5e1;">\${escapeHtml(student.name || "N/A")}</td>
+              <td style="padding:10px;border:1px solid #cbd5e1;">\${escapeHtml(student.studentId || student.id || "N/A")}</td>
+              <td style="padding:10px;border:1px solid #cbd5e1;text-align:center;">\${escapeHtml(student.roll || "-")}</td>
+              <td style="padding:10px;border:1px solid #cbd5e1;text-align:center;">\${escapeHtml(formatClassSectionLabel(student.class, student.section))}</td>
+              <td style="padding:10px;border:1px solid #cbd5e1;text-align:center;">\${getStudentPercentage(studentId)}%</td>
+            </tr>
+          \`;
+        }).join("");
+
+        target.innerHTML = \`
+          <div style="background:#f8fafc;padding:16px 18px;border-radius:12px;margin-bottom:16px;border:1px solid #e2e8f0;">
+            <h3 style="margin:0 0 8px;color:#0f172a;">Pass Out Preview</h3>
+            <p style="margin:0;color:#64748b;">
+              <strong>\${selectedCount}</strong> of <strong>\${passOutPreviewData.length}</strong> students selected from
+              <strong>Class \${escapeHtml(classValue)}\${sectionValue ? \`-\${escapeHtml(sectionValue)}\` : ""}</strong>.
+              Selected students active roster se remove hokar Passed Out page me dikh jayenge.
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <button type="button" class="btn btn-secondary btn-small" onclick="setPassOutPreviewSelection(true)">Select All</button>
+            <button type="button" class="btn btn-secondary btn-small" onclick="setPassOutPreviewSelection(false)">Unselect All</button>
+          </div>
+          <div style="max-height:420px;overflow:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#e2e8f0;">
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:left;"><input type="checkbox" id="passOutSelectAllPreview" \${selectedCount === passOutPreviewData.length ? "checked" : ""}></th>
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">Student</th>
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:left;">ID</th>
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:center;">Roll</th>
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:center;">Class</th>
+                  <th style="padding:10px;border:1px solid #cbd5e1;text-align:center;">Result %</th>
+                </tr>
+              </thead>
+              <tbody>\${rows}</tbody>
+            </table>
+          </div>
+        \`;
+
+        document.getElementById("passOutSelectAllPreview")?.addEventListener("change", (event) => {
+          setPassOutPreviewSelection(event.target.checked);
+        });
+        document.querySelectorAll(".passout-preview-checkbox").forEach((checkbox) => {
+          checkbox.addEventListener("change", (event) => {
+            const index = Number(event.target.dataset.index);
+            if (!Number.isNaN(index)) {
+              passOutPreviewData[index].selected = event.target.checked;
+              renderPassOutPreview();
+            }
+          });
+        });
+      };
+
+      window.setPassOutPreviewSelection = (checked) => {
+        passOutPreviewData = passOutPreviewData.map((entry) => ({ ...entry, selected: checked }));
+        renderPassOutPreview();
+      };
+
+      async function archiveBulkPassedOutStudent(student, passoutYear) {
+        const placement = extractClassSection(student.class, student.section);
+        const records = getArchivedStudentRecords(student);
+        const archiveId = student.id || student.studentId;
+        const archiveData = removeUndefinedFields({
+          ...student,
+          activeStudentDocId: student.id || "",
+          originalStudentDocId: student.id || "",
+          studentId: student.studentId || student.id || "",
+          passoutYear,
+          archiveReason: "Bulk pass out",
+          archiveSource: "students-bulk-passout",
+          status: "Passed Out",
+          class: placement.class || student.class || "",
+          section: placement.section || student.section || "",
+          finalClass: placement.class || student.class || "",
+          finalSection: placement.section || student.section || "",
+          promotedToClass: "Passed Out",
+          resultPercentage: getStudentPercentage(student.studentId || student.id),
+          resultSourceLabel: getSelectedSessionLabel() || student.currentYear || "",
+          passedOutAt: new Date().toISOString(),
+          archivedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          records
+        });
+
+        await setDoc(doc(db, "schools", currentUser.uid, "passedOutStudents", archiveId), archiveData);
+        await deleteDoc(doc(db, "schools", currentUser.uid, "students", student.id));
+      }
+
+      window.executePassOut = async () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked) return showToast("This session is locked - pass out is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session - pass out is disabled.", "error");
+
+        const selectedStudents = passOutPreviewData
+          .filter((entry) => entry.selected !== false)
+          .map((entry) => entry.student)
+          .filter((student) => student?.id);
+
+        if (!selectedStudents.length) return showToast("Please select at least one student to pass out", "error");
+
+        const passoutYear = getSelectedPassOutYear();
+        if (!/^\\d{4}$/.test(passoutYear)) return showToast("Please enter a valid passout year", "error");
+        if (!confirm(\`Pass out \${selectedStudents.length} selected student(s) for \${passoutYear}?\`)) return;
+
+        const confirmBtn = document.getElementById("confirmPassOutBtn");
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = "Processing...";
+        }
+
+        try {
+          await Promise.all(selectedStudents.map((student) => archiveBulkPassedOutStudent(student, passoutYear)));
+          selectedStudentIds.clear();
+          showToast(\`\${selectedStudents.length} student(s) moved to Passed Out\`, "success");
+          closePassOutModal();
+          await loadAllData();
+        } catch (error) {
+          console.error("Pass out error:", error);
+          showToast("Unable to pass out selected students", "error");
+        } finally {
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "Confirm Pass Out";
+          }
+        }
+      };
+
+      function buildPromotionPayload(student) {
+        const sessionStudent = getStudentForSelectedSession(student);
+        const currentPlacement = extractClassSection(sessionStudent.class, sessionStudent.section);
+        const nextClass = getNextClass(currentPlacement.class);
+
+        if (!currentPlacement.class || !nextClass || nextClass === currentPlacement.class) {
+          return null;
+        }
+
+        const selectedSession = getSelectedSession();
+        const report = getPromotionReportForStudent(sessionStudent.studentId || sessionStudent.id, getPromotionResultSessionId(), getPromotionResultTermKey());
+        const resultPercentage = report ? clampPercent(Number(report?.percentage || report?.student?.percentage || 0)) : 0;
+        const updatedSessionStudent = {
+          ...sessionStudent,
+          class: nextClass,
+          section: currentPlacement.section || ''
+        };
+        const sessionPlacementUpdate = selectedSession?.id
+          ? { [\`sessionPlacements.\${selectedSession.id}\`]: makeSessionPlacement(updatedSessionStudent, selectedSession) }
+          : {};
+
+        return {
+          student: sessionStudent,
+          studentId: sessionStudent.studentId || sessionStudent.id,
+          currentPlacement,
+          nextPlacement: {
+            class: nextClass,
+            section: currentPlacement.section || ''
+          },
+          resultPercentage,
+          resultSourceLabel: getPromotionResultTitle(),
+          updateData: {
+            class: nextClass,
+            section: currentPlacement.section || '',
+            promotedFromClass: currentPlacement.class,
+            promotedFromSection: currentPlacement.section || '',
+            promotedAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            sessionId: selectedSession?.id || sessionStudent.sessionId || '',
+            session: getSessionLabel(selectedSession) || sessionStudent.currentYear || '',
+            academicSession: getSessionLabel(selectedSession) || sessionStudent.currentYear || '',
+            currentYear: getSessionLabel(selectedSession) || sessionStudent.currentYear || '',
+            ...sessionPlacementUpdate
+          }
+        };
+      }
+
+      // REPLACE THE ENTIRE FUNCTION:
+      async function syncTeacherAssignmentsAfterPromotion(promotions) {
+        if (!promotions.length) return;
+
+        // Group promotions by source class-section
+        const groups = new Map();
+        promotions.forEach((promotion) => {
+          if (!promotion?.student || promotion.student.tcIssued) return;
+          const key = getClassSectionKey(
+            promotion.currentPlacement.class,
+            promotion.currentPlacement.section
+          );
+          if (!groups.has(key)) {
+            groups.set(key, {
+              source: promotion.currentPlacement,
+              destination: promotion.nextPlacement,
+              promotedIds: new Set(),
+            });
+          }
+          groups.get(key).promotedIds.add(promotion.student.id);
+        });
+
+        const teacherSnap = await getDocs(
+          query(
+            collection(db, "users"),
+            where("role", "==", "teacher"),
+            where("adminId", "==", currentUser.uid)
+          )
+        );
+        const teachers = teacherSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+        for (const group of groups.values()) {
+          if (
+            !group.source.class ||
+            !group.destination.class ||
+            group.destination.class === "Passed Out"
+          )
+            continue;
+
+          // ? DISABLED: Teacher auto-sync during promotion
+          // Teachers should remain in their assigned classes and not be automatically moved
+          // when students are promoted. Teachers should be manually assigned by admin.
+
+          // Comment: Teacher class assignments are now preserved during student promotion
+          // No automatic teacher reassignment will occur
+        }
+      }
+
+      async function runPromotionBatch(promotions) {
+        const validPromotions = promotions.filter(Boolean);
+        if (!validPromotions.length) return 0;
+
+        try {
+          await Promise.all(
+            validPromotions.map((promotion) => {
+              if (promotion.nextPlacement.class === "Passed Out") {
+                return archivePassedOutStudent(promotion);
+              }
+              return updateDoc(
+                doc(db, "schools", currentUser.uid, "students", promotion.student.id),
+                promotion.updateData
+              );
+            })
+          );
+          await reassignRollNumbersForPlacements(
+            ...validPromotions.flatMap((promotion) => [promotion.currentPlacement, promotion.nextPlacement])
+          );
+
+          // Teacher sync is disabled, so we skip this step
+          // await syncTeacherAssignmentsAfterPromotion(validPromotions);
+
+          return validPromotions.length;
+        } catch (error) {
+          console.error("Promotion batch error:", error);
+          throw error; // Re-throw to be handled by calling functions
+        }
+      }
+      window.showPromotionPreview = () => {
+        const threshold = parseInt(document.getElementById("promotionThreshold").value, 10);
+        if (isNaN(threshold) || threshold < 0 || threshold > 100) {
+          return showToast("Please enter a valid percentage (0-100)", "error");
+        }
+
+        promotionPreviewData = getFilteredStudents()
+          .filter((student) => !student.tcIssued)
+          .map(buildPromotionPayload)
+          .filter((promotion) => promotion && promotion.resultPercentage >= threshold)
+          .map((promotion) => ({ ...promotion, selected: true }));
+
+        if (promotionPreviewData.length === 0) {
+          return showToast(\`No promotable students found with percentage >= \${threshold}% using the selected result source\`, "error");
+        }
+
+        let previewHtml = \`
+    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 10px 0; color: #2d3748;">Promotion Summary</h3>
+      <p style="margin: 0; color: #718096;">
+        <strong>\${promotionPreviewData.length}</strong> students will be promoted to next class with percentage >= <strong>\${threshold}%</strong> using <strong>\${promotionPreviewData[0].resultSourceLabel}</strong>.
+      </p>
+    </div>
+
+    <div style="max-height: 400px; overflow-y: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #e2e8f0;">
+            <th style="padding: 12px; text-align: left; border: 1px solid #cbd5e1;"><input type="checkbox" id="promotionSelectAllPreview" checked></th>
+            <th style="padding: 12px; text-align: left; border: 1px solid #cbd5e1;">Student Name</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">Current Class</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">Result %</th>
+            <th style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">New Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          \${promotionPreviewData.map((promotion, index) => \`
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px; border: 1px solid #cbd5e1;"><input type="checkbox" class="promotion-preview-checkbox" data-index="\${index}" \${promotion.selected !== false ? 'checked' : ''}></td>
+                <td style="padding: 12px; border: 1px solid #cbd5e1;">\${promotion.student.name}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #cbd5e1;">\${formatClassSectionLabel(promotion.currentPlacement.class, promotion.currentPlacement.section)}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #cbd5e1; font-weight: 700; color: #4299e1;">\${promotion.resultPercentage}%</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #cbd5e1; font-weight: 700; color: #48bb78;">\${formatClassSectionLabel(promotion.nextPlacement.class, promotion.nextPlacement.section)}</td>
+              </tr>
+            \`).join('')}
+        </tbody>
+      </table>
+    </div>
+  \`;
+
+        document.getElementById("promotionContent").innerHTML = previewHtml;
+        document.getElementById("promotionSelectAllPreview")?.addEventListener('change', (event) => {
+          const checked = event.target.checked;
+          promotionPreviewData = promotionPreviewData.map((entry) => ({ ...entry, selected: checked }));
+          document.querySelectorAll('.promotion-preview-checkbox').forEach((checkbox) => {
+            checkbox.checked = checked;
+          });
+        });
+        document.querySelectorAll('.promotion-preview-checkbox').forEach((checkbox) => {
+          checkbox.addEventListener('change', (event) => {
+            const index = Number(event.target.dataset.index);
+            if (!Number.isNaN(index)) {
+              promotionPreviewData[index].selected = event.target.checked;
+            }
+          });
+        });
+        document.getElementById("promotionModal").style.display = "flex";
+      };
+
+      window.executePromotion = async () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked) return showToast("This session is locked — promotion is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session — promotion is disabled.", "error");
+
+        const confirmBtn = document.getElementById("confirmPromotionBtn");
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = "Processing...";
+
+        const selectedPromotions = promotionPreviewData.filter((promotion) => promotion.selected !== false);
+        if (!selectedPromotions.length) {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = "Confirm Promotion";
+          return showToast("Please select at least one student to promote", "error");
+        }
+
+        try {
+          const promoted = await runPromotionBatch(selectedPromotions);
+          if (promoted > 0) {
+            showToast(\`Successfully promoted \${promoted} students to next class!\`, "success");
+            closePromotionModal();
+            await loadAllData();
+            document.getElementById("promotionBanner").style.display = "none";
+          } else {
+            showToast("No students were promoted. Check promotion criteria.", "info");
+          }
+
+        } catch (error) {
+          console.error("Error promoting students:", error);
+          showToast(\`Error promoting students: \${error?.message || 'Unknown error'}\`, "error");
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = "Confirm Promotion";
+        }
+      };
+
+      document.getElementById("selectedDate").addEventListener('change', function () {
+        currentSelectedDate = this.value;
+        const student = allStudents.find(s => s.id === currentStudentId);
+        if (!student) return;
+        const sid = student.studentId || student.id;
+        const record = allAttendance.find(a => a.studentId === sid && a.date === currentSelectedDate && entryBelongsToSession(a));
+
+        if (record) {
+          selectedAttendanceStatus = record.status;
+          document.getElementById("markDateBtn").disabled = false;
+          showToast(\`Found: \${record.status} on \${new Date(currentSelectedDate + 'T00:00').toLocaleDateString()}\`, 'success');
+        } else {
+          selectedAttendanceStatus = null;
+          document.getElementById("markDateBtn").disabled = true;
+          showToast(\`No attendance found for this date\`, 'success');
+        }
+      });
+
+      document.getElementById("selectAllStudents").addEventListener('change', function () {
+        document.querySelectorAll(".selectStudent").forEach((checkbox) => {
+          checkbox.checked = this.checked;
+          if (this.checked) selectedStudentIds.add(checkbox.value);
+          else selectedStudentIds.delete(checkbox.value);
+        });
+        updateSelectionSummary();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.key === 'ArrowLeft') changePage(currentPage - 1);
+        if (e.key === 'ArrowRight') changePage(currentPage + 1);
+      });
+
+      window.switchTab = (tab, e) => {
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(tab + 'Tab').classList.add('active');
+      };
+
+      window.addEventListener('beforeunload', () => {
+        if (unsubscribeAttendance) unsubscribeAttendance();
+        if (unsubscribeFees) unsubscribeFees();
+      });
+      window.promoteSelected = async () => {
+        const sessionLocked = getSelectedSession()?.locked || false;
+        const classesLocked = getSelectedSession()?.classesLocked || false;
+        if (sessionLocked) return showToast("This session is locked — promotion is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session — promotion is disabled.", "error");
+
+        const selected = Array.from(selectedStudentIds);
+
+        if (selected.length === 0) {
+          return showToast("Please select students first", "error");
+        }
+
+        if (!confirm(\`Promote \${selected.length} selected students?\`)) return;
+
+        // Show loader on the Promote Selected button
+        const promoteBtn = document.querySelector('button[onclick="promoteSelected()"]');
+        let originalBtnHtml = null;
+        if (promoteBtn) {
+          try {
+            originalBtnHtml = promoteBtn.innerHTML;
+            promoteBtn.disabled = true;
+            promoteBtn.innerHTML = \`
+              <svg width="16" height="16" viewBox="0 0 50 50" style="vertical-align:middle; margin-right:8px;">
+                <circle cx="25" cy="25" r="20" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.415,31.415" transform="rotate(-90 25 25)">
+                  <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+                </circle>
+              </svg>
+              Processing...\`;
+          } catch (_) { /* ignore UI update errors */ }
+        }
+
+        try {
+          const selectedPromotions = selected
+            .map((id) => allStudents.find((student) => student.id === id))
+            .filter((student) => student && !student.tcIssued)
+            .map(buildPromotionPayload)
+            .filter(Boolean);
+
+          if (!selectedPromotions.length) {
+            return showToast("Selected students cannot be promoted. Check class or TC status.", "error");
+          }
+
+          const count = await runPromotionBatch(selectedPromotions);
+
+          if (count > 0) {
+            selectedStudentIds.clear();
+            showToast(\`\${count} students promoted successfully\`, "success");
+          } else {
+            showToast("No students were promoted. Check selection criteria.", "info");
+          }
+
+          await loadAllData(); // refresh data
+
+        } catch (error) {
+          console.error("Error promoting students:", error);
+          showToast(\`Error promoting students: \${error?.message || 'Unknown error'}\`, "error");
+        } finally {
+          if (promoteBtn) {
+            try {
+              promoteBtn.disabled = false;
+              if (originalBtnHtml !== null) promoteBtn.innerHTML = originalBtnHtml;
+            } catch (_) { /* ignore */ }
+          }
+        }
+      };
+    `},{attributes:{type:"module",src:"access-control.js"},text:""},{attributes:{src:"schoolix-polish.js"},text:""},{attributes:{src:"admin-shell.js?v=navbar-20260721"},text:""}]};export{e as default};

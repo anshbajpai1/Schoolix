@@ -286,10 +286,10 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   padding: 14px 18px;
   border: 1px solid var(--sx-shell-line);
   border-top: 0;
-  border-radius: 0 0 14px 14px;
+  border-radius: 0 0 8px 8px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 12px 28px rgba(16, 24, 40, 0.08);
-  backdrop-filter: blur(14px);
+  backdrop-filter: none;
   transform: translateZ(0);
 }
 
