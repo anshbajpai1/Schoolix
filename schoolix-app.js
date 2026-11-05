@@ -1,6 +1,6 @@
 const IS_SERVICE_WORKER = typeof self !== "undefined" && self.ServiceWorkerGlobalScope && self instanceof self.ServiceWorkerGlobalScope;
 const IS_WINDOW = typeof window !== "undefined" && typeof document !== "undefined";
-const APP_CACHE = "schoolix-shell-v32-performance-20261101";
+const APP_CACHE = "schoolix-shell-v33-teacher-panel-20261105";
 const APP_CACHE_PREFIX = "schoolix-shell-";
 const NETWORK_FIRST_ASSETS = new Set([
   "/index.html",
@@ -96,7 +96,7 @@ function iconWifiOff() {
 }
 
 function getTopbarTarget() {
-  return document.querySelector(".topbar-right") || document.querySelector(".sx-admin-header-actions") || document.querySelector(".header-actions") || document.body;
+  return document.querySelector("[data-schoolix-notification-slot]") || document.querySelector(".topbar-right") || document.querySelector(".sx-admin-header-actions") || document.querySelector(".header-actions") || document.body;
 }
 
 function isNativeApp() {
@@ -508,7 +508,7 @@ async function resolveNotificationContext() {
 }
 
 async function shouldShowNotificationBell() {
-  if (!hasNativeNotificationBridge() || isLoginPage() || isAdminWorkspace()) return false;
+  if (isLoginPage() || isAdminWorkspace()) return false;
   const context = await resolveNotificationContext();
   return Boolean(context.schoolId && isAllowedNotificationRole(context.role));
 }
@@ -522,7 +522,7 @@ async function ensureNotificationBell() {
   if (!target || document.getElementById("schoolixNotificationBell")) return;
   const wrap = document.createElement("div");
   wrap.className = "schoolix-notification-wrap";
-  wrap.dataset.nativeNotifications = "true";
+  wrap.dataset.notificationsReady = "true";
   wrap.innerHTML = `
     <button type="button" class="schoolix-notification-bell" id="schoolixNotificationBell" aria-label="Notifications" aria-expanded="false">
       ${iconBell()}<span class="schoolix-notification-count" id="schoolixNotificationCount" hidden>0</span>
@@ -532,7 +532,7 @@ async function ensureNotificationBell() {
         <strong>Notifications</strong>
         <button type="button" id="schoolixNotificationRefresh">Refresh</button>
       </div>
-      <div class="schoolix-notification-status" id="schoolixNotificationStatus">Checking phone alerts...</div>
+      <div class="schoolix-notification-status" id="schoolixNotificationStatus"${hasNativeNotificationBridge() ? "" : " hidden"}>Checking phone alerts...</div>
       <div class="schoolix-notification-list" id="schoolixNotificationList">
         <div class="schoolix-notification-empty">Loading notifications...</div>
       </div>
@@ -563,6 +563,7 @@ async function ensureNotificationBell() {
     if (panel) panel.hidden = true;
     button?.setAttribute("aria-expanded", "false");
   });
+  await loadNotificationInbox(false);
 }
 
 async function loadNotificationInbox(markRead = false) {
@@ -698,7 +699,7 @@ if (IS_WINDOW) {
 }
 
 function repositionNotificationBell() {
-  if (!isNativeApp() || isLoginPage()) {
+  if (isLoginPage()) {
     removeNotificationBell();
     return;
   }
@@ -715,10 +716,65 @@ function repositionNotificationBell() {
 
 let notificationInboxPollTimer = 0;
 function startNotificationInboxPolling() {
-  if (notificationInboxPollTimer || !isNativeApp() || isLoginPage()) return;
+  if (notificationInboxPollTimer || isLoginPage()) return;
   notificationInboxPollTimer = window.setInterval(() => {
     loadNotificationInbox(false);
   }, 30000);
+}
+
+function ensureNativeSidebarSwipe() {
+  if (!isNativeApp() || document.documentElement.dataset.schoolixSidebarSwipe === "ready") return;
+  document.documentElement.dataset.schoolixSidebarSwipe = "ready";
+
+  const sidebarIsOpen = () => Boolean(
+    document.body.classList.contains("sx-admin-shell-open")
+    || document.body.classList.contains("sx-accountant-mobile-sidebar-open")
+    || document.querySelector(".teacher-sidebar.open, #sidebar.open, .library-sidebar.open, .notice-sidebar.open")
+  );
+
+  const openSidebar = () => {
+    if (typeof window.openSidebar === "function") return window.openSidebar();
+    if (typeof window.openLibrarySidebar === "function") return window.openLibrarySidebar();
+    if (typeof window.openAccountantSidebar === "function") return window.openAccountantSidebar();
+    const adminButton = document.querySelector(".sx-admin-menu-btn");
+    if (adminButton && !document.body.classList.contains("sx-admin-shell-open")) return adminButton.click();
+    const menuButton = document.querySelector("#libraryMenuButton, #noticeMenuButton");
+    if (menuButton) return menuButton.click();
+  };
+
+  const closeSidebar = () => {
+    if (typeof window.closeSidebar === "function") return window.closeSidebar();
+    if (typeof window.closeLibrarySidebar === "function") return window.closeLibrarySidebar();
+    if (typeof window.closeAccountantSidebar === "function") return window.closeAccountantSidebar();
+    if (document.body.classList.contains("sx-admin-shell-open")) document.querySelector(".sx-admin-overlay")?.click();
+  };
+
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+  let beganOpen = false;
+
+  document.addEventListener("touchstart", (event) => {
+    if (event.touches.length !== 1 || window.innerWidth > 1024) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("input, textarea, select, [contenteditable='true'], .modal, .modal-overlay, .map, .maplibregl-map, canvas")) return;
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+    beganOpen = sidebarIsOpen();
+    tracking = beganOpen || startX <= 28;
+  }, { passive: true });
+
+  document.addEventListener("touchend", (event) => {
+    if (!tracking || !event.changedTouches.length) return;
+    const deltaX = event.changedTouches[0].clientX - startX;
+    const deltaY = event.changedTouches[0].clientY - startY;
+    tracking = false;
+    if (Math.abs(deltaY) > 72 || Math.abs(deltaX) < 64 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+    if (!beganOpen && deltaX > 0) openSidebar();
+    else if (beganOpen && deltaX < 0) closeSidebar();
+  }, { passive: true });
+
+  document.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
 }
 
 function ensurePageProgress() {
@@ -835,20 +891,21 @@ if (IS_WINDOW) {
   window.addEventListener("unhandledrejection", showUnexpectedError);
   window.addEventListener("beforeunload", showPageProgress);
   window.addEventListener("pageshow", hidePageProgress);
-  window.addEventListener("schoolix:student-session-ready", (event) => {
+  window.addEventListener("schoolix:student-session-ready", async (event) => {
     window.SchoolixNotificationContext = event.detail || window.SchoolixNotificationContext || {};
-    ensureNotificationBell();
-    loadNotificationInbox(false);
+    await ensureNotificationBell();
+    await loadNotificationInbox(false);
   });
-  window.addEventListener("schoolix:notification-context-ready", (event) => {
+  window.addEventListener("schoolix:notification-context-ready", async (event) => {
     window.SchoolixNotificationContext = event.detail || window.SchoolixNotificationContext || {};
-    ensureNotificationBell();
-    loadNotificationInbox(false);
+    await ensureNotificationBell();
+    await loadNotificationInbox(false);
   });
 
   function initSchoolixAppShell() {
     applyRuntimeMode();
     ensureNativePullToRefresh();
+    ensureNativeSidebarSwipe();
     ensurePageProgress();
     updateNetworkChip();
     updateConnectionNotice();

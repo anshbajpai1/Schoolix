@@ -1,9 +1,13 @@
 {
-  "versionCode": 119,
-  "versionName": "5.4.9",
+  "versionCode": 120,
+  "versionName": "5.5.0",
   "forceUpdate": false,
-  "message": "Makes the Students workspace faster, smoother, and more reliable with large school data.",
+  "message": "Fixes teacher notifications, aligns the teacher panel on phones, and adds swipe-to-open navigation in the Android app.",
   "changelog": [
+    "Shows teacher notifications reliably inside the notification bell on the website and Android app.",
+    "Aligns the teacher notification bell, session controls, profile, summary, and mobile header.",
+    "Adds a right-swipe gesture from the left edge to open the sidebar in the Android app.",
+    "Adds a left-swipe gesture to close an open app sidebar.",
     "Removes repeated full Students collection reads and automatic roll rewrites during page load.",
     "Shows the student roster first while attendance, fees, and reports finish loading in parallel.",
     "Deduplicates realtime attendance and fee renders and batches rapid updates.",
@@ -67,5 +71,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=119"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=120"
 }

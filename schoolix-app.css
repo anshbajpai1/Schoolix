@@ -30,12 +30,12 @@
 
 .schoolix-notification-wrap {
   position: relative;
-  display: none;
+  display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
 }
 
-.schoolix-notification-wrap[data-native-notifications="true"] {
+.schoolix-notification-wrap[data-notifications-ready="true"] {
   display: inline-flex;
 }
 

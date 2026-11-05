@@ -1,1 +1,1 @@
-importScripts("/schoolix-app.js?v=performance-cache-20261101-v32");
+importScripts("/schoolix-app.js?v=teacher-panel-20261105-v33");

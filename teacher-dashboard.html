@@ -206,7 +206,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     window.addEventListener("schoolix:critical-load-ready", paintEarlyTeacherIdentity, { once: true });
   }());
 </script>
-<link rel="stylesheet" href="/schoolix-app.css?v=navbar-20260721">
+<link rel="stylesheet" href="/schoolix-app.css?v=teacher-panel-20261105-v33">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2020,6 +2020,113 @@ body[data-active-tab="home"] .tabs-wrap {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Teacher shell alignment: stable desktop header and compact phone controls. */
+.topbar-left {
+  flex: 1 1 auto;
+}
+
+.teacher-notification-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.teacher-notification-slot:empty {
+  display: none;
+}
+
+.teacher-dashboard-summary.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+}
+
+@media (max-width: 768px), (max-width: 960px) and (pointer: coarse) {
+  .topbar {
+    gap: 8px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+
+  .topbar-left {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .teacher-notification-slot {
+    margin-left: auto;
+  }
+
+  .teacher-notification-slot .schoolix-notification-bell {
+    width: 40px;
+    height: 40px;
+  }
+
+  .topbar-right {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .topbar-right > .lock-badge,
+  .session-selector-wrap,
+  .class-selector-wrap.show {
+    grid-column: 1 / -1;
+  }
+
+  .topbar-right > .btn,
+  .teacher-chip {
+    min-width: 0;
+    min-height: 42px;
+  }
+
+  .teacher-dashboard-summary.header {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .teacher-hero-profile {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .teacher-hero-photo {
+    width: 76px;
+    height: 76px;
+    flex-basis: 76px;
+    border-radius: 20px;
+  }
+
+  .teacher-hero-caption {
+    max-width: none;
+  }
+
+  .stats-row.teacher-dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stats-row.teacher-dashboard-summary .stat-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 380px) {
+  .stats-row.teacher-dashboard-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats-row.teacher-dashboard-summary .stat-card:last-child {
+    grid-column: auto;
+  }
+}
 </style>
   <link rel="stylesheet" href="schoolix-polish.css">
   <link rel="stylesheet" href="schoolix-portal-dark.css?v=light-sidebar-20261105">
@@ -2072,6 +2179,7 @@ body[data-active-tab="home"] .tabs-wrap {
         <span class="ui-icon" data-icon="menu"></span>
       </button>
       <div class="page-label" id="topbarTitle">Dashboard</div>
+      <div class="teacher-notification-slot" data-schoolix-notification-slot aria-label="Teacher notifications"></div>
     </div>
     <div class="topbar-right">
       <span class="lock-badge unlocked" id="topbarSessionBadge">No Active Session</span>
@@ -5768,7 +5876,7 @@ window.printClassTimetable = async function() {
 });
     
 </script>
-<script src="/schoolix-app.js?v=navbar-20260721" defer></script>
+<script src="/schoolix-app.js?v=teacher-panel-20261105-v33" defer></script>
 <script type="module" src="notice-panel.js?v=notices-20260720"></script>
 <script type="module" src="access-control.js"></script>
   <script src="schoolix-polish.js" defer></script>
