@@ -1187,6 +1187,15 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
   }
 }
 
+/* Navigation drawers stay GPU-friendly across admin, student, library and accounts portals. */
+body :is(.sidebar,.teacher-sidebar,.side-nav,.library-sidebar,.notice-sidebar) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: transform;
+  transition-duration: 180ms !important;
+  transition-timing-function: cubic-bezier(.2, .8, .2, 1) !important;
+}
+
 /* Students is a dense live-data workspace: avoid full-page GPU blur/repaint work. */
 body.sx-admin-app[data-sx-title="Students"] {
   background-attachment: scroll !important;
@@ -1341,8 +1350,8 @@ body:not(.sx-dark-portal) :is(.sidebar,.side-nav,.navigation,.nav-panel,.library
   background: rgba(255, 255, 255, .74) !important;
   border-color: rgba(255, 255, 255, .78) !important;
   box-shadow: 8px 0 26px rgba(31, 55, 91, .09) !important;
-  backdrop-filter: blur(16px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body:not(.sx-dark-portal) :is(input,select,textarea,.form-control,.search-input,.filter-select) {
@@ -1390,8 +1399,8 @@ body.sx-login-app :is(.panel-left,.panel-right,.form-card,.mobile-brand) {
   }
 
   body:not(.sx-dark-portal) :is(.navbar,.topbar,.top-bar,.header,.app-header,.page-header,.library-page-topbar,.notice-page-topbar,.sidebar,.side-nav,.library-sidebar) {
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 

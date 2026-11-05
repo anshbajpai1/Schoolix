@@ -851,7 +851,7 @@
     window.clearTimeout(markShellAnimating.timer);
     markShellAnimating.timer = window.setTimeout(() => {
       document.body.classList.remove("sx-admin-shell-animating");
-    }, 280);
+    }, 190);
   }
 
   function scrollActiveNavIntoView() {
