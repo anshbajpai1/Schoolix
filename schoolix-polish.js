@@ -635,10 +635,22 @@
   }
 
   function enhanceProfessionalSurface() {
-    document.body.classList.add("sx-polished");
+    document.body.classList.add("sx-polished", "sx-enterprise-ui");
     document.querySelectorAll("input, select, textarea").forEach((control) => {
       if (!control.getAttribute("aria-label") && !control.id) return;
       control.classList.add("sx-control-polished");
+    });
+
+    document.querySelectorAll("table").forEach((table) => {
+      table.classList.add("sx-data-table");
+      const region = table.closest(".table-wrap,.table-wrapper,.table-container,.responsive-table,.card,.panel");
+      if (region) region.classList.add("sx-data-region");
+    });
+
+    document.querySelectorAll(".card,.panel,.stat-card,.summary-card,.metric-card,.quick-action,.quick-link").forEach((surface) => {
+      if (surface.matches("a,button,[role='button'],[onclick]") || surface.querySelector(":scope > a[href]")) {
+        surface.classList.add("sx-interactive-surface");
+      }
     });
   }
 

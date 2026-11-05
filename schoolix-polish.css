@@ -995,3 +995,206 @@ dialog[open],
   border-radius: 50% !important;
 }
 
+/* --------------------------------------------------------------------------
+   Schoolix enterprise interface
+   A calm, information-first layer inspired by mature campus ERP products.
+   It deliberately keeps Schoolix branding and existing feature structure.
+   -------------------------------------------------------------------------- */
+body.sx-enterprise-ui:not(.sx-login-app) {
+  --sx-enterprise-navy: #12213f;
+  --sx-enterprise-navy-2: #1b315b;
+  --sx-enterprise-blue: #2463eb;
+  --sx-enterprise-blue-soft: #edf4ff;
+  --sx-enterprise-canvas: #f3f6fb;
+  --sx-enterprise-line: #dfe5ee;
+  --sx-enterprise-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 24px rgba(16, 24, 40, .055);
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) {
+  background-color: var(--sx-enterprise-canvas) !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(h1, h2, h3, h4) {
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.page-title,.section-title,.card-title,.panel-title) {
+  color: #172033;
+  font-weight: 800;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.info-card,.form-card,.table-card,.dashboard-card,.section-card,.widget,.control-card) {
+  box-shadow: var(--sx-enterprise-shadow) !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-interactive-surface {
+  position: relative;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-interactive-surface:hover {
+  border-color: #c8d6ea !important;
+  box-shadow: 0 2px 4px rgba(16,24,40,.05), 0 14px 30px rgba(28,55,99,.09) !important;
+  transform: translateY(-2px);
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.stats,.stats-bar,.stats-row,.account-stats,.summary-grid,.metrics-grid) {
+  gap: 14px !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric) {
+  position: relative;
+  overflow: hidden;
+  min-height: 98px;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: #2463eb;
+  opacity: .85;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+2)::after { background: #0e9384; }
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+3)::after { background: #dc6803; }
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+4)::after { background: #7f56d9; }
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.stat-number,.stat-value,.metric-value,.summary-value) {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.035em;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.quick-grid,.quick-links,.action-grid,.dashboard-grid) {
+  gap: 12px !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.quick-action,.quick-link) {
+  min-height: 78px;
+  justify-content: flex-start;
+  text-align: left;
+  border: 1px solid var(--sx-enterprise-line) !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.quick-icon,.card-icon,.stat-icon-wrap) {
+  flex: 0 0 auto;
+  border-radius: 12px !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-data-region {
+  border-color: var(--sx-enterprise-line) !important;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 44px;
+  padding: 12px 14px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .045em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table td {
+  padding: 13px 14px !important;
+  vertical-align: middle;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) .sx-data-table tbody tr:nth-child(even) td {
+  background: #fbfcfe !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(button,.btn,.button,.action-btn,.primary-btn,.secondary-btn,.submit-btn,.save-btn) {
+  min-height: 40px;
+  letter-spacing: -.005em;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(button,.btn,.button,.action-btn,.primary-btn,.secondary-btn,.submit-btn,.save-btn):active {
+  transform: translateY(1px);
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(input,select,textarea,.form-control,.search-input,.filter-select) {
+  min-height: 42px;
+  padding-inline: 12px;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) textarea { min-height: 104px; }
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.empty-state,.no-data,.empty,.sx-empty-polish) {
+  border: 1px dashed #cbd5e1 !important;
+  background: #f8fafc !important;
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) :is(.modal,.modal-overlay,.dialog-overlay,.popup-overlay,.delete-modal,.receipt-modal).sx-modal-active {
+  background-color: rgba(10, 20, 38, .58) !important;
+  backdrop-filter: blur(3px);
+}
+
+body.sx-enterprise-ui:not(.sx-login-app) .sx-modal-scroll-surface {
+  border: 1px solid rgba(255,255,255,.5) !important;
+  box-shadow: 0 24px 70px rgba(8, 18, 36, .28) !important;
+}
+
+/* Student and teacher workspaces keep their dark character, with clearer ERP density. */
+body.sx-enterprise-ui.sx-dark-portal :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.section-card,.dashboard-card) {
+  border-color: rgba(155, 176, 210, .17) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.025) inset, 0 12px 30px rgba(0,0,0,.2) !important;
+}
+
+body.sx-enterprise-ui.sx-dark-portal .sx-interactive-surface:hover {
+  border-color: rgba(79, 144, 255, .42) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.28) !important;
+}
+
+body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td {
+  background: rgba(255,255,255,.018) !important;
+}
+
+@media (max-width: 760px) {
+  body.sx-enterprise-ui:not(.sx-login-app) :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.form-card,.table-card,.dashboard-card,.section-card) {
+    border-radius: 13px !important;
+  }
+
+  body.sx-enterprise-ui:not(.sx-login-app) :is(.stats,.stats-bar,.stats-row,.account-stats,.summary-grid,.metrics-grid) {
+    gap: 10px !important;
+  }
+
+  body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table th,
+  body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table td {
+    padding: 11px 12px !important;
+  }
+
+  body.sx-enterprise-ui:not(.sx-login-app) .sx-interactive-surface:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sx-enterprise-ui *,
+  body.sx-enterprise-ui *::before,
+  body.sx-enterprise-ui *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+

@@ -1,9 +1,14 @@
 {
-  "versionCode": 112,
-  "versionName": "5.4.2",
+  "versionCode": 113,
+  "versionName": "5.4.3",
   "forceUpdate": false,
-  "message": "Softer rounded interface and improved full-screen modal scrolling.",
+  "message": "A more professional campus ERP interface with cleaner navigation, cards, tables, and responsive layouts.",
   "changelog": [
+    "Introduces a cohesive enterprise design system across Schoolix portals.",
+    "Adds a professional navy admin sidebar with clearer active navigation and hierarchy.",
+    "Refines KPI cards, quick actions, forms, tables, spacing, shadows, and status styling.",
+    "Improves responsive data views and touch controls on mobile screens.",
+    "Keeps student and teacher dark workspaces while improving their density and clarity.",
     "Adds balanced rounded corners across cards, controls, menus, alerts, and dialogs.",
     "Locks the page behind open modals so only modal content scrolls.",
     "Uses the full viewport for reports, previews, documents, and other large modal content.",
@@ -41,5 +46,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=112"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=113"
 }
