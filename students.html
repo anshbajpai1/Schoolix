@@ -4360,6 +4360,56 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       body.sx-admin-app .page-btn--next::after { content: "›"; }
       body.sx-admin-app .page-btn--last::after { content: "»"; }
     }
+
+    /* Keep large fee amounts contained inside the Fee Health legend cards. */
+    body.sx-admin-app .insight-card {
+      container-type: inline-size;
+    }
+
+    body.sx-admin-app #feeHealthChart,
+    body.sx-admin-app #feeHealthChart .donut-wrap,
+    body.sx-admin-app #feeHealthChart .donut-legend,
+    body.sx-admin-app #feeHealthChart .legend-item,
+    body.sx-admin-app #feeHealthChart .legend-left {
+      min-width: 0;
+    }
+
+    body.sx-admin-app #feeHealthChart .donut-legend {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.sx-admin-app #feeHealthChart .legend-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 12px;
+    }
+
+    body.sx-admin-app #feeHealthChart .legend-left > span:last-child {
+      min-width: 0;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    body.sx-admin-app #feeHealthChart .legend-item strong {
+      min-width: 0;
+      max-width: 100%;
+      white-space: nowrap;
+      text-align: right;
+      font-size: clamp(.82rem, 1.35vw, 1rem);
+    }
+
+    @container (max-width: 820px) {
+      body.sx-admin-app #feeHealthChart .donut-legend {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @container (max-width: 560px) {
+      body.sx-admin-app #feeHealthChart .donut-wrap {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
   </style>
   <link rel="stylesheet" href="schoolix-polish.css">
   <link rel="stylesheet" href="admin-shell.css?v=light-sidebar-20261105">
