@@ -348,33 +348,9 @@ function syncNativeNotificationSchool(schoolId, role = "", context = {}) {
     }
     else bridge.clearSchool();
     if (schoolId && bridge.requestDeviceToken) bridge.requestDeviceToken();
-    if (schoolId && bridge.registerDevice && auth.currentUser) {
-      const deviceRole = notificationDeviceRole(role || context?.loginAs);
-      if (deviceRole) {
-        auth.currentUser.getIdToken().then((idToken) => {
-          if (bridge.registerDeviceWithAliases) {
-            bridge.registerDeviceWithAliases(
-              String(schoolId),
-              deviceRole,
-              studentId,
-              studentAliasPayload,
-              String(auth.currentUser?.uid || context?.authUid || ""),
-              String(context?.loginAs || ""),
-              idToken
-            );
-          } else {
-            bridge.registerDevice(
-              String(schoolId),
-              deviceRole,
-              studentId,
-              String(auth.currentUser?.uid || context?.authUid || ""),
-              String(context?.loginAs || ""),
-              idToken
-            );
-          }
-        }).catch((error) => console.warn("Unable to prepare native phone registration", error));
-      }
-    }
+    // Device records are saved by SchoolixNotificationRegistration through the
+    // authenticated Schoolix data service after the native bridge returns FCM's
+    // token. Do not send the Supabase session token to Firebase REST directly.
   } catch (error) {
     console.warn("Unable to sync app notification school", error);
   }
@@ -439,15 +415,15 @@ window.SchoolixNotificationRegistration = {
       directError = error;
       console.warn("Direct phone notification registration failed", error);
     }
-    try {
-      const idToken = await user.getIdToken();
+    if (!directRegistration) try {
+      const legacyIdToken = await user.getIdToken();
       const response = await fetch(NOTIFICATION_SEND_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_ANON_KEY,
           "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "x-firebase-token": idToken,
+          "x-firebase-token": legacyIdToken,
         },
         body: JSON.stringify({
           action: "register-device",
@@ -473,6 +449,7 @@ window.SchoolixNotificationRegistration = {
     try {
       const result = edgeRegistration || directRegistration;
       if (!result) throw edgeError || directError || new Error("Phone notification registration failed");
+      try { window.SchoolixNativeNotifications?.confirmDeviceRegistration?.(schoolId, deviceRole); } catch (_) {}
       if (lastRegistered === registrationKey) {
         window.dispatchEvent(new CustomEvent("schoolix:notifications-ready", { detail: result }));
         return;

@@ -162,58 +162,270 @@ body.sx-dark-portal :is(input,select,textarea,.form-control,.search-input,.filte
   }
 }
 
-/* Keep navigation light and consistent even when the portal content is dark. */
+/* Student and teacher navigation stays dark with the rest of each portal. */
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) {
-  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,248,253,.97)) !important;
-  border-color: #dbe3ef !important;
-  color: #172033 !important;
-  box-shadow: 12px 0 32px rgba(15, 31, 58, .10) !important;
+  background: linear-gradient(180deg, #0b1320, #0a111c) !important;
+  border-color: rgba(148, 180, 255, .14) !important;
+  color: #dce8ff !important;
+  box-shadow: 12px 0 32px rgba(0, 0, 0, .28) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.sidebar-logo, .sidebar-footer) {
-  border-color: #e4e9f2 !important;
+  border-color: rgba(148, 180, 255, .12) !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.logo-text, strong) {
-  color: #172033 !important;
+  color: #edf4ff !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.logo-sub, .nav-section, small) {
-  color: #667085 !important;
+  color: #6f85a8 !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item {
-  color: #475467 !important;
+  color: #94a8c8 !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item:hover {
-  background: #f7f9fc !important;
-  color: #1746c7 !important;
+  background: rgba(79, 144, 255, .09) !important;
+  color: #e7f0ff !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item.active {
-  background: #eef4ff !important;
-  color: #1746c7 !important;
+  background: rgba(79, 144, 255, .14) !important;
+  color: #72a7ff !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-icon {
-  background: #ffffff !important;
-  color: #5f78a5 !important;
-  box-shadow: inset 0 0 0 1px #e2e8f0 !important;
+  background: #111d31 !important;
+  color: #7e96bd !important;
+  box-shadow: inset 0 0 0 1px rgba(148, 180, 255, .12) !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item.active .nav-icon {
-  background: #1f5eff !important;
+  background: #215ed8 !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .logout-btn {
-  color: #c4322b !important;
+  color: #ff8585 !important;
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .logout-btn:hover {
-  background: #fff1f0 !important;
+  background: rgba(240, 107, 107, .10) !important;
+}
+
+body.sx-dark-portal .schoolix-notification-panel {
+  background: #0d1727 !important;
+  color: #e6efff !important;
+  border-color: rgba(148, 180, 255, .20) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .48) !important;
+}
+
+body.sx-dark-portal .schoolix-notification-head {
+  border-color: rgba(148, 180, 255, .14) !important;
+}
+
+body.sx-dark-portal .schoolix-notification-head button {
+  background: #172844 !important;
+  color: #8db7ff !important;
+}
+
+body.sx-dark-portal .schoolix-notification-status {
+  background: #111f35 !important;
+  color: #a9bad5 !important;
+}
+
+body.sx-dark-portal .schoolix-notification-item {
+  background: #0d1727 !important;
+  border-color: transparent !important;
+}
+
+body.sx-dark-portal .schoolix-notification-item.is-unread {
+  background: #12223a !important;
+  border-color: rgba(79, 144, 255, .22) !important;
+}
+
+body.sx-dark-portal .schoolix-notification-title { color: #edf4ff !important; }
+body.sx-dark-portal .schoolix-notification-message { color: #a9bad5 !important; }
+body.sx-dark-portal .schoolix-notification-meta,
+body.sx-dark-portal .schoolix-notification-empty { color: #7186a8 !important; }
+
+/* Complete teacher workspace coverage, including dynamically rendered panels. */
+body.sx-teacher-portal :is(
+  .main-area, .page-content, .tabs-wrap, .tabs-nav, .tab-content,
+  .salary-card, .sal-box, .timetable-container, .teacher-timetable,
+  .timetable-grid, .timetable-table-wrap, .class-teacher-card,
+  .student-row, .att-row, .att-mini, .teacher-attendance-record,
+  .qr-status-box, .grade-row, .term-new-row, .modal-box, .modal-body
+) {
+  background: #0f1a2e !important;
+  color: #e4ecff !important;
+  border-color: rgba(148, 180, 255, .16) !important;
+  box-shadow: none !important;
+}
+
+body.sx-teacher-portal :is(
+  .student-row, .att-row, .att-mini, .sal-box, .grade-row,
+  .teacher-attendance-record, .class-teacher-card, .qr-status-box,
+  .term-new-row
+) {
+  background: #121f35 !important;
+}
+
+body.sx-teacher-portal :is(.student-row, .att-row):hover {
+  background: #172842 !important;
+}
+
+body.sx-teacher-portal :is(
+  .section-title, .section-heading, .stat-value, .stu-name,
+  .class-info, .record-date, .grade-head, .timetable-header h3,
+  .timetable-section-head h4, .timetable-slot .teacher,
+  .modal-head h3, .sal-num
+) {
+  color: #edf4ff !important;
+}
+
+body.sx-teacher-portal :is(
+  .stat-sub, .stu-meta, .sal-lbl, .salary-bar-label, .marks-label,
+  .record-meta, .class-teacher-card .role, .class-teacher-card .meta,
+  .timetable-section-head p, .timetable-slot .class-info,
+  .timetable-slot .room, .term-dropdown-wrap label
+) {
+  color: #9fb1cf !important;
+}
+
+body.sx-teacher-portal :is(
+  .search-input, .term-select, .att-select, .marks-input,
+  input[type="date"], input[type="month"], input[type="number"]
+) {
+  background: #101d31 !important;
+  color: #edf4ff !important;
+  border-color: rgba(148, 180, 255, .22) !important;
+  color-scheme: dark;
+}
+
+body.sx-teacher-portal :is(
+  .search-input, .term-select, .att-select, .marks-input,
+  input[type="date"], input[type="month"], input[type="number"]
+):focus {
+  background: #14243d !important;
+  color: #ffffff !important;
+  border-color: #4f90ff !important;
+  box-shadow: 0 0 0 3px rgba(79, 144, 255, .14) !important;
+}
+
+body.sx-teacher-portal select option {
+  background: #101d31 !important;
+  color: #edf4ff !important;
+}
+
+body.sx-teacher-portal .att-select:disabled,
+body.sx-teacher-portal :is(input, select, textarea):disabled {
+  background: #0c1727 !important;
+  color: #7186a8 !important;
+  opacity: 1 !important;
+}
+
+body.sx-teacher-portal .timetable-table {
+  background: #0d1829 !important;
+  color: #e4ecff !important;
+}
+
+body.sx-teacher-portal .timetable-table th {
+  background: #162742 !important;
+  color: #a9c8ff !important;
+  border-color: rgba(148, 180, 255, .16) !important;
+}
+
+body.sx-teacher-portal .timetable-table td {
+  background: #0f1a2e !important;
+  color: #dce8ff !important;
+  border-color: rgba(148, 180, 255, .12) !important;
+}
+
+body.sx-teacher-portal .timetable-table tr:nth-child(even) td {
+  background: #121f35 !important;
+}
+
+body.sx-teacher-portal .timetable-table tr:hover td {
+  background: #172842 !important;
+}
+
+body.sx-teacher-portal .timetable-slot .subject { color: #76a8ff !important; }
+
+body.sx-teacher-portal .modal-overlay {
+  background: rgba(2, 7, 15, .78) !important;
+}
+
+body.sx-teacher-portal .modal-head {
+  background: #101c30 !important;
+  border-color: rgba(148, 180, 255, .14) !important;
+}
+
+body.sx-teacher-portal :is(.btn-neutral, .teacher-refresh-btn) {
+  background: #14243d !important;
+  color: #dce8ff !important;
+  border-color: rgba(148, 180, 255, .20) !important;
+}
+
+body.sx-teacher-portal :is(.grade-a-plus, .grade-a, .grade-b, .grade-c, .grade-f) {
+  border: 1px solid rgba(255, 255, 255, .10) !important;
+}
+body.sx-teacher-portal .grade-a-plus { background: #123a32 !important; color: #6ee7b7 !important; }
+body.sx-teacher-portal .grade-a { background: #152f55 !important; color: #93c5fd !important; }
+body.sx-teacher-portal .grade-b { background: #3b3516 !important; color: #fde68a !important; }
+body.sx-teacher-portal .grade-c { background: #422818 !important; color: #fdba74 !important; }
+body.sx-teacher-portal .grade-f { background: #461d25 !important; color: #fda4af !important; }
+
+body.sx-teacher-portal :is(.badge-tc, .badge-paid, .badge-due, .badge-pending, .badge-present, .badge-absent, .badge-half, .badge-noclass) {
+  border: 1px solid currentColor !important;
+}
+body.sx-teacher-portal :is(.badge-paid, .badge-present) { background: rgba(34, 197, 94, .12) !important; color: #6ee7a0 !important; }
+body.sx-teacher-portal :is(.badge-due, .badge-absent, .badge-tc) { background: rgba(239, 68, 68, .12) !important; color: #fda4af !important; }
+body.sx-teacher-portal :is(.badge-pending, .badge-half) { background: rgba(245, 158, 11, .12) !important; color: #fcd34d !important; }
+body.sx-teacher-portal .badge-noclass { background: rgba(148, 163, 184, .10) !important; color: #a9bad5 !important; }
+
+body.sx-teacher-portal ::-webkit-scrollbar-track { background: #0a1423; }
+body.sx-teacher-portal ::-webkit-scrollbar-thumb { background: #2a4164; }
+
+/* Override the shared light loading and empty-state polish on dark portals. */
+html.sx-page-loading body.sx-dark-portal,
+body.sx-dark-portal .sx-page-loader,
+body.sx-dark-portal .sx-page-loader .dots-container,
+body.sx-dark-portal .sx-sk-app-wrap {
+  background: #080d14 !important;
+  color: #dce8ff !important;
+}
+
+body.sx-dark-portal :is(.sx-sk-topbar, .sx-sk-sidebar, .sx-sk-main, .sx-sk-content-card) {
+  background: #0d1727 !important;
+  border-color: rgba(148, 180, 255, .12) !important;
+}
+
+body.sx-dark-portal :is(.sx-sk-block, .sx-skeleton-item, .staff-skeleton-line, .sx-skeleton-line, .staff-skeleton, .sx-skeleton-card, .skeleton-card) {
+  background: #17263e !important;
+  border-color: rgba(148, 180, 255, .12) !important;
+}
+
+body.sx-dark-portal :is(.sx-sk-block, .sx-skeleton-item, .staff-skeleton-line, .sx-skeleton-line, .skeleton-card)::after {
+  background: linear-gradient(90deg, transparent, rgba(118, 168, 255, .12), transparent) !important;
+}
+
+body.sx-enterprise-ui.sx-dark-portal:not(.sx-login-app) :is(.empty-state, .no-data, .empty, .sx-empty-polish) {
+  background: #101d31 !important;
+  border: 1px dashed rgba(148, 180, 255, .22) !important;
+  color: #a9bad5 !important;
+}
+
+body.sx-enterprise-ui.sx-dark-portal .sx-inline-loading {
+  color: #c8d7ef !important;
+}
+
+body.sx-enterprise-ui.sx-dark-portal .sx-inline-loading::before {
+  border-color: #344a6b !important;
+  border-top-color: #76a8ff !important;
 }

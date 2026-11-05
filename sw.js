@@ -1,1 +1,1 @@
-importScripts("/schoolix-app.js?v=teacher-panel-20261105-v33");
+importScripts("/schoolix-app.js?v=dark-portals-20261105-v34");

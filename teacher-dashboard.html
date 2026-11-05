@@ -44,7 +44,7 @@
 html.sx-page-loading,
 html.sx-page-loading body {
   min-height: 100%;
-  background: #f8fafc !important;
+  background: #080d14 !important;
 }
 html.sx-page-loading body::before,
 html.sx-page-loading body::after {
@@ -60,7 +60,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   display: flex;
   align-items: stretch;
   justify-content: stretch;
-  background: #f8fafc;
+  background: #080d14;
   transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s ease;
   overflow: hidden;
 }
@@ -78,7 +78,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background: #f8fafc;
+  background: #080d14;
 }
 .sx-page-loader .dots-container::before,
 .sx-page-loader .dots-container::after,
@@ -206,7 +206,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     window.addEventListener("schoolix:critical-load-ready", paintEarlyTeacherIdentity, { once: true });
   }());
 </script>
-<link rel="stylesheet" href="/schoolix-app.css?v=teacher-panel-20261105-v33">
+<link rel="stylesheet" href="/schoolix-app.css?v=dark-portals-20261105-v34">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2031,11 +2031,43 @@ body[data-active-tab="home"] .tabs-wrap {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  margin-left: auto;
 }
 
 .teacher-notification-slot:empty {
   display: none;
+}
+
+.teacher-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.teacher-refresh-btn {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 38px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.teacher-refresh-btn:hover {
+  color: var(--text);
+  border-color: rgba(79, 144, 255, .36);
+  background: rgba(79, 144, 255, .10);
+}
+
+.teacher-refresh-btn .ui-icon {
+  width: 17px;
+  height: 17px;
 }
 
 .teacher-dashboard-summary.header {
@@ -2059,7 +2091,7 @@ body[data-active-tab="home"] .tabs-wrap {
   }
 
   .teacher-notification-slot {
-    margin-left: auto;
+    margin-left: 0;
   }
 
   .teacher-notification-slot .schoolix-notification-bell {
@@ -2072,7 +2104,6 @@ body[data-active-tab="home"] .tabs-wrap {
     gap: 8px;
   }
 
-  .topbar-right > .lock-badge,
   .session-selector-wrap,
   .class-selector-wrap.show {
     grid-column: 1 / -1;
@@ -2082,6 +2113,10 @@ body[data-active-tab="home"] .tabs-wrap {
   .teacher-chip {
     min-width: 0;
     min-height: 42px;
+  }
+
+  .teacher-chip {
+    grid-column: 1 / -1;
   }
 
   .teacher-dashboard-summary.header {
@@ -2129,10 +2164,10 @@ body[data-active-tab="home"] .tabs-wrap {
 }
 </style>
   <link rel="stylesheet" href="schoolix-polish.css">
-  <link rel="stylesheet" href="schoolix-portal-dark.css?v=light-sidebar-20261105">
+  <link rel="stylesheet" href="schoolix-portal-dark.css?v=dark-portals-20261105-v34">
   <link rel="stylesheet" href="notice-panel.css?v=notices-20260720">
 </head>
-<body class="sx-dark-portal" data-active-tab="home">
+<body class="sx-dark-portal sx-teacher-portal" data-active-tab="home">
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
   <section class="dots-container" aria-label="Loading page">
     <div class="dot"></div>
@@ -2179,16 +2214,19 @@ body[data-active-tab="home"] .tabs-wrap {
         <span class="ui-icon" data-icon="menu"></span>
       </button>
       <div class="page-label" id="topbarTitle">Dashboard</div>
-      <div class="teacher-notification-slot" data-schoolix-notification-slot aria-label="Teacher notifications"></div>
+      <div class="teacher-topbar-actions">
+        <button class="teacher-refresh-btn" type="button" onclick="refreshTeacherDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
+          <span class="ui-icon" data-icon="refresh"></span>
+        </button>
+        <div class="teacher-notification-slot" data-schoolix-notification-slot aria-label="Teacher notifications"></div>
+      </div>
     </div>
     <div class="topbar-right">
-      <span class="lock-badge unlocked" id="topbarSessionBadge">No Active Session</span>
       <div class="session-selector-wrap"><label>Session</label><div id="topbarSessionSlot"></div></div>
       <div class="class-selector-wrap" id="teacherClassSelectorWrap">
         <label for="teacherClassSelector">Class</label>
         <select id="teacherClassSelector" class="search-input" onchange="onTeacherClassChange()"></select>
       </div>
-      <button class="btn btn-neutral btn-sm" onclick="refreshTeacherDashboard()"><span class="ui-icon" data-icon="refresh"></span>Refresh</button>
       <div class="teacher-chip">
         <button type="button" class="avatar" id="topbarAvatar" onclick="openTeacherPhotoPreview()">T</button>
         <span id="topbarTeacherName">Teacher</span>
@@ -3815,11 +3853,6 @@ function updateSessionBadge() {
     badge.textContent = teacherSessionLoadError ? "Session unavailable" : "No Active Session";
     badge.className = "lock-badge locked";
   }
-  const topbarBadge = $("topbarSessionBadge");
-  if (topbarBadge) {
-    topbarBadge.textContent = badge.textContent;
-    topbarBadge.className = badge.className;
-  }
 }
 
 function populateHeaderSessionSelector() {
@@ -5282,6 +5315,7 @@ window.switchTab = function(name) {
 };
 
 window.refreshTeacherDashboard = async function() {
+  if (!window.confirm("Refresh the teacher dashboard now?")) return;
   try {
     clearFirestoreReadCache();
     await refreshTeacherProfileContext(auth.currentUser);
@@ -5876,9 +5910,9 @@ window.printClassTimetable = async function() {
 });
     
 </script>
-<script src="/schoolix-app.js?v=teacher-panel-20261105-v33" defer></script>
+<script src="/schoolix-app.js?v=dark-portals-20261105-v34" defer></script>
 <script type="module" src="notice-panel.js?v=notices-20260720"></script>
-<script type="module" src="access-control.js"></script>
+<script type="module" src="access-control.js?v=notifications-v34"></script>
   <script src="schoolix-polish.js" defer></script>
 </body>
 </html>

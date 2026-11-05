@@ -1,6 +1,6 @@
 const IS_SERVICE_WORKER = typeof self !== "undefined" && self.ServiceWorkerGlobalScope && self instanceof self.ServiceWorkerGlobalScope;
 const IS_WINDOW = typeof window !== "undefined" && typeof document !== "undefined";
-const APP_CACHE = "schoolix-shell-v33-teacher-panel-20261105";
+const APP_CACHE = "schoolix-shell-v34-dark-portals-20261105";
 const APP_CACHE_PREFIX = "schoolix-shell-";
 const NETWORK_FIRST_ASSETS = new Set([
   "/index.html",
@@ -665,8 +665,8 @@ function renderNativeNotificationStatus(detail = {}) {
     text = "Phone alerts blocked in Android settings.";
     tone = "error";
   } else if (status === "ready") {
-    text = "Phone alerts ready.";
-    tone = "ready";
+    node.hidden = true;
+    return;
   } else if (status.includes("retrying")) {
     text = error ? `Phone alerts reconnecting: ${error.slice(0, 120)}` : "Phone alerts reconnecting...";
     tone = "checking";
@@ -677,8 +677,8 @@ function renderNativeNotificationStatus(detail = {}) {
     text = "Phone alerts ready. Google service will refresh in background.";
     tone = "ready";
   } else if (status.includes("failed") || status.includes("denied")) {
-    text = error ? `Phone alerts failed: ${error.slice(0, 120)}` : "Phone alerts failed.";
-    tone = "error";
+    text = "Phone alerts are reconnecting in the background.";
+    tone = "warning";
   } else if (status.includes("skipped")) {
     text = error ? `Phone alerts waiting: ${error.slice(0, 120)}` : "Phone alerts waiting for login.";
     tone = "warning";
