@@ -1187,6 +1187,58 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
   }
 }
 
+/* Students hero keeps a dark glass surface so its white content stays legible. */
+body.sx-admin-app[data-sx-title="Students"] .top-bar {
+  border-radius: 2px !important;
+  border: 1px solid rgba(140, 190, 255, .32) !important;
+  background:
+    linear-gradient(135deg, rgba(7, 17, 31, .94), rgba(20, 55, 124, .88)),
+    radial-gradient(circle at 84% 16%, rgba(69, 197, 190, .34), transparent 34%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 34px rgba(13, 31, 65, .22), inset 0 1px rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(14px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .top-bar :is(h1,h2,h3,strong) {
+  color: #ffffff !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .top-bar :is(p,.hero-eyebrow,.hero-chip,.hero-meta,.hero-metric span) {
+  color: rgba(235, 243, 255, .86) !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .top-bar :is(.hero-eyebrow,.hero-chip,.hero-metric,.hero-meta) {
+  border-color: rgba(255,255,255,.20) !important;
+  border-radius: 4px !important;
+  background: rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.08) !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .top-bar .btn {
+  border-radius: 4px !important;
+  border-color: rgba(255,255,255,.22) !important;
+  background: rgba(255,255,255,.12) !important;
+  color: #ffffff !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .top-bar .btn-primary {
+  background: rgba(255,255,255,.94) !important;
+  color: #12377f !important;
+}
+
+/* Students workspace uses the full content rail instead of stopping at a desktop max-width. */
+body.sx-admin-app[data-sx-title="Students"] {
+  padding-right: 12px !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] :is(#sx-page-root, #sx-page-root > .container) {
+  width: 100% !important;
+  max-width: none !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.sx-enterprise-ui *,
   body.sx-enterprise-ui *::before,
@@ -1195,6 +1247,119 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Schoolix glass workspace
+   Restrained glassmorphism shared by every non-dark portal. Blur is limited
+   on small screens to keep scrolling and first paint responsive.
+   -------------------------------------------------------------------------- */
+:root {
+  --sx-glass-surface: rgba(255, 255, 255, .72);
+  --sx-glass-surface-strong: rgba(255, 255, 255, .86);
+  --sx-glass-surface-soft: rgba(248, 250, 252, .62);
+  --sx-glass-border: rgba(255, 255, 255, .78);
+  --sx-glass-line: rgba(148, 163, 184, .27);
+  --sx-glass-shadow: 0 8px 28px rgba(31, 55, 91, .10), inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+html:not(:has(body.sx-dark-portal)),
+body:not(.sx-dark-portal) {
+  background-color: #eaf0f8 !important;
+  background-image:
+    radial-gradient(circle at 8% 4%, rgba(75, 126, 245, .22), transparent 32%),
+    radial-gradient(circle at 78% 28%, rgba(79, 112, 246, .18), transparent 30%),
+    radial-gradient(circle at 94% 78%, rgba(46, 196, 182, .16), transparent 31%),
+    radial-gradient(circle at 34% 92%, rgba(126, 87, 194, .13), transparent 32%),
+    linear-gradient(145deg, #edf3fb 0%, #f7f9fc 48%, #e9f0f8 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body:not(.sx-dark-portal) :is(
+  .page, .page-shell, .app-shell, .app-container, .main-content, .content-area,
+  .dashboard-container, .dashboard-shell, .driver-shell, .library-main
+) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+body:not(.sx-dark-portal) :is(
+  .card, .panel, .content-card, .stat-card, .summary-card, .metric-card,
+  .info-card, .form-card, .table-card, .dashboard-card, .section-card,
+  .widget, .control-card, .table-wrapper, .sx-chart-card, .filter-card,
+  .report-card, .daily-transactions-card, [class*="-card"]:not(.id-card):not(.report-card-sheet)
+) {
+  background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(248,250,252,.64)) !important;
+  border-color: var(--sx-glass-border) !important;
+  box-shadow: var(--sx-glass-shadow) !important;
+  backdrop-filter: blur(10px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(135%) !important;
+}
+
+body:not(.sx-dark-portal) :is(.navbar,.topbar,.top-bar,.header,.app-header,.page-header,.library-page-topbar,.notice-page-topbar) {
+  background: rgba(255, 255, 255, .76) !important;
+  border-color: rgba(255, 255, 255, .82) !important;
+  box-shadow: 0 5px 20px rgba(31, 55, 91, .08) !important;
+  backdrop-filter: blur(16px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(145%) !important;
+}
+
+body:not(.sx-dark-portal) :is(.sidebar,.side-nav,.navigation,.nav-panel,.library-sidebar,.notice-sidebar) {
+  background: rgba(255, 255, 255, .74) !important;
+  border-color: rgba(255, 255, 255, .78) !important;
+  box-shadow: 8px 0 26px rgba(31, 55, 91, .09) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+body:not(.sx-dark-portal) :is(input,select,textarea,.form-control,.search-input,.filter-select) {
+  background: rgba(255, 255, 255, .67) !important;
+  border-color: rgba(148, 163, 184, .34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+
+body:not(.sx-dark-portal) :is(input,select,textarea,.form-control,.search-input,.filter-select):focus {
+  background: rgba(255, 255, 255, .92) !important;
+}
+
+body:not(.sx-dark-portal) :is(table,.table) { background: rgba(255, 255, 255, .44) !important; }
+body:not(.sx-dark-portal) th { background: rgba(241, 245, 249, .78) !important; }
+body:not(.sx-dark-portal) td { background-color: rgba(255, 255, 255, .30) !important; }
+body:not(.sx-dark-portal) tr:hover td { background-color: rgba(239, 246, 255, .72) !important; }
+
+body:not(.sx-dark-portal) :is(.modal-content,.modal-card,.modal-box,.dialog-content,.dialog-box,.popup-content,.popup-card) {
+  background: rgba(255, 255, 255, .86) !important;
+  border-color: rgba(255, 255, 255, .9) !important;
+  box-shadow: 0 24px 70px rgba(22, 39, 70, .24), inset 0 1px 0 #fff !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(145%) !important;
+}
+
+/* Login uses the same glass language without restoring excessive rounding. */
+body.sx-login-app .shell { background: transparent !important; }
+body.sx-login-app :is(.panel-left,.panel-right,.form-card,.mobile-brand) {
+  background: rgba(255, 255, 255, .56) !important;
+  border-color: rgba(255, 255, 255, .8) !important;
+  box-shadow: 0 16px 46px rgba(31, 55, 91, .12) !important;
+  backdrop-filter: blur(18px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+}
+
+@media (max-width: 760px) {
+  body:not(.sx-dark-portal) :is(
+    .card, .panel, .content-card, .stat-card, .summary-card, .metric-card,
+    .info-card, .form-card, .table-card, .dashboard-card, .section-card,
+    .widget, .control-card, .table-wrapper, .sx-chart-card, [class*="-card"]
+  ) {
+    background: rgba(255, 255, 255, .88) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body:not(.sx-dark-portal) :is(.navbar,.topbar,.top-bar,.header,.app-header,.page-header,.library-page-topbar,.notice-page-topbar,.sidebar,.side-nav,.library-sidebar) {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
   }
 }
 

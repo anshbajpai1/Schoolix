@@ -121,3 +121,43 @@ body.sx-dark-portal .info-box {
   border-color: rgba(148, 180, 255, .18) !important;
   color: #9bb0d2 !important;
 }
+
+/* Dark glass treatment for student and teacher workspaces. */
+body.sx-dark-portal {
+  background-image:
+    radial-gradient(circle at 10% 5%, rgba(79,144,255,.16), transparent 34%),
+    radial-gradient(circle at 92% 12%, rgba(45,212,184,.10), transparent 30%),
+    linear-gradient(145deg, #070c13 0%, #0b1320 52%, #08111d 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body.sx-dark-portal :is(.app,.app-shell,.shell,.dashboard,.main-content,.content-area) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+body.sx-dark-portal :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.section-card,.widget,.dashboard-card,.table-wrapper,.modal-content,.modal-box) {
+  background: linear-gradient(145deg, rgba(20,34,58,.78), rgba(10,20,35,.68)) !important;
+  border-color: rgba(165,190,230,.18) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(10px) saturate(125%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(125%) !important;
+}
+
+body.sx-dark-portal :is(.sidebar,.side-nav,.navbar,.topbar,.top-bar,.header,.app-header,.nav-panel) {
+  background: rgba(12,22,38,.80) !important;
+  backdrop-filter: blur(16px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+}
+
+body.sx-dark-portal :is(input,select,textarea,.form-control,.search-input,.filter-select) {
+  background: rgba(17,30,51,.72) !important;
+}
+
+@media (max-width: 760px) {
+  body.sx-dark-portal :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.section-card,.widget,.dashboard-card,.table-wrapper) {
+    background: rgba(15,26,46,.92) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}

@@ -1,9 +1,17 @@
 {
-  "versionCode": 115,
-  "versionName": "5.4.5",
+  "versionCode": 118,
+  "versionName": "5.4.8",
   "forceUpdate": false,
-  "message": "Daily fee transactions by date, plus faster loading and sharper ERP-style corners.",
+  "message": "Expands Students to the full workspace width and restores the light admin sidebar.",
   "changelog": [
+    "Uses the full available width on the Students page, including wide desktop screens.",
+    "Restores a clean light-glass admin sidebar that matches the rest of the website.",
+    "Restores full text contrast in the Students Management hero section.",
+    "Uses a sharp 2px outer edge and compact 4px controls for the Students hero.",
+    "Removes the React compatibility shell, generated page chunks, Vite, and React runtime dependencies.",
+    "Opens the original Schoolix login and portals directly with no extra React loading layer.",
+    "Applies a consistent glassmorphism design across login, admin, staff, student, teacher, library, accounts, cards, tables, forms, and dialogs.",
+    "Keeps restrained ERP-style corner radii and limits card blur on mobile for smooth scrolling.",
     "Adds a Daily Transactions section to Fees Report with an exact-date picker.",
     "Automatically opens the most recent transaction day and provides quick Latest Day and Today actions.",
     "Shows daily transaction count, amount received, time, student, payment mode, applied amount, extra amount, and transaction ID.",
@@ -13,7 +21,7 @@
     "Splits the React compatibility shell into 36 lazy page chunks, reducing its initial JavaScript from 3.18 MB to about 162 KB.",
     "Reduces blur, hover movement, and heavy shadows for a sharper and faster ERP interface.",
     "Introduces a cohesive enterprise design system across Schoolix portals.",
-    "Adds a professional navy admin sidebar with clearer active navigation and hierarchy.",
+    "Adds a professional light admin sidebar with clearer active navigation and hierarchy.",
     "Refines KPI cards, quick actions, forms, tables, spacing, shadows, and status styling.",
     "Improves responsive data views and touch controls on mobile screens.",
     "Keeps student and teacher dark workspaces while improving their density and clarity.",
@@ -54,5 +62,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=115"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=118"
 }
