@@ -100,7 +100,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Schoolix Teacher">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Teacher Dashboard — Schoolix</title>
+<title>Teacher Dashboard | Schoolix</title>
 <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/schoolix-app-icon.svg">
 <script>
@@ -177,7 +177,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const sec = profile.section || localStorage.getItem("teacherSection") || "";
         if (cls || sec) {
           const badgeEl = document.getElementById("classSectionBadge");
-          if (badgeEl) badgeEl.textContent = cls ? (cls + " - " + (sec || "All")) : (sec ? ("Sec " + sec) : "—");
+          if (badgeEl) badgeEl.textContent = cls ? (cls + " - " + (sec || "All")) : (sec ? ("Sec " + sec) : "Not assigned");
         }
 
         const photo = profile.photoUrl || profile.imageUrl || profile.profilePhotoUrl || profile.avatarUrl;
@@ -251,7 +251,7 @@ body {
 
 /* ── HEADER ── */
 .header {
-  background: linear-gradient(135deg, #1e2f8a 0%, var(--primary-dark) 60%, #5a3fd6 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, var(--primary-dark) 60%, #0369a1 100%);
   border-radius: var(--radius);
   padding: 28px 32px;
   display: flex;
@@ -2096,7 +2096,7 @@ body[data-active-tab="home"] .tabs-wrap {
       <div class="header-eyebrow" id="schoolNameLabel">Schoolix</div>
       <div class="header-name" id="teacherNameDisplay">Loading…</div>
       <div class="header-meta">
-        <span id="classLabel"><span class="badge-class" id="classSectionBadge">—</span></span>
+        <span id="classLabel"><span class="badge-class" id="classSectionBadge">Not assigned</span></span>
         <span class="badge-class" id="teacherIdLabel">ID: --</span>
         <span id="emailLabel" style="opacity:0.75;"></span>
       </div>
@@ -2125,12 +2125,12 @@ body[data-active-tab="home"] .tabs-wrap {
     <div class="stat-card primary">
       <div class="stat-label"><span class="ui-icon" data-icon="users"></span>Total Students</div>
       <div class="stat-value" id="statTotal">0</div>
-      <div class="stat-sub" id="statClassInfo">Class —</div>
+      <div class="stat-sub" id="statClassInfo">Class not assigned</div>
     </div>
     <div class="stat-card success">
       <div class="stat-label"><span class="ui-icon" data-icon="check-circle"></span>Present Today</div>
       <div class="stat-value" id="statPresent">0</div>
-      <div class="stat-sub" id="statTodayDate">—</div>
+      <div class="stat-sub" id="statTodayDate">Not available</div>
     </div>
     <div class="stat-card danger">
       <div class="stat-label"><span class="ui-icon" data-icon="x-circle"></span>Absent Today</div>
@@ -2139,13 +2139,13 @@ body[data-active-tab="home"] .tabs-wrap {
     </div>
     <div class="stat-card info">
       <div class="stat-label"><span class="ui-icon" data-icon="activity"></span>Avg Attendance</div>
-      <div class="stat-value" id="statAvgAtt">—</div>
+      <div class="stat-value" id="statAvgAtt">Not available</div>
       <div class="stat-sub">All-time class avg</div>
     </div>
     <div class="stat-card warning">
       <div class="stat-label"><span class="ui-icon" data-icon="wallet"></span>My Net Salary</div>
       <div class="stat-value" id="statNetSalary">₹0</div>
-      <div class="stat-sub" id="statSalaryMonth">—</div>
+      <div class="stat-sub" id="statSalaryMonth">Not available</div>
     </div>
   </div>
 
@@ -2654,7 +2654,7 @@ function resetTeacherSessionDependentState() {
     teacherPlacement: { class: "", section: "" }
   };
   const termSelector = $("reportTermSelect");
-  if (termSelector) termSelector.innerHTML = `<option value="">— Select a term —</option>`;
+  if (termSelector) termSelector.innerHTML = `<option value="">Select a term</option>`;
   const termBanner = $("activeTermBanner");
   if (termBanner) termBanner.style.display = "none";
   const reportContent = $("reportContent");
@@ -3030,12 +3030,12 @@ function getStudentForActiveSession(student) {
 }
 
 function formatShortClassSection(placement) {
-  if (!placement?.class && !placement?.section) return "—";
+  if (!placement?.class && !placement?.section) return "Not assigned";
   return placement.section ? `${placement.class}-${placement.section}` : placement.class || placement.section;
 }
 
 function formatBadgeClassSection(placement) {
-  if (!placement?.class && !placement?.section) return "Class —";
+  if (!placement?.class && !placement?.section) return "Class not assigned";
   return placement.section ? `Class ${placement.class} – ${placement.section}` : `Class ${placement.class}`;
 }
 
@@ -3679,7 +3679,7 @@ function populateSessionSelector() {
   const selector = document.getElementById("sessionSelector");
   if (!selector) return;
   
-  selector.innerHTML = `<option value="">${teacherSessionLoadError ? "Unable to load school sessions" : "— Select Session —"}</option>`;
+  selector.innerHTML = `<option value="">${teacherSessionLoadError ? "Unable to load school sessions" : "Select session"}</option>`;
   
   const sortedSessions = sortSessions(allSessions);
   
@@ -3794,7 +3794,7 @@ function disableAllEditControls() {
       el.disabled = true;
       el.style.opacity = "0.55";
       el.style.cursor = "not-allowed";
-      el.title = "Session locked by admin — view only";
+      el.title = "Session locked by admin. View only.";
     }
   });
   // Special: make all attendance inputs disabled
@@ -3938,7 +3938,7 @@ function updateTodayStats() {
     });
     $("statAvgAtt").textContent = `${Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length)}%`;
   } else {
-    $("statAvgAtt").textContent = "—";
+    $("statAvgAtt").textContent = "Not available";
   }
 }
 
@@ -4195,7 +4195,7 @@ function getTodayAtt(studentId) {
 
 function getAttPct(studentId) {
   const recs = allAttendance.filter(a => a.studentId === studentId);
-  if (!recs.length) return "—";
+  if (!recs.length) return "Not available";
   return `${Math.round(recs.filter(a => a.status === "Present").length / recs.length * 100)}%`;
 }
 
@@ -4238,7 +4238,7 @@ function renderStudents() {
         ${renderStudentFace(s)}
         <div>
         <div class="stu-name">${s.name || "N/A"} ${tc}</div>
-        <div class="stu-meta">ID: ${sid} | Roll: ${s.roll || "—"} | Father: ${s.father || "—"} (${fatherPhone || "—"}) | Mother: ${s.mother || "—"} (${motherPhone || "—"})</div>
+        <div class="stu-meta">ID: ${sid} | Roll: ${s.roll || "Not available"} | Father: ${s.father || "Not available"} (${fatherPhone || "Not available"}) | Mother: ${s.mother || "Not available"} (${motherPhone || "Not available"})</div>
       </div>
         </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
@@ -4283,15 +4283,15 @@ window.openStudentModal = function(docId) {
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">
       <tr><td style="padding:8px 0;color:var(--muted);width:40%;font-weight:700;">Student ID</td><td>${sid}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Class</td><td>${s.class}-${s.section} | Roll ${s.roll||"—"}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Father</td><td>${s.father||"—"}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Father Phone</td><td>${fatherPhone||"—"}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Mother</td><td>${s.mother||"—"}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Mother Phone</td><td>${motherPhone||"—"}</td></tr>
-      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Primary Phone</td><td>${s.phone||"—"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Class</td><td>${s.class}-${s.section} | Roll ${s.roll||"Not available"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Father</td><td>${s.father||"Not available"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Father Phone</td><td>${fatherPhone||"Not available"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Mother</td><td>${s.mother||"Not available"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Mother Phone</td><td>${motherPhone||"Not available"}</td></tr>
+      <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Primary Phone</td><td>${s.phone||"Not available"}</td></tr>
       <tr><td style="padding:8px 0;color:var(--muted);font-weight:700;">Fee Status</td><td><span class="badge ${fee.cls}">${fee.label}</span></td></tr>
     </table>
-    ${s.tcIssued ? `<div class="info-box locked">Transfer Certificate issued — attendance and updates are restricted.</div>` : ""}
+    ${s.tcIssued ? `<div class="info-box locked">Transfer Certificate issued. Attendance and updates are restricted.</div>` : ""}
   `;
   $("studentModal").classList.add("open");
 };
@@ -4705,7 +4705,7 @@ window.loadSalaryData = async function() {
       $("salPaymentHistory").innerHTML = `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Payment History</div>
         ${payments.slice().reverse().map(p => `<div style="display:flex;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;background:var(--surface2);">
           <div><strong style="font-size:14px;">${fmt(p.amount)}</strong><div style="font-size:12px;color:var(--muted);">${p.note || "Salary payment"}</div></div>
-          <div style="text-align:right;font-size:12px;color:var(--muted);">${p.paymentDate ? new Date(p.paymentDate+"T00:00").toLocaleDateString("en-IN") : "—"}</div>
+          <div style="text-align:right;font-size:12px;color:var(--muted);">${p.paymentDate ? new Date(p.paymentDate+"T00:00").toLocaleDateString("en-IN") : "Not available"}</div>
         </div>`).join("")}`;
     } else {
       $("salPaymentHistory").innerHTML = `<div style="font-size:13px;color:var(--muted);margin-top:4px;">No payment recorded for this month yet.</div>`;
@@ -4772,7 +4772,7 @@ async function loadReportTermLocks() {
 function renderTermDropdown() {
   const sel = $("reportTermSelect");
   const currentVal = activeTermKey;
-  sel.innerHTML = `<option value="">— Select a term —</option>`;
+  sel.innerHTML = `<option value="">Select a term</option>`;
   allTerms.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t.termKey;
@@ -4852,7 +4852,7 @@ const inputs = subjects.map(sub => {
       <div class="grade-head">
         <div>
           <strong style="font-size:15px;">${s.name}</strong>
-          <div style="font-size:12px;color:var(--muted);">ID: ${sid} | Roll: ${s.roll || "—"} | Term: ${term.label}</div>
+          <div style="font-size:12px;color:var(--muted);">ID: ${sid} | Roll: ${s.roll || "Not available"} | Term: ${term.label}</div>
         </div>
       </div>
       <div class="marks-grid">${inputs}</div>
@@ -5044,7 +5044,7 @@ window.showGeneratedReports = async function() {
         <div>
           <strong style="font-size:15px;">${r.student?.name}</strong>
           <div style="font-size:12px;color:var(--muted);">
-            ID: ${r.student?.studentId} | Term: ${r.termLabel || r.term || "—"} | ${r.percentage}% | ${r.createdAt ? new Date(r.createdAt.toDate()).toLocaleDateString("en-IN") : "—"}
+            ID: ${r.student?.studentId} | Term: ${r.termLabel || r.term || "Not available"} | ${r.percentage}% | ${r.createdAt ? new Date(r.createdAt.toDate()).toLocaleDateString("en-IN") : "Not available"}
           </div>
         </div>
         <div class="grade-pill ${gradeCls(r.grade)}">${r.grade}</div>
@@ -5283,7 +5283,7 @@ async function loadTeacherTimetable() {
             </div>
           </td>`;
       } else {
-        html += '<td style="color: var(--muted); font-style: italic;">—</td>';
+        html += '<td style="color: var(--muted); font-style: italic;">Not assigned</td>';
       }
     });
     html += '</tr>';

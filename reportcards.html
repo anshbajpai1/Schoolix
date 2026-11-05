@@ -94,7 +94,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Report Card — Schoolix</title>
+  <title>Student Report Card Generator | Schoolix</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -156,7 +156,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .brand-mark {
       width: 42px; height: 42px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
       display: grid; place-items: center;
       color: #fff;
       box-shadow: 0 6px 16px rgba(29, 78, 216, 0.28);
@@ -393,7 +393,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         </div>
         <div>
-          <h1>Schoolix — Report Card Generator</h1>
+          <h1>Schoolix Report Card Generator</h1>
           <p class="subtitle">Global subjects, session-aware report cards</p>
         </div>
       </div>
@@ -422,7 +422,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           <div class="field">
             <label for="sessionSelector">Session</label>
             <select id="sessionSelector" onchange="onSessionChange()">
-              <option value="">— Select Session —</option>
+              <option value="">Select session</option>
             </select>
           </div>
           <div id="sessionLockBanner" class="banner banner-warn">
@@ -673,7 +673,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         let viewSessionId = "";
         try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
 
-        sel.innerHTML = '<option value="">— Select Session —</option>';
+        sel.innerHTML = '<option value="">Select session</option>';
         let activeSession = null;
         let sessions = [];
         snap.forEach(d => {
@@ -691,7 +691,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           sel.appendChild(opt);
         });
         if (snap.empty) {
-          sel.innerHTML = '<option value="">No sessions — go to Additional Settings</option>';
+          sel.innerHTML = '<option value="">No sessions. Go to Additional Settings</option>';
         }
         if (activeSession) {
           currentSession = activeSession.session;

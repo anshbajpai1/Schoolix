@@ -1187,6 +1187,19 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
   }
 }
 
+/* Professional interaction rules: compact controls and restrained motion. */
+html { scroll-behavior: auto !important; }
+
+body :is(button, .btn, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  border-radius: 8px !important;
+  transition-duration: 160ms !important;
+}
+
+body :is(button, .btn, [role="button"]):hover,
+body :is(.card, .panel, .stat-card, .summary-card, .metric-card, .insight-card):hover {
+  transform: none !important;
+}
+
 /* Navigation drawers stay GPU-friendly across admin, student, library and accounts portals. */
 body :is(.sidebar,.teacher-sidebar,.side-nav,.library-sidebar,.notice-sidebar) {
   backdrop-filter: none !important;

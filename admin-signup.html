@@ -1730,7 +1730,7 @@ window.openModal = async (uid) => {
     document.getElementById("paymentAmount").value = "";
     document.getElementById("paymentDate").value = new Date().toISOString().slice(0, 10);
     document.getElementById("paymentReference").value = "";
-    document.getElementById("subscriptionSummary").textContent = `${subscription.plan} · ${subscriptionLabel(currentData)}${subscription.blocked ? " — school access is blocked" : ""}`;
+    document.getElementById("subscriptionSummary").textContent = `${subscription.plan} · ${subscriptionLabel(currentData)}${subscription.blocked ? ". School access is blocked" : ""}`;
     loadBillingHistory(uid);
 
     // Build feature rows

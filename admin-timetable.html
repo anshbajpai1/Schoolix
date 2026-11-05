@@ -1049,11 +1049,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   <div class="stats-bar" id="statsBar" style="display:none">
     <div class="stat-chip">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Class:</span> <strong id="statClass">—</strong>
+      <span>Class:</span> <strong id="statClass">Not selected</strong>
     </div>
     <div class="stat-chip">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span>Section:</span> <strong id="statSection" style="color:var(--gold)">—</strong>
+      <span>Section:</span> <strong id="statSection" style="color:var(--gold)">Not selected</strong>
     </div>
     <div class="stat-chip">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1349,7 +1349,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
   function getTeacherReadableId(slot = {}) {
     const teacher = findTeacherBySlot(slot);
-    return teacher?.teacherId || slot.teacherReadableId || slot.teacherId || slot.teacherUid || "—";
+    return teacher?.teacherId || slot.teacherReadableId || slot.teacherId || slot.teacherUid || "Not available";
   }
 
   function slotBelongsToTeacher(slot = {}, teacher = {}) {
@@ -1628,7 +1628,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         updateSlot(day, period, "teacherEmail", "");
         teacherSel.value = "";
         const badge = document.getElementById(`tid-${slotKey}`);
-        if (badge) badge.textContent = "—";
+        if (badge) badge.textContent = "Not selected";
       }
     }
   };
@@ -1642,7 +1642,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       updateSlot(day, period, "teacherName", "");
       updateSlot(day, period, "teacherEmail", "");
       const badge = document.getElementById(`tid-${slotKey}`);
-      if (badge) badge.textContent = "—";
+      if (badge) badge.textContent = "Not selected";
       return;
     }
     const teacher = teachers.find(t => t.uid === teacherUid);
@@ -1931,7 +1931,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       currentTimetable.schedule[day][period].teacherId = "";
       currentTimetable.schedule[day][period].teacherEmail = "";
       const badge = document.getElementById(`tid-${day}-${period.replace(" ","_")}`);
-      if (badge) badge.textContent = "—";
+      if (badge) badge.textContent = "Not selected";
     }
   };
 
@@ -2349,13 +2349,13 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       days.forEach(day => {
         const slots = schedule[day]?.[period] || [];
         if (!slots.length) {
-          html += `<td><span style="color:var(--muted);font-size:0.8rem;">—</span></td>`;
+          html += `<td><span style="color:var(--muted);font-size:0.8rem;">Not assigned</span></td>`;
           return;
         }
         html += `<td>${slots.map(slot => `
           <div class="readonly-slot">
             <strong>${escHtml(slot.subject || "Lecture")}</strong>
-            <div>Class: ${escHtml(slot.classLabel || "—")}</div>
+            <div>Class: ${escHtml(slot.classLabel || "Not available")}</div>
             <div>Teacher ID: ${escHtml(getTeacherReadableId(slot))}</div>
           </div>
         `).join('<div style="height:8px"></div>')}</td>`;

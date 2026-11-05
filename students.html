@@ -5391,7 +5391,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const sessionLocked = getSelectedSession()?.locked || false;
         const classesLocked = getSelectedSession()?.classesLocked || false;
         if (sessionLocked || classesLocked) {
-          return showToast("This session is locked — promotion is disabled.", "error");
+          return showToast("This session is locked. Promotion is disabled.", "error");
         }
 
         const banner = document.getElementById("promotionBanner");
@@ -6300,7 +6300,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         const sessionLocked = getSelectedSession()?.locked || false;
         const classesLocked = getSelectedSession()?.classesLocked || false;
-        if (sessionLocked || classesLocked) return showToast('This session is locked — section shuffle is disabled.', 'error');
+        if (sessionLocked || classesLocked) return showToast('This session is locked. Section shuffle is disabled.', 'error');
 
         const students = getStudentsForSelectedSession().filter((student) => student.class === classValue);
         if (!students.length) return showToast('No students found for this class', 'error');
@@ -7076,10 +7076,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         const rawStudent = allStudents.find(s => s.id === currentStudentId);
         const student = getStudentForSelectedSession(rawStudent);
-        if (student?.tcIssued) return showToast("TC issued — attendance cannot be changed.", "error");
+        if (student?.tcIssued) return showToast("TC issued. Attendance cannot be changed.", "error");
 
         const sessionLocked = getSelectedSession()?.locked || false;
-        if (sessionLocked) return showToast("This session is locked — attendance changes are disabled.", "error");
+        if (sessionLocked) return showToast("This session is locked. Attendance changes are disabled.", "error");
 
         const attendanceData = {
           studentId: student.studentId || student.id,
@@ -7145,7 +7145,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
       window.quickMarkAttendance = (status) => {
         const student = allStudents.find(s => s.id === currentStudentId);
-        if (student?.tcIssued) return showToast("TC issued — attendance is locked.", "error");
+        if (student?.tcIssued) return showToast("TC issued. Attendance is locked.", "error");
         selectedAttendanceStatus = status;
         document.getElementById("markDateBtn").disabled = false;
         document.getElementById("markDateBtn").textContent = `Update to ${status}`;
@@ -7170,11 +7170,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       window.saveStudentDetails = async () => {
         const student = allStudents.find((s) => s.id === currentStudentId);
         if (!student) return showToast("Student not found", "error");
-        if (student.tcIssued) return showToast("TC issued — profile edit is disabled.", "error");
+        if (student.tcIssued) return showToast("TC issued. Profile edit is disabled.", "error");
         const sessionStudent = getStudentForSelectedSession(student);
 
         const sessionLocked = getSelectedSession()?.locked || false;
-        if (sessionLocked) return showToast("This session is locked — editing is disabled.", "error");
+        if (sessionLocked) return showToast("This session is locked. Editing is disabled.", "error");
 
         const updatedStudent = {
           ...student,
@@ -7234,7 +7234,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           updatedStudent.section !== sessionStudent.section ||
           updatedStudent.roll !== sessionStudent.roll;
         if (classesLocked && classChanged) {
-          return showToast("Classes are locked for this session — class changes are not allowed.", "error");
+          return showToast("Classes are locked for this session. Class changes are not allowed.", "error");
         }
 
         const duplicateRollStudent = findDuplicateRollStudent({
@@ -7380,10 +7380,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       window.deleteStudent = async (docId) => {
         const student = allStudents.find((s) => s.id === docId);
         if (!student) return showToast("Student not found", "error");
-        if (student.tcIssued) return showToast("TC issued — remove TC from TC page first, then delete.", "error");
+        if (student.tcIssued) return showToast("TC issued. Remove the TC from the TC page first, then delete.", "error");
 
         const sessionLocked = getSelectedSession()?.locked || false;
-        if (sessionLocked) return showToast("This session is locked — deletion is disabled.", "error");
+        if (sessionLocked) return showToast("This session is locked. Deletion is disabled.", "error");
 
         const label = `${student.name || "Student"} (${student.studentId || docId})`;
 
@@ -8009,8 +8009,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       window.executePromotion = async () => {
         const sessionLocked = getSelectedSession()?.locked || false;
         const classesLocked = getSelectedSession()?.classesLocked || false;
-        if (sessionLocked) return showToast("This session is locked — promotion is disabled.", "error");
-        if (classesLocked) return showToast("Classes are locked for this session — promotion is disabled.", "error");
+        if (sessionLocked) return showToast("This session is locked. Promotion is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session. Promotion is disabled.", "error");
 
         const confirmBtn = document.getElementById("confirmPromotionBtn");
         confirmBtn.disabled = true;
@@ -8091,8 +8091,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       window.promoteSelected = async () => {
         const sessionLocked = getSelectedSession()?.locked || false;
         const classesLocked = getSelectedSession()?.classesLocked || false;
-        if (sessionLocked) return showToast("This session is locked — promotion is disabled.", "error");
-        if (classesLocked) return showToast("Classes are locked for this session — promotion is disabled.", "error");
+        if (sessionLocked) return showToast("This session is locked. Promotion is disabled.", "error");
+        if (classesLocked) return showToast("Classes are locked for this session. Promotion is disabled.", "error");
 
         const selected = Array.from(selectedStudentIds);
 

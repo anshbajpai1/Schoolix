@@ -1332,7 +1332,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           </div>
           <div class="info-panel">
             <h3>Extra adjustment</h3>
-            <p>Extra collected amounts can be moved and applied to any billing month — current, past, or future —
+            <p>Extra collected amounts can be moved and applied to any billing month: current, past, or future.
               directly from the fee history section.</p>
           </div>
         </aside>
@@ -3302,7 +3302,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                 <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right;color:#0d9488">${formatCurrency(a.extra)}</td>
                 <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:right;color:#b42318">${formatCurrency(a.due)}</td>
                 <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;text-align:center"><span style="background:${statusColor}20;color:${statusColor};padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800">${meta.label}</span></td>
-                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;font-size:12px;color:#5e6c80">${escapeHtml(fee.remarks || "—")}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #e8eef7;font-size:12px;color:#5e6c80">${escapeHtml(fee.remarks || "Not available")}</td>
               </tr>`;
           }).join("");
 
@@ -3590,7 +3590,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             } catch(e) {}
             let viewSessionId = "";
             try { viewSessionId = localStorage.getItem("schoolix.viewSessionId") || ""; } catch (_) {}
-            sel.innerHTML = '<option value="">— Select session —</option>';
+            sel.innerHTML = '<option value="">Select session</option>';
             let defaultVal = "";
             snap.forEach(d => {
               const data = d.data();
@@ -3611,7 +3611,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
               sel.appendChild(opt);
             });
             if (snap.empty) {
-              sel.innerHTML = '<option value="">No sessions saved — go to Additional Settings</option>';
+              sel.innerHTML = '<option value="">No sessions saved. Go to Additional Settings</option>';
             }
           } catch(e) {
             console.error("Session load error:", e);
