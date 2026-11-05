@@ -161,3 +161,59 @@ body.sx-dark-portal :is(input,select,textarea,.form-control,.search-input,.filte
     -webkit-backdrop-filter: none !important;
   }
 }
+
+/* Keep navigation light and consistent even when the portal content is dark. */
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) {
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,248,253,.97)) !important;
+  border-color: #dbe3ef !important;
+  color: #172033 !important;
+  box-shadow: 12px 0 32px rgba(15, 31, 58, .10) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.sidebar-logo, .sidebar-footer) {
+  border-color: #e4e9f2 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.logo-text, strong) {
+  color: #172033 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.logo-sub, .nav-section, small) {
+  color: #667085 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item {
+  color: #475467 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item:hover {
+  background: #f7f9fc !important;
+  color: #1746c7 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item.active {
+  background: #eef4ff !important;
+  color: #1746c7 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-icon {
+  background: #ffffff !important;
+  color: #5f78a5 !important;
+  box-shadow: inset 0 0 0 1px #e2e8f0 !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .nav-item.active .nav-icon {
+  background: #1f5eff !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .logout-btn {
+  color: #c4322b !important;
+}
+
+body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) .logout-btn:hover {
+  background: #fff1f0 !important;
+}
