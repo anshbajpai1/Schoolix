@@ -4792,9 +4792,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       let sectionShufflePreviewData = [];
       let attendanceRecordsByStudent = new Map();
       let feeRecordsByStudent = new Map();
+      let reportRecordsByStudent = new Map();
+      let sessionAttendanceRecordsCache = new Map();
+      let attendancePercentageCache = new Map();
+      let feeSummaryCache = new Map();
       let latestReportByStudent = new Map();
       let latestReportBySessionStudent = new Map();
       let studentRefreshTimer = 0;
+      let realtimeRenderTimer = 0;
+      let analyticsRenderHandle = 0;
       let todayStatusFilter = "";
 
       function getHeaderViewSessionId() {
@@ -5261,6 +5267,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       function rebuildDataIndexes() {
         attendanceRecordsByStudent = new Map();
         feeRecordsByStudent = new Map();
+        reportRecordsByStudent = new Map();
+        sessionAttendanceRecordsCache = new Map();
+        attendancePercentageCache = new Map();
+        feeSummaryCache = new Map();
         latestReportByStudent = new Map();
         latestReportBySessionStudent = new Map();
 
@@ -5281,6 +5291,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         allReports.forEach((report) => {
           const key = report.student?.studentId || report.studentId;
           if (!key) return;
+          if (!reportRecordsByStudent.has(key)) reportRecordsByStudent.set(key, []);
+          reportRecordsByStudent.get(key).push(report);
           const previous = latestReportByStudent.get(key);
           const currentStamp = Math.max(
             toMillis(report.updatedAt),
@@ -5407,20 +5419,20 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         try {
           document.getElementById("studentsList").innerHTML = '<div class="loading">Loading students...</div>';
 
-          const [studentSnap, attendanceSnap, feesSnap, reportSnap, sessionsSnap, termsSnap] = await Promise.all([
+          const attendancePromise = getDocs(collection(db, "schools", currentUser.uid, "attendance"));
+          const feesPromise = getDocs(collection(db, "schools", currentUser.uid, "fees"));
+          const reportsPromise = getDocs(collection(db, "schools", currentUser.uid, "reportCards"));
+          const [studentSnap, sessionsSnap, termsSnap, settingsSnap] = await Promise.all([
             getDocs(collection(db, "schools", currentUser.uid, "students")),
-            getDocs(collection(db, "schools", currentUser.uid, "attendance")),
-            getDocs(collection(db, "schools", currentUser.uid, "fees")),
-            getDocs(collection(db, "schools", currentUser.uid, "reportCards")),
             getDocs(collection(db, "schools", currentUser.uid, "sessions")),
-            getDocs(collection(db, "schools", currentUser.uid, "terms"))
+            getDocs(collection(db, "schools", currentUser.uid, "terms")),
+            getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'))
           ]);
 
           allStudents = deduplicateStudents(studentSnap.docs.map(d => ({ id: d.id, ...d.data() })));
           allSessions = sessionsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
           allTerms = termsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-          const settingsSnap = await getDoc(doc(db, 'schools', currentUser.uid, 'settings', 'activeSession'));
           const schoolActiveSessionId = settingsSnap.exists() ? settingsSnap.data().sessionId || '' : '';
           activeSessionId = getHeaderViewSessionId() || schoolActiveSessionId;
           if (activeSessionId) {
@@ -5435,18 +5447,23 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             }
           }
 
-          allAttendance = attendanceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-          allFees = feesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-          allReports = reportSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-          // Existing records are corrected automatically once per load. A
-          // second load only happens when at least one roll actually changed.
-          if (await reconcileAllRollNumbers()) return loadAllData();
-
+          // Render the roster as soon as its primary data is ready. Attendance,
+          // fees and reports continue loading in parallel and enrich this view.
           rebuildDataIndexes();
           populateFilters();
           populateSessionSelector();
           populatePromotionResultControls();
+          loadData(false);
+
+          const [attendanceSnap, feesSnap, reportSnap] = await Promise.all([
+            attendancePromise,
+            feesPromise,
+            reportsPromise
+          ]);
+          allAttendance = attendanceSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allFees = feesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allReports = reportSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          rebuildDataIndexes();
           loadData(false);
 
         } catch (error) {
@@ -5463,22 +5480,49 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const attendanceRef = collection(db, "schools", currentUser.uid, "attendance");
         const feesRef = collection(db, "schools", currentUser.uid, "fees");
 
-        unsubscribeAttendance = onSnapshot(attendanceRef, (snapshot) => {
-          allAttendance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          rebuildDataIndexes();
-          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'attendance') {
-            updateModalAttendance();
+        const collectionFingerprint = (records) => records.map((record) => {
+          try {
+            return JSON.stringify(record, (_key, value) => {
+              if (value && typeof value.toMillis === 'function') return value.toMillis();
+              if (value instanceof Date) return value.getTime();
+              return value;
+            });
+          } catch (_) {
+            return String(record?.id || '');
           }
-          loadData(false);
+        }).sort().join('|');
+
+        let attendanceFingerprint = collectionFingerprint(allAttendance);
+        let feesFingerprint = collectionFingerprint(allFees);
+
+        const scheduleRealtimeRender = () => {
+          clearTimeout(realtimeRenderTimer);
+          realtimeRenderTimer = window.setTimeout(() => {
+            rebuildDataIndexes();
+            if (document.getElementById("attendanceModal").style.display === "flex") {
+              if (activeTab === 'attendance') updateModalAttendance();
+              if (activeTab === 'fees') updateFeeHistory();
+            }
+            loadData(false);
+          }, 90);
+        };
+
+        unsubscribeAttendance = onSnapshot(attendanceRef, (snapshot) => {
+          const nextAttendance = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          const nextFingerprint = collectionFingerprint(nextAttendance);
+          if (nextFingerprint === attendanceFingerprint) return;
+          attendanceFingerprint = nextFingerprint;
+          allAttendance = nextAttendance;
+          scheduleRealtimeRender();
         });
 
         unsubscribeFees = onSnapshot(feesRef, (snapshot) => {
-          allFees = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          rebuildDataIndexes();
-          if (document.getElementById("attendanceModal").style.display === "flex" && activeTab === 'fees') {
-            updateFeeHistory();
-          }
-          loadData(false);
+          const nextFees = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          const nextFingerprint = collectionFingerprint(nextFees);
+          if (nextFingerprint === feesFingerprint) return;
+          feesFingerprint = nextFingerprint;
+          allFees = nextFees;
+          scheduleRealtimeRender();
         });
       }
 
@@ -5487,9 +5531,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         if (latestReportBySessionStudent.has(cacheKey)) {
           return latestReportBySessionStudent.get(cacheKey);
         }
-        const reports = allReports
-          .filter((report) => (report.student?.studentId || report.studentId) === studentId)
-          .filter(entryBelongsToSession);
+        const reports = (reportRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
 
         if (!reports.length) {
           latestReportBySessionStudent.set(cacheKey, null);
@@ -6054,10 +6096,24 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         currentPage = totalPages ? Math.min(currentPage, totalPages) : 1;
 
         updateStats(filteredStudents);
-        renderAnalytics(filteredStudents);
         renderStudents(filteredStudents);
+        scheduleAnalyticsRender(filteredStudents);
         updateButtonStates();
       };
+
+      function scheduleAnalyticsRender(students) {
+        const render = () => {
+          analyticsRenderHandle = 0;
+          renderAnalytics(students);
+        };
+        if (analyticsRenderHandle) {
+          if (typeof cancelIdleCallback === 'function') cancelIdleCallback(analyticsRenderHandle);
+          else clearTimeout(analyticsRenderHandle);
+        }
+        analyticsRenderHandle = typeof requestIdleCallback === 'function'
+          ? requestIdleCallback(render, { timeout: 240 })
+          : window.setTimeout(render, 60);
+      }
 
       function updateButtonStates() {
         const sessionLocked = getSelectedSession()?.locked || false;
@@ -6239,14 +6295,25 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       }
 
       function getAttendanceRecordsForStudent(studentId) {
-        return (attendanceRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
+        if (sessionAttendanceRecordsCache.has(cacheKey)) return sessionAttendanceRecordsCache.get(cacheKey);
+        const records = (attendanceRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
+        sessionAttendanceRecordsCache.set(cacheKey, records);
+        return records;
       }
 
       function calculateAttendancePercentage(studentId) {
+        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
+        if (attendancePercentageCache.has(cacheKey)) return attendancePercentageCache.get(cacheKey);
         const records = getAttendanceRecordsForStudent(studentId);
-        if (records.length === 0) return 0;
+        if (records.length === 0) {
+          attendancePercentageCache.set(cacheKey, 0);
+          return 0;
+        }
         const weightedPresent = records.reduce((sum, record) => sum + getAttendanceWeight(record.status), 0);
-        return Math.round((weightedPresent / records.length) * 100);
+        const percentage = Math.round((weightedPresent / records.length) * 100);
+        attendancePercentageCache.set(cacheKey, percentage);
+        return percentage;
       }
 
       function getTodayStatus(studentId, date = toLocalDateISO()) {
@@ -6275,10 +6342,14 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       }
 
       function getStudentFeesSummary(studentId) {
+        const cacheKey = `${getSelectedSessionId() || 'all'}:${studentId || ''}`;
+        if (feeSummaryCache.has(cacheKey)) return feeSummaryCache.get(cacheKey);
         const studentFees = (feeRecordsByStudent.get(studentId) || []).filter(entryBelongsToSession);
         const total = studentFees.reduce((sum, fee) => sum + toMoneyNumber(fee.originalAmount || fee.amount || 0), 0);
         const paid = studentFees.reduce((sum, fee) => sum + getFeeCollectedAmount(fee), 0);
-        return { total, paid, due: Math.max(total - paid, 0) };
+        const summary = { total, paid, due: Math.max(total - paid, 0) };
+        feeSummaryCache.set(cacheKey, summary);
+        return summary;
       }
 
       function renderAttendanceChart(students) {
@@ -6590,7 +6661,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const initials = getStudentInitials(student.name || student.studentId || student.id);
         const className = size === "large" ? "student-photo-large" : "student-avatar";
         const title = escapeHtml(student.name || "Student");
-        return `<button type="button" class="${className}" onclick="event.stopPropagation(); openPhotoPreview('${escapeHtml(url)}','${title}')" title="View ${title} photo">${url ? `<img src="${escapeHtml(url)}" alt="${title} photo">` : escapeHtml(initials)}</button>`;
+        return `<button type="button" class="${className}" onclick="event.stopPropagation(); openPhotoPreview('${escapeHtml(url)}','${title}')" title="View ${title} photo">${url ? `<img src="${escapeHtml(url)}" alt="${title} photo" loading="lazy" decoding="async">` : escapeHtml(initials)}</button>`;
       }
 
       window.openPhotoPreview = (photoUrl, title = "Student Photo") => {

@@ -1187,6 +1187,38 @@ body.sx-enterprise-ui.sx-dark-portal .sx-data-table tbody tr:nth-child(even) td 
   }
 }
 
+/* Students is a dense live-data workspace: avoid full-page GPU blur/repaint work. */
+body.sx-admin-app[data-sx-title="Students"] {
+  background-attachment: scroll !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] :is(
+  .top-bar, .controls, .promotion-banner, .stat-card, .insight-card,
+  .students-grid, .pagination, .students-header, .modal-content, .sx-admin-sidebar
+) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] :is(
+  .stat-card, .insight-card, .students-grid, .student-row, .student-avatar,
+  .student-photo-large, .btn, .page-btn, .tab-btn
+):hover {
+  transform: none !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] :is(
+  .selection-pill, .students-summary-badge, .tc-badge, .percentage-display,
+  .status-present, .status-absent, .status-half, .status-noclass, .stat-trend,
+  .attendance-meter span, .bar-fill, .mini-progress span
+) {
+  animation: none !important;
+}
+
+body.sx-admin-app[data-sx-title="Students"] .student-row {
+  contain: paint;
+}
+
 /* Students hero keeps a dark glass surface so its white content stays legible. */
 body.sx-admin-app[data-sx-title="Students"] .top-bar {
   border-radius: 2px !important;

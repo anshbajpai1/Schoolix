@@ -1,9 +1,14 @@
 {
-  "versionCode": 118,
-  "versionName": "5.4.8",
+  "versionCode": 119,
+  "versionName": "5.4.9",
   "forceUpdate": false,
-  "message": "Expands Students to the full workspace width and restores the light admin sidebar.",
+  "message": "Makes the Students workspace faster, smoother, and more reliable with large school data.",
   "changelog": [
+    "Removes repeated full Students collection reads and automatic roll rewrites during page load.",
+    "Shows the student roster first while attendance, fees, and reports finish loading in parallel.",
+    "Deduplicates realtime attendance and fee renders and batches rapid updates.",
+    "Caches attendance, fee, and report calculations for smooth filtering and pagination.",
+    "Disables expensive blur repaints and repeated row animations on the Students workspace.",
     "Uses the full available width on the Students page, including wide desktop screens.",
     "Restores a clean light-glass admin sidebar that matches the rest of the website.",
     "Restores full text contrast in the Students Management hero section.",
@@ -62,5 +67,5 @@
     "Hides Download Latest Android App inside the APK while keeping it visible on the website.",
     "Adds pull-down-to-refresh on native app pages with a refresh indicator."
   ],
-  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=118"
+  "apkUrl": "https://schoolix-48107.web.app/dist/Schoolix-download?v=119"
 }
