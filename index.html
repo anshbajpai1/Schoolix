@@ -87,8 +87,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 }
 </style>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://ezkmeedcqetztkeppxil.supabase.co" crossorigin>
-<link rel="dns-prefetch" href="//ezkmeedcqetztkeppxil.supabase.co">
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <meta charset="UTF-8">
@@ -2022,7 +2020,7 @@ import {
 } from "./firebase-compat.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    apiKey: "",
     authDomain: "schoolix-48107.firebaseapp.com",
     projectId: "schoolix-48107"
 };
@@ -2033,8 +2031,7 @@ const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
-const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const SUPABASE_URL = "/api/supabase";
 const PASSWORD_RESET_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-password-reset-email`;
 
 const loginForm = document.getElementById('loginForm');
@@ -2135,8 +2132,6 @@ async function requestPasswordResetEmail(email) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "apikey": SUPABASE_ANON_KEY,
-                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
             },
             body: JSON.stringify({
                 email,

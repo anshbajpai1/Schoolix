@@ -1614,7 +1614,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         } from "./firebase-compat.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+          apiKey: "",
           authDomain: "schoolix-48107.firebaseapp.com",
           projectId: "schoolix-48107",
           storageBucket: "schoolix-48107.firebasestorage.app",
@@ -1629,8 +1629,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const studentCreatorApp = initializeApp(firebaseConfig, "studentCreatorApp");
         const studentCreatorAuth = getAuth(studentCreatorApp);
         const $ = (id) => document.getElementById(id);
-        const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+        const SUPABASE_URL = "/api/supabase";
         const REGISTRATION_EMAIL_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-registration-email`;
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -2295,8 +2294,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "apikey": SUPABASE_ANON_KEY,
-              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
             },
             body: JSON.stringify(payload)
           });

@@ -227,8 +227,8 @@ async function startTracking(trip) {
   if (hasNativeBridge() && state.nativeTripId !== trip.id) {
     state.nativeTripId = trip.id;
     window.SchoolixNativeLocation.startTracking(JSON.stringify({
-      supabaseUrl: "https://ezkmeedcqetztkeppxil.supabase.co",
-      anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg",
+      supabaseUrl: "/api/supabase",
+      anonKey: "",
       accessToken: accessToken(),
       schoolId: state.profile.school_id,
       vehicleId: state.profile.vehicle.id,

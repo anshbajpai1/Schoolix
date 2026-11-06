@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged, signOut } from "./firebase-compat.js";
 import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, limit } from "./firebase-compat.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  apiKey: "",
   authDomain: "schoolix-48107.firebaseapp.com",
   projectId: "schoolix-48107"
 };

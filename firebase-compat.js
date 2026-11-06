@@ -1,8 +1,8 @@
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase-config.js";
+import { SUPABASE_URL } from "./supabase-config.js";
 
 const FIRESTORE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/schoolix-firestore`;
 const LEGACY_LOGIN_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/legacy-firebase-login`;
-const AUTH_STORAGE_KEY = `sb-${new URL(SUPABASE_URL).hostname.split(".")[0]}-auth-token`;
+const AUTH_STORAGE_KEY = "schoolix-supabase-auth-token";
 const apps = [];
 const authListeners = new Set();
 const firebaseUserMappingPromises = new Map();
@@ -25,11 +25,10 @@ function decodeJwtPayload(token = "") {
   }
 }
 
-function authHeaders(token = SUPABASE_ANON_KEY) {
+function authHeaders(token = "") {
   return {
     "Content-Type": "application/json",
-    "apikey": SUPABASE_ANON_KEY,
-    "Authorization": `Bearer ${token || SUPABASE_ANON_KEY}`,
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
 }
 
@@ -112,7 +111,7 @@ function withTimeout(promise, ms, fallback, label = "Async operation") {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
 }
 
-async function authFetch(path, body, token = SUPABASE_ANON_KEY) {
+async function authFetch(path, body, token = "") {
   const response = await fetchWithTimeout(`${SUPABASE_URL}/auth/v1/${path}`, {
     method: "POST",
     headers: authHeaders(token),
@@ -345,7 +344,7 @@ async function currentSupabaseUser() {
 
 async function authToken() {
   const { data } = await withTimeout(client.auth.getSession(), 5000, { data: { session: null } }, "Supabase token restore");
-  return data.session?.access_token || SUPABASE_ANON_KEY;
+  return data.session?.access_token || "";
 }
 
 async function executeFirestoreRpc(payload) {
@@ -354,8 +353,7 @@ async function executeFirestoreRpc(payload) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${token}`,
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(payload),
   });
@@ -631,8 +629,6 @@ export async function signInWithEmailAndPassword(_auth, email, password) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ email, password }),
     });

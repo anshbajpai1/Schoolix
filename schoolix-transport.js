@@ -1,7 +1,6 @@
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase-config.js";
+import { SUPABASE_URL } from "./supabase-config.js";
 
-const AUTH_STORAGE_KEY = `sb-${new URL(SUPABASE_URL).hostname.split(".")[0]}-auth-token`;
-const REALTIME_URL = `${SUPABASE_URL.replace(/^http/, "ws")}/realtime/v1/websocket`;
+const AUTH_STORAGE_KEY = "schoolix-supabase-auth-token";
 const CHANNELS = new Map();
 
 function readSession() {
@@ -13,21 +12,20 @@ function readSession() {
 }
 
 export function accessToken() {
-  return readSession()?.access_token || SUPABASE_ANON_KEY;
+  return readSession()?.access_token || "";
 }
 
 function headers(extra = {}) {
   const token = accessToken();
   return {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${token}`,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     "Content-Type": "application/json",
     ...extra
   };
 }
 
 function url(path, params = {}) {
-  const target = new URL(`${SUPABASE_URL}/rest/v1/${path}`);
+  const target = new URL(`${SUPABASE_URL}/rest/v1/${path}`, window.location.origin);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") target.searchParams.set(key, value);
   });
@@ -215,7 +213,6 @@ function realtimeKey(table, filter) {
 export function subscribeTransport(table, filter, callback, fallbackLoader) {
   const key = realtimeKey(table, filter);
   unsubscribeTransport(key);
-  let socket;
   const timers = [];
 
   const emitFallback = async () => {
@@ -223,56 +220,14 @@ export function subscribeTransport(table, filter, callback, fallbackLoader) {
     try { callback(await fallbackLoader()); } catch (error) { console.warn("Transport fallback load failed", error); }
   };
 
-  try {
-    const socketUrl = new URL(REALTIME_URL);
-    socketUrl.searchParams.set("apikey", SUPABASE_ANON_KEY);
-    socketUrl.searchParams.set("vsn", "1.0.0");
-    socket = new WebSocket(socketUrl);
-    const topic = `realtime:public:${table}:${Math.random().toString(36).slice(2)}`;
-    const joinRef = String(Date.now());
-    socket.addEventListener("open", () => {
-      socket.send(JSON.stringify({
-        topic,
-        event: "phx_join",
-        payload: {
-          config: {
-            postgres_changes: [{ event: "*", schema: "public", table, filter }],
-            broadcast: { self: false },
-            presence: { key: "" }
-          },
-          access_token: accessToken()
-        },
-        ref: joinRef
-      }));
-      emitFallback();
-    });
-    socket.addEventListener("message", (event) => {
-      let message;
-      try { message = JSON.parse(event.data); } catch (_) { return; }
-      if (message.event === "postgres_changes") callback(message.payload);
-      if (message.event === "phx_error") emitFallback();
-    });
-    socket.addEventListener("close", () => {
-      if (!CHANNELS.has(key)) return;
-      timers.push(window.setTimeout(() => subscribeTransport(table, filter, callback, fallbackLoader), 3000));
-    });
-    timers.push(window.setInterval(() => {
-      if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ topic: "phoenix", event: "heartbeat", payload: {}, ref: String(Date.now()) }));
-      }
-    }, 25000));
-  } catch (error) {
-    console.warn("Realtime unavailable; using transport polling", error);
-  }
-
   const fallbackIntervalMs = Number(window.SchoolixTransportLiveRefreshMs || 10000);
+  emitFallback();
   timers.push(window.setInterval(emitFallback, Number.isFinite(fallbackIntervalMs) ? Math.max(2000, fallbackIntervalMs) : 10000));
   CHANNELS.set(key, () => {
     timers.forEach((timer) => {
       window.clearInterval(timer);
       window.clearTimeout(timer);
     });
-    try { socket?.close(); } catch (_) {}
   });
   return () => unsubscribeTransport(key);
 }

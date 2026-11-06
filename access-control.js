@@ -3,12 +3,11 @@ import { getAuth, onAuthStateChanged, signOut } from "./firebase-compat.js?v=acc
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, limit, onSnapshot } from "./firebase-compat.js?v=accountant-guard-20260806-3";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  apiKey: "",
   authDomain: "schoolix-48107.firebaseapp.com",
   projectId: "schoolix-48107"
 };
-const NOTIFICATION_SEND_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/send-app-notification";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const NOTIFICATION_SEND_URL = "/api/supabase/functions/v1/send-app-notification";
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -421,8 +420,6 @@ window.SchoolixNotificationRegistration = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           "x-firebase-token": legacyIdToken,
         },
         body: JSON.stringify({

@@ -1,5 +1,5 @@
 const PROJECT_ID = Deno.env.get("FIREBASE_PROJECT_ID") || "schoolix-48107";
-const FIREBASE_WEB_API_KEY = Deno.env.get("FIREBASE_WEB_API_KEY") || "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE";
+const FIREBASE_WEB_API_KEY = Deno.env.get("FIREBASE_WEB_API_KEY") || "";
 const BUCKET = "notice-attachments";
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"]);

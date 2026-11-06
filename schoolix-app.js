@@ -484,7 +484,7 @@ async function resolveNotificationContext() {
       import("./firebase-compat.js")
     ]);
     const firebaseConfig = {
-      apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+      apiKey: "",
       authDomain: "schoolix-48107.firebaseapp.com",
       projectId: "schoolix-48107"
     };
@@ -582,7 +582,7 @@ async function loadNotificationInbox(markRead = false) {
       import("./firebase-compat.js")
     ]);
     const firebaseConfig = {
-      apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+      apiKey: "",
       authDomain: "schoolix-48107.firebaseapp.com",
       projectId: "schoolix-48107"
     };

@@ -13,7 +13,7 @@ import {
 } from "./firebase-compat.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  apiKey: "",
   authDomain: "schoolix-48107.firebaseapp.com",
   projectId: "schoolix-48107",
   storageBucket: "schoolix-48107.firebasestorage.app",
@@ -30,8 +30,7 @@ const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";
 const CLOUDINARY_DOCUMENT_UPLOAD_PRESET = window.SchoolixCloudinaryDocumentPreset
   || localStorage.getItem("schoolixCloudinaryDocumentPreset")
   || "schoolix_documents";
-const SUPABASE_ATTACHMENT_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/upload-notice-attachment";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const SUPABASE_ATTACHMENT_URL = "/api/supabase/functions/v1/upload-notice-attachment";
 const DOCUMENT_MAX_SIZE_MB = 10;
 const DOCUMENT_ALLOWED_TYPES = new Set([
   "application/pdf",
@@ -916,8 +915,6 @@ async function uploadToSupabaseAttachment(file, group, type) {
   const response = await fetch(SUPABASE_ATTACHMENT_URL, {
     method: "POST",
     headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       "x-firebase-token": idToken
     },
     body: form

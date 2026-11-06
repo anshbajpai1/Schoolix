@@ -333,8 +333,7 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "./firebase-compat.js";
 import { collection, doc, getDoc, getDocs, limit, orderBy, query } from "./firebase-compat.js";
 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
-const SEND_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/send-app-notification";
+const SEND_URL = "/api/supabase/functions/v1/send-app-notification";
 const $ = (id) => document.getElementById(id);
 let currentUser = null;
 let schoolId = "";
@@ -427,8 +426,6 @@ $("notificationForm").addEventListener("submit", async (event) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
         "x-firebase-token": idToken,
       },
       body: JSON.stringify({ title, message, audience, schoolId }),

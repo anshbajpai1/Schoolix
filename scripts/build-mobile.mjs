@@ -1,11 +1,13 @@
 import { mkdir, copyFile, rm, access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { injectRuntimeEnv, loadRuntimeEnv } from "./runtime-env.mjs";
 
 const root = process.cwd();
 const args = process.argv.slice(2);
 const outArg = args.find((arg) => arg.startsWith("--out="));
 const out = path.join(root, outArg ? outArg.slice("--out=".length) : "www");
 const keepWebLoader = args.includes("--web-loader");
+const runtimeEnv = await loadRuntimeEnv(root);
 
 const files = [
   "404.html",
@@ -102,11 +104,6 @@ const criticalLoaderScriptPattern = /\s*<script id="sxCriticalLoaderScript">[\s\
 const criticalLoaderStylePattern = /\s*<style id="sxCriticalLoaderStyle">[\s\S]*?<\/style>\s*/i;
 const pageLoaderMarkupPattern = /\s*<div id="sxPageLoader" class="sx-page-loader"[^>]*>[\s\S]*?<\/section>\s*<\/div>\s*/i;
 const earlyLoaderTimeoutPattern = /setTimeout\(emergencyHide,\s*3200\);/g;
-const supabasePerformanceHints = [
-  '<link rel="preconnect" href="https://ezkmeedcqetztkeppxil.supabase.co" crossorigin>',
-  '<link rel="dns-prefetch" href="//ezkmeedcqetztkeppxil.supabase.co">'
-].join("\n");
-
 const siteOrigin = "https://schoolix-48107.web.app";
 const pageSeo = {
   "404.html": ["Page Not Found | Schoolix", "The requested Schoolix page could not be found. Return to the secure Schoolix sign-in page."],
@@ -235,9 +232,6 @@ async function applySharedPerformanceHints() {
     try {
       let html = await readFile(target, "utf8");
       html = html.replace(earlyLoaderTimeoutPattern, "setTimeout(emergencyHide, 1400);");
-      if (!html.includes("ezkmeedcqetztkeppxil.supabase.co")) {
-        html = html.replace(/<head>/i, `<head>\n${supabasePerformanceHints}`);
-      }
       await writeFile(target, html);
     } catch {
       // Optional HTML files are skipped during copy.
@@ -259,6 +253,16 @@ for (const file of files) {
     if (!optionalAssets.has(file)) {
       console.warn(`Skipped missing asset: ${file}`);
     }
+  }
+}
+
+for (const file of files.filter((name) => /\.(?:html|js|css|json|webmanifest)$/i.test(name))) {
+  const target = path.join(out, file);
+  try {
+    const content = await readFile(target, "utf8");
+    await writeFile(target, injectRuntimeEnv(content, runtimeEnv), "utf8");
+  } catch {
+    // Optional or binary assets are skipped.
   }
 }
 

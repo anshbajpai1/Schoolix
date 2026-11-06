@@ -408,14 +408,13 @@
     import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, updateDoc } from "./firebase-compat.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+      apiKey: "",
       authDomain: "schoolix-48107.firebaseapp.com",
       projectId: "schoolix-48107"
     };
 
-    const SEND_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/send-app-notification";
-    const ATTACHMENT_URL = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/upload-notice-attachment";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+    const SEND_URL = "/api/supabase/functions/v1/send-app-notification";
+    const ATTACHMENT_URL = "/api/supabase/functions/v1/upload-notice-attachment";
     const PDF_LIMIT = 10 * 1024 * 1024;
 
     const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
@@ -537,8 +536,6 @@
       const response = await fetch(ATTACHMENT_URL, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "apikey": SUPABASE_ANON_KEY,
           "x-firebase-token": idToken
         },
         body: formData
@@ -566,8 +563,6 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "apikey": SUPABASE_ANON_KEY,
           "x-firebase-token": idToken
         },
         body: JSON.stringify({ action: "delete", path: storagePath })
@@ -583,8 +578,6 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "apikey": SUPABASE_ANON_KEY,
           "x-firebase-token": idToken
         },
         body: JSON.stringify({

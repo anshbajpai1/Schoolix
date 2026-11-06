@@ -6,8 +6,7 @@
   const viewSessionStorageKey = "schoolix.viewSessionId";
   const lastOpenedStorageKey = "schoolix.adminLastOpenedAt";
   const assistantHistoryKey = "schoolix.aiAssistantHistory";
-  const assistantEndpoint = "https://ezkmeedcqetztkeppxil.supabase.co/functions/v1/school-assistant";
-  const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+  const assistantEndpoint = "/api/supabase/functions/v1/school-assistant";
   const currentFile = (location.pathname.split("/").pop() || DASHBOARD).toLowerCase();
   const isDashboardPage = currentFile === DASHBOARD;
   const skipFiles = new Set(["index.html", "admin-signup.html"]);
@@ -20,7 +19,7 @@
     messages: []
   };
   const firebaseConfig = {
-    apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    apiKey: "",
     authDomain: "schoolix-48107.firebaseapp.com",
     projectId: "schoolix-48107"
   };
@@ -334,8 +333,6 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": supabaseAnonKey,
-          "Authorization": `Bearer ${supabaseAnonKey}`,
           "x-firebase-token": token
         },
         body: JSON.stringify({

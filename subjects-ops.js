@@ -1,7 +1,7 @@
 import { initializeApp } from "./firebase-compat.js";
 import { getAuth, onAuthStateChanged } from "./firebase-compat.js";
 import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc, query, where, serverTimestamp } from "./firebase-compat.js";
-const config={apiKey:"AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",authDomain:"schoolix-48107.firebaseapp.com",projectId:"schoolix-48107",storageBucket:"schoolix-48107.firebasestorage.app",messagingSenderId:"133937954491",appId:"1:133937954491:web:69d8064422617eb8c4339e"};
+const config={apiKey:"",authDomain:"schoolix-48107.firebaseapp.com",projectId:"schoolix-48107",storageBucket:"schoolix-48107.firebasestorage.app",messagingSenderId:"133937954491",appId:"1:133937954491:web:69d8064422617eb8c4339e"};
 const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app),$=(id)=>document.getElementById(id);let adminId="",subjects=[],teachers=[],selectedSubject=null,mappingSelections=new Set();
 const escapeHtml=(v)=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 const subjectList=(t)=>[...new Set((Array.isArray(t.subjects)?t.subjects:(t.subject?[t.subject]:[])).map((n)=>String(n).trim()).filter(Boolean))];

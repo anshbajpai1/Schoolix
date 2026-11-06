@@ -25,6 +25,8 @@ supabase/.temp/
 *.aab
 Schoolix-Local-*-Setup.exe
 android/app/build/
+android/app/google-services.json
+!android/app/google-services.json.example
 android/.gradle/
 android/build/
 

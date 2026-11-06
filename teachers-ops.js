@@ -22,7 +22,7 @@ import {
 import { newLedgerTransactionId, syncSalaryDebit } from "./accounts-ledger.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+    apiKey: "",
     authDomain: "schoolix-48107.firebaseapp.com",
     projectId: "schoolix-48107",
     storageBucket: "schoolix-48107.firebasestorage.app",

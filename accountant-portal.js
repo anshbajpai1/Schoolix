@@ -15,7 +15,7 @@ const ACCOUNTANT_ICONS = {
 const ACCOUNTANT_VIEW_SESSION_KEY = "schoolix.viewSessionId";
 const ACCOUNTANT_HEADER_OPENED_KEY = "schoolix.accountantLastOpenedAt";
 const ACCOUNTANT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  apiKey: "",
   authDomain: "schoolix-48107.firebaseapp.com",
   projectId: "schoolix-48107"
 };

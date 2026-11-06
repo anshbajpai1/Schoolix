@@ -1176,7 +1176,7 @@ import {
 } from "./firebase-compat.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+  apiKey: "",
   authDomain: "schoolix-48107.firebaseapp.com",
   projectId: "schoolix-48107"
 };
@@ -1187,8 +1187,7 @@ const db = getFirestore(app);
 const adminCreatorApp = initializeApp(firebaseConfig, "superAdminCreatorApp");
 const adminCreatorAuth = getAuth(adminCreatorApp);
 const SUPER_ADMIN_EMAIL = "anshbajpai4@gmail.com";
-const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+const SUPABASE_URL = "/api/supabase";
 const CREATE_SCHOOL_ADMIN_URL = `${SUPABASE_URL}/functions/v1/create-school-admin`;
 
 // ---- FEATURE DEFINITIONS ----
@@ -1387,7 +1386,6 @@ window.signup = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({

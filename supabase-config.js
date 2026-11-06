@@ -1,7 +1,6 @@
-export const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
-
-export const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+// Browser traffic goes through the same-origin gateway. The gateway adds the
+// Supabase anon key server-side; no Supabase credential is shipped in assets.
+export const SUPABASE_URL = "/api/supabase";
 
 export const MAPLIBRE_CDN_JS =
   "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";

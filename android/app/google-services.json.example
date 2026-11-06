@@ -20,7 +20,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA5EiPM1tOlVARuFctj7cSbr8-k3BT3xZU"
+          "current_key": "__SCHOOLIX_ANDROID_FIREBASE_API_KEY__"
         }
       ],
       "services": {

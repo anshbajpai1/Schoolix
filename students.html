@@ -4803,7 +4803,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       import { getAuth, onAuthStateChanged, sendPasswordResetEmail } from "./firebase-compat.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyAomGwef93HFT9Xyx7SVW95FPw_IcIAICE",
+        apiKey: "",
         authDomain: "schoolix-48107.firebaseapp.com",
         projectId: "schoolix-48107",
         storageBucket: "schoolix-48107.firebasestorage.app",
@@ -4815,8 +4815,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth(app);
-      const SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6a21lZWRjcWV0enRrZXBweGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjk5NjAsImV4cCI6MjA5MzcwNTk2MH0.1davJ_NYkFhHToUtcFBR0kA6dk0-cOkaIbK2SCObkQg";
+      const SUPABASE_URL = "/api/supabase";
       const ABSENCE_EMAIL_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-absence-email`;
 
       let currentUser = null;
@@ -5262,8 +5261,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({
             parentEmail,
