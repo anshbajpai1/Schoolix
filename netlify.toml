@@ -5,6 +5,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # The project URL is a public endpoint and intentionally appears in server
+  # source and migration data. Keep secret scanning enabled for actual keys.
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
 
 [[redirects]]
   from = "/api/supabase/*"
