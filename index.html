@@ -647,14 +647,14 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             width: 100%;
             min-height: 48px;
             margin-top: 12px;
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px solid rgba(139, 92, 246, 0.22);
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            color: #c4b5fd;
+            color: #1d4ed8;
             text-decoration: none;
             font-size: 14px;
             font-weight: 700;
@@ -662,9 +662,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
 
         .btn-apk:hover {
-            background: rgba(139, 92, 246, 0.14);
-            border-color: rgba(139, 92, 246, 0.36);
-            color: #fff;
+            background: #e0edff;
+            border-color: #93c5fd;
+            color: #1e40af;
         }
 
         .btn-apk svg {
@@ -1794,21 +1794,67 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             }
 
             body.sx-login-app .form-card {
-                padding-top: 24px;
-                padding-bottom: 20px;
+                padding: 18px 24px 16px;
             }
 
             body.sx-login-app .form-header {
-                margin-bottom: 18px;
+                margin-bottom: 12px;
+            }
+
+            body.sx-login-app .form-welcome,
+            body.sx-login-app .form-subtitle {
+                display: none;
+            }
+
+            body.sx-login-app .form-title {
+                margin-bottom: 6px;
+                font-size: 1.7rem;
             }
 
             body.sx-login-app .form-hint {
-                margin-top: 12px;
+                margin-top: 8px;
+                padding: 8px 10px;
             }
 
-            body.sx-login-app .btn-apk,
+            body.sx-login-app .field {
+                margin-bottom: 10px;
+            }
+
+            body.sx-login-app .field-label {
+                margin-bottom: 4px;
+            }
+
+            body.sx-login-app .field-input {
+                height: 44px;
+            }
+
+            body.sx-login-app .forgot-row {
+                margin-top: -2px;
+                margin-bottom: 10px;
+            }
+
+            body.sx-login-app .btn-primary,
+            body.sx-login-app .btn-google {
+                height: 44px;
+            }
+
+            body.sx-login-app .btn-primary {
+                margin-bottom: 8px;
+            }
+
+            body.sx-login-app .or-row {
+                margin: 10px 0;
+            }
+
+            body.sx-login-app .btn-apk {
+                display: flex;
+                min-height: 42px;
+                margin-top: 8px;
+            }
+
             body.sx-login-app .download-meta {
-                display: none;
+                display: block;
+                margin-top: 4px;
             }
         }
     </style>
@@ -1980,7 +2026,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                 Continue with Google
             </button>
 
-            <a class="btn-apk" id="downloadAndroidApp" href="/dist/Schoolix-download" download="Schoolix.apk">
+            <a class="btn-apk" id="downloadAndroidApp" href="https://schoolix-48107.web.app/dist/Schoolix-download?v=120" download="Schoolix.apk" aria-label="Download the latest Schoolix Android app">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
                 </svg>
@@ -2230,7 +2276,7 @@ const FEATURE_LABELS = {
 
 async function hydrateAndroidDownloadLink() {
     if (!downloadAndroidApp) return;
-    const fallbackUrl = "/dist/Schoolix-download";
+    const fallbackUrl = "https://schoolix-48107.web.app/dist/Schoolix-download?v=120";
     try {
         const response = await fetch(`/version.json?t=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) throw new Error("version.json unavailable");
