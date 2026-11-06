@@ -121,7 +121,7 @@ body.sx-accountant-mobile-sidebar-open {
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .library-nav-link {
@@ -500,7 +500,7 @@ body.sx-accountant-shell-enabled .sx-accountant-sidebar-toggle {
   border-radius: 0 0 14px 14px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 12px 28px rgba(16, 24, 40, 0.08);
-  backdrop-filter: blur(14px);
+
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   line-height: 1.2;
@@ -561,7 +561,7 @@ body.sx-accountant-shell-enabled .sx-accountant-sidebar-toggle {
   font-size: 11px;
   font-weight: 900;
   line-height: 1.2;
-  text-transform: uppercase;
+  text-transform: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -617,7 +617,7 @@ body.sx-accountant-shell-enabled .sx-accountant-sidebar-toggle {
   font-size: 10px;
   font-weight: 900;
   line-height: 1.1;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .sx-accountant-meta-pill strong {
@@ -771,7 +771,7 @@ body.sx-accountant-shell-enabled :is(
   color: var(--lib-primary-dark);
   font-size: 10px;
   font-weight: 900;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .sx-accountant-header-actions {

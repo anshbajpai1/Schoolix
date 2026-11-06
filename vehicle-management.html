@@ -237,10 +237,7 @@ h3 { font-size: 15px; font-weight: 700; }
   align-items: stretch;
   color: #f8fafc;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  background:
-    radial-gradient(760px 320px at 88% -30%, rgba(56, 189, 248, 0.34), transparent 62%),
-    radial-gradient(560px 320px at 0% 120%, rgba(124, 58, 237, 0.32), transparent 60%),
-    linear-gradient(135deg, #0b1220 0%, #16233f 52%, #1e3a8a 100%);
+  background: #12213d;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   padding: 30px;
@@ -265,7 +262,7 @@ h3 { font-size: 15px; font-weight: 700; }
   background: rgba(148, 197, 255, 0.14);
   border: 1px solid rgba(148, 197, 255, 0.28);
   color: #cfe4ff;
-  font-size: 11.5px; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase;
+  font-size: 11.5px; font-weight: 750; letter-spacing: 0; text-transform: none;
   margin-bottom: 14px;
 }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -276,7 +273,7 @@ h3 { font-size: 15px; font-weight: 700; }
   border-radius: var(--radius);
   background: rgba(9, 14, 28, 0.42);
   border: 1px solid rgba(148, 163, 184, 0.2);
-  backdrop-filter: blur(8px);
+
 }
 .command-title { font-weight: 750; font-size: 14px; letter-spacing: 0.01em; color: #fff; }
 .transport-command-panel .muted { color: rgba(203, 213, 225, 0.72); font-size: 12.5px; }
@@ -289,7 +286,7 @@ h3 { font-size: 15px; font-weight: 700; }
 }
 .command-tile:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.12); }
 .command-tile strong { display: block; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: #fff; font-variant-numeric: tabular-nums; }
-.command-tile span { font-size: 11.5px; color: rgba(203, 213, 225, 0.8); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.command-tile span { font-size: 11.5px; color: rgba(203, 213, 225, 0.8); text-transform: none; letter-spacing: 0; font-weight: 600; }
 
 /* --------------------------------------------------------------- stats */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
@@ -441,7 +438,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
 .pill {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 10px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 750; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: 11.5px; font-weight: 750; letter-spacing: 0; text-transform: none;
   background: var(--surface-3); color: var(--ink-2); border: 1px solid var(--line-strong);
 }
 .pill.active { background: var(--success-soft); color: var(--success-ink); border-color: #bfe9d7; }
@@ -477,7 +474,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
 .route-id-badge {
   display: inline-flex; align-items: center;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em;
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0;
   padding: 3px 9px; border-radius: 7px;
   background: var(--brand-soft); color: var(--brand-ink); border: 1px solid #dbeafe;
 }
@@ -526,7 +523,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
   border: 1px solid var(--line-strong);
   color: var(--ink-2); font-size: 13px; font-weight: 650;
   cursor: pointer; box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(6px);
+
 }
 .sx-map-recenter:hover { color: var(--brand-ink); border-color: #bfd2ee; }
 
@@ -552,7 +549,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--success); border: 3px solid #fff;
   box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.18);
-  animation: sxPulse 2.1s ease-out infinite;
+
 }
 .sx-vehicle-marker[data-status="stale"] .sx-vehicle-marker-dot {
   background: var(--warn); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18); animation: none;
@@ -611,7 +608,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
   display: none; align-items: center; justify-content: center;
   padding: 20px;
   background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(5px);
+
 }
 .modal-overlay.open { display: flex; animation: sxFade 0.18s var(--ease) both; }
 .modal-box {
@@ -662,7 +659,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
   position: fixed; inset: 0; z-index: 1400;
   display: flex; align-items: center; justify-content: center;
   background: rgba(241, 245, 249, 0.72);
-  backdrop-filter: blur(6px);
+
   opacity: 0; visibility: hidden;
   transition: opacity 0.22s var(--ease), visibility 0.22s var(--ease);
 }
@@ -694,11 +691,7 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
 @keyframes sxShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
 @keyframes sxFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sxRise { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
-@keyframes sxPulse {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
-  70% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
+
 
 /* ------------------------------------------------------- scrollbars */
 .live-vehicle-list::-webkit-scrollbar,
@@ -794,8 +787,8 @@ form .btn-primary, form .btn-secondary { margin-top: 4px; }
   color: var(--faint);
   font-size: 10.5px;
   font-weight: 750;
-  letter-spacing: .055em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .vehicle-card .vehicle-meta-box span {
   display: block;
@@ -1406,7 +1399,7 @@ async function renderAssignedStudents(v) {
     list.innerHTML = items.map(s => {
         const sid = s.studentId || s.id;
         const tracking = studentTracking[sid] || {};
-        
+
         return `
         <div class="assigned-item" style="flex-direction:column;align-items:flex-start;gap:12px;padding:14px;">
             <div class="ai-info" style="width:100%;">
@@ -1414,24 +1407,24 @@ async function renderAssignedStudents(v) {
                 <span>ID: ${escHtml(sid)} - Class: ${escHtml(s.class||"-")}${s.section ? "-"+escHtml(s.section) : ""}</span>
             </div>
             <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:8px;padding:10px;">
-                    <div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;margin-bottom:6px;">Pickup Time</div>
-                    <input type="time" style="width:100%;padding:6px;border:1px solid #c4b5fd;border-radius:6px;font-size:12px;" 
-                        id="pickup_${escHtml(sid)}" value="${tracking.pickupTime || ''}" 
+                <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:10px;">
+                    <div style="font-size:11px;font-weight:700;color:#1e40af;text-transform: none;margin-bottom:6px;">Pickup Time</div>
+                    <input type="time" style="width:100%;padding:6px;border:1px solid #93c5fd;border-radius:6px;font-size:12px;"
+                        id="pickup_${escHtml(sid)}" value="${tracking.pickupTime || ''}"
                         onchange="updateStudentTracking('${escHtml(sid)}', 'pickupTime', this.value)">
-                    <div style="font-size:11px;font-weight:700;color:#5b21b6;text-transform:uppercase;margin:12px 0 6px;">Pickup Place</div>
-                    <input type="text" placeholder="Enter pickup place" style="width:100%;padding:8px;border:1px solid #c4b5fd;border-radius:6px;font-size:12px;" 
-                        id="pickupPlace_${escHtml(sid)}" value="${escHtml(tracking.pickupPlace || '')}" 
+                    <div style="font-size:11px;font-weight:700;color:#1e40af;text-transform: none;margin:12px 0 6px;">Pickup Place</div>
+                    <input type="text" placeholder="Enter pickup place" style="width:100%;padding:8px;border:1px solid #93c5fd;border-radius:6px;font-size:12px;"
+                        id="pickupPlace_${escHtml(sid)}" value="${escHtml(tracking.pickupPlace || '')}"
                         onchange="updateStudentTracking('${escHtml(sid)}', 'pickupPlace', this.value)">
                 </div>
                 <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:10px;">
-                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:6px;">Drop-off Time</div>
-                    <input type="time" style="width:100%;padding:6px;border:1px solid #86efac;border-radius:6px;font-size:12px;" 
-                        id="dropoff_${escHtml(sid)}" value="${tracking.dropoffTime || ''}" 
+                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform: none;margin-bottom:6px;">Drop-off Time</div>
+                    <input type="time" style="width:100%;padding:6px;border:1px solid #86efac;border-radius:6px;font-size:12px;"
+                        id="dropoff_${escHtml(sid)}" value="${tracking.dropoffTime || ''}"
                         onchange="updateStudentTracking('${escHtml(sid)}', 'dropoffTime', this.value)">
-                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;margin:12px 0 6px;">Drop-off Place</div>
-                    <input type="text" placeholder="Enter drop-off place" style="width:100%;padding:8px;border:1px solid #86efac;border-radius:6px;font-size:12px;" 
-                        id="dropoffPlace_${escHtml(sid)}" value="${escHtml(tracking.dropoffPlace || '')}" 
+                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform: none;margin:12px 0 6px;">Drop-off Place</div>
+                    <input type="text" placeholder="Enter drop-off place" style="width:100%;padding:8px;border:1px solid #86efac;border-radius:6px;font-size:12px;"
+                        id="dropoffPlace_${escHtml(sid)}" value="${escHtml(tracking.dropoffPlace || '')}"
                         onchange="updateStudentTracking('${escHtml(sid)}', 'dropoffPlace', this.value)">
                 </div>
             </div>
@@ -1539,17 +1532,17 @@ window.updateStudentTracking = async (studentId, field, value) => {
     try {
         const v = vehicles.find(x => x.id === assigningVehicleId);
         if (!v) return;
-        
+
         const tracking = v.studentTracking || {};
         if (!tracking[studentId]) tracking[studentId] = {};
         tracking[studentId][field] = value;
-        
+
         const vRef = doc(db, "schools", adminId, "vehicles", assigningVehicleId);
         await updateDoc(vRef, {
             studentTracking: tracking,
             updatedAt: serverTimestamp()
         });
-        
+
         const fieldLabels = {
             pickupTime: 'Pickup time',
             dropoffTime: 'Drop-off time',
@@ -1570,10 +1563,10 @@ window.removeStudentFromVehicle = async (studentId) => {
     try {
         const v = vehicles.find(x => x.id === assigningVehicleId);
         if (!v) return;
-        
+
         const tracking = v.studentTracking || {};
         delete tracking[studentId];
-        
+
         const vRef = doc(db, "schools", adminId, "vehicles", assigningVehicleId);
         await updateDoc(vRef, {
             assignedStudentIds: arrayRemove(studentId),

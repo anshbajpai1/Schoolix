@@ -54,8 +54,8 @@ body.sx-admin-shell-enabled > :is(.navbar, .topbar, .main-header, .page-header) 
   border-right: 1px solid rgba(148, 163, 184, .26);
   background: linear-gradient(180deg, rgba(255, 255, 255, .94) 0%, rgba(248, 250, 253, .91) 58%, rgba(242, 246, 252, .94) 100%);
   box-shadow: 12px 0 34px rgba(15, 31, 58, .08), inset -1px 0 rgba(255,255,255,.76);
-  backdrop-filter: blur(18px) saturate(125%);
-  -webkit-backdrop-filter: blur(18px) saturate(125%);
+
+
   overflow: hidden;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -119,7 +119,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 
 .sx-admin-brand-name {
   color: var(--sx-shell-ink);
-  font: 900 16px/1.15 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 16px/1.15 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -129,7 +129,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 .sx-admin-brand-kicker {
   margin-top: 4px;
   color: var(--sx-shell-muted);
-  font: 700 12px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 700 12px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
@@ -151,8 +151,8 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 .sx-admin-nav-label {
   margin: 8px 10px;
   color: #7a8699;
-  font: 900 11px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
-  text-transform: uppercase;
+  font: 900 11px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
+  text-transform: none;
   transition: opacity 0.18s ease, visibility 0.18s ease, height 0.24s ease, margin 0.24s ease;
 }
 
@@ -168,7 +168,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   border-radius: 9px;
   color: #344054;
   text-decoration: none;
-  font: 800 13px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 13px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   white-space: nowrap;
   transition: grid-template-columns 0.24s ease, padding 0.24s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
@@ -221,7 +221,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   padding: 14px 18px;
   border-top: 1px solid var(--sx-shell-line);
   color: var(--sx-shell-muted);
-  font: 700 12px/1.4 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 700 12px/1.4 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
@@ -272,7 +272,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   z-index: 11999;
   display: none;
   background: rgba(15, 23, 42, 0.42);
-  backdrop-filter: blur(2px);
+
 }
 
 .sx-admin-header {
@@ -293,8 +293,8 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   border-radius: 0 0 8px 8px;
   background: rgba(255, 255, 255, .76);
   box-shadow: 0 8px 28px rgba(31, 55, 91, .10), inset 0 1px rgba(255,255,255,.8);
-  backdrop-filter: blur(16px) saturate(145%);
-  -webkit-backdrop-filter: blur(16px) saturate(145%);
+
+
   transform: translateZ(0);
 }
 
@@ -331,8 +331,8 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 
 .sx-admin-header-kicker {
   color: var(--sx-shell-muted);
-  font: 800 11px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
-  text-transform: uppercase;
+  font: 800 11px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
+  text-transform: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -341,7 +341,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 .sx-admin-header h1 {
   margin: 4px 0 0 !important;
   color: var(--sx-shell-ink) !important;
-  font: 900 22px/1.15 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font: 900 22px/1.15 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   letter-spacing: 0 !important;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -397,7 +397,7 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 
 .sx-admin-session-caret {
   color: var(--sx-shell-primary-dark);
-  font: 900 12px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 12px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-dropdown {
@@ -426,13 +426,13 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 
 .sx-admin-session-dropdown-head strong {
   color: var(--sx-shell-ink);
-  font: 900 13px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 13px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-dropdown-head small {
   margin-top: 4px;
   color: var(--sx-shell-muted);
-  font: 800 11px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 11px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-list {
@@ -482,13 +482,13 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
 }
 
 .sx-admin-session-option strong {
-  font: 900 13px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 13px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-option small {
   margin-top: 4px;
   color: var(--sx-shell-muted);
-  font: 800 11px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 11px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-state {
@@ -496,14 +496,14 @@ body.sx-admin-shell-hydrating .sx-admin-nav-link {
   border-radius: 999px;
   background: var(--sx-shell-soft);
   color: var(--sx-shell-muted);
-  font: 900 10px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 10px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-session-empty {
   padding: 18px 12px;
   color: var(--sx-shell-muted);
   text-align: center;
-  font: 800 12px/1.4 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 12px/1.4 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 body.sx-admin-shell-enabled :is(
@@ -579,14 +579,14 @@ body.sx-admin-shell-enabled :is(
 
 .sx-admin-meta-pill small {
   color: var(--sx-shell-muted);
-  font: 800 10px/1.15 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
-  text-transform: uppercase;
+  font: 800 10px/1.15 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
+  text-transform: none;
 }
 
 .sx-admin-meta-pill strong {
   margin-top: 2px;
   color: var(--sx-shell-ink);
-  font: 900 12px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 12px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-admin-header-actions {
@@ -610,7 +610,7 @@ body.sx-admin-shell-enabled :is(
   color: var(--sx-shell-primary-dark);
   background: #fff;
   text-decoration: none;
-  font: 900 12px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 12px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -645,7 +645,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   right: 20px;
   bottom: 20px;
   z-index: 2147481980;
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-ai-launcher {
@@ -660,7 +660,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   color: #fff;
   box-shadow: 0 18px 34px rgba(23, 70, 199, 0.26);
   cursor: pointer;
-  font: 900 13px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 13px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-ai-launcher:hover {
@@ -729,13 +729,13 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
 
 .sx-ai-head strong {
   color: #172033;
-  font: 900 15px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 15px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-ai-head small {
   margin-top: 3px;
   color: #667085;
-  font: 800 11px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 11px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-ai-close {
@@ -784,7 +784,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   color: #172033;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  font: 700 13px/1.45 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 700 13px/1.45 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   overflow-wrap: anywhere;
 }
 
@@ -811,7 +811,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   height: 6px;
   border-radius: 50%;
   background: #1746c7;
-  animation: sxAiPulse 0.9s infinite ease-in-out;
+
 }
 
 .sx-ai-typing span:nth-child(2) {
@@ -822,16 +822,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   animation-delay: 0.28s;
 }
 
-@keyframes sxAiPulse {
-  0%, 80%, 100% {
-    opacity: 0.32;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
-}
+
 
 .sx-ai-form {
   display: grid;
@@ -852,7 +843,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   color: #172033;
   background: #fff;
   outline: none;
-  font: 700 13px/1.35 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 700 13px/1.35 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-ai-form textarea:focus {
@@ -894,7 +885,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
   background: #172033;
   color: #fff;
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
-  font: 800 12px/1.35 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 12px/1.35 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.18s ease, transform 0.18s ease;
@@ -1311,7 +1302,7 @@ body.sx-admin-shell-enabled > :not(.sx-admin-sidebar):not(.sx-admin-menu-btn):no
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
   .sx-admin-header,
   .sx-admin-overlay {
-    backdrop-filter: none;
+
   }
 }
 
@@ -1347,16 +1338,16 @@ body.sx-admin-shell-enabled {
 }
 
 .sx-admin-sidebar {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
   will-change: transform;
   transition: transform 180ms cubic-bezier(.2, .8, .2, 1) !important;
 }
 
 .sx-admin-header,
 .sx-admin-overlay {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
 }
 
 .sx-admin-menu-btn {

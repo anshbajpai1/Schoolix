@@ -288,7 +288,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       display: grid; grid-template-columns: 1fr 110px 110px 40px;
       gap: 12px; padding: 0 4px; margin-bottom: 2px;
     }
-    .subject-head span { font-size: 11px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+    .subject-head span { font-size: 11px; font-weight: 700; color: var(--text-soft); text-transform: none; letter-spacing: 0; }
     .subject-row { display: grid; grid-template-columns: 1fr 110px 110px 40px; gap: 12px; align-items: center; }
     .subject-row input { margin: 0; }
     .row-del {
@@ -341,7 +341,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       box-shadow: var(--shadow-md);
     }
     .report .r-head { text-align: center; border-bottom: 2px solid var(--text); padding-bottom: 16px; margin-bottom: 22px; }
-    .report .r-brand { text-transform: uppercase; letter-spacing: .16em; color: var(--primary); font-weight: 700; font-size: 11px; }
+    .report .r-brand { text-transform: none; letter-spacing: 0; color: var(--primary); font-weight: 700; font-size: 11px; }
     .report .r-head h2 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; color: var(--text); }
     .report .r-head .r-sub { color: var(--text-muted); font-weight: 600; margin-top: 4px; font-size: 14px; }
     .report .r-head .r-year { color: var(--text-soft); font-size: 12.5px; margin-top: 2px; }
@@ -361,7 +361,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     @media (max-width: 620px) { .report .r-stats { grid-template-columns: repeat(2, 1fr); } }
     .report .r-stat { border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; background: var(--surface-2); }
     .report .r-stat b { display: block; font-size: 1.6rem; font-weight: 800; color: var(--primary); letter-spacing: -0.02em; }
-    .report .r-stat small { color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .report .r-stat small { color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0.03em; }
     .report .r-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 44px; }
     @media (max-width: 620px) { .report .r-sign { grid-template-columns: 1fr; gap: 40px; } }
     .report .r-sign div { text-align: center; border-top: 1.5px solid var(--text); padding-top: 8px; font-size: 12.5px; font-weight: 600; color: #334155; }
@@ -1180,7 +1180,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           body{font-family:'Inter',Arial,sans-serif;margin:24px;color:#0f172a;}
           .report{border:1px solid #d1d5db;border-radius:12px;padding:36px;}
           .r-head{text-align:center;border-bottom:2px solid #000;padding-bottom:14px;margin-bottom:20px;}
-          .r-brand{text-transform:uppercase;letter-spacing:.16em;color:#1d4ed8;font-weight:700;font-size:11px;}
+          .r-brand{text-transform: none;letter-spacing: 0;color:#1d4ed8;font-weight:700;font-size:11px;}
           .r-head h2{font-size:1.8rem;margin:4px 0;}
           .r-sub{color:#64748b;font-weight:600;}
           .r-year{color:#94a3b8;font-size:12px;}
@@ -1193,7 +1193,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           .r-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
           .r-stat{border:1px solid #e5e7eb;border-radius:10px;padding:12px;text-align:center;background:#f8fafc;}
           .r-stat b{display:block;font-size:1.4rem;color:#1d4ed8;}
-          .r-stat small{color:#64748b;font-size:11px;text-transform:uppercase;}
+          .r-stat small{color:#64748b;font-size:11px;text-transform: none;}
           .r-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px;}
           .r-sign div{text-align:center;border-top:1.5px solid #000;padding-top:8px;font-size:12px;}
           .r-foot{margin-top:24px;padding-top:12px;border-top:1px dashed #d1d5db;text-align:center;color:#94a3b8;font-size:11px;}

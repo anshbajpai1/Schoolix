@@ -639,7 +639,7 @@ button.sx-action-loading::after,
   border-radius: 7px;
   background: #fff;
   color: var(--sx-polish-text);
-  font: 800 13px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 13px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .sx-pagination__controls {
@@ -657,7 +657,7 @@ button.sx-action-loading::after,
   border-radius: 7px;
   background: var(--sx-polish-surface);
   color: var(--sx-polish-text);
-  font: 800 13px/1 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 800 13px/1 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -781,7 +781,7 @@ html, body {
 }
 
 body {
-  font-family: "Inter", "DM Sans", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Inter", "Segoe UI", "Segoe UI", Arial, sans-serif !important;
   background-image: none !important;
 }
 
@@ -805,7 +805,7 @@ body {
   border: 1px solid var(--sx-workspace-border) !important;
   border-radius: var(--sx-polish-radius) !important;
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.055) !important;
-  backdrop-filter: none !important;
+
 }
 
 /* Rectangular, consistent controls. */
@@ -1062,7 +1062,7 @@ body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.st
 
 body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+2)::after { background: #0e9384; }
 body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+3)::after { background: #dc6803; }
-body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+4)::after { background: #7f56d9; }
+body.sx-enterprise-ui:not(.sx-login-app):not(.sx-dark-portal) :is(.stat-card,.stat-item,.summary-card,.summary-item,.metric-card,.metric):nth-child(4n+4)::after { background: #2563eb; }
 
 body.sx-enterprise-ui:not(.sx-login-app) :is(.stat-number,.stat-value,.metric-value,.summary-value) {
   font-variant-numeric: tabular-nums;
@@ -1107,8 +1107,8 @@ body.sx-enterprise-ui:not(.sx-login-app) .sx-data-table th {
   padding: 12px 14px !important;
   font-size: 11px !important;
   font-weight: 800 !important;
-  letter-spacing: .045em !important;
-  text-transform: uppercase;
+  letter-spacing: 0 !important;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -1145,7 +1145,7 @@ body.sx-enterprise-ui:not(.sx-login-app) :is(.empty-state,.no-data,.empty,.sx-em
 
 body.sx-enterprise-ui:not(.sx-login-app) :is(.modal,.modal-overlay,.dialog-overlay,.popup-overlay,.delete-modal,.receipt-modal).sx-modal-active {
   background-color: rgba(10, 20, 38, .58) !important;
-  backdrop-filter: none;
+
 }
 
 body.sx-enterprise-ui:not(.sx-login-app) .sx-modal-scroll-surface {
@@ -1202,8 +1202,8 @@ body :is(.card, .panel, .stat-card, .summary-card, .metric-card, .insight-card):
 
 /* Navigation drawers stay GPU-friendly across admin, student, library and accounts portals. */
 body :is(.sidebar,.teacher-sidebar,.side-nav,.library-sidebar,.notice-sidebar) {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
   will-change: transform;
   transition-duration: 180ms !important;
   transition-timing-function: cubic-bezier(.2, .8, .2, 1) !important;
@@ -1218,8 +1218,8 @@ body.sx-admin-app[data-sx-title="Students"] :is(
   .top-bar, .controls, .promotion-banner, .stat-card, .insight-card,
   .students-grid, .pagination, .students-header, .modal-content, .sx-admin-sidebar
 ) {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
 }
 
 body.sx-admin-app[data-sx-title="Students"] :is(
@@ -1250,8 +1250,8 @@ body.sx-admin-app[data-sx-title="Students"] .top-bar {
     radial-gradient(circle at 84% 16%, rgba(69, 197, 190, .34), transparent 34%) !important;
   color: #ffffff !important;
   box-shadow: 0 12px 34px rgba(13, 31, 65, .22), inset 0 1px rgba(255,255,255,.08) !important;
-  backdrop-filter: blur(14px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
 }
 
 body.sx-admin-app[data-sx-title="Students"] .top-bar :is(h1,h2,h3,strong) {
@@ -1325,7 +1325,7 @@ body:not(.sx-dark-portal) {
     radial-gradient(circle at 8% 4%, rgba(75, 126, 245, .22), transparent 32%),
     radial-gradient(circle at 78% 28%, rgba(79, 112, 246, .18), transparent 30%),
     radial-gradient(circle at 94% 78%, rgba(46, 196, 182, .16), transparent 31%),
-    radial-gradient(circle at 34% 92%, rgba(126, 87, 194, .13), transparent 32%),
+    radial-gradient(circle at 34% 92%, rgba(59,130,246, .13), transparent 32%),
     linear-gradient(145deg, #edf3fb 0%, #f7f9fc 48%, #e9f0f8 100%) !important;
   background-attachment: fixed !important;
 }
@@ -1347,24 +1347,24 @@ body:not(.sx-dark-portal) :is(
   background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(248,250,252,.64)) !important;
   border-color: var(--sx-glass-border) !important;
   box-shadow: var(--sx-glass-shadow) !important;
-  backdrop-filter: blur(10px) saturate(135%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(135%) !important;
+
+
 }
 
 body:not(.sx-dark-portal) :is(.navbar,.topbar,.top-bar,.header,.app-header,.page-header,.library-page-topbar,.notice-page-topbar) {
   background: rgba(255, 255, 255, .76) !important;
   border-color: rgba(255, 255, 255, .82) !important;
   box-shadow: 0 5px 20px rgba(31, 55, 91, .08) !important;
-  backdrop-filter: blur(16px) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(145%) !important;
+
+
 }
 
 body:not(.sx-dark-portal) :is(.sidebar,.side-nav,.navigation,.nav-panel,.library-sidebar,.notice-sidebar) {
   background: rgba(255, 255, 255, .74) !important;
   border-color: rgba(255, 255, 255, .78) !important;
   box-shadow: 8px 0 26px rgba(31, 55, 91, .09) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
 }
 
 body:not(.sx-dark-portal) :is(input,select,textarea,.form-control,.search-input,.filter-select) {
@@ -1386,8 +1386,8 @@ body:not(.sx-dark-portal) :is(.modal-content,.modal-card,.modal-box,.dialog-cont
   background: rgba(255, 255, 255, .86) !important;
   border-color: rgba(255, 255, 255, .9) !important;
   box-shadow: 0 24px 70px rgba(22, 39, 70, .24), inset 0 1px 0 #fff !important;
-  backdrop-filter: blur(20px) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(145%) !important;
+
+
 }
 
 /* Login uses the same glass language without restoring excessive rounding. */
@@ -1396,8 +1396,8 @@ body.sx-login-app :is(.panel-left,.panel-right,.form-card,.mobile-brand) {
   background: rgba(255, 255, 255, .56) !important;
   border-color: rgba(255, 255, 255, .8) !important;
   box-shadow: 0 16px 46px rgba(31, 55, 91, .12) !important;
-  backdrop-filter: blur(18px) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+
+
 }
 
 @media (max-width: 760px) {
@@ -1407,13 +1407,13 @@ body.sx-login-app :is(.panel-left,.panel-right,.form-card,.mobile-brand) {
     .widget, .control-card, .table-wrapper, .sx-chart-card, [class*="-card"]
   ) {
     background: rgba(255, 255, 255, .88) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+
   }
 
   body:not(.sx-dark-portal) :is(.navbar,.topbar,.top-bar,.header,.app-header,.page-header,.library-page-topbar,.notice-page-topbar,.sidebar,.side-nav,.library-sidebar) {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+
   }
 }
 

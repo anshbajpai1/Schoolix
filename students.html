@@ -97,7 +97,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Students - Schoolix Dashboard</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="schoolix-theme.css">
 
@@ -351,8 +351,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       display: inline-block;
       font-size: 11px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      text-transform: none;
+      letter-spacing: 0;
       padding: 4px 10px;
       border-radius: 999px;
       background: linear-gradient(135deg, #fecaca, #fca5a5);
@@ -446,7 +446,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-size: 12px;
       color: #475569;
       font-weight: 700;
-      text-transform: uppercase;
+      text-transform: none;
       letter-spacing: 0.03em;
     }
 
@@ -863,7 +863,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     body {
-      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', 'Segoe UI', sans-serif;
       background:
         radial-gradient(circle at top left, rgba(49, 94, 251, 0.18), transparent 32%),
         radial-gradient(circle at top right, rgba(15, 159, 98, 0.10), transparent 22%),
@@ -887,8 +887,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background: var(--surface);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+
+
     }
 
     .top-bar {
@@ -924,8 +924,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       gap: 6px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       opacity: 0.78;
       margin-bottom: 10px;
     }
@@ -1150,8 +1150,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-size: 12px;
       font-weight: 800;
       color: var(--muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       margin-bottom: 10px;
     }
 
@@ -1231,8 +1231,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       margin-bottom: 8px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       color: var(--primary-dark);
     }
 
@@ -1505,8 +1505,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       grid-template-columns: 70px 1.7fr 1fr 1fr 1fr 1.1fr 1.15fr 1.1fr 1fr 1fr 230px;
       gap: 14px;
       font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       color: rgba(255, 255, 255, 0.9);
     }
 
@@ -1649,7 +1649,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     .modal {
       background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(6px);
+
     }
 
     .modal-content {
@@ -1863,8 +1863,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       border: 1px solid rgba(188, 201, 220, 0.8);
       border-radius: var(--student-radius);
       box-shadow: var(--student-shadow);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
+
+
     }
 
     body .top-bar {
@@ -1909,7 +1909,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-primary-deep);
       font-size: 12px;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .header-text h1 {
@@ -1992,8 +1992,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-muted);
       font-size: 11px;
       font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       margin-bottom: 3px;
     }
 
@@ -2038,9 +2038,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-muted);
       font-size: 11px;
       font-weight: 900;
-      letter-spacing: 0.06em;
+      letter-spacing: 0;
       line-height: 1.2;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .filter-field.compact {
@@ -2273,7 +2273,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-muted);
       font-size: 12px;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .stat-number {
@@ -2343,7 +2343,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-primary-deep);
       font-size: 11px;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .insight-head h3 {
@@ -2434,7 +2434,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: #627088;
       font-size: 11px;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .students-header input[type="checkbox"],
@@ -2512,7 +2512,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-family: inherit;
       padding: 0;
       cursor: pointer;
-      text-transform: uppercase;
+      text-transform: none;
       overflow: hidden;
     }
 
@@ -2549,7 +2549,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       padding: 0;
       cursor: pointer;
       overflow: hidden;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .photo-preview-content {
@@ -2747,7 +2747,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     body .modal {
       background: rgba(15, 23, 42, 0.54);
-      backdrop-filter: blur(4px);
+
     }
 
     body .modal-content {
@@ -2872,7 +2872,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--student-muted);
       font-size: 11px;
       font-weight: 900;
-      text-transform: uppercase;
+      text-transform: none;
     }
 
     body .detail-actions {
@@ -2990,7 +2990,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         color: var(--student-muted);
         font-size: 12px;
         font-weight: 900;
-        text-transform: uppercase;
+        text-transform: none;
       }
 
       body .student-cell[data-label=""] {
@@ -3012,7 +3012,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         color: var(--student-muted);
         font-size: 12px;
         font-weight: 900;
-        text-transform: uppercase;
+        text-transform: none;
       }
 
       body .student-identity {
@@ -3126,7 +3126,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     body.sx-admin-app {
-      font-family: "DM Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
         linear-gradient(rgba(36, 87, 255, 0.035) 1px, transparent 1px),
@@ -3180,8 +3180,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       border: 1px solid var(--border);
       background: var(--surface);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(18px) saturate(1.12);
-      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+
+
     }
 
     body.sx-admin-app .top-bar {
@@ -3232,8 +3232,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     body.sx-admin-app .stat-label,
     body.sx-admin-app .filter-field > span,
     body.sx-admin-app .detail-field label {
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     body.sx-admin-app .hero-eyebrow {
@@ -3370,8 +3370,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      text-transform: none;
+      letter-spacing: 0;
     }
 
     body.sx-admin-app .hero-metric strong {
@@ -3780,11 +3780,11 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background: rgba(248, 250, 252, 0.96);
       color: #667085;
       border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+
+
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.05em;
+      letter-spacing: 0;
     }
 
     body.sx-admin-app #studentsList {
@@ -3915,8 +3915,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     body.sx-admin-app .modal {
       background: rgba(8, 13, 24, 0.58);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+
+
     }
 
     body.sx-admin-app .modal-content {
@@ -4023,8 +4023,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         color: var(--muted);
         font-size: 11px;
         font-weight: 800;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        letter-spacing: 0;
+        text-transform: none;
       }
 
       body.sx-admin-app .student-cell[data-label=""] {
@@ -4196,7 +4196,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       border-top: 1px solid #eaecf0;
       border-bottom: 1px solid #eaecf0;
       font-size: 11px;
-      letter-spacing: .055em;
+      letter-spacing: 0;
     }
 
     body.sx-admin-app #studentsList,
@@ -4470,7 +4470,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <div class="promotion-controls" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
           <div style="display:flex; flex-direction:column; gap:4px; min-width:220px;">
             <label for="promotionResultSession"
-              style="font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Choose Result
+              style="font-size:12px; color:#64748b; text-transform: none; letter-spacing: 0;">Choose Result
               From</label>
             <select id="promotionResultSession" onchange="refreshPromotionResultOptions()"
               style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; min-width:220px;">
@@ -4479,7 +4479,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           </div>
           <div style="display:flex; flex-direction:column; gap:4px; min-width:220px;">
             <label for="promotionResultTerm"
-              style="font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Exam /
+              style="font-size:12px; color:#64748b; text-transform: none; letter-spacing: 0;">Exam /
               Term</label>
             <select id="promotionResultTerm"
               style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; min-width:220px;">
@@ -5444,9 +5444,9 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         const toast = document.createElement('div');
         toast.textContent = message;
         toast.style.cssText = `
-    position: fixed; top: 20px; right: 20px; 
-    padding: 15px 25px; border-radius: 12px; 
-    color: white; z-index: 10000; 
+    position: fixed; top: 20px; right: 20px;
+    padding: 15px 25px; border-radius: 12px;
+    color: white; z-index: 10000;
     font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
   `;
         if (type === 'success') toast.style.background = 'linear-gradient(135deg, #48bb78, #38a169)';
@@ -6812,7 +6812,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             : placement ? '<span class="tc-badge" style="background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe;">Session Class</span>' : '';
 
           return `
-    
+
       <div class="student-row ${tc ? 'row-tc' : ''}">
        <div class="student-cell" data-label="">
   <input type="checkbox" class="selectStudent" value="${s.id}" ${selectedIds.has(s.id) ? 'checked' : ''} onchange="handleStudentSelection('${s.id}', this.checked)">

@@ -185,8 +185,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--primary-deep);
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       margin-bottom: 14px
     }
 
@@ -294,8 +294,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     .config-pill strong {
-      text-transform: uppercase;
-      letter-spacing: .06em;
+      text-transform: none;
+      letter-spacing: 0;
       line-height: 1.2;
     }
 
@@ -500,8 +500,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--text-soft);
       font-size: 12px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      text-transform: none;
+      letter-spacing: 0;
       margin-bottom: 6px
     }
 
@@ -672,7 +672,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       position: fixed;
       inset: 0;
       background: rgba(9, 16, 29, .56);
-      backdrop-filter: blur(6px);
+
       z-index: 1000;
       padding: 24px;
       justify-content: center;
@@ -697,7 +697,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       position: sticky;
       top: 0;
       background: rgba(255, 255, 255, .97);
-      backdrop-filter: blur(6px);
+
       z-index: 2
     }
 
@@ -769,8 +769,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     .fee-config-grid .field label {
       color: var(--text-soft);
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      text-transform: none;
+      letter-spacing: 0;
       font-size: 11px;
     }
 
@@ -789,7 +789,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       padding: 16px 26px;
       border-top: 1px solid var(--line);
       background: rgba(255, 255, 255, .96);
-      backdrop-filter: blur(8px);
+
       display: flex;
       justify-content: flex-end;
       gap: 12px;
@@ -867,8 +867,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       display: block;
       margin-bottom: 3px;
       font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .06em
+      text-transform: none;
+      letter-spacing: 0
     }
 
     .status-chip {
@@ -880,8 +880,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       border-radius: 999px;
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: .04em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       background: #edf3fb;
       color: #23486f
     }
@@ -3309,7 +3309,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div style="font-family:'Aptos','Segoe UI',Tahoma,sans-serif;max-width:860px;margin:0 auto;background:#fff;color:#142033">
               <div style="padding:28px 30px;background:linear-gradient(135deg,#0f6cbd,#0b4f8a);color:#fff;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
                 <div>
-                  <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;font-weight:700">${escapeHtml(schoolName)}</div>
+                  <div style="font-size:11px;letter-spacing: 0;text-transform: none;opacity:.8;font-weight:700">${escapeHtml(schoolName)}</div>
                   <h1 style="margin:8px 0 4px;font-size:26px;letter-spacing:-.02em">${isSingle ? "Fee Receipt" : "Full Fee Statement"}</h1>
                   <div style="font-size:13px;opacity:.85">Receipt No: ${receiptNo}</div>
                 </div>
@@ -3321,7 +3321,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
               <div style="padding:20px 30px;background:#eef3fb;border-bottom:1px solid #d7e2f2;display:grid;grid-template-columns:1fr 1fr;gap:20px">
                 <div>
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#3b4b63;font-weight:700;margin-bottom:8px">Student Details</div>
+                  <div style="font-size:11px;text-transform: none;letter-spacing: 0;color:#3b4b63;font-weight:700;margin-bottom:8px">Student Details</div>
                   <table style="font-size:13px;border-collapse:collapse;width:100%">
                     <tr><td style="padding:3px 0;font-weight:700;width:38%">Name</td><td>${escapeHtml(student.name || "N/A")}</td></tr>
                     <tr><td style="padding:3px 0;font-weight:700">Student ID</td><td>${escapeHtml(student.studentId || "N/A")}</td></tr>
@@ -3330,7 +3330,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                   </table>
                 </div>
                 <div>
-                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5e6c80;font-weight:700;margin-bottom:8px">Parent Details</div>
+                  <div style="font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;font-weight:700;margin-bottom:8px">Parent Details</div>
                   <table style="font-size:13px;border-collapse:collapse;width:100%">
                     <tr><td style="padding:3px 0;font-weight:700;width:38%">Father</td><td>${escapeHtml(student.father || "N/A")}</td></tr>
                     <tr><td style="padding:3px 0;font-weight:700">Father Phone</td><td>${escapeHtml(student.fatherPhone || student.phone || "N/A")}</td></tr>
@@ -3348,13 +3348,13 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                   <table style="width:100%;border-collapse:collapse;font-size:13px">
                     <thead>
                       <tr style="background:#e8eff8">
-                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Month</th>
-                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Assigned</th>
-                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Applied</th>
-                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Extra</th>
-                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Due</th>
-                        <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Status</th>
-                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5e6c80;border-bottom:2px solid #d8e2f0">Remarks</th>
+                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Month</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Assigned</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Applied</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Extra</th>
+                        <th style="padding:10px 12px;text-align:right;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Due</th>
+                        <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Status</th>
+                        <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform: none;letter-spacing: 0;color:#5e6c80;border-bottom:2px solid #d8e2f0">Remarks</th>
                       </tr>
                     </thead>
                     <tbody>${rowsHtml}</tbody>
@@ -3458,7 +3458,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div style="font-family:'Aptos','Segoe UI',Tahoma,sans-serif;max-width:900px;margin:0 auto;padding:28px 30px;color:#142033">
               <div style="border:2px solid #0f6cbd;border-radius:22px;overflow:hidden">
                 <div style="padding:24px 30px;background:linear-gradient(135deg,#0f6cbd,#0b4f8a);color:#fff">
-                  <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.88">${escapeHtml(schoolName)}</div>
+                  <div style="font-size:13px;letter-spacing: 0;text-transform: none;font-weight:700;opacity:.88">${escapeHtml(schoolName)}</div>
                   <h1 style="margin:10px 0 6px;font-size:32px;letter-spacing:-.02em">Student Registration Form</h1>
                   <p style="margin:0;font-size:14px;opacity:.88">Registration ID: ${escapeHtml(student.studentId || student.id || "N/A")}</p>
                 </div>
@@ -3494,10 +3494,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                   <div style="border:1px solid #d8e2f0;border-radius:18px;padding:18px 20px;background:#f7fbfd">
                     <h3 style="margin:0 0 12px;font-size:18px;color:#0b4f8a">Fee Summary</h3>
                     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
-                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Assigned</div><div style="font-size:22px;font-weight:800;margin-top:6px">${formatCurrency(feeSummary.total)}</div></div>
-                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Applied</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#12805c">${formatCurrency(feeSummary.applied)}</div></div>
-                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Extra</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#0d9488">${formatCurrency(feeSummary.extra)}</div></div>
-                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform:uppercase;color:#5e6c80;font-weight:700">Due</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#b42318">${formatCurrency(feeSummary.due)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform: none;color:#5e6c80;font-weight:700">Assigned</div><div style="font-size:22px;font-weight:800;margin-top:6px">${formatCurrency(feeSummary.total)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform: none;color:#5e6c80;font-weight:700">Applied</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#12805c">${formatCurrency(feeSummary.applied)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform: none;color:#5e6c80;font-weight:700">Extra</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#0d9488">${formatCurrency(feeSummary.extra)}</div></div>
+                      <div style="background:#fff;border:1px solid #d8e2f0;border-radius:14px;padding:14px"><div style="font-size:12px;text-transform: none;color:#5e6c80;font-weight:700">Due</div><div style="font-size:22px;font-weight:800;margin-top:6px;color:#b42318">${formatCurrency(feeSummary.due)}</div></div>
                     </div>
                   </div>
                   <div style="margin-top:24px;padding-top:18px;border-top:1px solid #d8e2f0;color:#5e6c80;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -3571,7 +3571,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           resetFeeForm();
         };
 
-        
+
         // ── SESSION DROPDOWN ────────────────────────────────────────────────
         async function loadSessionDropdown() {
           const sel = $("currentYear");

@@ -222,7 +222,7 @@
   align-items: center;
   gap: 9px;
   padding: 9px 11px;
-  font: 900 12px/1.2 "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  font: 900 12px/1.2 "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif;
   text-align: left;
   cursor: pointer;
   box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
@@ -361,7 +361,7 @@ html.is-native-app #downloadAndroidApp {
   place-items: center;
   padding: 20px;
   background: rgba(5, 15, 35, .74);
-  backdrop-filter: blur(6px);
+
 }
 
 .schoolix-unexpected-error-card {

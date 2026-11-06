@@ -1,5 +1,5 @@
 :root {
-    --bg: linear-gradient(180deg, #eef4ff 0%, #f8fbff 52%, #eef2ff 100%);
+    --bg: linear-gradient(180deg, #eef4ff 0%, #f8fbff 52%, #eff6ff 100%);
     --panel: rgba(255, 255, 255, 0.92);
     --panel-strong: #ffffff;
     --panel-soft: #f4f8ff;
@@ -49,8 +49,8 @@ body {
     border: 1px solid var(--line);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+
+
 }
 
 .hero {
@@ -90,8 +90,8 @@ body {
     color: var(--primary-dark);
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     margin-bottom: 16px;
 }
 
@@ -128,8 +128,8 @@ body {
 .stat-label {
     color: var(--text-soft);
     font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    text-transform: none;
+    letter-spacing: 0;
     font-weight: 700;
     margin-bottom: 10px;
 }
@@ -506,7 +506,7 @@ textarea {
     place-items: center;
     overflow: hidden;
     font-weight: 900;
-    text-transform: uppercase;
+    text-transform: none;
     flex: 0 0 auto;
     cursor: pointer;
     padding: 0;
@@ -603,8 +603,8 @@ textarea {
 .mini-stat span {
     display: block;
     font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    text-transform: none;
+    letter-spacing: 0;
     color: var(--text-soft);
     font-weight: 700;
     margin-bottom: 8px;
@@ -640,8 +640,8 @@ textarea {
     border-radius: 999px;
     font-size: 12px;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .status-paid,
@@ -773,8 +773,8 @@ textarea {
     inset: 0;
     z-index: 9000;
     background: rgba(15, 23, 42, 0.52);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+
+
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -900,8 +900,8 @@ textarea {
     text-align: left;
     font-weight: 700;
     font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    text-transform: none;
+    letter-spacing: 0;
     color: var(--text-soft);
     border-bottom: 1px solid var(--line);
     white-space: nowrap;

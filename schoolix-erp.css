@@ -67,7 +67,7 @@ body.sx-login-app .brand-logo,
 body.sx-login-app .hero-heading,
 body.sx-login-app .stat-num,
 body.sx-login-app .mobile-brand-logo {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   color: var(--erp-ink) !important;
 }
 
@@ -148,7 +148,7 @@ body.sx-login-app .form-welcome {
 }
 
 body.sx-login-app .form-title {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   color: var(--erp-ink) !important;
   font-size: 1.8rem !important;
 }
@@ -246,7 +246,7 @@ body.sx-login-app .mobile-brand-tag {
 
 /* Admin dashboard */
 body.sx-admin-app {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
 }
 
 body.sx-admin-app .page-wrap {
@@ -308,7 +308,7 @@ body.sx-admin-app .hero-badge {
 }
 
 body.sx-admin-app .school-name {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   font-size: clamp(1.8rem, 3vw, 2.35rem) !important;
   line-height: 1.1 !important;
   color: var(--erp-ink) !important;
@@ -359,7 +359,7 @@ body.sx-admin-app .stat-icon {
 }
 
 body.sx-admin-app .stat-number {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   color: var(--erp-ink) !important;
   font-size: 1.85rem !important;
 }
@@ -419,7 +419,7 @@ body.sx-admin-app .card:hover .card-icon {
 }
 
 body.sx-admin-app .card-title {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   color: var(--erp-ink) !important;
   font-weight: 800 !important;
 }
@@ -473,7 +473,7 @@ body.sx-admin-tool {
     linear-gradient(180deg, rgba(31, 94, 255, 0.05), transparent 300px),
     var(--erp-bg) !important;
   color: var(--erp-ink) !important;
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
 }
 
 body.sx-admin-tool * {
@@ -485,7 +485,7 @@ body.sx-admin-tool .topbar {
   background: rgba(255, 255, 255, 0.96) !important;
   border-bottom: 1px solid var(--erp-line) !important;
   box-shadow: 0 2px 12px rgba(16, 24, 40, 0.05) !important;
-  backdrop-filter: blur(12px);
+
 }
 
 body.sx-admin-tool .topbar-logo {
@@ -498,7 +498,7 @@ body.sx-admin-tool .page-header h1,
 body.sx-admin-tool .period-num,
 body.sx-admin-tool .teacher-view-title,
 body.sx-admin-tool .empty-state h3 {
-  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif !important;
+  font-family: "Segoe UI", "Inter", "Segoe UI", Arial, sans-serif !important;
   color: var(--erp-ink) !important;
 }
 
@@ -718,7 +718,7 @@ body.sx-settings-app .card {
   border: 1px solid var(--erp-line) !important;
   border-radius: var(--erp-radius) !important;
   box-shadow: var(--erp-shadow-soft) !important;
-  backdrop-filter: none !important;
+
 }
 
 body.sx-settings-app .page-header {

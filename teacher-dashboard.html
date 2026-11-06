@@ -298,7 +298,7 @@ body {
   font-family: inherit;
   font-size: 34px;
   font-weight: 900;
-  text-transform: uppercase;
+  text-transform: none;
   cursor: pointer;
   padding: 0;
   box-shadow: 0 22px 55px rgba(6, 14, 52, 0.28), 0 0 0 8px rgba(255,255,255,0.08);
@@ -324,8 +324,8 @@ body {
 .header-eyebrow {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   opacity: 0.72;
   margin-bottom: 8px;
 }
@@ -354,7 +354,7 @@ body {
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 .header-actions {
   position: relative;
@@ -395,8 +395,8 @@ body {
 .stat-label {
   font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--muted);
   margin-bottom: 10px;
   display: flex;
@@ -453,8 +453,8 @@ body {
 }
 .sal-box .sal-lbl {
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--muted);
   font-weight: 700;
   margin-top: 4px;
@@ -587,7 +587,7 @@ body {
   font-family: inherit;
   padding: 0;
   cursor: pointer;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .student-face img {
@@ -621,8 +621,8 @@ body {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 .badge-paid { background: var(--success-soft); color: var(--success); }
 .badge-due { background: var(--danger-soft); color: var(--danger); }
@@ -687,7 +687,7 @@ body {
 }
 .att-select:disabled {
   cursor: not-allowed;
-  background: #eef2ff;
+  background: #eff6ff;
   color: var(--muted);
 }
 
@@ -705,7 +705,7 @@ body {
   text-align: center;
 }
 .att-mini strong { font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 2px; }
-.att-mini span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.att-mini span { font-size: 11px; text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 700; }
 .att-mini.p strong { color: var(--success); }
 .att-mini.a strong { color: var(--danger); }
 .att-mini.h strong { color: var(--warning); }
@@ -818,8 +818,8 @@ body {
   font-size: 12px;
   font-weight: 700;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 .marks-input {
   padding: 10px 12px;
@@ -879,8 +879,8 @@ body {
   font-size: 12px;
   font-weight: 700;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 .term-select {
   padding: 11px 14px;
@@ -1007,7 +1007,7 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(13,17,54,0.55);
-  backdrop-filter: blur(4px);
+
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -1095,8 +1095,8 @@ body {
 .class-teacher-card .role {
   font-size: 12px;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 .class-teacher-card strong {
   display: block;
@@ -1344,8 +1344,8 @@ body {
 .nav-section {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: #4d6b94;
   padding: 10px 10px 6px;
 }
@@ -1417,7 +1417,7 @@ body {
 .topbar {
   min-height: var(--topbar-h);
   background: rgba(8,13,20,0.92);
-  backdrop-filter: blur(16px);
+
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -1524,7 +1524,7 @@ body {
 .header-eyebrow {
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 .header-name {
   font-family: inherit;
@@ -1743,7 +1743,7 @@ body {
 
   .timetable-table-wrap{
     overflow-x: auto;
-    
+
   }
 
   /* Modal */
@@ -2351,7 +2351,7 @@ body[data-active-tab="home"] .tabs-wrap {
     <div id="salPaymentHistory" style="margin-top:12px;"></div>
   </div>
 
- 
+
 
   <!-- MAIN TABS -->
   <div class="tabs-wrap">
@@ -2389,7 +2389,7 @@ body[data-active-tab="home"] .tabs-wrap {
           <button class="btn btn-success btn-sm" onclick="printClassTimetable()"><span class="ui-icon" data-icon="printer"></span>Print Class</button>
         </div>
       </div>
-      
+
       <div class="timetable-container">
         <div class="timetable-header">
           <h3><span class="section-heading"><span class="ui-icon" data-icon="school"></span>Class Teacher Responsibilities</span></h3>
@@ -2397,7 +2397,7 @@ body[data-active-tab="home"] .tabs-wrap {
             <!-- Class teacher assignments will be loaded here -->
           </div>
         </div>
-        
+
         <div class="timetable-grid" id="teacherTimetable">
           <div class="empty-state">Loading timetable...</div>
         </div>
@@ -2444,7 +2444,7 @@ body[data-active-tab="home"] .tabs-wrap {
     <div class="tab-content" id="attendanceTab">
       <div class="att-toolbar-row">
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Date</label>
+          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform: none;letter-spacing: 0;display:block;margin-bottom:6px;">Date</label>
           <input type="date" id="attendanceDate" class="search-input" style="width:auto;">
         </div>
         <button class="btn btn-success btn-sm" data-attendance-edit-control="true" onclick="bulkMark('Present')"><span class="ui-icon" data-icon="check-circle"></span>All Present</button>
@@ -2523,11 +2523,11 @@ body[data-active-tab="home"] .tabs-wrap {
     <div class="modal-body">
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
         <div style="flex:1;min-width:220px;">
-          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Subject Name</label>
+          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform: none;letter-spacing: 0;display:block;margin-bottom:6px;">Subject Name</label>
           <input class="search-input" id="newSubjectInput" placeholder="e.g. Mathematics">
         </div>
         <div style="width:160px;">
-          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Max Marks</label>
+          <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform: none;letter-spacing: 0;display:block;margin-bottom:6px;">Max Marks</label>
           <input class="search-input" id="newSubjectMaxInput" type="number" min="1" step="1" value="100" placeholder="100">
         </div>
         <button class="btn btn-success" onclick="addSubjectGlobal()">Add</button>
@@ -3466,9 +3466,9 @@ function getSubjectMarkEntry(termMarks, subject) {
     };
   }
   // No entry - return null/undefined to indicate empty
-  return { 
-    obtained: null, 
-    maxMarks: getSubjectMaxMarks(subject) 
+  return {
+    obtained: null,
+    maxMarks: getSubjectMaxMarks(subject)
   };
 }
 // ── AUTH ───────────────────────────────────────────────────────────
@@ -3823,11 +3823,11 @@ async function loadSessions({ force = false } = {}) {
 function populateSessionSelector() {
   const selector = document.getElementById("sessionSelector");
   if (!selector) return;
-  
+
   selector.innerHTML = `<option value="">${teacherSessionLoadError ? "Unable to load school sessions" : "Select session"}</option>`;
-  
+
   const sortedSessions = sortSessions(allSessions);
-  
+
   sortedSessions.forEach(session => {
     const option = document.createElement("option");
     option.value = session.id;
@@ -3843,7 +3843,7 @@ function populateSessionSelector() {
 function updateSessionBadge() {
   const badge = document.getElementById("currentSessionBadge");
   if (!badge) return;
-  
+
   if (sessionContextReady && activeSessionId && activeSessionLabel) {
     const prefix = schoolActiveSessionId && activeSessionId !== schoolActiveSessionId ? "Viewing" : "Active";
     badge.textContent = `${prefix}: ${activeSessionLabel}${activeSessionLocked ? " (Locked)" : ""}`;
@@ -3857,15 +3857,15 @@ function updateSessionBadge() {
 function populateHeaderSessionSelector() {
   const selector = document.getElementById("headerSessionSelector");
   if (!selector) return;
-  
+
   selector.innerHTML = `<option value="">${teacherSessionLoadError ? "Unable to load school sessions" : "No school sessions configured"}</option>`;
-  
+
   if (!allSessions.length) return;
-  
+
   const sortedSessions = sortSessions(allSessions);
-  
+
   selector.innerHTML = '';
-  
+
   sortedSessions.forEach(session => {
     const option = document.createElement("option");
     option.value = session.id;
@@ -3881,19 +3881,19 @@ function populateHeaderSessionSelector() {
 window.onHeaderSessionChange = async function() {
   const selector = document.getElementById("headerSessionSelector");
   if (!selector) return;
-  
+
   const selectedSessionId = selector.value;
   if (!selectedSessionId) return;
-  
+
   if (!setSelectedSession(selectedSessionId)) return;
   teacherUserSelectedSessionId = activeSessionId === schoolActiveSessionId ? "" : activeSessionId;
   sessionContextReady = Boolean(adminId && activeSessionId && findTeacherSessionByValue(activeSessionId));
-  
+
   updateSessionBadge();
   populateSessionSelector();
   resetTeacherSessionDependentState();
   applySessionLockState();
-  
+
   // Reload data for new session
   await loadEverything();
 };
@@ -3901,19 +3901,19 @@ window.onHeaderSessionChange = async function() {
 window.onSessionChange = async function() {
   const selector = document.getElementById("sessionSelector");
   if (!selector) return;
-  
+
   const selectedSessionId = selector.value;
   if (!selectedSessionId) return;
-  
+
   if (!setSelectedSession(selectedSessionId)) return;
   teacherUserSelectedSessionId = activeSessionId === schoolActiveSessionId ? "" : activeSessionId;
   sessionContextReady = Boolean(adminId && activeSessionId && findTeacherSessionByValue(activeSessionId));
-  
+
   updateSessionBadge();
   populateHeaderSessionSelector();
   resetTeacherSessionDependentState();
   applySessionLockState();
-  
+
   // Reload data for new session
   await loadEverything();
 };
@@ -4059,7 +4059,7 @@ async function loadFees() {
 async function loadAllAttendance() {
   const visibleStudentIds = getVisibleStudentIds();
   if (!visibleStudentIds.size) { allAttendance = []; return; }
-  
+
   const snap = await getDocs(collection(db, "schools", adminId, "attendance"));
   allAttendance = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
@@ -4840,7 +4840,7 @@ window.loadSalaryData = async function() {
     $("salProgressLabel").textContent = `${pct}% paid`;
     const payments = Array.isArray(salaryRecord.payments) ? salaryRecord.payments : [];
     if (payments.length) {
-      $("salPaymentHistory").innerHTML = `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Payment History</div>
+      $("salPaymentHistory").innerHTML = `<div style="font-size:12px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--muted);margin-bottom:8px;">Payment History</div>
         ${payments.slice().reverse().map(p => `<div style="display:flex;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;background:var(--surface2);">
           <div><strong style="font-size:14px;">${fmt(p.amount)}</strong><div style="font-size:12px;color:var(--muted);">${p.note || "Salary payment"}</div></div>
           <div style="text-align:right;font-size:12px;color:var(--muted);">${p.paymentDate ? new Date(p.paymentDate+"T00:00").toLocaleDateString("en-IN") : "Not available"}</div>
@@ -4970,8 +4970,8 @@ window.loadReportTab = async function() {
    const termMarks = marksDoc.terms?.[marksTermKey] || (!activeSessionId ? (marksDoc.terms?.[activeTermKey] || marksDoc.terms?.[term.label]) : {}) || {};
 const inputs = subjects.map(sub => {
   const entry = getSubjectMarkEntry(termMarks, sub);
-  const displayValue = (entry.obtained != null && entry.obtained !== "" && !isNaN(entry.obtained)) 
-    ? Number(entry.obtained) 
+  const displayValue = (entry.obtained != null && entry.obtained !== "" && !isNaN(entry.obtained))
+    ? Number(entry.obtained)
     : "";
   const maxMarks = entry.maxMarks || getSubjectMaxMarks(sub);
   return `
@@ -5092,7 +5092,7 @@ window.saveMark = async function(sid, subject, value, maxMarks) {
   if (!data.terms[marksTermKey]) data.terms[marksTermKey] = {};
 
   const obtainedValue = value === "" || value == null ? null : Number(value);
-  
+
   data.terms[marksTermKey][subject] = {
     obtained: obtainedValue,
     maxMarks: Number(maxMarks || 100)
@@ -5100,7 +5100,7 @@ window.saveMark = async function(sid, subject, value, maxMarks) {
 
   await setDoc(ref, data, { merge: true });
   toast("Saved");
-  
+
   setTimeout(() => loadReportTab(), 500);
 };
 window.generateAllReports = async function() {
@@ -5132,13 +5132,13 @@ const subArr = subjects.map(sub => {
   // Treat null/empty as 0 for calculations only
   const obtained = (entry.obtained != null && !isNaN(entry.obtained)) ? Number(entry.obtained) : 0;
   const maxMarks = getSubjectMaxMarks(sub);
-  total += obtained; 
+  total += obtained;
   totalMax += maxMarks;
-  return { 
-    name: sub.name, 
-    obtained, 
-    maxMarks, 
-    remarks: getReportRemarks(obtained, maxMarks) 
+  return {
+    name: sub.name,
+    obtained,
+    maxMarks,
+    remarks: getReportRemarks(obtained, maxMarks)
   };
 });
     const pct = totalMax ? (total / totalMax) * 100 : 0;
@@ -5243,7 +5243,7 @@ window.closeSubjectModal = () => $("subjectModal").classList.remove("open");
 async function refreshSubjectList() {
   const subjects = await loadSubjects();
   $("subjectListInModal").innerHTML = subjects.length
-    ? `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Current Subjects</div>
+    ? `<div style="font-size:12px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--muted);margin-bottom:8px;">Current Subjects</div>
        ${subjects.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface2);gap:10px;">
          <span style="font-weight:600;">${s.name} <span style="font-size:12px;color:var(--muted);">(Max ${Number(s.maxMarks || 100)})</span></span>
          <button class="btn btn-danger btn-sm" onclick="deleteSubject('${s.id}')">Delete</button>
@@ -5491,7 +5491,7 @@ function renderTeacherTimetable({ myTimetable, classFullTimetable }) {
 
   container.innerHTML = html;
 }
-    
+
 */
 
 // ===== Timetable (Teacher) =====
@@ -5905,7 +5905,7 @@ window.printClassTimetable = async function() {
 ["studentModal","subjectModal"].forEach(id => {
   $(id)?.addEventListener("click", e => { if (e.target === $(id)) $(id).classList.remove("open"); });
 });
-    
+
 </script>
 <script src="/schoolix-app.js?v=dark-portals-20261105-v34" defer></script>
 <script type="module" src="notice-panel.js?v=notices-20260720"></script>

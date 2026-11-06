@@ -95,7 +95,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Timetable</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -116,7 +116,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: var(--navy);
       color: var(--white);
       min-height: 100vh;
@@ -137,7 +137,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(12px);
+
     }
     .topbar-left {
       display: flex;
@@ -167,8 +167,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .topbar-subtitle {
       font-size: 0.72rem;
       color: var(--muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .topbar-badge {
       background: rgba(59,158,255,0.12);
@@ -178,7 +178,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-weight: 600;
       padding: 4px 12px;
       border-radius: 20px;
-      letter-spacing: 0.05em;
+      letter-spacing: 0;
     }
 
     /* ── MAIN ── */
@@ -229,8 +229,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-size: 0.72rem;
       font-weight: 600;
       color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -242,7 +242,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--white);
       border-radius: 10px;
       padding: 10px 14px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       font-size: 0.9rem;
       outline: none;
       cursor: pointer;
@@ -269,7 +269,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       gap: 7px;
       padding: 10px 18px;
       border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       font-size: 0.88rem;
       font-weight: 600;
       border: none;
@@ -344,8 +344,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       text-align: left;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
@@ -424,7 +424,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--white);
       border-radius: 8px;
       padding: 7px 10px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       font-size: 0.82rem;
       outline: none;
       width: 100%;
@@ -524,8 +524,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .readonly-slot div { color: var(--muted); font-size: 0.76rem; line-height: 1.45; }
     .field-label-small {
       font-size: 0.65rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       color: var(--muted);
       font-weight: 600;
       display: flex;
@@ -577,7 +577,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background: rgba(247, 251, 255, 0.78);
       display: flex; align-items: center; justify-content: center;
       z-index: 2147482550;
-      backdrop-filter: blur(8px);
+
       display: none;
       padding: 18px;
     }
@@ -633,7 +633,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       justify-content: center;
       padding: 18px;
       background: rgba(15, 23, 42, 0.54);
-      backdrop-filter: blur(8px);
+
     }
     .subjects-modal.show { display: flex; }
     .subjects-panel {
@@ -1618,7 +1618,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       const currentSlot = currentTimetable.schedule?.[day]?.[period] || {};
       const currentTeacherUid = currentSlot.teacherUid || currentSlot.teacherId || currentSlot.teacherName || "";
       teacherSel.innerHTML = teacherSelectOptions(subject, currentTeacherUid, day, period);
-      
+
       const matching = getTeachersForSubject(subject);
       const stillMatches = currentTeacherUid && matching.some(t => t.uid === currentTeacherUid || t.teacherId === currentTeacherUid || t.name === currentTeacherUid);
       if (!stillMatches && currentTeacherUid && subject) {

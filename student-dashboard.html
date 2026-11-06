@@ -225,8 +225,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .nav-section {
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
       color: var(--text3);
       padding: 10px 10px 6px;
     }
@@ -262,8 +262,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--rose);
       font-size: 10px;
       font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .nav-item.active::before {
@@ -323,8 +323,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .topbar {
       height: var(--topbar-h);
       background: rgba(8,13,20,0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+
+
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center;
       padding: 0 24px;
@@ -724,7 +724,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     .stat-card-label {
       font-size: 11.5px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3);
+      text-transform: none; letter-spacing: 0; color: var(--text3);
     }
 
     .stat-icon {
@@ -776,8 +776,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     table { width: 100%; border-collapse: collapse; min-width: 480px; }
     th {
       background: var(--bg3); color: var(--text3);
-      font-size: 11px; text-transform: uppercase;
-      letter-spacing: 0.09em; font-weight: 700;
+      font-size: 11px; text-transform: none;
+      letter-spacing: 0; font-weight: 700;
       padding: 13px 16px; text-align: left;
       white-space: nowrap; border-bottom: 1px solid var(--border);
     }
@@ -795,7 +795,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       display: inline-flex; align-items: center;
       padding: 4px 10px; border-radius: 99px;
       font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.05em;
+      text-transform: none; letter-spacing: 0;
     }
     .badge.present { background: var(--green-dim); color: var(--green); }
     .badge.absent  { background: var(--rose-dim);  color: var(--rose); }
@@ -872,7 +872,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       animation: sxVehicleFloat 1.7s ease-in-out infinite;
     }
     .sx-vehicle-avatar { width: 42px; height: 42px; display: block; }
-    .sx-vehicle-avatar-pulse { fill: rgba(52,211,153,0.18); animation: sxVehiclePulse 1.6s ease-out infinite; transform-origin: center; }
+    .sx-vehicle-avatar-pulse { fill: rgba(52,211,153,0.18);  transform-origin: center; }
     .sx-vehicle-avatar-body { fill: var(--green); stroke: #fff; stroke-width: 2.2; }
     .sx-vehicle-avatar-window { fill: #e0f2fe; }
     .sx-vehicle-avatar-light { stroke: #fff; stroke-width: 2.2; stroke-linecap: round; }
@@ -909,10 +909,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       0%, 100% { transform: translateY(0) rotate(-1deg); }
       50% { transform: translateY(-3px) rotate(1deg); }
     }
-    @keyframes sxVehiclePulse {
-      0% { transform: scale(.72); opacity: .85; }
-      100% { transform: scale(1.25); opacity: 0; }
-    }
+
     .sx-map-popup { min-width: 170px; font: 13px/1.45 "Inter", sans-serif; color: #172033; }
     .sx-map-popup strong { display:block; font-size:14px; margin-bottom:4px; }
     .sx-map-popup span { display:inline-flex; margin-bottom:6px; padding:2px 7px; border-radius:999px; background:#e7f8ef; color:#16794f; font-weight:800; font-size:11px; }
@@ -931,7 +928,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .profile-item:hover { border-color: var(--border2); }
     .profile-item strong {
       display: block; font-size: 10.5px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.09em;
+      text-transform: none; letter-spacing: 0;
       color: var(--text3); margin-bottom: 5px;
     }
     .profile-item span { font-size: 14px; font-weight: 600; color: var(--text); }
@@ -957,8 +954,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       display: block;
       color: var(--text3);
       font-size: 10.5px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
+      text-transform: none;
+      letter-spacing: 0;
       margin-bottom: 7px;
     }
     .archive-item span {
@@ -984,8 +981,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--text3);
       font-size: 10.5px;
       font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .filter-control select {
       background: var(--bg3);
@@ -1070,8 +1067,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     /* --- TERM SELECTOR --- */
     .term-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .term-row label {
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text3); white-space: nowrap;
+      font-size: 12px; font-weight: 700; text-transform: none;
+      letter-spacing: 0; color: var(--text3); white-space: nowrap;
     }
     .term-row select {
       padding: 10px 14px;
@@ -1117,8 +1114,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     }
     .subject-row:last-child { border-bottom: none; }
     .subject-header {
-      background: var(--bg3); font-size: 11px; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text3); font-weight: 700;
+      background: var(--bg3); font-size: 11px; text-transform: none;
+      letter-spacing: 0; color: var(--text3); font-weight: 700;
     }
     .subject-row:not(.subject-header):hover { background: rgba(79,144,255,0.04); }
 
@@ -1183,7 +1180,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     .receipt-paid {
       position:absolute; right:30px; top:30px;
       background:#16a34a; padding:10px 18px;
-      border-radius:999px; font-weight:700; letter-spacing:.08em;
+      border-radius:999px; font-weight:700; letter-spacing: 0;
     }
     .receipt-content {
       padding: 32px;
@@ -1196,10 +1193,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       background:#f8fafc; border:1px solid #e2e8f0;
       border-radius:14px; padding:16px;
     }
-    .receipt-item strong { display:block; font-size:12px; color:#64748b; margin-bottom:6px; text-transform:uppercase; }
+    .receipt-item strong { display:block; font-size:12px; color:#64748b; margin-bottom:6px; text-transform: none; }
     .receipt-item span { font-size:17px; font-weight:700; }
     .receipt-table { width:100%; border-collapse: collapse; margin-top:10px; font-size:14px; }
-    .receipt-table th { background:#e8f4fd; color:#1e40af; padding:12px 8px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+    .receipt-table th { background:#e8f4fd; color:#1e40af; padding:12px 8px; font-size:12px; font-weight:700; text-transform: none; letter-spacing: 0; }
     .receipt-table td { padding:12px 8px; border-bottom:1px solid #e2e8f0; font-size:13px; word-wrap: break-word; }
     .receipt-total { margin-top:24px; display:flex; justify-content: flex-end; }
     .receipt-total-box { background:#eff6ff; padding:18px 26px; border-radius:16px; text-align:right; }
@@ -1249,8 +1246,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       font-size: 12px;
       color: #64748b;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      text-transform: none;
+      letter-spacing: 0;
       margin-bottom: 8px;
     }
 
@@ -1348,8 +1345,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       color: var(--text3);
       font-size: 12px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      text-transform: none;
+      letter-spacing: 0;
       padding: 14px 16px;
       text-align: center;
       border-bottom: 1px solid var(--border);
@@ -4134,10 +4131,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
     const route = vehicle.route || {};
     const viaStops = Array.isArray(vehicle.viaStops) ? vehicle.viaStops : [];
-    
+
     // Check multiple field names for driver contact
     const driverContact = vehicle.driverContact || vehicle.driverPhone || vehicle.contact || vehicle.phone || "-";
-    
+
     // Get pickup and drop-off times and places for this student
     const studentTracking = vehicle.studentTracking || {};
     let sk = getStudentKey();
@@ -4163,7 +4160,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
           </div>
           <div id="studentTransportMap" style="height:320px"></div>
         </div>
-        
+
         <div class="profile-grid" style="margin-bottom:24px">
           <div class="profile-item">
             <strong>Vehicle Number</strong>
@@ -4199,27 +4196,27 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:16px">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
                 <div>
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px">Route Name</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3);margin-bottom:6px">Route Name</div>
                   <div style="font-size:15px;font-weight:600;color:var(--text)">${esc(route.routeName || vehicle.routeName || "-")}</div>
                 </div>
                 <div>
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px">Route ID</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3);margin-bottom:6px">Route ID</div>
                   <div style="font-size:15px;font-weight:600;color:var(--blue)">${esc(route.routeId || vehicle.routeId || "-")}</div>
                 </div>
               </div>
-              
+
               <div style="padding:12px;background:var(--panel);border-radius:var(--r-md);border-left:3px solid var(--blue)">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
                 <div style="background:rgba(79,144,255,0.08);border:1px solid rgba(79,144,255,0.16);border-radius:var(--r-md);padding:14px">
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);margin-bottom:8px"> Pickup Point</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--blue);margin-bottom:8px"> Pickup Point</div>
                   <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">${esc(route.pickupPoint || vehicle.pickupPoint || pickupPlace)}</div>
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px">Pickup Time</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3);margin-bottom:4px">Pickup Time</div>
                   <div style="font-size:18px;font-weight:700;color:var(--blue)">${pickupTime !== "-" ? pickupTime : "Not Set"}</div>
                 </div>
                 <div style="background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.16);border-radius:var(--r-md);padding:14px">
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px">Drop-off Point</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--green);margin-bottom:8px">Drop-off Point</div>
                   <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">${esc(route.dropoffPoint || vehicle.dropoffPoint || dropoffPlace)}</div>
-                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px">Drop-off Time</div>
+                  <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3);margin-bottom:4px">Drop-off Time</div>
                   <div style="font-size:18px;font-weight:700;color:var(--green)">${dropoffTime !== "-" ? dropoffTime : "Not Set"}</div>
                 </div>
               </div>
@@ -4227,28 +4224,28 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                 <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
                   <svg style="width:18px;height:18px;color:var(--blue);flex-shrink:0;margin-top:2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                   <div>
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)">Pickup Point</div>
+                    <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3)">Pickup Point</div>
                     <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:4px">${esc(route.pickupPoint || vehicle.pickupPoint || pickupPlace)}</div>
                   </div>
                 </div>
-                
+
                 <div style="display:flex;align-items:center;justify-content:center;height:24px;margin:8px 0">
                   <svg style="width:20px;height:20px;color:var(--text3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
                 </div>
-                
+
                 <div style="display:flex;align-items:flex-start;gap:12px">
                   <svg style="width:18px;height:18px;color:var(--rose);flex-shrink:0;margin-top:2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <div>
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)">Dropoff Point</div>
+                    <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--text3)">Dropoff Point</div>
                     <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:4px">${esc(route.dropoffPoint || vehicle.dropoffPoint || dropoffPlace)}</div>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             ${viaStops.length ? `
               <div style="background:var(--teal-dim);border:1px solid rgba(45,212,184,0.3);border-radius:var(--r-md);padding:14px">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--teal);margin-bottom:12px">Via Stops on This Route</div>
+                <div style="font-size:11px;font-weight:700;text-transform: none;letter-spacing: 0;color:var(--teal);margin-bottom:12px">Via Stops on This Route</div>
                 <div style="display:flex;flex-direction:column;gap:8px">
                   ${viaStops.map((stop, idx) => `
                     <div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(45,212,184,0.1);border-radius:var(--r-sm)">
@@ -5031,20 +5028,20 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     const rep  = latestReport(state.reports);
     const html = `<div style="font-family:'Segoe UI',sans-serif;max-width:860px;margin:0 auto;padding:28px;color:#0f172a">
       <div style="background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-radius:16px;padding:24px 28px;margin-bottom:20px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.75">${esc(school)}</div>
+        <div style="font-size:11px;text-transform: none;letter-spacing: 0;opacity:.75">${esc(school)}</div>
         <h1 style="font-size:26px;margin:8px 0 4px;letter-spacing:-.02em">Student Summary</h1>
         <div style="font-size:13px;opacity:.8">ID: ${esc(p.studentId||getStudentKey())}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px">
-          <h3 style="margin:0 0 10px;color:#1d4ed8;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Profile</h3>
+          <h3 style="margin:0 0 10px;color:#1d4ed8;font-size:12px;text-transform: none;letter-spacing: 0">Profile</h3>
           <p style="margin:4px 0"><strong>Name:</strong> ${esc(p.name||"-")}</p>
           <p style="margin:4px 0"><strong>Class:</strong> ${esc(getClassForSession()||"-")}-${esc(getSectionForSession()||"-")}</p>
           <p style="margin:4px 0"><strong>Roll No.:</strong> ${esc(getRollForSession()||"-")}</p>
           <p style="margin:4px 0"><strong>School:</strong> ${esc(school)}</p>
         </div>
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px">
-          <h3 style="margin:0 0 10px;color:#1d4ed8;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Overview</h3>
+          <h3 style="margin:0 0 10px;color:#1d4ed8;font-size:12px;text-transform: none;letter-spacing: 0">Overview</h3>
           <p style="margin:4px 0"><strong>Attendance:</strong> ${att.total?`${att.percentage}%`:"-"}</p>
           <p style="margin:4px 0"><strong>Fees Due:</strong> ${esc(fmt(fees.due))}</p>
           <p style="margin:4px 0"><strong>Latest Result:</strong> ${rep?`${Math.round(Number(rep.percentage||0))}%`:"-"}</p>

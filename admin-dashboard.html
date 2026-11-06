@@ -97,10 +97,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schoolix - Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="schoolix-theme.css">
-    
+
     <style>
         /* ───────────────────────────────────────────
            DESIGN TOKENS
@@ -131,7 +131,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: var(--navy);
             color: var(--text);
             min-height: 100vh;
@@ -201,7 +201,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             color: #fca5a5;
             padding: 10px 20px;
             border-radius: 50px;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             font-size: 0.88rem;
             font-weight: 600;
             cursor: pointer;
@@ -249,8 +249,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             color: var(--gold);
             font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            letter-spacing: 0;
+            text-transform: none;
             padding: 6px 14px;
             border-radius: 50px;
             margin-bottom: 20px;
@@ -267,10 +267,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         }
 
         .school-name span {
-            background: linear-gradient(135deg, #fff 30%, var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--gold);
         }
 
         .school-owner {
@@ -343,8 +340,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         .stat-icon {
             font-size: 0.8rem;
             color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            text-transform: none;
+            letter-spacing: 0;
             font-weight: 600;
             margin-bottom: 10px;
             display: flex;
@@ -373,8 +370,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         .section-label {
             font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: 0;
+            text-transform: none;
             color: var(--text-dim);
             margin-bottom: 14px;
             padding-left: 2px;
@@ -478,7 +475,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         .teacher   { --accent-color:#2563eb; --icon-bg:rgba(37,99,235,0.12);--icon-color:#60a5fa; }
         .staff     { --accent-color:#38bdf8; --icon-bg:rgba(56,189,248,0.12); --icon-color:#7dd3fc; }
         .tc        { --accent-color:#fbbf24; --icon-bg:rgba(251,191,36,0.12); --icon-color:#fcd34d; }
-        .reports   { --accent-color:#e879f9; --icon-bg:rgba(232,121,249,0.12);--icon-color:#f0abfc; }
+        .reports   { --accent-color:#38bdf8; --icon-bg:rgba(56,189,248,0.12);--icon-color:#7dd3fc; }
         .fees      { --accent-color:#38bdf8; --icon-bg:rgba(56,189,248,0.12); --icon-color:#7dd3fc; }
         .accountant { --accent-color:#34d399; --icon-bg:rgba(52,211,153,0.12); --icon-color:#6ee7b7; }
         .accounts   { --accent-color:#22c55e; --icon-bg:rgba(34,197,94,0.12); --icon-color:#86efac; }
@@ -508,7 +505,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             border: 1px solid rgba(147,197,253,0.25);
             border-radius: 50px;
             padding: 14px 32px;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -534,7 +531,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(6px);
+
             display: none;
             justify-content: center;
             align-items: center;
@@ -678,7 +675,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                 radial-gradient(circle at 24% 24%, rgba(45,212,191,0.16), transparent 26%),
                 radial-gradient(circle at 78% 18%, rgba(240,180,41,0.13), transparent 24%),
                 rgba(248, 250, 252, 0.94);
-            backdrop-filter: blur(20px);
+
         }
         .sx-first-login-launch.is-visible,
         .sx-first-setup-overlay.is-visible { display: flex; }
@@ -773,8 +770,8 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             color: #1f5eff;
             font-size: 0.78rem;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            text-transform: none;
+            letter-spacing: 0;
             margin-bottom: 8px;
         }
         .sx-setup-head h2 {
@@ -1070,7 +1067,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
             <i class="fas fa-chevron-right card-arrow"></i>
         </a>
 
-       
+
 
         <a href="admin-timetable.html" class="card timetable" title="Manage Timetables">
             <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
@@ -1158,14 +1155,14 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     <script src="school-branding.js"></script>
     <script type="module">
         import { initializeApp } from "./firebase-compat.js";
-        import { 
-            getAuth, 
-            signInWithPopup, 
-            GoogleAuthProvider, 
+        import {
+            getAuth,
+            signInWithPopup,
+            GoogleAuthProvider,
             signOut,
             onAuthStateChanged
         } from "./firebase-compat.js";
-        import { 
+        import {
             getFirestore
         } from "./firebase-compat.js";
         import {

@@ -14,7 +14,7 @@ h1 { margin:0; font-size:24px; }
 .muted { color:#64748b; margin-top:5px; }
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
 .metric { border:1px solid #e2e8f0; border-radius:8px; padding:14px; background:#f8fafc; }
-.metric strong { display:block; font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+.metric strong { display:block; font-size:12px; color:#64748b; text-transform: none; letter-spacing: 0; margin-bottom:6px; }
 .metric span { font-weight:700; font-size:17px; }
 .badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:7px 11px; font-weight:800; font-size:12px; }
 .badge.on { background:#dcfce7; color:#166534; }
@@ -29,7 +29,7 @@ button.secondary { background:#e2e8f0; color:#0f172a; }
 .sx-vehicle-marker { width:auto; height:42px; min-width:42px; border:0; background:transparent; box-shadow:none; display:inline-flex; align-items:center; gap:8px; color:#101828; }
 .sx-vehicle-marker-dot { width:42px; height:42px; display:block; border-radius:999px; background:transparent; border:0; box-shadow:0 8px 18px rgba(16,24,40,.28); animation:sxVehicleFloat 1.7s ease-in-out infinite; }
 .sx-vehicle-avatar { width:42px; height:42px; display:block; }
-.sx-vehicle-avatar-pulse { fill:rgba(22,130,85,.18); animation:sxVehiclePulse 1.6s ease-out infinite; transform-origin:center; }
+.sx-vehicle-avatar-pulse { fill:rgba(22,130,85,.18);  transform-origin:center; }
 .sx-vehicle-avatar-body { fill:#168255; stroke:#fff; stroke-width:2.2; }
 .sx-vehicle-avatar-window { fill:#e0f2fe; }
 .sx-vehicle-avatar-light { stroke:#fff; stroke-width:2.2; stroke-linecap:round; }
@@ -40,7 +40,7 @@ button.secondary { background:#e2e8f0; color:#0f172a; }
 .sx-vehicle-marker-label strong { color:#101828; font-size:12px; font-weight:900; }
 .sx-vehicle-marker-label small { color:#667085; font-size:11px; font-weight:800; }
 @keyframes sxVehicleFloat { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-3px) rotate(1deg)} }
-@keyframes sxVehiclePulse { 0%{transform:scale(.72);opacity:.85} 100%{transform:scale(1.25);opacity:0} }
+
 .sx-map-popup { min-width:170px; font:13px/1.45 "Segoe UI", sans-serif; color:#172033; }
 .sx-map-popup strong { display:block; font-size:14px; margin-bottom:4px; }
 .sx-map-popup span { display:inline-flex; margin-bottom:6px; padding:2px 7px; border-radius:999px; background:#e7f8ef; color:#16794f; font-weight:800; font-size:11px; }
@@ -51,7 +51,7 @@ body { background:#070b14; color:#e8eef8; }
 h1 { color:#f8fafc; letter-spacing:0; }
 .muted { color:#9aacbf; }
 .metric { background:#0c1422; border-color:#26364d; }
-.metric strong { color:#8fa3ba; letter-spacing:.04em; }
+.metric strong { color:#8fa3ba; letter-spacing: 0; }
 .metric span { color:#f8fafc; }
 .badge.on { background:rgba(45,212,191,.16); color:#99f6e4; border:1px solid rgba(45,212,191,.28); }
 .badge.off { background:rgba(248,113,113,.13); color:#fecaca; border:1px solid rgba(248,113,113,.24); }

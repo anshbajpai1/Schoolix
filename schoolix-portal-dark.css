@@ -140,14 +140,14 @@ body.sx-dark-portal :is(.card,.panel,.content-card,.stat-card,.summary-card,.met
   background: linear-gradient(145deg, rgba(20,34,58,.78), rgba(10,20,35,.68)) !important;
   border-color: rgba(165,190,230,.18) !important;
   box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.035) !important;
-  backdrop-filter: blur(10px) saturate(125%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(125%) !important;
+
+
 }
 
 body.sx-dark-portal :is(.sidebar,.side-nav,.navbar,.topbar,.top-bar,.header,.app-header,.nav-panel) {
   background: rgba(12,22,38,.80) !important;
-  backdrop-filter: blur(16px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+
+
 }
 
 body.sx-dark-portal :is(input,select,textarea,.form-control,.search-input,.filter-select) {
@@ -157,8 +157,8 @@ body.sx-dark-portal :is(input,select,textarea,.form-control,.search-input,.filte
 @media (max-width: 760px) {
   body.sx-dark-portal :is(.card,.panel,.content-card,.stat-card,.summary-card,.metric-card,.section-card,.widget,.dashboard-card,.table-wrapper) {
     background: rgba(15,26,46,.92) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+
   }
 }
 
@@ -168,8 +168,8 @@ body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) {
   border-color: rgba(148, 180, 255, .14) !important;
   color: #dce8ff !important;
   box-shadow: 12px 0 32px rgba(0, 0, 0, .28) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
+
 }
 
 body.sx-dark-portal :is(.sidebar, .side-nav, .nav-panel, .teacher-sidebar) :is(.sidebar-logo, .sidebar-footer) {
