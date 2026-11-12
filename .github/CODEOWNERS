@@ -1,0 +1,9 @@
+# Default review owner for Schoolix.
+* @anshbajpai1
+
+# Platform-specific changes need the same owner to review release impact.
+/android/ @anshbajpai1
+/desktop/ @anshbajpai1
+/scripts/ @anshbajpai1
+/firestore.rules @anshbajpai1
+/storage.rules @anshbajpai1
