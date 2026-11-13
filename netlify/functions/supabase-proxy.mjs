@@ -1,4 +1,3 @@
-const DEFAULT_SUPABASE_URL = "https://ezkmeedcqetztkeppxil.supabase.co";
 const ALLOWED_PREFIXES = ["auth/v1/", "functions/v1/", "rest/v1/", "storage/v1/"];
 
 function responseHeaders(upstreamHeaders = new Headers()) {
@@ -25,9 +24,9 @@ export default async function handler(request) {
     return new Response(null, { status: 204, headers: responseHeaders() });
   }
 
-  const supabaseUrl = String(process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, "");
+  const supabaseUrl = String(process.env.SUPABASE_URL || "").replace(/\/$/, "");
   const anonKey = String(process.env.SUPABASE_ANON_KEY || "").trim();
-  if (!anonKey) {
+  if (!supabaseUrl || !anonKey) {
     return Response.json({ error: "Server configuration is incomplete" }, { status: 503, headers: responseHeaders() });
   }
 

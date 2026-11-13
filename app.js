@@ -50,12 +50,12 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/supabase', async (req, res) => {
-  const supabaseUrl = String(runtimeEnv.SUPABASE_URL || 'https://ezkmeedcqetztkeppxil.supabase.co').replace(/\/$/, '');
+  const supabaseUrl = String(runtimeEnv.SUPABASE_URL || '').replace(/\/$/, '');
   const anonKey = String(runtimeEnv.SUPABASE_ANON_KEY || runtimeEnv.SCHOOLIX_SUPABASE_ANON_KEY || '').trim();
   const upstreamPath = req.originalUrl.replace(/^\/api\/supabase\/?/, '');
   const allowed = ['auth/v1/', 'functions/v1/', 'rest/v1/', 'storage/v1/'].some((prefix) => upstreamPath.startsWith(prefix));
   if (!allowed) return res.status(404).json({ error: 'Unsupported upstream path' });
-  if (!anonKey) return res.status(503).json({ error: 'Server configuration is incomplete' });
+  if (!supabaseUrl || !anonKey) return res.status(503).json({ error: 'Server configuration is incomplete' });
 
   const headers = { ...req.headers, apikey: anonKey };
   ['host', 'content-length', 'cookie', 'origin', 'referer', 'x-forwarded-for'].forEach((name) => delete headers[name]);
