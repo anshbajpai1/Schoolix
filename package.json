@@ -11,6 +11,7 @@
     "build:mobile": "node scripts/build-mobile.mjs",
     "build:hosting": "node scripts/build-mobile.mjs --web-loader --out=hosting",
     "validate": "node scripts/validate-project.mjs",
+    "audit:browser": "node scripts/audit-browser-bundle.mjs hosting",
     "migrate:firestore": "node scripts/migrate-firestore-to-supabase.mjs",
     "migrate:auth": "node scripts/migrate-firebase-auth-to-supabase.mjs",
     "android:sync": "node scripts/prepare-android-config.mjs && npm run build:mobile -- --skip-apk && npx cap sync android",
