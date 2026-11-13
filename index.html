@@ -1790,19 +1790,10 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         body.sx-login-app .left-hero { max-width: 540px; margin: auto 0; }
 
-        body.sx-login-app .hero-tag {
-            width: fit-content;
-            padding: 7px 11px;
-            font-size: 11px;
-            font-weight: 650;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-        }
-
         body.sx-login-app .hero-heading {
             max-width: 510px;
-            margin-top: 24px;
-            font-size: clamp(2.5rem, 4.15vw, 4.35rem);
+            margin-top: 0;
+            font-size: clamp(2.35rem, 3.8vw, 4rem);
             font-weight: 720;
             line-height: 1.04;
             letter-spacing: -.058em;
@@ -1810,30 +1801,50 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
         body.sx-login-app .hero-heading span { color: #b9d9ff; }
 
-        body.sx-login-app .hero-desc {
-            max-width: 455px;
-            margin-top: 21px;
-            font-size: 1rem;
-            line-height: 1.7;
-            color: #c1d2eb;
+        .login-product-preview {
+            position: relative;
+            width: min(100%, 540px);
+            height: 220px;
+            margin-top: 31px;
+            padding: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(191, 219, 254, .17);
+            border-radius: 18px;
+            background: rgba(3, 18, 46, .34);
+            box-shadow: 0 22px 50px rgba(0, 10, 32, .22), inset 0 1px rgba(255,255,255,.06);
         }
-
-        .login-capabilities { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 31px; }
-        .login-capability {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 11px;
-            border: 1px solid rgba(191, 219, 254, .16);
-            border-radius: 10px;
-            background: rgba(11, 36, 77, .32);
-            color: #d9e8fa;
-            font-size: 12px;
-            font-weight: 560;
+        .login-product-preview::after {
+            content: '';
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            right: -92px;
+            bottom: -150px;
+            border-radius: 50%;
+            background: rgba(45, 212, 191, .18);
+            filter: blur(30px);
         }
-        .login-capability svg { width: 15px; height: 15px; color: #7dd3fc; flex: 0 0 auto; }
-        .login-assurance { display: flex; align-items: center; gap: 9px; color: #91add0; font-size: 12px; line-height: 1.4; }
-        .login-assurance svg { width: 17px; height: 17px; color: #7dd3fc; flex: 0 0 auto; }
+        .preview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .preview-dots { display: flex; gap: 5px; }
+        .preview-dots i { display: block; width: 6px; height: 6px; border-radius: 999px; background: #7dd3fc; opacity: .8; }
+        .preview-dots i:nth-child(2) { opacity: .45; }
+        .preview-dots i:nth-child(3) { opacity: .22; }
+        .preview-status { width: 64px; height: 7px; border-radius: 99px; background: rgba(191, 219, 254, .16); }
+        .preview-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 12px; height: 158px; }
+        .preview-large, .preview-tile { border: 1px solid rgba(191, 219, 254, .10); border-radius: 12px; background: rgba(255,255,255,.055); }
+        .preview-large { position: relative; padding: 17px; overflow: hidden; }
+        .preview-large::before { content: ''; display: block; width: 36%; height: 7px; border-radius: 99px; background: rgba(191,219,254,.55); }
+        .preview-large::after { content: ''; position: absolute; right: 16px; bottom: 15px; left: 16px; height: 77px; border-radius: 8px 8px 0 0; background: linear-gradient(90deg, rgba(96,165,250,.18) 1px, transparent 1px), linear-gradient(rgba(96,165,250,.13) 1px, transparent 1px); background-size: 28px 22px; }
+        .preview-chart { position: absolute; right: 18px; bottom: 15px; left: 18px; z-index: 1; height: 74px; display: flex; align-items: end; gap: 8px; }
+        .preview-chart b { display: block; flex: 1; min-width: 8px; border-radius: 4px 4px 1px 1px; background: linear-gradient(180deg, #67e8f9, #3b82f6); box-shadow: 0 4px 12px rgba(59,130,246,.25); }
+        .preview-chart b:nth-child(1) { height: 33%; }.preview-chart b:nth-child(2) { height: 55%; }.preview-chart b:nth-child(3) { height: 42%; }.preview-chart b:nth-child(4) { height: 77%; }.preview-chart b:nth-child(5) { height: 61%; }.preview-chart b:nth-child(6) { height: 92%; }
+        .preview-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+        .preview-tile { position: relative; overflow: hidden; }
+        .preview-tile::before, .preview-tile::after { content: ''; position: absolute; border-radius: 99px; }
+        .preview-tile::before { top: 18px; left: 16px; width: 46%; height: 7px; background: rgba(191,219,254,.52); }
+        .preview-tile::after { top: 34px; left: 16px; width: 31%; height: 5px; background: rgba(191,219,254,.16); }
+        .preview-ring { position: absolute; right: 15px; bottom: 11px; width: 37px; height: 37px; border: 7px solid rgba(96,165,250,.2); border-top-color: #7dd3fc; border-right-color: #38bdf8; border-radius: 50%; transform: rotate(34deg); }
+        .preview-line { position: absolute; right: 14px; bottom: 17px; left: 16px; height: 22px; border-bottom: 2px solid #5eead4; border-radius: 50%; transform: skewY(-12deg); opacity: .8; }
 
         body.sx-login-app .panel-right {
             width: min(47vw, 590px);
@@ -1865,9 +1876,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         body.sx-login-app .form-hint { margin-top: 20px; margin-bottom: 25px; }
         body.sx-login-app .field-input { height: 50px; border-radius: 11px; }
         body.sx-login-app .btn-primary, body.sx-login-app .btn-google { height: 50px; border-radius: 11px; }
-        .signin-security-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 15px; color: #7c8aa0; font-size: 11.5px; line-height: 1.4; }
-        .signin-security-note svg { width: 14px; height: 14px; color: #2563eb; }
-
         @media (max-width: 900px) { body.sx-login-app .panel-right { width: 100%; } }
         @media (max-width: 480px) { body.sx-login-app .form-card { padding: 26px 20px 22px; border-radius: 16px; } }
 
@@ -2016,23 +2024,21 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 
             <!-- Hero -->
             <div class="left-hero">
-                <div class="hero-tag">
-                    <span class="hero-tag-dot"></span>
-                    School ERP Platform
-                </div>
                 <h1 class="hero-heading">
-                    Every school day,<br>
-                    <span>running in sync.</span>
+                    Everything aligned.<br>
+                    <span>Nothing in the way.</span>
                 </h1>
-                <p class="hero-desc">
-                    A clear, connected workspace for your people, operations, and academic progress.
-                </p>
-                <div class="login-capabilities" aria-label="Schoolix capabilities">
-                    <span class="login-capability"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Role-based access</span>
-                    <span class="login-capability"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>One connected system</span>
+                <div class="login-product-preview" aria-hidden="true">
+                    <div class="preview-top"><span class="preview-dots"><i></i><i></i><i></i></span><span class="preview-status"></span></div>
+                    <div class="preview-grid">
+                        <div class="preview-large"><div class="preview-chart"><b></b><b></b><b></b><b></b><b></b><b></b></div></div>
+                        <div class="preview-stack">
+                            <div class="preview-tile"><span class="preview-ring"></span></div>
+                            <div class="preview-tile"><span class="preview-line"></span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="login-assurance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Your school workspace is protected with secure access controls.</div>
         </div>
     </div>
 
@@ -2041,15 +2047,15 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         <div class="form-card">
 
             <div class="form-header">
-                <p class="form-welcome">Secure workspace</p>
-                <h2 class="form-title">Welcome back</h2>
-                <p class="form-subtitle">Access your dashboard using your school credentials.</p>
+                <p class="form-welcome">Schoolix</p>
+                <h2 class="form-title">Sign in</h2>
+                <p class="form-subtitle">Use your school credentials to continue.</p>
 
                 <div class="form-hint">
                     <span class="form-hint-icon">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                     </span>
-                    <p>Use your <strong style="color:#93c5fd;font-weight:600;">email</strong>, parent email, or <strong style="color:#93c5fd;font-weight:600;">Student ID</strong> to continue.</p>
+                    <p>Use your email or Student ID to continue.</p>
                 </div>
             </div>
 
@@ -2134,7 +2140,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
                 <span id="downloadAndroidLabel">Download Android App</span>
             </a>
             <span class="download-meta" id="downloadAndroidMeta">Latest APK</span>
-            <p class="signin-security-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Protected sign-in · Role-based access</p>
 
         </div>
     </div>
