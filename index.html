@@ -44,7 +44,7 @@
 html.sx-page-loading,
 html.sx-page-loading body {
   min-height: 100%;
-  background: #0d0820 !important;
+  background: #f8fafc !important;
 }
 html.sx-page-loading body::before,
 html.sx-page-loading body::after {
@@ -60,7 +60,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   display: flex;
   align-items: stretch;
   justify-content: stretch;
-  background: #0d0820;
+  background: #f8fafc;
   transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s ease;
   overflow: hidden;
 }
@@ -78,7 +78,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background: #0d0820;
+  background: #f8fafc;
 }
 .sx-page-loader .dots-container::before,
 .sx-page-loader .dots-container::after,
@@ -1879,118 +1879,6 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
         @media (max-width: 900px) { body.sx-login-app .panel-right { width: 100%; } }
         @media (max-width: 480px) { body.sx-login-app .form-card { padding: 26px 20px 22px; border-radius: 16px; } }
 
-        /* ── Immersive violet login layout ────────────── */
-        body.sx-login-app { background: #0d0820; }
-        body.sx-login-app .shell {
-            display: grid;
-            grid-template-columns: minmax(0, 1.32fr) minmax(420px, .78fr);
-            gap: 18px;
-            max-width: 1540px;
-            min-height: 100dvh;
-            margin: 0 auto;
-            padding: 18px;
-            background:
-                radial-gradient(circle at 12% 0%, rgba(139, 92, 246, .28), transparent 28%),
-                radial-gradient(circle at 94% 95%, rgba(236, 72, 153, .16), transparent 26%),
-                #0d0820;
-        }
-        body.sx-login-app .panel-left,
-        body.sx-login-app .panel-right {
-            width: auto;
-            min-height: 0;
-            height: auto;
-            border: 1px solid rgba(221, 214, 254, .12);
-            border-radius: 26px;
-        }
-        body.sx-login-app .panel-left {
-            padding: 38px clamp(34px, 5vw, 78px);
-            background:
-                radial-gradient(circle at 78% 24%, rgba(196, 181, 253, .22), transparent 23%),
-                radial-gradient(circle at 21% 88%, rgba(236, 72, 153, .17), transparent 26%),
-                linear-gradient(135deg, #19103d 0%, #32175f 54%, #130c31 100%);
-            box-shadow: inset 0 1px rgba(255,255,255,.09), 0 20px 60px rgba(2, 0, 14, .25);
-        }
-        body.sx-login-app .panel-left::before { opacity: .46; background-size: 32px 32px; }
-        body.sx-login-app .panel-left::after { opacity: .16; }
-        body.sx-login-app .left-hero { margin: auto 0; }
-        body.sx-login-app .hero-heading { max-width: 580px; font-size: clamp(2.6rem, 4.4vw, 5rem); }
-        body.sx-login-app .hero-heading span { color: #e9ddff; }
-        body.sx-login-app .brand-logo { color: #fff; }
-        body.sx-login-app .brand-icon { background: linear-gradient(135deg, #a855f7, #ec4899); }
-        .login-product-preview {
-            height: min(31vh, 255px);
-            min-height: 190px;
-            margin-top: 34px;
-            border-color: rgba(233, 213, 255, .19);
-            background: rgba(20, 10, 54, .42);
-            box-shadow: 0 26px 60px rgba(8, 2, 28, .3), inset 0 1px rgba(255,255,255,.07);
-        }
-        .login-product-preview::after { background: rgba(217, 70, 239, .24); }
-        .preview-dots i { background: #e9d5ff; }
-        .preview-status { background: rgba(233, 213, 255, .18); }
-        .preview-large, .preview-tile { border-color: rgba(233, 213, 255, .12); background: rgba(255,255,255,.05); }
-        .preview-large::before, .preview-tile::before { background: rgba(233, 213, 255, .56); }
-        .preview-large::after { background: linear-gradient(90deg, rgba(216, 180, 254, .2) 1px, transparent 1px), linear-gradient(rgba(216, 180, 254, .12) 1px, transparent 1px); }
-        .preview-chart b { background: linear-gradient(180deg, #f0abfc, #8b5cf6); box-shadow: 0 4px 14px rgba(192, 132, 252, .28); }
-        .preview-ring { border-color: rgba(216, 180, 254, .18); border-top-color: #f0abfc; border-right-color: #c084fc; }
-        .preview-line { border-bottom-color: #f0abfc; }
-        body.sx-login-app .panel-right {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            background: rgba(21, 12, 45, .7);
-            box-shadow: inset 0 1px rgba(255,255,255,.07), 0 20px 60px rgba(2, 0, 14, .22);
-        }
-        body.sx-login-app .form-card {
-            max-width: 440px;
-            border: 1px solid rgba(233, 213, 255, .16);
-            border-radius: 22px;
-            background: rgba(255,255,255,.97);
-            box-shadow: 0 25px 65px rgba(4, 1, 15, .32);
-        }
-        body.sx-login-app .form-welcome { color: #7e22ce; border-color: #eadcff; background: #faf5ff; }
-        body.sx-login-app .form-title { color: #21113f; }
-        body.sx-login-app .form-hint { border-color: #eadcff; background: #faf5ff; }
-        body.sx-login-app .form-hint p { color: #6b21a8 !important; }
-        body.sx-login-app .form-hint-icon svg { fill: #9333ea; }
-        body.sx-login-app .field-input:focus { border-color: #a855f7; box-shadow: 0 0 0 4px rgba(168, 85, 247, .14); }
-        body.sx-login-app .btn-primary { background: linear-gradient(135deg, #7c3aed, #c026d3); box-shadow: 0 12px 24px rgba(147, 51, 234, .25); }
-        body.sx-login-app .btn-primary:hover { box-shadow: 0 16px 32px rgba(147, 51, 234, .34); }
-        @media (max-width: 900px) {
-            body.sx-login-app .shell { display: block; padding: 0; background: #120a2b; }
-            body.sx-login-app .panel-left { display: none; }
-            body.sx-login-app .panel-right { min-height: 100dvh; border: 0; border-radius: 0; background: radial-gradient(circle at 100% 0%, rgba(168,85,247,.2), transparent 31%), #120a2b; }
-        }
-
-        .auth-gate { background: #0d0820; }
-        .login-skeleton {
-            display: grid;
-            grid-template-columns: minmax(0, 1.32fr) minmax(420px, .78fr);
-            gap: 18px;
-            width: min(100%, 1540px);
-            height: 100dvh;
-            padding: 18px;
-            background: radial-gradient(circle at 12% 0%, rgba(139,92,246,.28), transparent 28%), #0d0820;
-        }
-        .skeleton-panel { position: relative; overflow: hidden; border: 1px solid rgba(233,213,255,.12); border-radius: 26px; background: rgba(255,255,255,.055); }
-        .skeleton-panel::after, .skeleton-line::after, .skeleton-input::after, .skeleton-button::after {
-            content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); animation: skeletonShimmer 1.25s infinite;
-        }
-        .skeleton-left { padding: 42px clamp(34px,5vw,78px); background: linear-gradient(135deg, #19103d, #32175f 54%, #130c31); }
-        .skeleton-brand { width: 124px; height: 38px; border-radius: 10px; background: rgba(233,213,255,.16); }
-        .skeleton-copy { position: absolute; top: 34%; left: clamp(34px,5vw,78px); right: 18%; display: grid; gap: 14px; }
-        .skeleton-line { position: relative; height: 23px; overflow: hidden; border-radius: 8px; background: rgba(233,213,255,.16); }
-        .skeleton-line.short { width: 68%; }.skeleton-line.tiny { width: 40%; height: 14px; margin-top: 8px; }
-        .skeleton-visual { position: absolute; bottom: 12%; left: clamp(34px,5vw,78px); right: 13%; height: 190px; border-radius: 18px; background: rgba(233,213,255,.1); }
-        .skeleton-right { display: grid; place-items: center; padding: 30px; background: rgba(21,12,45,.7); }
-        .skeleton-card { width: min(100%, 440px); padding: 34px; border-radius: 22px; background: rgba(255,255,255,.96); box-shadow: 0 25px 65px rgba(4,1,15,.28); }
-        .skeleton-card .skeleton-line { background: #ede9fe; }.skeleton-card .skeleton-line.short { width: 46%; }.skeleton-card .skeleton-line.tiny { width: 70%; }
-        .skeleton-input, .skeleton-button { position: relative; height: 50px; margin-top: 20px; overflow: hidden; border-radius: 11px; background: #f1f5f9; }
-        .skeleton-button { margin-top: 28px; background: #ddd6fe; }
-        @keyframes skeletonShimmer { 100% { transform: translateX(100%); } }
-        @media (max-width: 900px) { .login-skeleton { display: block; padding: 0; } .skeleton-left { display: none; } .skeleton-right { height: 100%; border: 0; border-radius: 0; } }
-
         /* The sign-in screen is a self-contained view, not a scrolling page. */
         body.sx-login-app {
             overflow: hidden;
@@ -2093,16 +1981,16 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   </section>
 </div>
 
-<div class="auth-gate" id="authGate" role="status" aria-label="Loading sign in">
-    <div class="login-skeleton" aria-hidden="true">
-        <section class="skeleton-panel skeleton-left">
-            <div class="skeleton-brand"></div>
-            <div class="skeleton-copy"><span class="skeleton-line"></span><span class="skeleton-line short"></span><span class="skeleton-line tiny"></span></div>
-            <div class="skeleton-visual"></div>
-        </section>
-        <section class="skeleton-panel skeleton-right">
-            <div class="skeleton-card"><span class="skeleton-line short"></span><span class="skeleton-line tiny"></span><div class="skeleton-input"></div><div class="skeleton-input"></div><div class="skeleton-button"></div></div>
-        </section>
+<div class="auth-gate" id="authGate" role="status" aria-live="polite">
+        <div class="auth-loader-card">
+        <div class="auth-loader-mark">
+            <img src="/schoolix-app-icon.svg" alt="Schoolix logo">
+        </div>
+        <div>
+            <div class="auth-loader-title">Opening Schoolix</div>
+            <div class="auth-loader-subtitle" id="authGateText">Checking your saved login...</div>
+        </div>
+        <div class="auth-loader-ring"><span></span></div>
     </div>
 </div>
 
