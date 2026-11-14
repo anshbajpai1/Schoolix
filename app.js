@@ -8,8 +8,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const requestedPort = Number(process.env.PORT || 3000);
 const runtimeEnv = await loadRuntimeEnv(__dirname);
+const LOCAL_SUPABASE_URL = 'https://ezkmeedcqetztkeppxil.supabase.co';
 
 async function sendInjectedFile(res, filePath) {
   const content = await readFile(filePath, 'utf8');
@@ -50,7 +51,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/supabase', async (req, res) => {
-  const supabaseUrl = String(runtimeEnv.SUPABASE_URL || '').replace(/\/$/, '');
+  const isLocalRequest = ['localhost', '127.0.0.1', '::1'].includes(String(req.hostname || '').toLowerCase());
+  const supabaseUrl = String(runtimeEnv.SUPABASE_URL || (isLocalRequest ? LOCAL_SUPABASE_URL : '')).replace(/\/$/, '');
   const anonKey = String(runtimeEnv.SUPABASE_ANON_KEY || runtimeEnv.SCHOOLIX_SUPABASE_ANON_KEY || '').trim();
   const upstreamPath = req.originalUrl.replace(/^\/api\/supabase\/?/, '');
   const allowed = ['auth/v1/', 'functions/v1/', 'rest/v1/', 'storage/v1/'].some((prefix) => upstreamPath.startsWith(prefix));
@@ -124,4 +126,19 @@ app.use(express.static(__dirname, {
   }
 }));
 
-app.listen(port);
+function startServer(port, allowFallback = true) {
+  const server = app.listen(port, () => {
+    console.log(`Schoolix local server: http://localhost:${port}`);
+  });
+  server.on('error', (error) => {
+    if (error?.code === 'EADDRINUSE' && allowFallback && !process.env.PORT) {
+      const fallbackPort = port + 1;
+      console.warn(`Port ${port} is already in use. Starting Schoolix on port ${fallbackPort}.`);
+      startServer(fallbackPort, false);
+      return;
+    }
+    throw error;
+  });
+}
+
+startServer(requestedPort);
