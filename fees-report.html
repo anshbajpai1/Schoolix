@@ -1954,19 +1954,19 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       gap: 16px;
     }
 
-    body .top-bar {
+    body #feesReportHeader {
       min-height: 176px;
       align-items: center;
       padding: 30px 32px;
       background:
         linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 64, 175, 0.9)),
-        #101828;
-      border-color: rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+        #101828 !important;
+      border-color: rgba(255, 255, 255, 0.14) !important;
+      color: #ffffff !important;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
     }
 
-    body .top-bar::before {
+    body #feesReportHeader::before {
       width: 100%;
       background:
         linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px),
@@ -1975,33 +1975,33 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       opacity: 0.45;
     }
 
-    body .top-bar > * {
+    body #feesReportHeader > * {
       position: relative;
       z-index: 1;
     }
 
-    body .page-eyebrow {
+    body #feesReportHeader .page-eyebrow {
       width: fit-content;
       margin-bottom: 12px;
       padding: 6px 10px;
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.84);
+      color: rgba(255, 255, 255, 0.9) !important;
       font-size: 11px;
       font-weight: 900;
       text-transform: none;
     }
 
-    body .top-bar h1 {
-      color: #ffffff;
+    body #feesReportHeader h1 {
+      color: #ffffff !important;
       font-size: 40px;
       letter-spacing: 0;
     }
 
-    body .top-bar p {
+    body #feesReportHeader p {
       max-width: 680px;
-      color: rgba(255, 255, 255, 0.76);
+      color: rgba(255, 255, 255, 0.82) !important;
       font-size: 15px;
       line-height: 1.55;
     }
@@ -2015,16 +2015,16 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
       max-width: 560px;
     }
 
-    body .top-bar .btn {
-      background: rgba(255,255,255,0.12);
-      border-color: rgba(255,255,255,0.18);
-      color: #ffffff;
-      box-shadow: none;
+    body #feesReportHeader .btn {
+      background: rgba(255,255,255,0.12) !important;
+      border-color: rgba(255,255,255,0.22) !important;
+      color: #ffffff !important;
+      box-shadow: none !important;
     }
 
-    body .top-bar .btn:hover {
-      background: rgba(255,255,255,0.2);
-      border-color: rgba(255,255,255,0.28);
+    body #feesReportHeader .btn:hover {
+      background: rgba(255,255,255,0.22) !important;
+      border-color: rgba(255,255,255,0.34) !important;
     }
 
     body .fee-ops-grid {
@@ -2462,7 +2462,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
   </section>
 </div>
   <div class="container">
-    <div class="top-bar">
+    <div class="top-bar" id="feesReportHeader">
       <div>
         <div class="page-eyebrow">Finance Operations</div>
         <h1>Fees Reports</h1>
