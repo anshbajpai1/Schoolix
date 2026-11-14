@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const requestedPort = Number(process.env.PORT || 3000);
+const requestedPort = Number(process.env.PORT || 3001);
 const runtimeEnv = await loadRuntimeEnv(__dirname);
 const LOCAL_SUPABASE_URL = 'https://ezkmeedcqetztkeppxil.supabase.co';
 
@@ -31,6 +31,14 @@ app.disable("x-powered-by");
 
 app.use((req, res, next) => {
   Object.entries(securityHeaders).forEach(([key, value]) => res.setHeader(key, value));
+  const requestOrigin = String(req.headers.origin || "");
+  if (/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(requestOrigin)) {
+    res.setHeader("Access-Control-Allow-Origin", requestOrigin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "authorization, content-type, prefer, range, x-client-info, x-firebase-token");
+    res.setHeader("Vary", "Origin");
+    if (req.method === "OPTIONS") return res.sendStatus(204);
+  }
   res.setHeader(
     "Content-Security-Policy",
     [

@@ -99,7 +99,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
     <title>Schoolix - Sign In</title>
     <link rel="icon" href="/schoolix-app-icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/schoolix-app-icon.svg">
-    <link rel="modulepreload" href="/firebase-compat.js">
+    <link rel="modulepreload" href="/firebase-compat.js?v=local-gateway-20261114">
     <link rel="modulepreload" href="/supabase-config.js">
     <link rel="preload" href="/school-branding.js" as="script">
     <link rel="preload" href="/schoolix-app.css?v=navbar-20260721" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -2031,7 +2031,7 @@ html.sx-page-loading body > :not(#sxPageLoader):not(script):not(style) {
 <script src="school-branding.js" defer></script>
 <script src="/schoolix-app.js?v=navbar-20260721" defer></script>
 <script type="module">
-import { initializeApp } from "./firebase-compat.js";
+import { initializeApp } from "./firebase-compat.js?v=local-gateway-20261114";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -2042,7 +2042,8 @@ import {
     GoogleAuthProvider,
     onAuthStateChanged,
     signOut
-} from "./firebase-compat.js";
+} from "./firebase-compat.js?v=local-gateway-20261114";
+import { SUPABASE_URL } from "./supabase-config.js?v=local-gateway-20261114";
 import {
     getFirestore,
     doc,
@@ -2053,7 +2054,7 @@ import {
     where,
     limit,
     setDoc
-} from "./firebase-compat.js";
+} from "./firebase-compat.js?v=local-gateway-20261114";
 
 const firebaseConfig = {
     apiKey: "",
@@ -2067,7 +2068,6 @@ const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
-const SUPABASE_URL = "/api/supabase";
 const PASSWORD_RESET_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-password-reset-email`;
 
 const loginForm = document.getElementById('loginForm');

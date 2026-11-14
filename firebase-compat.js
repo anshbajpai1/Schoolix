@@ -1,4 +1,4 @@
-import { SUPABASE_URL } from "./supabase-config.js";
+import { SUPABASE_URL } from "./supabase-config.js?v=local-gateway-20261114";
 
 const FIRESTORE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/schoolix-firestore`;
 const LEGACY_LOGIN_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/legacy-firebase-login`;

@@ -1,6 +1,12 @@
-// Browser traffic goes through the same-origin gateway. The gateway adds the
-// Supabase anon key server-side; no Supabase credential is shipped in assets.
-export const SUPABASE_URL = "/api/supabase";
+// Browser traffic goes through the Schoolix gateway. Local static previews
+// (for example VS Code on port 3002) use the Node gateway on port 3001.
+const browserLocation = globalThis.location;
+const isLocalPreview = ["localhost", "127.0.0.1"].includes(String(browserLocation?.hostname || "").toLowerCase());
+const isLocalGateway = String(browserLocation?.hostname || "").toLowerCase() === "localhost" && browserLocation?.port === "3001";
+const localGatewayOrigin = isLocalPreview && !isLocalGateway
+  ? `${browserLocation.protocol}//localhost:3001`
+  : "";
+export const SUPABASE_URL = `${localGatewayOrigin}/api/supabase`;
 
 export const MAPLIBRE_CDN_JS =
   "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
