@@ -1065,9 +1065,11 @@ body:has(#featureModal.open) { overflow:hidden; }
 #superAdminWorkspace button:disabled { opacity:.55; cursor:wait; }
 #superAdminWorkspace .logo-upload-row { grid-template-columns:56px minmax(0,1fr); background:#f8fafc !important; }
 #superAdminWorkspace .school-logo-preview { width:56px; height:56px; }
-#superAdminWorkspace #featureModal { position:fixed !important; inset:0 !important; padding:0 !important; overflow:hidden !important; background:#fff !important; }
+#superAdminWorkspace #featureModal { display:flex !important; position:fixed !important; inset:0 !important; width:100vw !important; height:100dvh !important; min-height:100dvh !important; max-width:none !important; max-height:none !important; margin:0 !important; padding:0 !important; overflow:hidden !important; background:#fff !important; z-index:2147482000 !important; transform:none !important; }
 #superAdminWorkspace #featureModal:not(.open) { visibility:hidden; }
-#superAdminWorkspace #featureModal .modal { display:flex !important; position:relative !important; inset:auto !important; width:100% !important; height:100dvh !important; max-width:none !important; max-height:100dvh !important; margin:0 !important; padding:0 !important; overflow:hidden !important; transform:none !important; border-radius:0 !important; background:#fff !important; }
+#superAdminWorkspace #featureModal.open { visibility:visible !important; opacity:1 !important; pointer-events:auto !important; }
+#superAdminWorkspace #featureModal > .modal,
+#superAdminWorkspace #featureModal.sx-modal-active > .modal.sx-modal-scroll-surface { display:flex !important; position:absolute !important; inset:0 !important; width:100vw !important; height:100dvh !important; min-width:100vw !important; min-height:100dvh !important; max-width:none !important; max-height:none !important; margin:0 !important; padding:0 !important; overflow:hidden !important; transform:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; background:#fff !important; }
 #superAdminWorkspace #featureModal .modal-body { flex:1 1 0; min-height:0; overflow:auto !important; overscroll-behavior:contain; background:#f3f5f9 !important; }
 #superAdminWorkspace #featureModal .modal-header, #superAdminWorkspace #featureModal .modal-footer { flex:0 0 auto; position:static; background:#fff !important; }
 #superAdminWorkspace #featureModal .modal-title, #superAdminWorkspace #featureModal .modal-sub { overflow-wrap:anywhere; }
@@ -1075,6 +1077,10 @@ body:has(#featureModal.open) { overflow:hidden; }
 #superAdminWorkspace #featureModal .insight-card, #superAdminWorkspace #featureModal .feature-row { background:#fff !important; box-shadow:none !important; transform:none !important; }
 #superAdminWorkspace #featureModal .feature-icon { color:#175cd3; }
 #superAdminWorkspace #featureModal .feature-state { font-style:normal; }
+#superAdminWorkspace #featureModal[aria-busy="true"] .modal-body { cursor:progress; }
+#superAdminWorkspace .manage-school-loading { grid-column:1/-1; display:grid; gap:10px; width:100%; }
+#superAdminWorkspace .manage-school-loading span { display:block; height:72px; border:1px solid #e4e7ec; border-radius:10px; background:linear-gradient(90deg,#f2f4f7 20%,#fff 40%,#f2f4f7 60%); background-size:240% 100%; animation:manageSchoolShimmer 1.15s ease-in-out infinite; }
+@keyframes manageSchoolShimmer { to { background-position:-240% 0; } }
 #superAdminWorkspace #accessLabel { color:#b42318 !important; }
 #superAdminWorkspace #featureModal .toggle-wrap:has(input:checked) #accessLabel { color:#067647 !important; }
 #superAdminWorkspace .toast { z-index:2147482600; background:#fff !important; color:#344054 !important; }
@@ -1181,7 +1187,7 @@ body:has(#featureModal.open) { overflow:hidden; }
 </div>
 
 <!-- FEATURE CONTROL MODAL -->
-<div class="modal-overlay" id="featureModal" role="dialog" aria-modal="true" aria-labelledby="modalSchoolName">
+<div class="modal-overlay modal-fullscreen fullscreen-modal" id="featureModal" role="dialog" aria-modal="true" aria-labelledby="modalSchoolName" data-fullscreen="true" aria-busy="false">
   <div class="modal" tabindex="-1">
     <div class="modal-header">
       <div>
@@ -1261,7 +1267,7 @@ body:has(#featureModal.open) { overflow:hidden; }
 
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveFeatures()">Save Changes</button>
+      <button class="btn-save" id="manageSchoolSaveButton" onclick="saveFeatures()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -1325,6 +1331,7 @@ const FEATURES = [
 // ---- CURRENT MODAL STATE ----
 let currentUID = null;
 let currentData = null;
+let modalRequestId = 0;
 let signupInProgress = false;
 const CLOUDINARY_CLOUD_NAME = "fthnumnk";
 const CLOUDINARY_UPLOAD_PRESET = "schoolix_student_photos";
@@ -1793,11 +1800,31 @@ window.quickToggle = async (uid, currentAccess) => {
 // ---- OPEN MODAL ----
 window.openModal = async (uid) => {
   if (!isAuthorizedSuperAdmin(auth.currentUser)) return showToast("Unauthorized access.", "error");
+  const requestId = ++modalRequestId;
   currentUID = uid;
+  currentData = null;
+  const modal = document.getElementById("featureModal");
+  const saveButton = document.getElementById("manageSchoolSaveButton");
+  modal.setAttribute("aria-busy", "true");
+  modal.classList.add("open");
+  saveButton.disabled = true;
+  document.getElementById("modalSchoolName").textContent = "Loading school...";
+  document.getElementById("modalSchoolEmail").textContent = "Fetching settings";
+  document.getElementById("modalSchoolLogo").textContent = "...";
+  document.getElementById("modalSchoolHealth").textContent = "Loading live school metrics...";
+  document.getElementById("schoolInsightGrid").innerHTML = `<div class="manage-school-loading"><span></span><span></span></div>`;
+  document.getElementById("featuresGrid").innerHTML = `<div class="manage-school-loading"><span></span><span></span><span></span></div>`;
+  document.getElementById("moduleCount").textContent = "Loading modules...";
+  document.getElementById("subscriptionSummary").textContent = "Loading subscription...";
+  document.getElementById("billingHistory").innerHTML = `<div class="billing-empty">Loading records...</div>`;
+  requestAnimationFrame(() => document.querySelector("#featureModal > .modal")?.focus());
   try {
-    const snap = await getDoc(doc(db, "users", uid));
-    if (!snap.exists()) { showToast("School not found", "error"); return; }
-    const schoolSnap = await getDoc(doc(db, "schools", uid)).catch(() => null);
+    const [snap, schoolSnap] = await Promise.all([
+      getDoc(doc(db, "users", uid)),
+      getDoc(doc(db, "schools", uid)).catch(() => null)
+    ]);
+    if (requestId !== modalRequestId || currentUID !== uid) return;
+    if (!snap.exists()) { showToast("School not found", "error"); closeModal(); return; }
     currentData = { ...(schoolSnap?.exists?.() ? schoolSnap.data() : {}), ...snap.data() };
 
     document.getElementById("modalSchoolName").textContent = currentData.schoolName;
@@ -1806,11 +1833,12 @@ window.openModal = async (uid) => {
     document.getElementById("schoolInsightGrid").innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Loading live metrics...</div>`;
     document.getElementById("modalSchoolHealth").textContent = "Loading live school metrics...";
     loadSchoolMetrics(uid).then((metrics) => {
-      if (currentUID !== uid) return;
+      if (requestId !== modalRequestId || currentUID !== uid) return;
       document.getElementById("schoolInsightGrid").innerHTML = renderInsightGrid(metrics);
       document.getElementById("modalSchoolHealth").textContent =
         `${metrics.students} students, ${metrics.teachers} teachers, ${metrics.todayEmails} mails today, ${metrics.writeEstimate} estimated app writes today`;
     }).catch(() => {
+      if (requestId !== modalRequestId || currentUID !== uid) return;
       document.getElementById("schoolInsightGrid").innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Unable to load metrics.</div>`;
     });
 
@@ -1859,9 +1887,17 @@ window.openModal = async (uid) => {
 
     updateModuleCount();
 
-    document.getElementById("featureModal").classList.add("open");
-    document.querySelector("#featureModal .modal").focus();
-  } catch(e) { showToast(e.message, "error"); }
+  } catch(e) {
+    if (requestId === modalRequestId && currentUID === uid) {
+      document.getElementById("featuresGrid").innerHTML = `<div class="empty-state" style="grid-column:1/-1;">School settings could not be loaded. Please try again.</div>`;
+      showToast(e.message, "error");
+    }
+  } finally {
+    if (requestId === modalRequestId && currentUID === uid) {
+      modal.setAttribute("aria-busy", "false");
+      saveButton.disabled = !currentData;
+    }
+  }
 };
 
 async function loadBillingHistory(uid) {
@@ -1872,15 +1908,20 @@ async function loadBillingHistory(uid) {
     const snap = await getDocs(collection(db, "schools", uid, "billingPayments"));
     const rows = snap.docs.map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => String(b.paymentDate || b.createdAt || "").localeCompare(String(a.paymentDate || a.createdAt || ""))).slice(0, 8);
+    if (currentUID !== uid) return;
     target.innerHTML = rows.length ? rows.map((payment) => `<div class="billing-item"><div><strong>₹${Number(payment.amount || 0).toLocaleString("en-IN")}</strong><span>${escapeHtml(payment.reference || "Payment recorded")}</span></div><span>${escapeHtml(payment.paymentDate || "")}</span></div>`).join("") : `<div class="billing-empty">No payments recorded for this school yet.</div>`;
   } catch (_) {
+    if (currentUID !== uid) return;
     target.innerHTML = `<div class="billing-empty">Payment history could not be loaded.</div>`;
   }
 }
 
 // ---- CLOSE MODAL ----
 window.closeModal = () => {
-  document.getElementById("featureModal").classList.remove("open");
+  modalRequestId += 1;
+  const modal = document.getElementById("featureModal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-busy", "false");
   currentUID = null;
   currentData = null;
 };
