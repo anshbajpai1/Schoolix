@@ -1027,8 +1027,64 @@ body:has(#featureModal.open) { overflow:hidden; }
 @media(max-width:900px){.shell{grid-template-columns:1fr}.form-panel{position:static}.workspace-header{padding:0 18px}.admin-summary{grid-template-columns:repeat(2,1fr)}.summary-cell:nth-child(2){border-right:0}.summary-cell:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media(max-width:520px){.shell{padding:20px 14px}.panel-body,.form-panel .panel-body{padding:20px}.workspace-label{display:none}.admin-summary{grid-template-columns:repeat(2,1fr)}.school-toolbar{flex-wrap:wrap}.school-search{min-width:100%}.subscription-grid,.school-profile-grid{grid-template-columns:1fr}.insight-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
+<style>
+/* Own the workspace appearance independently of shared portal themes. */
+#superAdminWorkspace { color-scheme:light; margin:0; min-height:100dvh; background:#f3f5f9 !important; color:#182230 !important; font-family:Inter,system-ui,sans-serif; }
+#superAdminWorkspace::before, #superAdminWorkspace::after { display:none !important; }
+#superAdminWorkspace .workspace-header { height:auto; min-height:72px; padding:16px clamp(16px,2.5vw,40px); gap:16px; background:#fff !important; border-bottom:1px solid #dfe5ee; }
+#superAdminWorkspace .workspace-brand { flex-wrap:wrap; font-family:inherit; letter-spacing:-.02em; }
+#superAdminWorkspace .shell { display:grid; width:100%; max-width:none; margin:0; padding:28px clamp(16px,2.5vw,40px) 40px; grid-template-columns:minmax(0,1fr) minmax(320px,380px); align-items:start; gap:24px; }
+#superAdminWorkspace .panel { min-width:0; background:#fff !important; border:1px solid #dfe5ee !important; border-radius:14px !important; box-shadow:0 2px 6px #10182805 !important; transform:none !important; }
+#superAdminWorkspace .panel-body { padding:24px; }
+#superAdminWorkspace .form-panel { position:static; }
+#superAdminWorkspace h1, #superAdminWorkspace h2, #superAdminWorkspace h3 { font-family:inherit; color:#182230 !important; letter-spacing:-.025em; }
+#superAdminWorkspace h1 { font-size:28px; line-height:1.25; }
+#superAdminWorkspace h2 { font-size:21px; line-height:1.35; }
+#superAdminWorkspace .hero p, #superAdminWorkspace .sub { color:#475467 !important; line-height:1.6; font-size:13px; }
+#superAdminWorkspace .admin-summary { gap:0; border:1px solid #e4e7ec; border-radius:10px; overflow:hidden; background:#f8fafc; }
+#superAdminWorkspace .summary-cell { padding:18px 14px; min-width:0; }
+#superAdminWorkspace .summary-cell strong { font-family:inherit; font-size:25px; color:#182230; }
+#superAdminWorkspace .school-toolbar { flex-wrap:wrap; }
+#superAdminWorkspace .school-search { min-width:180px; }
+#superAdminWorkspace .school-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); gap:16px; max-height:none; overflow:visible; }
+#superAdminWorkspace .school-card { min-width:0; background:#fff !important; border:1px solid #dfe5ee !important; border-radius:10px; box-shadow:none !important; transform:none !important; }
+#superAdminWorkspace .school-card[hidden] { display:none !important; }
+#superAdminWorkspace .card-info { min-width:0; }
+#superAdminWorkspace .card-name, #superAdminWorkspace .card-meta { overflow-wrap:anywhere; }
+#superAdminWorkspace .card-meta { color:#475467 !important; line-height:1.6; }
+#superAdminWorkspace .school-card-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+#superAdminWorkspace .school-card-stat { background:#f8fafc !important; border-color:#e4e7ec !important; }
+#superAdminWorkspace .card-actions { flex-wrap:wrap; gap:8px; padding:14px; }
+#superAdminWorkspace .card-actions button { min-height:38px; flex:1 1 auto; }
+#superAdminWorkspace input:not([type=checkbox]), #superAdminWorkspace select, #superAdminWorkspace textarea { min-width:0; max-width:100%; min-height:42px; background:#fff !important; color:#182230 !important; border:1px solid #cbd3df !important; border-radius:8px; font-family:inherit; }
+#superAdminWorkspace input[type=file] { width:100%; padding:8px; font-size:12px; }
+#superAdminWorkspace input::placeholder, #superAdminWorkspace textarea::placeholder { color:#667085 !important; }
+#superAdminWorkspace label { color:#344054; }
+#superAdminWorkspace :is(button,a,input,select,textarea):focus-visible { outline:3px solid #84adff; outline-offset:3px; }
+#superAdminWorkspace button { font-family:inherit; }
+#superAdminWorkspace button:disabled { opacity:.55; cursor:wait; }
+#superAdminWorkspace .logo-upload-row { grid-template-columns:56px minmax(0,1fr); background:#f8fafc !important; }
+#superAdminWorkspace .school-logo-preview { width:56px; height:56px; }
+#superAdminWorkspace #featureModal { position:fixed !important; inset:0 !important; padding:0 !important; overflow:hidden !important; background:#fff !important; }
+#superAdminWorkspace #featureModal:not(.open) { visibility:hidden; }
+#superAdminWorkspace #featureModal .modal { display:flex !important; position:relative !important; inset:auto !important; width:100% !important; height:100dvh !important; max-width:none !important; max-height:100dvh !important; margin:0 !important; padding:0 !important; overflow:hidden !important; transform:none !important; border-radius:0 !important; background:#fff !important; }
+#superAdminWorkspace #featureModal .modal-body { flex:1 1 0; min-height:0; overflow:auto !important; overscroll-behavior:contain; background:#f3f5f9 !important; }
+#superAdminWorkspace #featureModal .modal-header, #superAdminWorkspace #featureModal .modal-footer { flex:0 0 auto; position:static; background:#fff !important; }
+#superAdminWorkspace #featureModal .modal-title, #superAdminWorkspace #featureModal .modal-sub { overflow-wrap:anywhere; }
+#superAdminWorkspace #featureModal .insight-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+#superAdminWorkspace #featureModal .insight-card, #superAdminWorkspace #featureModal .feature-row { background:#fff !important; box-shadow:none !important; transform:none !important; }
+#superAdminWorkspace #featureModal .feature-icon { color:#175cd3; }
+#superAdminWorkspace #featureModal .feature-state { font-style:normal; }
+#superAdminWorkspace #accessLabel { color:#b42318 !important; }
+#superAdminWorkspace #featureModal .toggle-wrap:has(input:checked) #accessLabel { color:#067647 !important; }
+#superAdminWorkspace .toast { z-index:2147482600; background:#fff !important; color:#344054 !important; }
+@media(min-width:1600px) { #superAdminWorkspace #featureModal .features-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:1000px) { #superAdminWorkspace .shell { grid-template-columns:1fr; } #superAdminWorkspace .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } #superAdminWorkspace .form-grid :is(.logo-upload-row,.hint,.submit-btn) { grid-column:1/-1; } }
+@media(max-width:600px) { #superAdminWorkspace .shell { padding:16px 12px 28px; gap:16px; } #superAdminWorkspace .panel-body { padding:18px; } #superAdminWorkspace .workspace-label { display:none; } #superAdminWorkspace .form-grid, #superAdminWorkspace #featureModal .features-grid { grid-template-columns:1fr; } #superAdminWorkspace .admin-summary, #superAdminWorkspace #featureModal .insight-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } #superAdminWorkspace .school-search { min-width:100%; } #superAdminWorkspace .school-filter { width:100%; } #superAdminWorkspace #featureModal .modal-header, #superAdminWorkspace #featureModal .modal-body, #superAdminWorkspace #featureModal .modal-footer { padding:16px !important; } #superAdminWorkspace #featureModal .modal-footer { padding-bottom:max(16px,env(safe-area-inset-bottom)) !important; } #superAdminWorkspace .toast { left:16px; right:16px; max-width:none; } }
+@media(prefers-reduced-motion:reduce) { #superAdminWorkspace *, #superAdminWorkspace *::before { transition:none !important; animation:none !important; } }
+</style>
 </head>
-<body>
+<body id="superAdminWorkspace">
 <div id="sxPageLoader" class="sx-page-loader" role="status" aria-live="polite">
   <section class="dots-container" aria-label="Loading page">
     <div class="dot"></div>
