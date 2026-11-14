@@ -55,7 +55,14 @@
   const PAGE_LOADER_STABLE_MS = 16;
   const PAGE_LOADER_MAX_WAIT_MS = 520;
   const PAGE_LOADER_CHECK_DEBOUNCE_MS = 12;
-  const PAGE_LOADER_DISABLED = window.SchoolixDisablePageLoader === true;
+  // Keep the application shell visible. Data-heavy regions get their own
+  // layout-aware skeleton instead of a blocking, full-viewport placeholder.
+  const PAGE_LOADER_DISABLED = true;
+  const REGION_CACHE_KEY = `schoolix:region-cache:v2:${location.pathname}`;
+  const REGION_CACHE_TTL_MS = 20 * 60 * 1000;
+  const REGION_CACHE_MAX_BYTES = 900000;
+  const REGION_CACHE_MAX_ITEMS = 36;
+  const regionCacheState = { restored: new Set(), writeTimer: 0, syncing: false };
   const PAGE_LOADER_CONTENT_READY_EVENTS = [
     "schoolix:critical-load-ready",
     "schoolix:content-ready",
@@ -311,7 +318,9 @@
   }
 
   function isLoadingText(text) {
-    return /^(loading|loading data|loading sessions|loading terms|please wait|fetching|processing)(\.{0,3}|\u2026)?$/i.test(String(text || "").trim());
+    const value = String(text || "").replace(/\s+/g, " ").trim();
+    if (!value || value.length > 90) return false;
+    return /^(?:(?:loading|fetching|processing|preparing|checking|syncing)(?:\s+[\w&/ -]+)?|please wait)(?:\.{0,3}|\u2026)?$/i.test(value);
   }
 
   function isLayoutVisible(el) {
@@ -396,6 +405,160 @@
       if (!isLoadingText(el.textContent)) return;
       el.classList.add("sx-inline-loading");
     });
+  }
+
+  function cacheableRegion(element) {
+    if (!(element instanceof HTMLElement) || !element.id) return false;
+    if (element.closest("#sxPageLoader,.modal-overlay:not(.open),dialog:not([open])")) return false;
+    if (element.matches("input,select,textarea,form,script,style,template")) return false;
+    const identity = `${element.id} ${element.className}`.toLowerCase();
+    return /(list|grid|table|tbody|records|history|stats|summary|students|teachers|attendance|fees|payments|notices|assignments|vehicles|routes|subjects|sessions|terms|results|school)/.test(identity);
+  }
+
+  function regionIsLoading(region) {
+    if (!region) return false;
+    if (region.matches("[aria-busy='true'],[data-loading='true']")) return true;
+    const loading = region.querySelector(".sx-inline-loading,[aria-busy='true'],[data-loading='true'],.loading,.loader,.spinner,.status-msg,.empty-state");
+    return !!loading && (loading.matches("[aria-busy='true'],[data-loading='true']") || isLoadingText(loading.textContent));
+  }
+
+  function regionHasUsefulContent(region) {
+    if (!region || regionIsLoading(region)) return false;
+    const text = String(region.textContent || "").replace(/\s+/g, " ").trim();
+    return text.length > 2 || !!region.querySelector("tr,.card,[class*='item'],[class*='row'],img,svg,canvas");
+  }
+
+  function safeCachedMarkup(region) {
+    const clone = region.cloneNode(true);
+    clone.querySelectorAll("script,style,template,.sx-region-skeleton,.sx-pagination,.sx-runtime-error").forEach((node) => node.remove());
+    clone.querySelectorAll("input,textarea,select").forEach((control) => {
+      control.removeAttribute("value");
+      control.removeAttribute("checked");
+      control.removeAttribute("selected");
+    });
+    return clone.innerHTML;
+  }
+
+  function readRegionCache() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(REGION_CACHE_KEY) || "null");
+      if (!cached || Date.now() - Number(cached.savedAt || 0) > REGION_CACHE_TTL_MS || !Array.isArray(cached.items)) return [];
+      return cached.items;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function restoreCachedRegions() {
+    readRegionCache().forEach(({ id, html }) => {
+      const region = document.getElementById(id);
+      if (!cacheableRegion(region) || !html || (!regionIsLoading(region) && regionHasUsefulContent(region))) return;
+      region.innerHTML = html;
+      region.classList.add("sx-cache-preview");
+      region.dataset.sxCachePreview = "true";
+      region.setAttribute("aria-busy", "true");
+      regionCacheState.restored.add(region);
+    });
+  }
+
+  function writeRegionCache() {
+    clearTimeout(regionCacheState.writeTimer);
+    regionCacheState.writeTimer = setTimeout(() => {
+      const items = [];
+      let bytes = 0;
+      document.querySelectorAll("[id]").forEach((region) => {
+        if (items.length >= REGION_CACHE_MAX_ITEMS || !cacheableRegion(region) || region.dataset.sxCachePreview === "true" || !regionHasUsefulContent(region)) return;
+        const html = safeCachedMarkup(region);
+        if (!html || html.length > 160000 || bytes + html.length > REGION_CACHE_MAX_BYTES) return;
+        items.push({ id: region.id, html });
+        bytes += html.length;
+      });
+      try {
+        sessionStorage.setItem(REGION_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), items }));
+      } catch (_) {
+        // Storage may be unavailable or full; live data remains unaffected.
+      }
+    }, 320);
+  }
+
+  function loadingRegionFor(element) {
+    if (!(element instanceof HTMLElement)) return null;
+    if (element.matches("[aria-busy='true'],[data-loading='true']")) return element;
+    if (element.closest("tbody")) {
+      const table = element.closest("table");
+      return table?.closest(".table-wrap,.table-wrapper,.table-container,.responsive-table,.card,.panel") || table?.parentElement || table;
+    }
+    const preferred = element.closest([
+      "[data-sx-loading-region]",
+      LIST_SELECTORS,
+      ".table-wrap,.table-wrapper,.table-container,.responsive-table",
+      ".cards-grid,.card-grid,.stats-grid,.metrics-grid",
+      ".panel-body,.card-body,.content-body"
+    ].join(","));
+    return preferred || element.parentElement;
+  }
+
+  function skeletonLayout(region) {
+    if (region.matches("tbody") || region.closest("table")) return "table";
+    const identity = `${region.id || ""} ${region.className || ""}`.toLowerCase();
+    if (/(grid|stats|metrics|cards)/.test(identity)) return "grid";
+    return "list";
+  }
+
+  function createRegionSkeleton(region) {
+    const skeleton = document.createElement("div");
+    const layout = skeletonLayout(region);
+    const compact = region.getBoundingClientRect().height > 0 && region.getBoundingClientRect().height < 160;
+    skeleton.className = `sx-region-skeleton sx-region-skeleton--${layout}${compact ? " sx-region-skeleton--compact" : ""}`;
+    skeleton.setAttribute("aria-hidden", "true");
+    const count = compact ? 1 : (layout === "grid" ? 4 : 3);
+    skeleton.innerHTML = Array.from({ length: count }, (_, index) => (
+      `<div class="sx-region-skeleton__item"><i></i><span><b style="width:${64 - index * 7}%"></b><b style="width:${38 + index * 6}%"></b></span><em></em></div>`
+    )).join("");
+    return skeleton;
+  }
+
+  function syncRegionalLoading() {
+    if (regionCacheState.syncing) return;
+    regionCacheState.syncing = true;
+    try {
+      const active = new Set();
+      document.querySelectorAll(".sx-inline-loading,.loading,.loader,.spinner,.status-msg,[aria-busy='true'],[data-loading='true']").forEach((loading) => {
+        const explicitLoader = loading.matches(".loading,.loader,.spinner,[aria-busy='true'],[data-loading='true']");
+        if (loading.closest("#sxPageLoader,.sx-region-skeleton") || (!explicitLoader && !isLoadingText(loading.textContent))) return;
+        const region = loadingRegionFor(loading);
+        if (!region || region === document.body || region.closest("#sxPageLoader") || !isLayoutVisible(region)) return;
+        active.add(region);
+        region.classList.add("sx-region-loading");
+        if (region.dataset.sxCachePreview === "true") {
+          region.classList.add("sx-cache-refreshing");
+          return;
+        }
+        if (!region.querySelector(":scope > .sx-region-skeleton")) region.appendChild(createRegionSkeleton(region));
+      });
+
+      document.querySelectorAll(".sx-region-loading").forEach((region) => {
+        if (active.has(region)) return;
+        region.classList.remove("sx-region-loading", "sx-cache-refreshing", "sx-cache-preview");
+        delete region.dataset.sxCachePreview;
+        if (region.getAttribute("aria-busy") === "true") region.removeAttribute("aria-busy");
+        region.querySelectorAll(":scope > .sx-region-skeleton").forEach((item) => item.remove());
+      });
+
+      regionCacheState.restored.forEach((region) => {
+        if (!document.contains(region)) return regionCacheState.restored.delete(region);
+        if (!regionIsLoading(region) && region.dataset.sxCachePreview !== "true") regionCacheState.restored.delete(region);
+      });
+    } finally {
+      regionCacheState.syncing = false;
+    }
+    writeRegionCache();
+  }
+
+  function clearSchoolixRegionCache() {
+    try {
+      Object.keys(sessionStorage).filter((key) => key.startsWith("schoolix:region-cache:")).forEach((key) => sessionStorage.removeItem(key));
+    } catch (_) {}
   }
 
   function clearStaleLoadingText(root = document) {
@@ -805,6 +968,13 @@
     optimizeMedia();
     enhanceProfessionalSurface();
     enhanceLoadingText();
+    const authPath = (location.pathname || "").toLowerCase();
+    if (authPath.endsWith("/index.html") || authPath.endsWith("/login.html") || authPath.endsWith("/reset-password.html") || authPath === "/") {
+      clearSchoolixRegionCache();
+    } else {
+      restoreCachedRegions();
+    }
+    syncRegionalLoading();
     enhanceOpenModals();
     afterFirstPaint(() => enhancePagination());
     hidePageLoaderAfterFullLoad();
@@ -812,12 +982,23 @@
     document.addEventListener("pointerdown", (event) => {
       const button = event.target.closest("button,.btn,.action-btn");
       buttonPressFeedback(button);
+      const logout = event.target.closest("[data-logout],#logoutBtn,.logout-btn,.btn-logout,[onclick*='logout' i],[href*='logout' i]");
+      if (logout) clearSchoolixRegionCache();
     });
 
     let scanTimer = 0;
     const observer = new MutationObserver((mutations) => {
       let shouldScan = false;
       mutations.forEach((mutation) => {
+        const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+        const cachedRegion = target?.closest?.("[data-sx-cache-preview='true']");
+        if (cachedRegion && (mutation.type === "characterData" || mutation.addedNodes.length || mutation.removedNodes.length)) {
+          cachedRegion.classList.remove("sx-cache-preview", "sx-cache-refreshing", "sx-region-loading");
+          cachedRegion.removeAttribute("aria-busy");
+          delete cachedRegion.dataset.sxCachePreview;
+          cachedRegion.querySelectorAll(":scope > .sx-region-skeleton").forEach((item) => item.remove());
+          regionCacheState.restored.delete(cachedRegion);
+        }
         if (mutation.type === "childList" && mutation.addedNodes.length) shouldScan = true;
         if (mutation.type === "characterData") shouldScan = true;
       });
@@ -827,6 +1008,7 @@
         clearStaleLoadingText();
         optimizeMedia();
         enhanceLoadingText();
+        syncRegionalLoading();
         afterFirstPaint(() => enhancePagination());
       }, 90);
     });
