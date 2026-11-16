@@ -60,6 +60,13 @@ if (updateManifest) {
   }
 }
 
+const webManifest = parsedJson.get("manifest.webmanifest");
+if (webManifest) {
+  for (const field of ["name", "short_name", "start_url", "display", "theme_color", "background_color"]) {
+    if (!String(webManifest[field] || "").trim()) fail(`Web manifest is missing ${field}.`);
+  }
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
