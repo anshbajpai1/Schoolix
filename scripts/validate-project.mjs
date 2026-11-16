@@ -98,6 +98,15 @@ if (firebaseConfig) {
   if (!/no-cache/i.test(cacheControl)) fail("Service worker responses must not be served from a stale cache.");
 }
 
+try {
+  const gitignore = await readFile(path.join(root, ".gitignore"), "utf8");
+  for (const rule of [".env", "*service-account*.json", "android/app/google-services.json"]) {
+    if (!gitignore.includes(rule)) fail(`.gitignore must protect ${rule}.`);
+  }
+} catch (error) {
+  fail(`Unable to read .gitignore: ${error.message}`);
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
