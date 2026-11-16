@@ -7,6 +7,7 @@ const jsonFiles = ["capacitor.config.json", "firebase.json", "manifest.webmanife
 const localAssetPattern = /(?:src|href)=["']([^"'#?]+)["']/gi;
 const ignoredTargets = new Set(["/", "#"]);
 let failures = 0;
+const parsedJson = new Map();
 
 async function exists(target) {
   try {
@@ -32,11 +33,19 @@ function fail(message) {
 
 for (const file of jsonFiles) {
   try {
-    JSON.parse(await readFile(path.join(root, file), "utf8"));
+    parsedJson.set(file, JSON.parse(await readFile(path.join(root, file), "utf8")));
     console.log(`✓ Valid JSON: ${file}`);
   } catch (error) {
     fail(`Invalid JSON in ${file}: ${error.message}`);
   }
+}
+
+const updateManifest = parsedJson.get("update.json");
+const versionManifest = parsedJson.get("version.json");
+if (updateManifest && versionManifest && JSON.stringify(updateManifest) !== JSON.stringify(versionManifest)) {
+  fail("update.json and version.json must publish the same release metadata.");
+} else if (updateManifest && versionManifest) {
+  console.log("✓ Release manifests are synchronized");
 }
 
 const entryPages = await findRootHtmlPages();
