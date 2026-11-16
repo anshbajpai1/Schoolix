@@ -89,6 +89,15 @@ for (const file of ["sw.js", "schoolix-app.js"]) {
   if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
 }
 
+const firebaseConfig = parsedJson.get("firebase.json");
+if (firebaseConfig) {
+  if (firebaseConfig.hosting?.public !== "hosting") fail("Firebase Hosting must publish the generated hosting directory.");
+  const headers = firebaseConfig.hosting?.headers || [];
+  const serviceWorkerHeaders = headers.find((rule) => rule.source === "/sw.js")?.headers || [];
+  const cacheControl = serviceWorkerHeaders.find((header) => header.key?.toLowerCase() === "cache-control")?.value || "";
+  if (!/no-cache/i.test(cacheControl)) fail("Service worker responses must not be served from a stale cache.");
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
