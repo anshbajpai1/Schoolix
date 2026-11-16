@@ -1,10 +1,9 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const jsonFiles = ["capacitor.config.json", "firebase.json", "manifest.webmanifest", "update.json", "version.json"];
-const entryPages = ["index.html", "offline.html", "404.html"];
 const localAssetPattern = /(?:src|href)=["']([^"'#?]+)["']/gi;
 const ignoredTargets = new Set(["/", "#"]);
 let failures = 0;
@@ -16,6 +15,14 @@ async function exists(target) {
   } catch {
     return false;
   }
+}
+
+async function findRootHtmlPages() {
+  const entries = await readdir(root, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".html"))
+    .map((entry) => entry.name)
+    .sort((left, right) => left.localeCompare(right));
 }
 
 function fail(message) {
@@ -32,6 +39,9 @@ for (const file of jsonFiles) {
   }
 }
 
+const entryPages = await findRootHtmlPages();
+if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
+
 for (const page of entryPages) {
   const target = path.join(root, page);
   if (!(await exists(target))) {
@@ -43,7 +53,7 @@ for (const page of entryPages) {
   const seen = new Set();
   for (const match of html.matchAll(localAssetPattern)) {
     const reference = match[1].trim();
-    if (!reference || ignoredTargets.has(reference) || /^(?:https?:|data:|blob:|mailto:|tel:|javascript:)/i.test(reference)) continue;
+    if (!reference || reference.includes("${") || ignoredTargets.has(reference) || /^(?:https?:|data:|blob:|mailto:|tel:|javascript:)/i.test(reference)) continue;
     const asset = path.resolve(path.dirname(target), reference.replace(/^\//, ""));
     if (!seen.has(asset) && !(await exists(asset))) fail(`${page} references a missing local asset: ${reference}`);
     seen.add(asset);
