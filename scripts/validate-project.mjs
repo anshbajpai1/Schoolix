@@ -55,6 +55,9 @@ if (updateManifest) {
   if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(String(updateManifest.versionName || ""))) {
     fail("Release versionName must use semantic versioning (for example 1.2.3).");
   }
+  if (!/^https:\/\//i.test(String(updateManifest.apkUrl || ""))) {
+    fail("Release apkUrl must use HTTPS.");
+  }
 }
 
 const entryPages = await findRootHtmlPages();
