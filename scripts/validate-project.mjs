@@ -76,6 +76,13 @@ if (webManifest) {
       fail(`Web manifest references a missing icon: ${source}`);
     }
   }
+  for (const target of [webManifest.start_url, ...(webManifest.shortcuts || []).map((shortcut) => shortcut?.url)]) {
+    const url = String(target || "").trim();
+    if (!url || /^(?:https?:|data:)/i.test(url)) continue;
+    if (!(await exists(path.resolve(root, url.replace(/^\//, ""))))) {
+      fail(`Web manifest references a missing route: ${url}`);
+    }
+  }
 }
 
 const entryPages = await findRootHtmlPages();
