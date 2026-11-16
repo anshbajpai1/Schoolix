@@ -48,6 +48,15 @@ if (updateManifest && versionManifest && JSON.stringify(updateManifest) !== JSON
   console.log("✓ Release manifests are synchronized");
 }
 
+if (updateManifest) {
+  if (!Number.isInteger(updateManifest.versionCode) || updateManifest.versionCode < 1) {
+    fail("Release versionCode must be a positive integer.");
+  }
+  if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(String(updateManifest.versionName || ""))) {
+    fail("Release versionName must use semantic versioning (for example 1.2.3).");
+  }
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
