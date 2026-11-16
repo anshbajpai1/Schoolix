@@ -85,6 +85,10 @@ if (webManifest) {
   }
 }
 
+for (const file of ["sw.js", "schoolix-app.js"]) {
+  if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
