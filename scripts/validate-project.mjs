@@ -96,6 +96,9 @@ for (const page of entryPages) {
   }
 
   const html = await readFile(target, "utf8");
+  if (!/<html\b[^>]*\blang\s*=/i.test(html)) fail(`${page} is missing a document language.`);
+  if (!/<meta\s+charset\s*=\s*["']?utf-8/i.test(html)) fail(`${page} is missing a UTF-8 charset declaration.`);
+  if (!/<meta\s+name\s*=\s*["']viewport["']/i.test(html)) fail(`${page} is missing a responsive viewport declaration.`);
   const seen = new Set();
   for (const match of html.matchAll(localAssetPattern)) {
     const reference = match[1].trim();
