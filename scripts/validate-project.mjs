@@ -107,6 +107,16 @@ try {
   fail(`Unable to read .gitignore: ${error.message}`);
 }
 
+try {
+  const robots = await readFile(path.join(root, "robots.txt"), "utf8");
+  const sitemap = await readFile(path.join(root, "sitemap.xml"), "utf8");
+  const sitemapUrl = robots.match(/^Sitemap:\s*(\S+)$/im)?.[1];
+  if (!sitemapUrl) fail("robots.txt must declare the sitemap URL.");
+  if (!/<urlset\b/i.test(sitemap)) fail("sitemap.xml must contain a URL set.");
+} catch (error) {
+  fail(`Unable to validate search-discovery files: ${error.message}`);
+}
+
 const entryPages = await findRootHtmlPages();
 if (!entryPages.length) fail("No HTML entry pages were found at the project root.");
 
