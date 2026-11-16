@@ -65,6 +65,17 @@ if (webManifest) {
   for (const field of ["name", "short_name", "start_url", "display", "theme_color", "background_color"]) {
     if (!String(webManifest[field] || "").trim()) fail(`Web manifest is missing ${field}.`);
   }
+  const icons = Array.isArray(webManifest.icons) ? webManifest.icons : [];
+  if (!icons.length) {
+    fail("Web manifest must declare at least one application icon.");
+  }
+  for (const icon of icons) {
+    const source = String(icon?.src || "").trim();
+    if (!source || /^(?:https?:|data:)/i.test(source)) continue;
+    if (!(await exists(path.resolve(root, source.replace(/^\//, ""))))) {
+      fail(`Web manifest references a missing icon: ${source}`);
+    }
+  }
 }
 
 const entryPages = await findRootHtmlPages();
