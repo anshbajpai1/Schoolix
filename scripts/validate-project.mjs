@@ -136,6 +136,15 @@ if (capacitorConfig) {
   }
 }
 
+if (capacitorConfig) {
+  if (String(capacitorConfig.server?.androidScheme || "").toLowerCase() !== "https") {
+    fail("Capacitor Android WebView must use the HTTPS URL scheme.");
+  }
+  if (capacitorConfig.android?.allowMixedContent !== false) {
+    fail("Capacitor Android WebView must keep mixed-content loading disabled.");
+  }
+}
+
 for (const file of ["sw.js", "schoolix-app.js"]) {
   if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
 }
