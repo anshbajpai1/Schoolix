@@ -184,6 +184,22 @@ if (firebaseConfig) {
 }
 
 try {
+  const netlifyConfig = await readFile(path.join(root, "netlify.toml"), "utf8");
+  const proxyRoute = /from\s*=\s*[\"']\/api\/supabase\/\*[\"'][\s\S]*?to\s*=\s*[\"']\/\.netlify\/functions\/supabase-proxy\/:splat[\"'][\s\S]*?status\s*=\s*200/i;
+  if (!proxyRoute.test(netlifyConfig)) {
+    fail("Netlify must preserve the Supabase API proxy route as a status 200 rewrite.");
+  }
+  const globalHeaders = netlifyConfig.match(/\[\[headers\]\]\s*for\s*=\s*[\"']\/\*[\"'][\s\S]*?(?=\n\[\[|$)/i)?.[0] || "";
+  for (const header of ["X-Content-Type-Options", "X-Frame-Options", "Strict-Transport-Security"]) {
+    if (!new RegExp(`^\\s*${header}\\s*=`, "im").test(globalHeaders)) {
+      fail(`Netlify global response headers must include ${header}.`);
+    }
+  }
+} catch (error) {
+  fail(`Unable to validate Netlify deployment configuration: ${error.message}`);
+}
+
+try {
   const gitignore = await readFile(path.join(root, ".gitignore"), "utf8");
   for (const rule of [".env", "*service-account*.json", "android/app/google-services.json"]) {
     if (!gitignore.includes(rule)) fail(`.gitignore must protect ${rule}.`);
