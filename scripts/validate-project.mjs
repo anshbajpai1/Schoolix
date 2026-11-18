@@ -103,6 +103,22 @@ if (capacitorConfig) {
   }
 }
 
+if (updateManifest) {
+  try {
+    const gradle = await readFile(path.join(root, "android", "app", "build.gradle"), "utf8");
+    const androidVersionCode = Number(gradle.match(/versionCode\s+(\d+)/)?.[1]);
+    const androidVersionName = gradle.match(/versionName\s+[\"']([^\"']+)[\"']/)?.[1];
+    if (androidVersionCode !== updateManifest.versionCode) {
+      fail("Android versionCode must match update.json.");
+    }
+    if (androidVersionName !== updateManifest.versionName) {
+      fail("Android versionName must match update.json.");
+    }
+  } catch (error) {
+    fail(`Unable to validate Android release metadata: ${error.message}`);
+  }
+}
+
 for (const file of ["sw.js", "schoolix-app.js"]) {
   if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
 }
