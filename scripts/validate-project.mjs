@@ -85,6 +85,24 @@ if (webManifest) {
   }
 }
 
+const capacitorConfig = parsedJson.get("capacitor.config.json");
+if (capacitorConfig) {
+  const appId = String(capacitorConfig.appId || "").trim();
+  if (!appId) {
+    fail("Capacitor config must declare an Android application id.");
+  } else {
+    try {
+      const gradle = await readFile(path.join(root, "android", "app", "build.gradle"), "utf8");
+      const androidAppId = gradle.match(/applicationId\s+[\"']([^\"']+)[\"']/)?.[1];
+      if (androidAppId !== appId) {
+        fail(`Android applicationId must match Capacitor appId (${appId}).`);
+      }
+    } catch (error) {
+      fail(`Unable to validate Android application id: ${error.message}`);
+    }
+  }
+}
+
 for (const file of ["sw.js", "schoolix-app.js"]) {
   if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
 }
