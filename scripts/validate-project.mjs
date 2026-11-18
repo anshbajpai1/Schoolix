@@ -180,6 +180,15 @@ try {
   const sitemap = await readFile(path.join(root, "sitemap.xml"), "utf8");
   const sitemapUrl = robots.match(/^Sitemap:\s*(\S+)$/im)?.[1];
   if (!sitemapUrl) fail("robots.txt must declare the sitemap URL.");
+  else {
+    try {
+      const parsedSitemapUrl = new URL(sitemapUrl);
+      if (parsedSitemapUrl.protocol !== "https:") fail("robots.txt sitemap URL must use HTTPS.");
+      if (!parsedSitemapUrl.pathname.endsWith("/sitemap.xml")) fail("robots.txt must point to a sitemap.xml file.");
+    } catch {
+      fail("robots.txt sitemap URL must be an absolute URL.");
+    }
+  }
   if (!/<urlset\b/i.test(sitemap)) fail("sitemap.xml must contain a URL set.");
 } catch (error) {
   fail(`Unable to validate search-discovery files: ${error.message}`);
