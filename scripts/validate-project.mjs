@@ -166,6 +166,9 @@ if (firebaseConfig) {
   if (pageHeader("X-Frame-Options").toLowerCase() !== "deny") {
     fail("Firebase HTML responses must deny framing to prevent clickjacking.");
   }
+  if (pageHeader("X-Content-Type-Options").toLowerCase() !== "nosniff") {
+    fail("Firebase HTML responses must disable MIME type sniffing.");
+  }
   const serviceWorkerHeaders = headers.find((rule) => rule.source === "/sw.js")?.headers || [];
   const cacheControl = serviceWorkerHeaders.find((header) => header.key?.toLowerCase() === "cache-control")?.value || "";
   if (!/no-cache/i.test(cacheControl)) fail("Service worker responses must not be served from a stale cache.");
