@@ -119,6 +119,23 @@ if (updateManifest) {
   }
 }
 
+if (capacitorConfig) {
+  try {
+    const templatePath = path.join(root, "android", "app", "google-services.json.example");
+    const template = JSON.parse(await readFile(templatePath, "utf8"));
+    const appId = String(capacitorConfig.appId || "").trim();
+    const clients = Array.isArray(template.client) ? template.client : [];
+    if (!clients.some((client) => client.client_info?.android_client_info?.package_name === appId)) {
+      fail("Firebase Android template must include the Capacitor application id.");
+    }
+    if (!clients.some((client) => client.api_key?.some((key) => key.current_key === "__SCHOOLIX_ANDROID_FIREBASE_API_KEY__"))) {
+      fail("Firebase Android template must use the runtime API key placeholder.");
+    }
+  } catch (error) {
+    fail(`Unable to validate Firebase Android template: ${error.message}`);
+  }
+}
+
 for (const file of ["sw.js", "schoolix-app.js"]) {
   if (!(await exists(path.join(root, file)))) fail(`Missing required offline-support file: ${file}`);
 }
