@@ -169,6 +169,9 @@ if (firebaseConfig) {
   if (pageHeader("X-Content-Type-Options").toLowerCase() !== "nosniff") {
     fail("Firebase HTML responses must disable MIME type sniffing.");
   }
+  if (!/max-age=\d{7,}/i.test(pageHeader("Strict-Transport-Security"))) {
+    fail("Firebase HTML responses must enable long-lived HTTPS Strict Transport Security.");
+  }
   const serviceWorkerHeaders = headers.find((rule) => rule.source === "/sw.js")?.headers || [];
   const cacheControl = serviceWorkerHeaders.find((header) => header.key?.toLowerCase() === "cache-control")?.value || "";
   if (!/no-cache/i.test(cacheControl)) fail("Service worker responses must not be served from a stale cache.");
