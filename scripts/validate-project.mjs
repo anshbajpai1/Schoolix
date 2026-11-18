@@ -190,6 +190,19 @@ try {
     }
   }
   if (!/<urlset\b/i.test(sitemap)) fail("sitemap.xml must contain a URL set.");
+  const locations = [...sitemap.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi)].map((match) => match[1]);
+  if (!locations.length) fail("sitemap.xml must contain at least one page URL.");
+  const seenLocations = new Set();
+  for (const location of locations) {
+    try {
+      const parsedLocation = new URL(location);
+      if (parsedLocation.protocol !== "https:") fail(`Sitemap page URL must use HTTPS: ${location}`);
+      if (seenLocations.has(parsedLocation.href)) fail(`Sitemap contains a duplicate page URL: ${location}`);
+      seenLocations.add(parsedLocation.href);
+    } catch {
+      fail(`Sitemap page URL must be absolute: ${location}`);
+    }
+  }
 } catch (error) {
   fail(`Unable to validate search-discovery files: ${error.message}`);
 }
