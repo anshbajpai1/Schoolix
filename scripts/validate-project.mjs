@@ -161,6 +161,11 @@ const firebaseConfig = parsedJson.get("firebase.json");
 if (firebaseConfig) {
   if (firebaseConfig.hosting?.public !== "hosting") fail("Firebase Hosting must publish the generated hosting directory.");
   const headers = firebaseConfig.hosting?.headers || [];
+  const pageHeaders = headers.find((rule) => rule.source === "**/*.html")?.headers || [];
+  const pageHeader = (name) => pageHeaders.find((header) => header.key?.toLowerCase() === name.toLowerCase())?.value || "";
+  if (pageHeader("X-Frame-Options").toLowerCase() !== "deny") {
+    fail("Firebase HTML responses must deny framing to prevent clickjacking.");
+  }
   const serviceWorkerHeaders = headers.find((rule) => rule.source === "/sw.js")?.headers || [];
   const cacheControl = serviceWorkerHeaders.find((header) => header.key?.toLowerCase() === "cache-control")?.value || "";
   if (!/no-cache/i.test(cacheControl)) fail("Service worker responses must not be served from a stale cache.");
