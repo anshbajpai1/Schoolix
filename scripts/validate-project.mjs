@@ -83,6 +83,14 @@ if (webManifest) {
       fail(`Web manifest references a missing route: ${url}`);
     }
   }
+  if (webManifest.scope) {
+    const scopePath = new URL(webManifest.scope, "https://schoolix.invalid/").pathname;
+    for (const route of [webManifest.start_url, ...(webManifest.shortcuts || []).map((shortcut) => shortcut?.url)]) {
+      if (!route || /^(?:https?:|data:)/i.test(String(route))) continue;
+      const routePath = new URL(String(route), "https://schoolix.invalid/").pathname;
+      if (!routePath.startsWith(scopePath)) fail(`PWA route ${route} falls outside the manifest scope ${webManifest.scope}.`);
+    }
+  }
 }
 
 const capacitorConfig = parsedJson.get("capacitor.config.json");
