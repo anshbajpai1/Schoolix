@@ -422,6 +422,20 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public void confirmDeviceRegistration(String schoolId, String role) {
+            String cleanSchoolId = schoolId == null ? "" : schoolId.trim();
+            String cleanRole = role == null ? "" : role.trim().toLowerCase();
+            getSharedPreferences("schoolix_notifications", Context.MODE_PRIVATE)
+                .edit()
+                .putString("registeredSchoolId", cleanSchoolId)
+                .putString("registeredRole", cleanRole)
+                .putString("lastStatus", "ready")
+                .putString("lastError", "")
+                .apply();
+            emitNotificationStatus("ready", "");
+        }
+
+        @JavascriptInterface
         public void showLocalNotification(String notificationId, String title, String body) {
             runOnUiThread(() -> showNativeNotification(notificationId, title, body));
         }
