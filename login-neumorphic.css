@@ -1,0 +1,524 @@
+/* Schoolix login surface inspired by Smit-Prajapati's Uiverse form. */
+body.sx-login-app {
+  --login-ink: #17243a;
+  --login-muted: #66768d;
+  --login-blue: #1689d2;
+  --login-cyan: #12a9c7;
+  --login-shadow: rgba(95, 151, 190, 0.28);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background:
+    radial-gradient(ellipse at 78% 8%, rgba(191, 225, 255, 0.55), transparent 34%),
+    #edf3fa;
+  color: var(--login-ink);
+}
+
+body.sx-login-app .shell {
+  min-height: 100dvh;
+  height: auto;
+  background: transparent;
+}
+
+body.sx-login-app .panel-left {
+  min-height: 100dvh;
+  height: auto;
+  border-right: 1px solid rgba(226, 237, 250, 0.12) !important;
+  color: #fff !important;
+  background:
+    radial-gradient(ellipse at 14% 16%, rgba(96, 165, 250, 0.28), transparent 34%),
+    radial-gradient(ellipse at 82% 88%, rgba(18, 169, 199, 0.2), transparent 35%),
+    linear-gradient(145deg, #0b1d42 0%, #123e7a 56%, #0a2855 100%) !important;
+}
+
+body.sx-login-app .brand-logo,
+body.sx-login-app .hero-heading,
+body.sx-login-app .stat-num {
+  color: #fff !important;
+}
+
+body.sx-login-app .hero-heading span {
+  color: #75c5ff !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+body.sx-login-app .hero-desc,
+body.sx-login-app .stat-label {
+  color: #cbd9ef !important;
+}
+
+body.sx-login-app .hero-tag {
+  border-color: rgba(191, 219, 254, 0.24) !important;
+  background: rgba(147, 197, 253, 0.12) !important;
+  color: #d9eaff !important;
+}
+
+body.sx-login-app .hero-tag-dot {
+  background: #67d5ec !important;
+}
+
+body.sx-login-app .brand-icon {
+  border-radius: 11px !important;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25) !important;
+}
+
+body.sx-login-app .panel-right {
+  width: min(46vw, 560px) !important;
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+  padding: clamp(24px, 4vw, 52px);
+  border: 0 !important;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(214, 235, 255, 0.64), transparent 46%),
+    linear-gradient(160deg, #f5f9fe, #eaf1f8) !important;
+  box-shadow: none !important;
+}
+
+body.sx-login-app .form-card {
+  width: 100%;
+  max-width: 430px !important;
+  margin: auto;
+  padding: 34px 32px 28px;
+  border: 5px solid #fff !important;
+  border-radius: 34px !important;
+  background: linear-gradient(180deg, #fff 0%, #f4f7fb 100%) !important;
+  box-shadow:
+    0 30px 40px -24px var(--login-shadow),
+    0 12px 28px rgba(28, 59, 91, 0.07) !important;
+}
+
+body.sx-login-app .form-header {
+  margin-bottom: 22px;
+}
+
+body.sx-login-app .form-welcome {
+  color: var(--login-blue) !important;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.sx-login-app .form-title {
+  margin-top: 8px;
+  color: #12233c !important;
+  font-size: clamp(1.85rem, 2.4vw, 2.15rem) !important;
+  letter-spacing: -0.045em;
+}
+
+body.sx-login-app .form-subtitle {
+  color: var(--login-muted) !important;
+  line-height: 1.55;
+}
+
+body.sx-login-app .form-hint {
+  margin-top: 16px;
+  padding: 11px 13px;
+  border: 1px solid #d9eafb !important;
+  border-radius: 17px !important;
+  background: #eef7ff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+body.sx-login-app .form-hint p,
+body.sx-login-app .form-hint p strong {
+  color: #28547a !important;
+}
+
+body.sx-login-app .form-hint-icon svg {
+  fill: var(--login-blue) !important;
+}
+
+body.sx-login-app .field {
+  margin-bottom: 15px;
+}
+
+body.sx-login-app .field-label {
+  color: #34465d !important;
+  font-size: 12px;
+  font-weight: 750 !important;
+}
+
+body.sx-login-app .field-input {
+  height: 54px;
+  padding-left: 18px;
+  padding-right: 52px;
+  border: 1px solid transparent !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  color: #17243a !important;
+  box-shadow: 0 10px 12px -7px rgba(103, 169, 207, 0.42) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+body.sx-login-app .field-input::placeholder {
+  color: #98a7b8 !important;
+}
+
+body.sx-login-app .field-input:hover {
+  border-color: #dceaf6 !important;
+}
+
+body.sx-login-app .field-input:focus {
+  border-color: #20a5c5 !important;
+  box-shadow: 0 0 0 4px rgba(18, 169, 199, 0.12), 0 10px 16px -8px rgba(55, 144, 189, 0.38) !important;
+}
+
+body.sx-login-app .field-suffix {
+  color: #73869c;
+}
+
+body.sx-login-app .field-suffix:hover {
+  color: var(--login-blue);
+}
+
+body.sx-login-app .forgot-row {
+  margin-top: -3px;
+  margin-bottom: 18px;
+}
+
+body.sx-login-app .forgot-link {
+  color: #0789cf !important;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+body.sx-login-app .forgot-link:hover {
+  color: #086ca8 !important;
+}
+
+body.sx-login-app .btn-primary {
+  height: 54px;
+  margin: 18px auto 12px;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: linear-gradient(45deg, #167fd0 0%, #12a9c7 100%) !important;
+  box-shadow: 0 18px 22px -15px rgba(34, 139, 194, 0.72) !important;
+  font-weight: 750;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+body.sx-login-app .btn-primary::before {
+  display: block !important;
+  background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.22), transparent 70%);
+}
+
+body.sx-login-app .btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 22px 26px -16px rgba(34, 139, 194, 0.8) !important;
+}
+
+body.sx-login-app .btn-primary:active {
+  transform: scale(0.985) !important;
+}
+
+body.sx-login-app .or-row {
+  gap: 12px;
+  margin: 15px 0;
+}
+
+body.sx-login-app .or-line {
+  background: #e1e9f1 !important;
+}
+
+body.sx-login-app .or-text {
+  color: #8998a9 !important;
+  font-size: 11px;
+}
+
+body.sx-login-app .btn-google {
+  height: 50px;
+  border: 1px solid #dbe7f1 !important;
+  border-radius: 17px !important;
+  background: #fff !important;
+  color: #33465b !important;
+  box-shadow: 0 8px 12px -10px rgba(61, 108, 143, 0.45);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.sx-login-app .btn-google:hover {
+  transform: translateY(-1px);
+  border-color: #bfd9eb !important;
+  background: #fff !important;
+  box-shadow: 0 12px 18px -12px rgba(61, 108, 143, 0.55);
+}
+
+body.sx-login-app .btn-apk {
+  min-height: 46px;
+  border: 1px solid #d4e7f6 !important;
+  border-radius: 16px !important;
+  background: #eef7ff !important;
+  color: #1675b4 !important;
+}
+
+body.sx-login-app .btn-apk:hover {
+  border-color: #afd4ee !important;
+  background: #e4f2ff !important;
+}
+
+body.sx-login-app .download-meta {
+  color: #8796a7 !important;
+}
+
+body.sx-login-app .error-msg {
+  border-radius: 16px;
+}
+
+body.sx-login-app .mobile-brand {
+  color: #17243a !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom: 1px solid #e2eaf2 !important;
+  box-shadow: 0 8px 20px rgba(31, 58, 88, 0.04);
+}
+
+body.sx-login-app .mobile-brand-tag {
+  border-color: #d4e7f6 !important;
+  background: #eef7ff !important;
+  color: #1675b4 !important;
+}
+
+body.sx-login-app .mobile-brand .brand-icon {
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.2);
+}
+
+body.sx-login-app .auth-gate {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(89, 174, 226, 0.18), transparent 32%),
+    radial-gradient(circle at 78% 78%, rgba(37, 99, 235, 0.12), transparent 34%),
+    #edf3fa !important;
+}
+
+body.sx-login-app .auth-loader-card {
+  border: 5px solid #fff;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #fff, #f4f7fb);
+  box-shadow: 0 28px 42px -24px var(--login-shadow);
+}
+
+body.sx-login-app .auth-loader-mark {
+  border-radius: 22px;
+  box-shadow: 0 14px 24px -12px rgba(37, 99, 235, 0.42);
+}
+
+body.sx-login-app .auth-loader-title {
+  color: #17243a;
+}
+
+body.sx-login-app .auth-loader-subtitle {
+  color: #66768d;
+}
+
+body.sx-login-app .auth-loader-ring span {
+  background: linear-gradient(90deg, #167fd0, #12a9c7);
+}
+
+body.sx-login-app.is-native-app {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(191, 225, 255, 0.75), transparent 48%),
+    #edf3fa;
+}
+
+body.sx-login-app.is-native-app .shell {
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+body.sx-login-app.is-native-app .shell::before {
+  display: none;
+}
+
+body.sx-login-app.is-native-app .mobile-brand {
+  min-height: 68px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 18px 12px;
+}
+
+body.sx-login-app.is-native-app .mobile-brand-logo {
+  color: #17243a;
+}
+
+body.sx-login-app.is-native-app .panel-right {
+  width: 100% !important;
+  min-height: calc(100dvh - 68px);
+  padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  overflow: visible;
+  align-items: center;
+  background: transparent !important;
+}
+
+body.sx-login-app.is-native-app .form-card {
+  max-width: 430px !important;
+  padding: 28px 24px 22px;
+  border-color: #fff !important;
+  border-radius: 30px !important;
+  background: linear-gradient(180deg, #fff 0%, #f4f7fb 100%) !important;
+  box-shadow: 0 26px 38px -22px var(--login-shadow) !important;
+}
+
+body.sx-login-app.is-native-app .form-title {
+  color: #12233c !important;
+}
+
+body.sx-login-app.is-native-app .form-subtitle {
+  color: var(--login-muted) !important;
+}
+
+body.sx-login-app.is-native-app .form-hint {
+  border-color: #d9eafb !important;
+  background: #eef7ff !important;
+}
+
+body.sx-login-app.is-native-app .form-hint p,
+body.sx-login-app.is-native-app .form-hint strong {
+  color: #28547a !important;
+}
+
+body.sx-login-app.is-native-app .field-label {
+  color: #34465d !important;
+}
+
+body.sx-login-app.is-native-app .field-input {
+  color: #17243a !important;
+  caret-color: #167fd0;
+}
+
+body.sx-login-app.is-native-app .field-input:-webkit-autofill,
+body.sx-login-app.is-native-app .field-input:-webkit-autofill:hover,
+body.sx-login-app.is-native-app .field-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #17243a;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset, 0 10px 12px -7px rgba(103, 169, 207, 0.42) !important;
+}
+
+body.sx-login-app.is-native-app .btn-google {
+  color: #33465b !important;
+}
+
+body.sx-login-app.is-native-app .or-line {
+  background: #e1e9f1 !important;
+}
+
+body.sx-login-app.is-native-app .or-text,
+body.sx-login-app.is-native-app .download-meta {
+  color: #8998a9 !important;
+}
+
+@media (max-width: 900px) {
+  body.sx-login-app .shell {
+    min-height: 100dvh;
+    height: auto;
+    flex-direction: column;
+  }
+
+  body.sx-login-app .mobile-brand {
+    display: flex;
+  }
+
+  body.sx-login-app .panel-right {
+    width: 100% !important;
+    min-height: calc(100dvh - 68px);
+    height: auto;
+    padding: 24px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+    overflow: visible;
+    align-items: center;
+  }
+
+  body.sx-login-app .form-card {
+    max-width: 430px !important;
+    margin: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  body.sx-login-app .panel-right {
+    padding: 18px 14px calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.sx-login-app .form-card,
+  body.sx-login-app.is-native-app .form-card {
+    padding: 24px 18px 20px;
+    border-width: 4px !important;
+    border-radius: 27px !important;
+  }
+
+  body.sx-login-app .form-header {
+    margin-bottom: 18px;
+  }
+
+  body.sx-login-app .form-hint {
+    margin-top: 13px;
+    padding: 10px 11px;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  body.sx-login-app .panel-right {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  body.sx-login-app .form-card {
+    padding-top: 25px;
+    padding-bottom: 20px;
+  }
+
+  body.sx-login-app .form-header {
+    margin-bottom: 14px;
+  }
+
+  body.sx-login-app .form-hint {
+    margin-top: 10px;
+    padding-block: 8px;
+  }
+
+  body.sx-login-app .field {
+    margin-bottom: 10px;
+  }
+
+  body.sx-login-app .field-input {
+    height: 48px;
+  }
+
+  body.sx-login-app .btn-primary {
+    height: 48px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+  }
+
+  body.sx-login-app .or-row {
+    margin: 10px 0;
+  }
+
+  body.sx-login-app .btn-google {
+    height: 44px;
+  }
+
+  body.sx-login-app .btn-apk {
+    min-height: 40px;
+    margin-top: 8px;
+  }
+
+  body.sx-login-app .download-meta {
+    margin-top: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sx-login-app *,
+  body.sx-login-app *::before,
+  body.sx-login-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body.sx-login-app :is(.btn-primary, .btn-google, .btn-apk, .forgot-link, .field-input):focus-visible {
+  outline: 3px solid rgba(18, 169, 199, 0.38);
+  outline-offset: 3px;
+}

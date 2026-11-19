@@ -77,6 +77,7 @@ const files = [
   "schoolix-maplibre.js",
   "schoolix-transport.js",
   "schoolix-polish.css",
+  "login-neumorphic.css",
   "schoolix-portal-dark.css",
   "schoolix-polish.js",
   "admin-shell.css",
